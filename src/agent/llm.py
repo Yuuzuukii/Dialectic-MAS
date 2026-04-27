@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 from typing import Optional, Type, TypeVar, cast
 from langchain_core.messages import BaseMessage
-from langchain_openai import ChatOpenAI
+from langchain_openai.chat_models import ChatOpenAI
 from pydantic import BaseModel, SecretStr
 
 load_dotenv()

@@ -24,9 +24,8 @@ INTERNAL_STATE_FIELDS = {
     "ag2_pending",
     "history",
     "warrant_result",
-    "characterization_result",
     "generalization_result",
-    "answer",
+    "integration_result",
 }
 
 AG1_STANCE = f"""
@@ -53,21 +52,15 @@ AG2_STANCE = f"""
         If something is out of stock, we should not buy it.
         """
 
+QUESTION = f"""What camera should we buy?"""
+
 
 def public_result(result: dict[str, Any]) -> dict[str, Any]:
-    if "dialogue_history" in result and "synthesis" in result:
-        public = {
-            "dialogue_history": result["dialogue_history"],
-            "synthesis": result["synthesis"],
-        }
-        if result.get("error"):
-            public["error"] = result["error"]
-        return public
     return {key: value for key, value in result.items() if key not in INTERNAL_STATE_FIELDS}
 
 
 class DialogueRequest(BaseModel):
-    question: str
+    question: str = QUESTION
     agent1_stance: str = AG1_STANCE
     agent2_stance: str = AG2_STANCE
     max_turns: int = Field(default=5, ge=1)

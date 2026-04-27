@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Literal, Optional
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -23,12 +23,3 @@ class ArgumentRecord(BaseModel):
             "support": self.support,
             "agent": self.agent,
         }
-
-
-class SynthesisResult(BaseModel):
-    final_answer: str
-
-
-class DialogueOutput(BaseModel):
-    dialogue_history: list[dict[str, Any]] = Field(default_factory=list)
-    synthesis: Optional[dict[str, Any]] = None

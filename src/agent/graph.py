@@ -43,20 +43,18 @@ class State:
     last_generated_argument: Optional[ArgumentRecord] = None
     last_generated_argument_appended: bool = False
     warrant_result: Optional[str] = None
-    characterization_result: Optional[str] = None
     generalization_result: Optional[str] = None
-    answer: Optional[str] = None
-    synthesis: Optional[dict[str, Any]] = None
+    integration_result: Optional[str] = None
+    integrated_rule: Optional[str] = None
+    justified_argument: Optional[str] = None
+    justification_status: Optional[str] = None
+    final_rebuttal: Optional[str] = None
     dialogue_history: list[dict[str, Any]] = field(default_factory=list)
     error: Optional[str] = None
 
 
 def _agent_stance(state: State, agent: AgentName) -> str:
     return state.agent1_stance if agent == "AG1" else state.agent2_stance
-
-
-def _opponent(agent: AgentName) -> AgentName:
-    return "AG2" if agent == "AG1" else "AG1"
 
 
 def _history_text(history: list[ArgumentRecord]) -> str:
@@ -74,6 +72,79 @@ def _dialogue_history(history: list[ArgumentRecord]) -> list[dict[str, Any]]:
 
 def _record(agent: AgentName, arg_type: ArgumentType, content: str) -> ArgumentRecord:
     return ArgumentRecord(type=arg_type, argument=content, support=[], agent=agent)
+
+
+def _background_knowledge_text(state: State) -> str:
+    if not state.additional_context:
+        return ""
+    return (
+        "\n\nBackgroundKnowledge:\n"
+        f"{json.dumps(state.additional_context, ensure_ascii=False, indent=2)}"
+    )
+
+
+def _append_rule_to_stance(stance: str, integrated_rule: str) -> str:
+    rule = integrated_rule.strip()
+    if not rule or rule in stance:
+        return stance
+    base = stance.rstrip()
+    if not base.endswith("\n"):
+        base += "\n"
+    return f"{base}{rule}\n"
+
+
+def _main_argument_for_stage(state: State, stage: str) -> Optional[str]:
+    if stage == "ag1_main_justified" and state.ag1_main_argument is not None:
+        return state.ag1_main_argument.argument
+    if stage == "ag2_main_justified" and state.ag2_main_argument is not None:
+        return state.ag2_main_argument.argument
+    return None
+
+
+def _extract_json_from_argument(argument_text: str) -> dict[str, Any]:
+    try:
+        if "```json" in argument_text:
+            json_start = argument_text.find("```json") + 7
+            json_end = argument_text.find("```", json_start)
+            json_str = argument_text[json_start:json_end].strip()
+        elif "```" in argument_text:
+            json_start = argument_text.find("```") + 3
+            json_end = argument_text.find("```", json_start)
+            json_str = argument_text[json_start:json_end].strip()
+        else:
+            json_start = argument_text.find("{")
+            json_end = argument_text.rfind("}") + 1
+            json_str = argument_text[json_start:json_end].strip()
+        return json.loads(json_str)
+    except Exception:
+        return {}
+
+
+def _response_can_defeat(response: str) -> bool:
+    data = _extract_json_from_argument(response)
+    value = data.get("can_defeat")
+    if isinstance(value, str):
+        normalized = value.strip().upper()
+        if normalized == "YES":
+            return True
+        if normalized == "NO":
+            return False
+    return "YES" in response.upper()
+
+
+def _extract_integrated_rule(integration_result: str) -> Optional[str]:
+    data = _extract_json_from_argument(integration_result)
+    argument = data.get("Argument", {})
+    integration = argument.get("Integration", {})
+    rule = integration.get("rule")
+    if isinstance(rule, str) and rule.strip():
+        cleaned = rule.strip()
+        lowered = cleaned.lower()
+        if "integrated buying condition" in lowered or "condition 1" in lowered or "condition 2" in lowered:
+            return None
+        return cleaned
+    rules = argument.get("rules", [])
+    return None
 
 
 async def _invoke_agent(system_prompt: str, human_prompt: str) -> str:
@@ -99,9 +170,6 @@ async def _can_make_defeating_argument(
     agent: AgentName,
     opponent_argument: ArgumentRecord,
 ) -> tuple[bool, Optional[ArgumentRecord]]:
-    if _is_rebut_without_weak_negation(opponent_argument):
-        return False, None
-
     history_text = _history_text(state.history)
     full_prompt = (
         f"{history_text}\n\n"
@@ -109,64 +177,10 @@ async def _can_make_defeating_argument(
         f"{PromptTemplates.DEFEATING_ARGUMENT}"
     )
     response = await _invoke_agent(_agent_stance(state, agent), full_prompt)
-    can_defeat = "YES" in response.upper() or "yes" in response
+    can_defeat = _response_can_defeat(response)
     if not can_defeat:
         return False, None
     return True, _record(agent, "defeat", response)
-
-
-def _extract_json_from_argument(argument_text: str) -> dict[str, Any]:
-    try:
-        if "```json" in argument_text:
-            json_start = argument_text.find("```json") + 7
-            json_end = argument_text.find("```", json_start)
-            json_str = argument_text[json_start:json_end].strip()
-        elif "```" in argument_text:
-            json_start = argument_text.find("```") + 3
-            json_end = argument_text.find("```", json_start)
-            json_str = argument_text[json_start:json_end].strip()
-        else:
-            json_start = argument_text.find("{")
-            json_end = argument_text.rfind("}") + 1
-            json_str = argument_text[json_start:json_end].strip()
-        return json.loads(json_str)
-    except Exception:
-        return {}
-
-
-def _has_valid_weak_negation(weak_negation_list: Any) -> bool:
-    if not weak_negation_list:
-        return False
-    for item in weak_negation_list:
-        if item and item != [] and item != "":
-            return True
-    return False
-
-
-def _is_rebut_without_weak_negation(opponent_argument: ArgumentRecord) -> bool:
-    if opponent_argument.type == "main":
-        return False
-
-    json_data = _extract_json_from_argument(opponent_argument.argument)
-    if not json_data:
-        return False
-
-    attack_type = json_data.get("Argument", {}).get("attack", "")
-    if attack_type.lower() != "rebut":
-        return False
-
-    ass_list = json_data.get("Argument", {}).get("Ass", [])
-    has_valid_ass = _has_valid_weak_negation(ass_list)
-
-    rules = json_data.get("Argument", {}).get("rules", [])
-    has_valid_weak_negation_in_rules = False
-    for rule in rules:
-        weak_negation = rule.get("antecedent", {}).get("weak_negation", [])
-        if _has_valid_weak_negation(weak_negation):
-            has_valid_weak_negation_in_rules = True
-            break
-
-    return not has_valid_ass and not has_valid_weak_negation_in_rules
 
 
 async def initialize(state: State) -> dict[str, Any]:
@@ -184,10 +198,12 @@ async def initialize(state: State) -> dict[str, Any]:
         "last_generated_argument": None,
         "last_generated_argument_appended": False,
         "warrant_result": None,
-        "characterization_result": None,
         "generalization_result": None,
-        "answer": None,
-        "synthesis": None,
+        "integration_result": None,
+        "integrated_rule": None,
+        "justified_argument": None,
+        "justification_status": None,
+        "final_rebuttal": None,
         "dialogue_history": [],
         "error": None,
     }
@@ -197,11 +213,19 @@ async def ag1_main(state: State) -> dict[str, Any]:
     argument = await _construct_main_argument(state, "AG1")
     history = [argument]
     return {
+        "turn_count": 0,
         "active_agent": "AG2",
+        "debate_stage": "ag1_main_thread",
         "current_argument": argument,
         "ag1_main_argument": argument,
         "history": history,
         "dialogue_history": _dialogue_history(history),
+        "last_can_defeat": None,
+        "last_generated_argument": None,
+        "last_generated_argument_appended": False,
+        "justified_argument": None,
+        "justification_status": None,
+        "final_rebuttal": None,
     }
 
 
@@ -211,26 +235,21 @@ async def ag2_attack_ag1(state: State) -> dict[str, Any]:
 
     can_defeat, argument = await _can_make_defeating_argument(state, "AG2", state.current_argument)
     if not can_defeat or argument is None:
-        return {"last_can_defeat": False, "last_generated_argument": None}
-
-    if state.turn_count >= state.max_turns:
+        stage = "ag1_main_justified"
         return {
-            "ag1_pending": True,
-            "last_can_defeat": True,
-            "last_generated_argument": argument,
-            "last_generated_argument_appended": False,
+            "last_can_defeat": False,
+            "last_generated_argument": None,
+            "justified_argument": _main_argument_for_stage(state, stage),
+            "justification_status": stage,
         }
 
-    history = [*state.history, argument]
     return {
-        "active_agent": "AG1",
-        "current_argument": argument,
-        "history": history,
-        "dialogue_history": _dialogue_history(history),
+        "active_agent": "AG2",
         "turn_count": state.turn_count + 1,
         "last_can_defeat": True,
         "last_generated_argument": argument,
-        "last_generated_argument_appended": True,
+        "last_generated_argument_appended": False,
+        "final_rebuttal": argument.argument,
     }
 
 
@@ -251,6 +270,7 @@ async def ag1_counter_ag2(state: State) -> dict[str, Any]:
         "last_can_defeat": True,
         "last_generated_argument": argument,
         "last_generated_argument_appended": True,
+        "final_rebuttal": argument.argument,
     }
 
 
@@ -290,25 +310,20 @@ async def ag1_attack_ag2(state: State) -> dict[str, Any]:
 
     can_defeat, argument = await _can_make_defeating_argument(state, "AG1", state.current_argument)
     if not can_defeat or argument is None:
-        return {"last_can_defeat": False, "last_generated_argument": None}
-
-    if state.turn_count >= state.max_turns:
+        stage = "ag2_main_justified"
         return {
-            "last_can_defeat": True,
-            "last_generated_argument": argument,
-            "last_generated_argument_appended": False,
+            "last_can_defeat": False,
+            "last_generated_argument": None,
+            "justified_argument": _main_argument_for_stage(state, stage),
+            "justification_status": stage,
         }
 
-    history = [*state.history, argument]
     return {
-        "active_agent": "AG2",
-        "current_argument": argument,
-        "history": history,
-        "dialogue_history": _dialogue_history(history),
         "turn_count": state.turn_count + 1,
         "last_can_defeat": True,
         "last_generated_argument": argument,
-        "last_generated_argument_appended": True,
+        "last_generated_argument_appended": False,
+        "final_rebuttal": argument.argument,
     }
 
 
@@ -329,14 +344,19 @@ async def ag2_counter_ag1(state: State) -> dict[str, Any]:
         "last_can_defeat": True,
         "last_generated_argument": argument,
         "last_generated_argument_appended": True,
+        "final_rebuttal": argument.argument,
     }
 
 
 async def early_finish(state: State) -> dict[str, Any]:
     return {
-        "answer": None,
-        "synthesis": None,
         "dialogue_history": _dialogue_history(state.history),
+        "justified_argument": state.justified_argument,
+        "justification_status": state.justification_status,
+        "final_rebuttal": state.final_rebuttal,
+        "integrated_rule": None,
+        "agent1_stance": state.agent1_stance,
+        "agent2_stance": state.agent2_stance,
     }
 
 
@@ -365,7 +385,6 @@ async def extract_warrants(state: State) -> dict[str, Any]:
                 "warrant": {
                     "antecedent": {
                         "strong": ag1_last_rule["antecedent"]["strong"],
-                        "weak_negation": ag1_last_rule["antecedent"].get("weak_negation", []),
                     },
                     "consequent": ag1_last_rule["consequent"],
                 }
@@ -374,7 +393,6 @@ async def extract_warrants(state: State) -> dict[str, Any]:
                 "warrant": {
                     "antecedent": {
                         "strong": ag2_last_rule["antecedent"]["strong"],
-                        "weak_negation": ag2_last_rule["antecedent"].get("weak_negation", []),
                     },
                     "consequent": ag2_last_rule["consequent"],
                 }
@@ -385,51 +403,52 @@ async def extract_warrants(state: State) -> dict[str, Any]:
         return {"error": f"Warrant抽出中にエラーが発生しました: {exc}"}
 
 
-async def characterize(state: State) -> dict[str, Any]:
-    if state.warrant_result is None:
-        return {"error": "Cannot characterize without warrants."}
-
-    background_knowledge_json = ""
-    if state.additional_context:
-        background_knowledge_json = (
-            f"\n\nBackgroundKnowledge:\n"
-            f"{json.dumps(state.additional_context, ensure_ascii=False, indent=2)}"
-        )
-
-    input_text = f"{state.warrant_result}{background_knowledge_json}\n\n{PromptTemplates.CHARACTERIZATION}"
-    response = await _invoke_agent(state.agent1_stance, input_text)
-    return {"characterization_result": response}
-
-
 async def generalize(state: State) -> dict[str, Any]:
-    if state.characterization_result is None:
-        return {"error": "Cannot generalize without characterization."}
+    if state.warrant_result is None:
+        return {"error": "Cannot generalize without warrants."}
 
-    input_text = f"{state.characterization_result}\n\n{PromptTemplates.GENERALIZATION}"
+    input_text = (
+        f"{state.warrant_result}"
+        f"{_background_knowledge_text(state)}\n\n"
+        f"{PromptTemplates.GENERALIZATION}"
+    )
     response = await _invoke_agent(state.agent1_stance, input_text)
     return {"generalization_result": response}
 
 
-async def answer(state: State) -> dict[str, Any]:
+async def integrate(state: State) -> dict[str, Any]:
     if state.warrant_result is None or state.generalization_result is None:
-        return {"error": "Cannot answer without warrants and generalization."}
+        return {"error": "Cannot integrate without warrants and generalization."}
 
-    input_text = f"{state.warrant_result}\n\n{state.generalization_result}\n\n{PromptTemplates.ANSWER}"
+    input_text = (
+        f"{state.warrant_result}\n\n"
+        f"{state.generalization_result}"
+        f"{_background_knowledge_text(state)}\n\n"
+        f"{PromptTemplates.INTEGRATION}"
+    )
     response = await _invoke_agent(state.agent1_stance, input_text)
-    synthesis = {"final_answer": response}
+    integrated_rule = _extract_integrated_rule(response)
+    if integrated_rule is None:
+        return {"error": "統合結果から新しいルールを抽出できませんでした"}
 
     return {
-        "answer": synthesis["final_answer"],
-        "synthesis": synthesis,
+        "integration_result": response,
+        "integrated_rule": integrated_rule,
+        "agent1_stance": _append_rule_to_stance(state.agent1_stance, integrated_rule),
         "dialogue_history": _dialogue_history(state.history),
     }
 
 
 async def finish_with_error(state: State) -> dict[str, Any]:
     return {
-        "answer": None,
-        "synthesis": None,
         "dialogue_history": _dialogue_history(state.history),
+        "justified_argument": state.justified_argument,
+        "justification_status": state.justification_status,
+        "final_rebuttal": state.final_rebuttal,
+        "integrated_rule": state.integrated_rule,
+        "agent1_stance": state.agent1_stance,
+        "agent2_stance": state.agent2_stance,
+        "error": state.error,
     }
 
 
@@ -438,38 +457,16 @@ def route_after_ag2_attack_ag1(state: State) -> str:
         return "finish_with_error"
     if state.last_can_defeat is False:
         return "early_finish"
-    if state.ag1_pending:
-        return "ag2_main"
-    return "ag1_counter_ag2"
-
-
-def route_after_ag1_counter_ag2(state: State) -> str:
-    if state.error:
-        return "finish_with_error"
-    if state.last_can_defeat is False:
-        return "ag2_main"
-    return "ag2_attack_ag1"
+    return "ag2_main"
 
 
 def route_after_ag1_attack_ag2(state: State) -> str:
     if state.error:
         return "finish_with_error"
-    if state.last_can_defeat is False:
-        return "extract_warrants"
-    if state.turn_count >= state.max_turns and not state.last_generated_argument_appended:
-        return "extract_warrants"
-    return "ag2_counter_ag1"
+    return "extract_warrants"
 
 
-def route_after_ag2_counter_ag1(state: State) -> str:
-    if state.error:
-        return "finish_with_error"
-    if state.last_can_defeat is False:
-        return "extract_warrants"
-    return "ag1_attack_ag2"
-
-
-def route_after_synthesis_step(state: State) -> str:
+def route_after_integration_step(state: State) -> str:
     if state.error:
         return "finish_with_error"
     return "next"
@@ -480,14 +477,11 @@ graph = (
     .add_node("initialize", initialize)
     .add_node("ag1_main", ag1_main)
     .add_node("ag2_attack_ag1", ag2_attack_ag1)
-    .add_node("ag1_counter_ag2", ag1_counter_ag2)
     .add_node("ag2_main", ag2_main)
     .add_node("ag1_attack_ag2", ag1_attack_ag2)
-    .add_node("ag2_counter_ag1", ag2_counter_ag1)
     .add_node("extract_warrants", extract_warrants)
-    .add_node("characterize", characterize)
     .add_node("generalize", generalize)
-    .add_node("answer", answer)
+    .add_node("integrate", integrate)
     .add_node("early_finish", early_finish)
     .add_node("finish_with_error", finish_with_error)
     .add_edge(START, "initialize")
@@ -498,17 +492,7 @@ graph = (
         route_after_ag2_attack_ag1,
         {
             "early_finish": "early_finish",
-            "ag1_counter_ag2": "ag1_counter_ag2",
             "ag2_main": "ag2_main",
-            "finish_with_error": "finish_with_error",
-        },
-    )
-    .add_conditional_edges(
-        "ag1_counter_ag2",
-        route_after_ag1_counter_ag2,
-        {
-            "ag2_main": "ag2_main",
-            "ag2_attack_ag1": "ag2_attack_ag1",
             "finish_with_error": "finish_with_error",
         },
     )
@@ -518,35 +502,20 @@ graph = (
         route_after_ag1_attack_ag2,
         {
             "extract_warrants": "extract_warrants",
-            "ag2_counter_ag1": "ag2_counter_ag1",
-            "finish_with_error": "finish_with_error",
-        },
-    )
-    .add_conditional_edges(
-        "ag2_counter_ag1",
-        route_after_ag2_counter_ag1,
-        {
-            "extract_warrants": "extract_warrants",
-            "ag1_attack_ag2": "ag1_attack_ag2",
             "finish_with_error": "finish_with_error",
         },
     )
     .add_conditional_edges(
         "extract_warrants",
-        route_after_synthesis_step,
-        {"next": "characterize", "finish_with_error": "finish_with_error"},
-    )
-    .add_conditional_edges(
-        "characterize",
-        route_after_synthesis_step,
+        route_after_integration_step,
         {"next": "generalize", "finish_with_error": "finish_with_error"},
     )
     .add_conditional_edges(
         "generalize",
-        route_after_synthesis_step,
-        {"next": "answer", "finish_with_error": "finish_with_error"},
+        route_after_integration_step,
+        {"next": "integrate", "finish_with_error": "finish_with_error"},
     )
-    .add_edge("answer", END)
+    .add_edge("integrate", "ag1_main")
     .add_edge("early_finish", END)
     .add_edge("finish_with_error", END)
     .compile(name="Dialect MAS")

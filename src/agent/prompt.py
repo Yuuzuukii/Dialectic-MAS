@@ -7,6 +7,10 @@ class PromptTemplates:
 
     Constraint:
     The main Argument must follow the structure of argumentation below.
+    The main Argument must recommend exactly one buying option as the final conclusion.
+    Do not include side conclusions about rejecting other options unless they are strictly necessary premises for the single final buying conclusion.
+    The last rule's consequent must be one sentence of the form "We should buy ...".
+    Do not output multiple independent recommendations in one main Argument.
 
     Argumentation structure:
       - rules: An array of inference rules. Each rule represents an inference from premises (antecedent) to a conclusion (consequent)
@@ -14,44 +18,32 @@ class PromptTemplates:
         Include only the minimum necessary rules to derive the final conclusion (consequent of the last rule).
         - id: Rule identifier (r1, r2, ...)
         - antecedent.strong: A list of natural language statements representing the minimum necessary premises to derive the conclusion (may include consequents from previous rules)
-        - antecedent.weak_negation: A list of natural language statements representing assumptions that there is no evidence for certain arguments (not negation of facts) necessary to derive the conclusion
-        - consequent: A natural language statement of the conclusion (conclusion only) derived from strong and weak_negation
+        - consequent: A natural language statement of the conclusion (conclusion only) derived from antecedent.strong
       - Conc: A list collecting the consequent of each rule
-      - Ass: A list collecting the weak_negation of each rule
 
     Output only the following JSON:
-{
-"Argument": {
-  "rules": [
     {
-      "id": "r1",
-      "antecedent": {
-        "strong": [
-          "Minimum necessary premise 1 to derive conclusion", 
-          "Minimum necessary premise 2 to derive conclusion", 
-          ...
-        ],
-        "weak_negation": [
-          "Assumption that there is no evidence for an argument (not negation of facts) premise 1", 
-          "Assumption that there is no evidence for an argument (not negation of facts) premise 2", 
-          ...
-        ]
-      },
-      "consequent": "Natural language statement of the conclusion (conclusion only) derived from strong and weak_negation",
+    "Argument": {
+      "rules": [
+        {
+          "id": "r1",
+          "antecedent": {
+            "strong": [
+              "Minimum necessary premise 1 to derive conclusion", 
+              "Minimum necessary premise 2 to derive conclusion", 
+              ...
+            ]
+          },
+          "consequent": "Natural language statement of the conclusion (conclusion only) derived from antecedent.strong",
+        }
+      ],
+      ...
+      "Conc": [
+        "consequent of r1", 
+        "consequent of r2", 
+      ]
     }
-  ],
-  ...
-  "Conc": [
-    "consequent of r1", 
-    "consequent of r2", 
-  ...],
-  "Ass": [
-    "weak_negation of r1", 
-    "weak_negation of r2", 
-    ...
-  ]
-}
-}
+    }
     """
     
     # For determining defeatability and constructing counterarguments (common to AG1 and AG2)
@@ -63,48 +55,41 @@ The argument has the following structure:
   Important: rules have an order. The consequent of an earlier rule can be used in the antecedent.strong of a later rule.
   Include only the minimum necessary rules to derive the final conclusion (consequent of the last rule).
   - id: Rule identifier (r1, r2, ...)
-  - (attack): Attack method (rebut or undercut)
+  - attack: Attack method (rebut)
   - antecedent.strong: A list of minimum necessary premises to derive the conclusion (may include consequents from previous rules)
-  - antecedent.weak_negation: A list of assumptions that there is no evidence for certain arguments (not negation of facts) necessary to derive the conclusion
-  - consequent: Conclusion (conclusion only) derived from strong and weak_negation
+  - consequent: Conclusion (conclusion only) derived from antecedent.strong
 - Conc: A list collecting the consequent of each rule
-- Ass: A list collecting the weak_negation of each rule
 
 Task:
 Determine whether you can defeat the opponent's Argument, and if possible, generate one counterargument.
 Answer NO only if you truly cannot counterargue.
 
 Constraint:
-For counterarguments, choose one of the following attack methods.
 Counterarguments must follow the argumentation structure below.
 Counterarguments must ""always"" be stated from your own stance.
 Counterarguments must ""never"" reuse your past antecedent.strong.
+Counterarguments must use only the rebut attack method.
 
-Attack methods:
+Attack method:
 ・rebut: When your stance semantically contradicts or conflicts with a proposition in the opponent's argument's conclusion (Conc)
   → Construct an inference rule that negates the opponent's conclusion or derives a conclusion incompatible with the opponent's conclusion
   → If the opponent's argument's strong is empty, rebut is not possible.
-・undercut: When your stance can provide evidence that a proposition in the opponent's argument's assumption (Ass) is correct
-  → Construct an inference rule that negates the weak negation assumption used in the opponent's inference rule, or shows that the assumption does not hold
-  → If the opponent's argument's weak_negation is empty, undercut is not possible.
 
 Argumentation structure:
 - rules: An array of inference rules. Each rule represents an inference from premises (antecedent) to a conclusion (consequent)
   Important: rules have an order. The consequent of an earlier rule can be used in the antecedent.strong of a later rule.
   Include only the minimum necessary rules to derive the final conclusion (consequent of the last rule).
   - id: Rule identifier (r1, r2, ...)
-  - attack: Attack method (rebut or undercut)
+  - attack: Attack method (rebut)
   - antecedent.strong: A list of minimum necessary premises to derive the conclusion (may include consequents from previous rules)
-  - antecedent.weak_negation: A list of assumptions that there is no evidence for certain arguments (not negation of facts) necessary to derive the conclusion
-  - consequent: Conclusion (conclusion only) derived from strong and weak_negation
+  - consequent: Conclusion (conclusion only) derived from antecedent.strong
 - Conc: A list collecting the consequent of each rule
-- Ass: A list collecting the weak_negation of each rule
 
     Output only the following JSON:
 {
   "can_defeat": "YES or NO",
   "Argument": {
-    "attack": "rebut or undercut",
+    "attack": "rebut",
     "rules": [
       {
         "id": "r1",
@@ -113,14 +98,9 @@ Argumentation structure:
             "Minimum necessary premise 1 to derive conclusion", 
             "Minimum necessary premise 2 to derive conclusion", 
             ...
-          ],
-          "weak_negation": [
-            "Assumption that there is no evidence for an argument (not negation of facts) premise 1", 
-            "Assumption that there is no evidence for an argument (not negation of facts) premise 2",
-            ...
           ]
         },
-        "consequent": "For rebut: statement negating opponent's conclusion; For undercut: statement showing opponent's rule cannot be applied",
+        "consequent": "Statement negating the opponent's conclusion or deriving an incompatible conclusion",
       }
     ],
     ...
@@ -128,109 +108,77 @@ Argumentation structure:
       "consequent of r1", 
       "consequent of r2", 
       ...
-    ],
-    "Ass": [
-      "weak_negation of r1", 
-      "weak_negation of r2", 
-      ...
     ]
   }
 }
     """
 
-    CHARACTERIZATION = """
-The above are two conflicting arguments, Argument1 and Argument2.
-Each has the following meaning.
-The argument has the following structure:
-  - antecedent.strong: A list representing the properties of the minimum necessary premises to derive the conclusion
-  - consequent: The conclusion (conclusion only) derived from strong
-
-Task:
-Characterize the given Argument1 and Argument2.
-This operation clarifies the characteristics of each of the two conflicting arguments.
-
-Constraint:
-Output must follow the argumentation structure below.
-
-Argumentation structure:
-- antecedent.strong: A list representing the properties of the minimum necessary premises to derive the conclusion
-- consequent: The property of the conclusion (conclusion only) derived from strong
-
-Output only the following JSON:
-Output:
-{
-  "Argument": {
-    "C1": {
-      "strong": [
-        "Property 1 of minimum necessary premises to derive conclusion (do not include expressions uniquely identifying specific objects)",
-        "Property 2 of minimum necessary premises to derive conclusion (do not include expressions uniquely identifying specific objects)",
-        ...
-      ],
-      "consequent": "Natural language statement representing the property of the conclusion (conclusion only) derived from strong",
-    },
-    "C2": {
-      "strong": [
-        "Property 1 of minimum necessary premises to derive conclusion (do not include expressions uniquely identifying specific objects)",
-        "Property 2 of minimum necessary premises to derive conclusion (do not include expressions uniquely identifying specific objects)",
-        ...
-      ],
-      "consequent": "Natural language statement representing the property of the conclusion (conclusion only) derived from strong (do not include expressions uniquely identifying specific objects)",
-    }
-  }
-}
-    """
-
     GENERALIZATION = """
-The above are C1 and C2, representing the properties of a pair of conflicting arguments.
+The above are the warrants of two conflicting arguments, Argument1 and Argument2.
 
-Each argument (C1, C2) has the following structure:
+Each warrant has the following structure:
 Argumentation structure:
-- antecedent.strong: A list representing the properties of the minimum necessary premises to derive the conclusion
-- consequent: The property of the conclusion (conclusion only) derived from strong
+- antecedent.strong: A list of the minimum necessary premises to derive the conclusion
+- consequent: The conclusion (conclusion only) derived from the premises
 
 Task:
-Based on the given C1 and C2, construct one consensus core E (Generalization result) that both parties can easily accept.
+Extract generalized buying criteria from the two warrants.
 
 Constraint:
-If there are facts (strong) common to both, they must be included.
-Do not use the strong of C1 and C2 as they are.
-Each premise of the consensus core must be able to encompass both positions.
+- Output generalized criteria, not a concrete product recommendation.
+- Do not mention specific objects such as a, b, or c.
+- Each criterion must preserve the intent of at least one warrant while remaining reusable for a future main argument.
+- Express the result as argument-style criteria that can later be integrated.
+- Do not use placeholders such as "criterion 1", "criterion 2", "condition 1", or "condition 2" as actual content.
+- Use concrete natural-language buying conditions.
 
 Output only the following JSON:
 Output:
 {
   "Argument": {
-    "E": {
-      "strong": [
-        "Consensus core premise (natural language) 1",
-        "Consensus core premise (natural language) 2",
-        "..."
+    "Generalization": {
+      "criteria": [
+        {
+          "id": "g1",
+          "strong": [
+            "Generalized buying criterion 1",
+            "Generalized buying criterion 2"
+          ],
+          "consequent": "A generalized buying conclusion derived from the criterion"
+        }
       ],
-      "consequent": "Conclusion (conclusion only) derived from the consensus core"
+      "summary": "Short summary of the reusable buying criteria"
     }
   }
 }
     """
 
-    ANSWER = """
-The above are the warrants of two conflicting arguments Argument1 and
-Argument2, and the consensus core E of both.
-Structure of premise information:
-- Warrant of Argument1, Argument2: Premises and conclusions of
-individual cases claimed by each agent
-- Consensus core E: Property-level rules that both parties can agree
-on
+    INTEGRATION = """
+The above are the original warrants and the generalized buying criteria derived from them.
+
 Task:
-Based on the given consensus core E, present a solution that
-satisfies the conditions of E.strong as much as possible, and
-make it the final answer.
+Integrate the generalized buying criteria into one new buying rule that can be appended to both agents' stance and reused by the main argument generation prompt.
+
 Constraint:
-- Individual conclusions appearing in the warrants of Argument1 and
-Argument2 ""must"" not be used as they are in the final answer
-- The final answer must be a concrete solution that satisfies E.strong
+- Do not output a concrete recommendation or product name.
+- Output one reusable rule about when we should buy something.
+- The rule must be phrased so it can be added directly to a stance, like "If ..., we should buy it."
+- The rule must be more general than the original warrants while still preserving their combined intent.
+- Do not use placeholders such as "integrated buying condition 1" or "integrated buying condition 2".
+- The `strong` entries and the `rule` must contain concrete natural-language conditions derived from the given criteria.
+
 Output only the following JSON:
 {
-"final_answer": "Final answer (simple)"
+  "Argument": {
+    "Integration": {
+      "strong": [
+        "Integrated buying condition 1",
+        "Integrated buying condition 2"
+      ],
+      "consequent": "we should buy it",
+      "rule": "If integrated buying condition 1 and integrated buying condition 2, we should buy it."
+    }
+  }
 }
     """
 
@@ -238,7 +186,6 @@ Output only the following JSON:
 PROMPTS = {
     "main_argument": PromptTemplates.MAIN_ARGUMENT,
     "defeating_argument": PromptTemplates.DEFEATING_ARGUMENT,
-    "characterization": PromptTemplates.CHARACTERIZATION,
     "generalization": PromptTemplates.GENERALIZATION,
-    "answer": PromptTemplates.ANSWER,
+    "integration": PromptTemplates.INTEGRATION,
 }
