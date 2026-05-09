@@ -30,6 +30,8 @@ class State:
     agent2_stance: str
     max_turns: int = 5
     additional_context: dict[str, Any] = field(default_factory=dict)
+    debate_round: int = 1
+    learned_findings: list[str] = field(default_factory=list)
     turn_count: int = 0
     active_agent: AgentName = "AG1"
     debate_stage: DebateStage = "ag1_main_thread"
@@ -37,6 +39,7 @@ class State:
     current_argument: Optional[ArgumentRecord] = None
     ag1_main_argument: Optional[ArgumentRecord] = None
     ag2_main_argument: Optional[ArgumentRecord] = None
+    ag1_rejection_rebuttal: Optional[str] = None
     ag1_pending: bool = False
     ag2_pending: bool = False
     last_can_defeat: Optional[bool] = None
@@ -60,7 +63,7 @@ def _agent_stance(state: State, agent: AgentName) -> str:
 def _history_text(history: list[ArgumentRecord]) -> str:
     if not history:
         return ""
-    lines = ["これまでの議論履歴:"]
+    lines = ["Discussion history:"]
     for i, arg in enumerate(history, 1):
         lines.append(f"{i}. [{arg.agent}] {arg.type}: {arg.argument[:200]}...")
     return "\n".join(lines)
@@ -80,6 +83,16 @@ def _background_knowledge_text(state: State) -> str:
     return (
         "\n\nBackgroundKnowledge:\n"
         f"{json.dumps(state.additional_context, ensure_ascii=False, indent=2)}"
+    )
+
+
+def _learned_findings_text(state: State) -> str:
+    if not state.learned_findings:
+        return ""
+    findings = "\n".join(f"- {finding}" for finding in state.learned_findings)
+    return (
+        f"\n\n{PromptTemplates.LEARNED_FINDINGS.format(round_number=state.debate_round).strip()}\n"
+        f"LearnedFindings:\n{findings}"
     )
 
 
@@ -147,6 +160,52 @@ def _extract_integrated_rule(integration_result: str) -> Optional[str]:
     return None
 
 
+def _append_unique_findings(existing: list[str], new_items: list[str]) -> list[str]:
+    merged = [*existing]
+    for item in new_items:
+        if item not in merged:
+            merged.append(item)
+    return merged
+
+
+def _mechanical_rebut_findings(rebuttal_text: str | None) -> list[str]:
+    if not rebuttal_text:
+        return []
+
+    rebut_json = _extract_json_from_argument(rebuttal_text)
+    argument = rebut_json.get("Argument", {})
+    rules = argument.get("rules", [])
+    if not isinstance(rules, list):
+        return []
+
+    findings: list[str] = []
+    for rule in rules:
+        if not isinstance(rule, dict):
+            continue
+        antecedent = rule.get("antecedent", {})
+        strong = antecedent.get("strong", []) if isinstance(antecedent, dict) else []
+        consequent = rule.get("consequent")
+        if not isinstance(consequent, str) or not consequent.strip():
+            continue
+        strong_items = [item.strip() for item in strong if isinstance(item, str) and item.strip()]
+        if strong_items:
+            findings.append(f"Because {' and '.join(strong_items)}, {consequent.strip()}.")
+        else:
+            findings.append(consequent.strip())
+    return findings
+
+
+async def update_learned_findings(state: State) -> dict[str, Any]:
+    learned_findings = _append_unique_findings(
+        state.learned_findings,
+        _mechanical_rebut_findings(state.ag1_rejection_rebuttal),
+    )
+    return {
+        "debate_round": state.debate_round + 1,
+        "learned_findings": learned_findings,
+    }
+
+
 async def _invoke_agent(system_prompt: str, human_prompt: str) -> str:
     return await call_llm_messages(
         [
@@ -160,7 +219,11 @@ async def _invoke_agent(system_prompt: str, human_prompt: str) -> str:
 async def _construct_main_argument(state: State, agent: AgentName) -> ArgumentRecord:
     response = await _invoke_agent(
         _agent_stance(state, agent),
-        f"{PromptTemplates.MAIN_ARGUMENT}\n\nTopic: {state.question}",
+        (
+            f"{_learned_findings_text(state)}\n\n"
+            f"{PromptTemplates.MAIN_ARGUMENT}"
+            f"Topic: {state.question}"
+        ),
     )
     return _record(agent, "main", response)
 
@@ -188,10 +251,13 @@ async def initialize(state: State) -> dict[str, Any]:
         "turn_count": 0,
         "active_agent": "AG1",
         "debate_stage": "ag1_main_thread",
+        "debate_round": 1,
+        "learned_findings": [],
         "history": [],
         "current_argument": None,
         "ag1_main_argument": None,
         "ag2_main_argument": None,
+        "ag1_rejection_rebuttal": None,
         "ag1_pending": False,
         "ag2_pending": False,
         "last_can_defeat": None,
@@ -218,6 +284,7 @@ async def ag1_main(state: State) -> dict[str, Any]:
         "debate_stage": "ag1_main_thread",
         "current_argument": argument,
         "ag1_main_argument": argument,
+        "ag1_rejection_rebuttal": None,
         "history": history,
         "dialogue_history": _dialogue_history(history),
         "last_can_defeat": None,
@@ -246,6 +313,7 @@ async def ag2_attack_ag1(state: State) -> dict[str, Any]:
     return {
         "active_agent": "AG2",
         "turn_count": state.turn_count + 1,
+        "ag1_rejection_rebuttal": argument.argument,
         "last_can_defeat": True,
         "last_generated_argument": argument,
         "last_generated_argument_appended": False,
@@ -285,6 +353,8 @@ async def ag2_main(state: State) -> dict[str, Any]:
         agent2_stance=state.agent2_stance,
         max_turns=state.max_turns,
         additional_context=state.additional_context,
+        debate_round=state.debate_round,
+        learned_findings=state.learned_findings,
         history=preserved_history,
         active_agent="AG2",
     )
@@ -482,6 +552,7 @@ graph = (
     .add_node("extract_warrants", extract_warrants)
     .add_node("generalize", generalize)
     .add_node("integrate", integrate)
+    .add_node("update_learned_findings", update_learned_findings)
     .add_node("early_finish", early_finish)
     .add_node("finish_with_error", finish_with_error)
     .add_edge(START, "initialize")
@@ -515,7 +586,8 @@ graph = (
         route_after_integration_step,
         {"next": "integrate", "finish_with_error": "finish_with_error"},
     )
-    .add_edge("integrate", "ag1_main")
+    .add_edge("integrate", "update_learned_findings")
+    .add_edge("update_learned_findings", "ag1_main")
     .add_edge("early_finish", END)
     .add_edge("finish_with_error", END)
     .compile(name="Dialect MAS")

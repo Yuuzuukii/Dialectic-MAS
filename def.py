@@ -86,28 +86,53 @@ def _record_argument_payload(record: Any) -> Any:
 
 
 def _node_payload(node_name: str, update: dict[str, Any]) -> Any:
+    if node_name == "update_learned_findings":
+        return {k: _parse_json_text(v) for k, v in update.items() if v is not None}
+
     if node_name in {"ag1_main", "ag2_main"}:
         payload = _record_argument_payload(update.get("current_argument"))
         if payload is not None:
+            if update.get("learned_findings"):
+                return {
+                    "argument": payload,
+                    "learned_findings": update["learned_findings"],
+                }
             return payload
 
     if node_name in {"ag2_attack_ag1", "ag1_counter_ag2", "ag1_attack_ag2", "ag2_counter_ag1"}:
         payload = _record_argument_payload(update.get("last_generated_argument"))
         if payload is not None:
-            return payload
+            result = {"argument": payload}
+            if update.get("learned_findings"):
+                result["learned_findings"] = update["learned_findings"]
+            return result
         if update.get("last_can_defeat") is False:
             if update.get("justified_argument"):
                 return {
                     "can_defeat": "NO",
                     "justified_argument": _parse_json_text(update["justified_argument"]),
                     "justification_status": update.get("justification_status"),
+                    "learned_findings": update.get("learned_findings"),
                 }
             return {"can_defeat": "NO"}
 
     if node_name in {"extract_warrants", "generalize", "integrate"}:
         for key in ("warrant_result", "generalization_result", "integration_result"):
             if key in update and update[key] is not None:
-                return _parse_json_text(update[key])
+                payload = _parse_json_text(update[key])
+                if node_name == "integrate":
+                    result = {"integration_result": payload}
+                    if update.get("integrated_rule") is not None:
+                        result["integrated_rule"] = update["integrated_rule"]
+                    if update.get("learned_findings"):
+                        result["learned_findings"] = update["learned_findings"]
+                    return result
+                if update.get("learned_findings"):
+                    return {
+                        "result": payload,
+                        "learned_findings": update["learned_findings"],
+                    }
+                return payload
 
     if node_name in {"early_finish", "finish_with_error"}:
         if update.get("justified_argument"):
@@ -115,6 +140,7 @@ def _node_payload(node_name: str, update: dict[str, Any]) -> Any:
                 "justified_argument": _parse_json_text(update["justified_argument"]),
                 "justification_status": update.get("justification_status"),
                 "final_rebuttal": _parse_json_text(update.get("final_rebuttal")),
+                "learned_findings": update.get("learned_findings"),
                 "error": update.get("error"),
             }
 

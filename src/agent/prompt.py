@@ -1,4 +1,10 @@
 class PromptTemplates:
+    LEARNED_FINDINGS = """
+    Previous discussion result:
+    - As a result of the previous discussion, your earlier claim was rejected for the following reasons.
+    - You must take these rejection reasons into account when generating the next argument or rebuttal.
+    - Because the earlier claim was rejected, you must not continue to assert the same rejected claim unless the rejection reason is explicitly resolved in your new argument.
+    """
 
     # For constructing main arguments (common to AG1 and AG2)
     MAIN_ARGUMENT = """
@@ -7,10 +13,6 @@ class PromptTemplates:
 
     Constraint:
     The main Argument must follow the structure of argumentation below.
-    The main Argument must recommend exactly one buying option as the final conclusion.
-    Do not include side conclusions about rejecting other options unless they are strictly necessary premises for the single final buying conclusion.
-    The last rule's consequent must be one sentence of the form "We should buy ...".
-    Do not output multiple independent recommendations in one main Argument.
 
     Argumentation structure:
       - rules: An array of inference rules. Each rule represents an inference from premises (antecedent) to a conclusion (consequent)
@@ -18,8 +20,10 @@ class PromptTemplates:
         Include only the minimum necessary rules to derive the final conclusion (consequent of the last rule).
         - id: Rule identifier (r1, r2, ...)
         - antecedent.strong: A list of natural language statements representing the minimum necessary premises to derive the conclusion (may include consequents from previous rules)
-        - consequent: A natural language statement of the conclusion (conclusion only) derived from antecedent.strong
+        - antecedent.weak_negation: A list of natural language statements representing assumptions that there is no evidence for certain arguments (not negation of facts) necessary to derive the conclusion
+        - consequent: A natural language statement of the conclusion (conclusion only) derived from strong and weak_negation
       - Conc: A list collecting the consequent of each rule
+      - Ass: A list collecting the weak_negation of each rule
 
     Output only the following JSON:
     {
@@ -69,11 +73,17 @@ Counterarguments must follow the argumentation structure below.
 Counterarguments must ""always"" be stated from your own stance.
 Counterarguments must ""never"" reuse your past antecedent.strong.
 Counterarguments must use only the rebut attack method.
+Counterarguments must use only facts that are explicitly available from your own stance, the provided background knowledge, or the opponent's argument.
+Do not invent new facts, hidden conditions, or unstated product properties.
+Do not introduce premises that contradict your own stance or the provided discussion context.
+If you cannot explicitly negate the opponent's conclusion using those available facts, answer NO.
+The final consequent must directly reject the opponent's final recommendation, rather than propose a different recommendation.
 
 Attack method:
 ・rebut: When your stance semantically contradicts or conflicts with a proposition in the opponent's argument's conclusion (Conc)
-  → Construct an inference rule that negates the opponent's conclusion or derives a conclusion incompatible with the opponent's conclusion
+  → Construct an inference rule that explicitly negates the opponent's conclusion
   → If the opponent's argument's strong is empty, rebut is not possible.
+  → The negation must be justified by available facts, not by fabricated facts.
 
 Argumentation structure:
 - rules: An array of inference rules. Each rule represents an inference from premises (antecedent) to a conclusion (consequent)
@@ -100,7 +110,7 @@ Argumentation structure:
             ...
           ]
         },
-        "consequent": "Statement negating the opponent's conclusion or deriving an incompatible conclusion",
+        "consequent": "Statement explicitly negating the opponent's conclusion",
       }
     ],
     ...
@@ -122,15 +132,15 @@ Argumentation structure:
 - consequent: The conclusion (conclusion only) derived from the premises
 
 Task:
-Extract generalized buying criteria from the two warrants.
+Extract generalized criteria from the two warrants.
 
 Constraint:
-- Output generalized criteria, not a concrete product recommendation.
+- Output generalized criteria, not a concrete recommendation.
 - Do not mention specific objects such as a, b, or c.
 - Each criterion must preserve the intent of at least one warrant while remaining reusable for a future main argument.
 - Express the result as argument-style criteria that can later be integrated.
 - Do not use placeholders such as "criterion 1", "criterion 2", "condition 1", or "condition 2" as actual content.
-- Use concrete natural-language buying conditions.
+- Use concrete natural-language conditions, but do not hard-code a domain-specific action unless that action is explicitly required by the given warrants.
 
 Output only the following JSON:
 Output:
@@ -141,42 +151,42 @@ Output:
         {
           "id": "g1",
           "strong": [
-            "Generalized buying criterion 1",
-            "Generalized buying criterion 2"
+            "A concrete generalized condition derived from a warrant",
+            "Another concrete generalized condition derived from a warrant"
           ],
-          "consequent": "A generalized buying conclusion derived from the criterion"
+          "consequent": "A generalized conclusion derived from the criterion"
         }
-      ],
-      "summary": "Short summary of the reusable buying criteria"
+      ]
     }
   }
 }
     """
 
     INTEGRATION = """
-The above are the original warrants and the generalized buying criteria derived from them.
+The above are the original warrants and the generalized criteria derived from them.
 
 Task:
-Integrate the generalized buying criteria into one new buying rule that can be appended to both agents' stance and reused by the main argument generation prompt.
+Integrate the generalized criteria into one new reusable rule that can be appended to both agents' stance and reused by the main argument generation prompt.
 
 Constraint:
 - Do not output a concrete recommendation or product name.
-- Output one reusable rule about when we should buy something.
-- The rule must be phrased so it can be added directly to a stance, like "If ..., we should buy it."
+- Output one reusable rule about when the conclusion should follow from the integrated conditions.
+- The rule must be phrased so it can be added directly to a stance, using a generalized consequent derived from the warrants instead of a fixed action.
 - The rule must be more general than the original warrants while still preserving their combined intent.
-- Do not use placeholders such as "integrated buying condition 1" or "integrated buying condition 2".
+- Do not use placeholders such as "integrated condition 1" or "integrated condition 2".
 - The `strong` entries and the `rule` must contain concrete natural-language conditions derived from the given criteria.
+- Do not hard-code a domain-specific action unless that action is explicitly required by the given warrants.
 
 Output only the following JSON:
 {
   "Argument": {
     "Integration": {
       "strong": [
-        "Integrated buying condition 1",
-        "Integrated buying condition 2"
+        "A concrete integrated condition derived from the criteria",
+        "Another concrete integrated condition derived from the criteria"
       ],
-      "consequent": "we should buy it",
-      "rule": "If integrated buying condition 1 and integrated buying condition 2, we should buy it."
+      "consequent": "A generalized conclusion derived from the integrated conditions",
+      "rule": "If the concrete integrated conditions hold, then the generalized conclusion follows."
     }
   }
 }
@@ -184,6 +194,7 @@ Output only the following JSON:
 
 
 PROMPTS = {
+    "learned_findings": PromptTemplates.LEARNED_FINDINGS,
     "main_argument": PromptTemplates.MAIN_ARGUMENT,
     "defeating_argument": PromptTemplates.DEFEATING_ARGUMENT,
     "generalization": PromptTemplates.GENERALIZATION,
