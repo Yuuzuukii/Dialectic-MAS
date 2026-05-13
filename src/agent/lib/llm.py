@@ -40,6 +40,13 @@ async def call_llm_structured(prompt: str, schema: Type[T], model: str) -> T:
     response = await structured_model.ainvoke(prompt)
     return cast(T, response)
 
+
+async def call_llm_messages_structured(messages: list[BaseMessage], schema: Type[T], model: str) -> T:
+    model_client = _chat_openai(model)
+    structured_model = model_client.with_structured_output(schema)
+    response = await structured_model.ainvoke(messages)
+    return cast(T, response)
+
 async def call_llm(prompt: str, model: str) -> str:
     model_client = _chat_openai(model)
     response = await model_client.ainvoke(prompt)

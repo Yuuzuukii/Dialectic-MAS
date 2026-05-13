@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, Field, field_validator
 
-from src.agent.graph import State, graph
+from src.agent.graphs.dialectic_workflow import State, graph
 
 app = FastAPI()
 
@@ -26,9 +26,13 @@ INTERNAL_STATE_FIELDS = {
     "warrant_result",
     "generalization_result",
     "integration_result",
+    "b_defeats_a",
+    "c_defeats_b",
+    "b_defeats_c",
+    "c_strictly_defeats_b",
 }
 
-AG1_STANCE = f"""
+AG1_STANCE = """
         Your stance:
         a is a camera.
         c is a camera.
@@ -42,7 +46,7 @@ AG1_STANCE = f"""
         If something is compact and light, it is user-friendly.
         """
 
-AG2_STANCE = f"""
+AG2_STANCE = """
         Your stance:
         b is a camera.
         a is out of stock.
@@ -52,7 +56,7 @@ AG2_STANCE = f"""
         If something is out of stock, we should not buy it.
         """
 
-QUESTION = f"""What camera should we buy?"""
+QUESTION = """What camera should we buy?"""
 
 
 def public_result(result: dict[str, Any]) -> dict[str, Any]:

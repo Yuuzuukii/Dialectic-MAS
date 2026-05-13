@@ -3,8 +3,12 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+import sys
 from pathlib import Path
 from typing import Any
+
+# プロジェクトのルートディレクトリを sys.path に追加
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 AG1_STANCE = """
         Your stance:
@@ -45,9 +49,24 @@ INTERNAL_STATE_FIELDS = {
     "ag1_pending",
     "ag2_pending",
     "history",
+    "dialogue_history",
     "warrant_result",
     "generalization_result",
     "integration_result",
+    "defeat_relations",
+    "current_proponent",
+    "current_opponent",
+    "current_thread_status",
+    "b_argument",
+    "c_argument",
+    "d_argument",
+    "b_argument_id",
+    "c_argument_id",
+    "d_argument_id",
+    "b_defeats_a",
+    "c_defeats_b",
+    "b_defeats_c",
+    "c_strictly_defeats_b",
 }
 
 
@@ -85,11 +104,44 @@ def _record_argument_payload(record: Any) -> Any:
     return record
 
 
-def _node_payload(node_name: str, update: dict[str, Any]) -> Any:
-    if node_name == "update_learned_findings":
-        return {k: _parse_json_text(v) for k, v in update.items() if v is not None}
+def _jsonable(value: Any) -> Any:
+    if hasattr(value, "model_dump"):
+        return _jsonable(value.model_dump())
+    if isinstance(value, list):
+        return [_jsonable(item) for item in value]
+    if isinstance(value, dict):
+        return {k: _jsonable(v) for k, v in value.items()}
+    return _parse_json_text(value)
 
-    if node_name in {"ag1_main", "ag2_main"}:
+
+def _status_payload(update: dict[str, Any]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key in (
+        "current_thread_status",
+        "ag1_thread_status",
+        "ag2_thread_status",
+        "current_proponent",
+        "current_opponent",
+        "active_agent",
+        "debate_stage",
+        "debate_round",
+    ):
+        if update.get(key) is not None:
+            result[key] = update[key]
+    return result
+
+
+def _node_payload(node_name: str, update: dict[str, Any]) -> Any:
+    if update is None:
+        return None
+
+    if not update:
+        return None
+
+    if node_name == "update_learned_findings":
+        return _jsonable({k: v for k, v in update.items() if v is not None})
+
+    if node_name in {"ag1_main", "ag2_main", "p_main"}:
         payload = _record_argument_payload(update.get("current_argument"))
         if payload is not None:
             if update.get("learned_findings"):
@@ -99,13 +151,32 @@ def _node_payload(node_name: str, update: dict[str, Any]) -> Any:
                 }
             return payload
 
-    if node_name in {"ag2_attack_ag1", "ag1_counter_ag2", "ag1_attack_ag2", "ag2_counter_ag1"}:
+    if node_name in {
+        "ag2_attack_ag1",
+        "ag1_counter_ag2",
+        "ag1_attack_ag2",
+        "ag2_counter_ag1",
+        "o_defeat_a",
+        "validate_b_defeats_a",
+        "p_counter_b",
+        "validate_c_defeats_b",
+        "validate_b_defeats_c",
+    }:
         payload = _record_argument_payload(update.get("last_generated_argument"))
+        if payload is None:
+            for key in ("b_argument", "c_argument", "d_argument"):
+                payload = _record_argument_payload(update.get(key))
+                if payload is not None:
+                    break
         if payload is not None:
             result = {"argument": payload}
+            if update.get("current_thread_status"):
+                result["thread_status"] = update["current_thread_status"]
             if update.get("learned_findings"):
                 result["learned_findings"] = update["learned_findings"]
             return result
+        if update.get("current_thread_status"):
+            return _status_payload(update)
         if update.get("last_can_defeat") is False:
             if update.get("justified_argument"):
                 return {
@@ -116,7 +187,12 @@ def _node_payload(node_name: str, update: dict[str, Any]) -> Any:
                 }
             return {"can_defeat": "NO"}
 
-    if node_name in {"extract_warrants", "generalize", "integrate"}:
+    if node_name in {"extract_warrants", "generalize", "integrate", "add_integrated_rule"}:
+        if node_name == "add_integrated_rule":
+            return {
+                "integrated_rules": _jsonable(update.get("integrated_rules")),
+                "debate_round": update.get("debate_round"),
+            }
         for key in ("warrant_result", "generalization_result", "integration_result"):
             if key in update and update[key] is not None:
                 payload = _parse_json_text(update[key])
@@ -134,25 +210,30 @@ def _node_payload(node_name: str, update: dict[str, Any]) -> Any:
                     }
                 return payload
 
-    if node_name in {"early_finish", "finish_with_error"}:
-        if update.get("justified_argument"):
-            return {
-                "justified_argument": _parse_json_text(update["justified_argument"]),
-                "justification_status": update.get("justification_status"),
-                "final_rebuttal": _parse_json_text(update.get("final_rebuttal")),
-                "learned_findings": update.get("learned_findings"),
-                "error": update.get("error"),
-            }
+    if node_name in {"early_finish", "finish", "finish_with_error"}:
+        return {
+            "justified_argument": _parse_json_text(update.get("justified_argument")),
+            "justification_status": update.get("justification_status"),
+            "final_rebuttal": _parse_json_text(update.get("final_rebuttal")),
+            "ag1_thread_status": update.get("ag1_thread_status"),
+            "ag2_thread_status": update.get("ag2_thread_status"),
+            "integrated_rules": update.get("integrated_rules"),
+            "defeat_relations": _jsonable(update.get("defeat_relations")),
+            "learned_findings": update.get("learned_findings"),
+            "error": update.get("error"),
+        }
 
         public_update = {k: v for k, v in update.items() if k not in INTERNAL_STATE_FIELDS}
-        return {k: _parse_json_text(v) for k, v in public_update.items() if v is not None}
+        return _jsonable({k: v for k, v in public_update.items() if v is not None})
 
-    return {k: _parse_json_text(v) for k, v in update.items() if v is not None}
+    return _jsonable({k: v for k, v in update.items() if v is not None})
 
 
 def _print_node_output(node_name: str, payload: Any) -> None:
+    if payload is None:
+        return
     print(f"[{node_name}]")
-    print(json.dumps(payload, ensure_ascii=False, indent=2, default=str))
+    print(json.dumps(_jsonable(payload), ensure_ascii=False, indent=2, default=str))
     print()
 
 
@@ -189,7 +270,7 @@ async def run() -> None:
     print(json.dumps({"status": "loading_graph"}, ensure_ascii=False, indent=2), flush=True)
     print(flush=True)
 
-    from src.agent.graph import State, graph
+    from src.agent.graphs.dialectic_workflow import State, graph
 
     file_input = _load_input(args.input)
     cli_input = {
