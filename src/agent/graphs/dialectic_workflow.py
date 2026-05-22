@@ -14,6 +14,7 @@ from ..schema.outputs.schema import (
 from .edges import (
     route_after_add_integrated_rule,
     route_after_o_defeat_a,
+    route_after_p_main,
     route_after_p_counter_b,
     route_after_synthesis_step,
     route_after_thread,
@@ -118,7 +119,15 @@ graph = (
     .add_node("finish_with_error", finish_with_error)
     .add_edge(START, "initialize")
     .add_edge("initialize", "p_main")
-    .add_edge("p_main", "o_defeat_a")
+    .add_conditional_edges(
+        "p_main",
+        route_after_p_main,
+        {
+            "o_defeat_a": "o_defeat_a",
+            "finish": "finish",
+            "finish_with_error": "finish_with_error",
+        },
+    )
     .add_conditional_edges(
         "o_defeat_a",
         route_after_o_defeat_a,

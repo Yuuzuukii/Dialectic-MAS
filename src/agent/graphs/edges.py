@@ -3,6 +3,14 @@ from __future__ import annotations
 from typing import Any
 
 
+def route_after_p_main(state: Any) -> str:
+    if state.error:
+        return "finish_with_error"
+    if state.current_argument is None:
+        return "finish"
+    return "o_defeat_a"
+
+
 def route_after_o_defeat_a(state: Any) -> str:
     if state.error:
         return "finish_with_error"

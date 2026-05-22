@@ -95,7 +95,8 @@ class AttackMetadata(BaseModel):
 
 
 class MainArgumentOutput(BaseModel):
-    Argument: ArgumentBody = Field(description="Main argument supporting the agent's stance.")
+    can_generate: Literal["YES", "NO"] = Field(description="YES only if a valid main argument can be constructed.")
+    Argument: ArgumentBody | None = Field(default=None, description="Main argument supporting the agent's stance.")
 
 
 class DefeatingArgumentOutput(BaseModel):

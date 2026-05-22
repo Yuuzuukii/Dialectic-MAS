@@ -420,6 +420,14 @@ async def p_main(state: Any) -> dict[str, Any]:
     agent = state.current_proponent
     prompt = main_argument_prompt(state, agent)
     output = await invoke_agent_structured(agent_stance(state, agent), prompt, MainArgumentOutput)
+    if output.can_generate != "YES" or output.Argument is None:
+        key = current_agent_thread_key(state)
+        return {
+            "current_argument": None,
+            "current_thread_status": "no_main_argument",
+            f"{key}_thread_status": "no_main_argument",
+            "justification_status": f"{key}_main_not_generated",
+        }
     response = structured_json(output)
     argument = record(agent, "main", response)
     history = [*state.history, argument]

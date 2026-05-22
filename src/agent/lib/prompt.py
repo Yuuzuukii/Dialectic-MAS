@@ -8,7 +8,9 @@ Previous discussion result:
 
     MAIN_ARGUMENT = """
 Task:
-Construct one main argument for your stance on the Issue.
+Decide whether you can construct one main argument for your stance on the Issue.
+If you can, set can_generate to YES and construct the Argument.
+If you cannot construct a valid main argument, set can_generate to NO and omit Argument.
 
 Rules:
 - The final consequent must directly answer the Issue.
