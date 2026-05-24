@@ -510,6 +510,8 @@ async def validate_b_defeats_a(state: Any) -> dict[str, Any]:
             "justified",
             [result.blocker] if result.blocker is not None else None,
         )
+        if result.blocker is not None:
+            update["last_generated_argument"] = result.blocker
         update["defeat_relations"] = relations
         update["last_can_defeat"] = False
         return update
@@ -557,6 +559,8 @@ async def validate_c_defeats_b(state: Any) -> dict[str, Any]:
             "overruled",
             [result.blocker] if result.blocker is not None else None,
         )
+        if result.blocker is not None:
+            update["last_generated_argument"] = result.blocker
         update["defeat_relations"] = relations
         update["last_can_defeat"] = False
         return update

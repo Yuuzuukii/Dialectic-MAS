@@ -1,7 +1,7 @@
 class PromptTemplates:
     LEARNED_FINDINGS = """
 Previous discussion result:
-- Do not repeat the same recommendation with the same concrete premises or warrant.
+- Do not repeat the same conclusion with the same concrete premises or warrant.
 - Do not restate a previously defeated or unresolved main argument as if it were new.
 - If IntegratedRules are available, use them to build a revised argument instead of copying an earlier one.
 """
@@ -14,12 +14,9 @@ If you cannot construct a valid main argument, set can_generate to NO and omit A
 
 Rules:
 - The final consequent must directly answer the Issue.
-- For a purchase Issue, the final consequent should recommend a concrete object to buy.
-- A conclusion that only rejects an object, such as "We should not buy X", belongs to a defeating argument, not a main argument.
-- Do not repeat a previous main argument.
 - If IntegratedRules are available in this round, use at least one of them as the basis of the new main argument.
 - In a later round, do not rebuild the same argument from the same concrete premises as your previous main argument.
-- A later-round argument may reach the same recommendation only if it explicitly uses a new IntegratedRule to resolve the previous conflict.
+- A later-round argument may reach the same conclusion only if it explicitly uses a new IntegratedRule to resolve the previous conflict.
 
 Argument requirements:
 - Use ordered rules.
@@ -38,11 +35,11 @@ Available attacks:
 
 Constraints:
 - Use only your stance, background knowledge, and the target argument.
-- Do not invent facts or product properties.
-- A different recommendation is not a rebut unless it directly contradicts the target conclusion.
+- Do not invent facts or properties.
+- A different conclusion is not a rebut unless it directly contradicts the target conclusion.
 - If the target has no Ass, undercut is impossible.
 - If you are the Proponent, do not repeat your previous move in this branch.
-- If no valid rebut 1or undercut is available, set can_defeat to NO and omit Argument.
+- If no valid rebut or undercut is available, set can_defeat to NO and omit Argument.
 
 Output shape:
 - Put only rules, Conc, and Ass inside Argument.
@@ -60,8 +57,8 @@ Available attacks:
 
 Constraints:
 - Use only your stance, background knowledge, and the target argument.
-- Do not invent facts or product properties.
-- A different recommendation is not a rebut unless it directly contradicts the target conclusion.
+- Do not invent facts or properties.
+- A different conclusion is not a rebut unless it directly contradicts the target conclusion.
 - If the target has no Ass, undercut is impossible.
 - If you are the Proponent, do not repeat your previous move in this branch.
 - If no valid rebut or undercut is available, set can_defeat to NO and omit Argument.
@@ -96,7 +93,7 @@ Validate the declared attack.
 Rules:
 - rebut is valid only if attacker.Conc directly contradicts target.Conc.
 - undercut is valid only if attacker.Conc directly invalidates target.Ass.
-- A different recommendation is not a rebut unless it directly contradicts the target conclusion.
+- A different conclusion is not a rebut unless it directly contradicts the target conclusion.
 """
 
     GENERALIZATION = """
@@ -104,7 +101,7 @@ Task:
 Extract generalized criteria from the two warrants.
 
 Rules:
-- Output reusable criteria, not a concrete recommendation.
+- Output reusable criteria, not a concrete answer to the Issue.
 - Do not mention specific objects such as a, b, or c.
 - Preserve the intent of the original warrants.
 - Avoid placeholders such as "criterion 1" or "condition 1".
@@ -115,7 +112,7 @@ Task:
 Integrate the generalized criteria into one reusable rule.
 
 Rules:
-- Do not output a concrete product recommendation.
+- Do not output a concrete answer to the Issue.
 - The rule must be reusable in a later main argument.
 - Preserve the combined intent of the criteria.
 - Avoid placeholders such as "integrated condition", "concrete integrated conditions", and "generalized conclusion".

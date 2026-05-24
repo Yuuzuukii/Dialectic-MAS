@@ -12,29 +12,27 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 AG1_STANCE = """
         Your stance:
-        a is a camera.
-        c is a camera.
-        a is compact.
-        a is light.
-        c has long battery life.
-        c is user-friendly.
-        b is over budget.
-        If a camera is compact and light, we should buy it.
-        If something is over budget, we should not buy it.
-        If something is compact and light, it is user-friendly.
+        a is curry rice.
+        c is curry noodles.
+        a has curry flavor.
+        c has curry flavor.
+        I do not want to eat b.
+        If a menu item has curry flavor, we should eat it.
+        If I do not want to eat something, we should not eat it.
         """
 
 AG2_STANCE = """
         Your stance:
-        b is a camera.
-        a is out of stock.
-        b has long battery life.
-        b has high image quality.
-        If a camera has high image quality and long battery life, we should buy it.
-        If something is out of stock, we should not buy it.
+        b is Chinese noodles.
+        c is curry noodles.
+        b is a noodle dish.
+        c is a noodle dish.
+        I do not want to eat a.
+        If a menu item is a noodle dish, we should eat it.
+        If I do not want to eat something, we should not eat it.
         """
 
-QUESTION = "What camera should we buy?"
+QUESTION = "What should we eat?"
 
 INTERNAL_STATE_FIELDS = {
     "last_generated_argument",
@@ -104,6 +102,22 @@ def _record_argument_payload(record: Any) -> Any:
     return record
 
 
+def _record_metadata(record: Any) -> dict[str, Any]:
+    if record is None:
+        return {}
+    if hasattr(record, "model_dump"):
+        data = record.model_dump()
+    elif isinstance(record, dict):
+        data = record
+    else:
+        return {}
+    return {
+        key: data[key]
+        for key in ("id", "type", "agent", "attack", "target_id", "status")
+        if data.get(key) is not None
+    }
+
+
 def _jsonable(value: Any) -> Any:
     if hasattr(value, "model_dump"):
         return _jsonable(value.model_dump())
@@ -162,18 +176,22 @@ def _node_payload(node_name: str, update: dict[str, Any]) -> Any:
         "validate_c_defeats_b",
         "validate_b_defeats_c",
     }:
-        payload = _record_argument_payload(update.get("last_generated_argument"))
+        record = update.get("last_generated_argument")
+        payload = _record_argument_payload(record)
         if payload is None:
             for key in ("b_argument", "c_argument", "d_argument"):
-                payload = _record_argument_payload(update.get(key))
+                record = update.get(key)
+                payload = _record_argument_payload(record)
                 if payload is not None:
                     break
         if payload is not None:
-            result = {"argument": payload}
+            result = {"argument": payload, **_record_metadata(record)}
             if update.get("current_thread_status"):
                 result["thread_status"] = update["current_thread_status"]
             if update.get("learned_findings"):
                 result["learned_findings"] = update["learned_findings"]
+            if update.get("defeat_relations"):
+                result["defeat_relations"] = _jsonable(update["defeat_relations"])
             return result
         if update.get("current_thread_status"):
             return _status_payload(update)
@@ -215,6 +233,7 @@ def _node_payload(node_name: str, update: dict[str, Any]) -> Any:
             "justified_argument": _parse_json_text(update.get("justified_argument")),
             "justification_status": update.get("justification_status"),
             "final_rebuttal": _parse_json_text(update.get("final_rebuttal")),
+            "dialogue_history": _jsonable(update.get("dialogue_history")),
             "ag1_thread_status": update.get("ag1_thread_status"),
             "ag2_thread_status": update.get("ag2_thread_status"),
             "integrated_rules": update.get("integrated_rules"),

@@ -34,29 +34,27 @@ INTERNAL_STATE_FIELDS = {
 
 AG1_STANCE = """
         Your stance:
-        a is a camera.
-        c is a camera.
-        a is compact.
-        a is light.
-        c has long battery life.
-        c is user-friendly.
-        b is over budget.
-        If a camera is compact and light, we should buy it.
-        If something is over budget, we should not buy it.
-        If something is compact and light, it is user-friendly.
+        a is curry rice.
+        c is curry noodles.
+        a has curry flavor.
+        c has curry flavor.
+        b is not acceptable to you.
+        If a menu has curry flavor, we should eat it.
+        If something is not acceptable to you, we should not eat it.
         """
 
 AG2_STANCE = """
         Your stance:
-        b is a camera.
-        a is out of stock.
-        b has long battery life.
-        b has high image quality.
-        If a camera has high image quality and long battery life, we should buy it.
-        If something is out of stock, we should not buy it.
+        b is Chinese noodles.
+        c is curry noodles.
+        b is a noodle dish.
+        c is a noodle dish.
+        a is not acceptable to you.
+        If a menu is a noodle dish, we should eat it.
+        If something is not acceptable to you, we should not eat it.
         """
 
-QUESTION = """What camera should we buy?"""
+QUESTION = "What should we eat?"
 
 
 def public_result(result: dict[str, Any]) -> dict[str, Any]:
