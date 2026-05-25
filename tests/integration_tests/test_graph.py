@@ -14,6 +14,13 @@ async def test_agent_graph_compiles() -> None:
 async def test_agent_graph_uses_abc_flow_without_d_nodes() -> None:
     nodes = set(compiled_graph.get_graph().nodes)
 
-    assert {"validate_b_defeats_a", "validate_c_defeats_b", "validate_b_defeats_c"} <= nodes
+    assert {
+        "can_generate_main",
+        "validate_b_defeats_a",
+        "validate_c_defeats_b",
+        "validate_b_defeats_c",
+    } <= nodes
+    assert "p_main" not in nodes
+    assert "initialize" not in nodes
     assert "o_defeat_c" not in nodes
     assert "p_undercut_d" not in nodes

@@ -12,8 +12,9 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.agent.graphs.dialectic_workflow import State
-from src.agent.graphs.nodes import main_argument_prompt, p_main, thread_finding
-from src.agent.schema.outputs.schema import ArgumentRecord
+from src.agent.graphs.nodes import can_generate_main, thread_finding
+from src.agent.lib.prompt_build import build_main_argument_prompt
+from src.agent.schema.state import ArgumentRecord
 
 def_module = importlib.import_module("def")
 AG1_STANCE = def_module.AG1_STANCE
@@ -27,7 +28,6 @@ FIRST_MAIN_ARGUMENT = {
     "Argument": {
         "rules": [
             {
-                "id": "r1",
                 "antecedent": {
                     "strong": ["a is compact", "a is light"],
                     "weak_negation": [],
@@ -46,7 +46,6 @@ FIRST_REBUTTAL = {
     "Argument": {
         "rules": [
             {
-                "id": "r1",
                 "antecedent": {
                     "strong": ["a is out of stock"],
                     "weak_negation": [],
@@ -56,12 +55,6 @@ FIRST_REBUTTAL = {
         ],
         "Conc": ["We should not buy camera a."],
         "Ass": [],
-        "attack": "rebut",
-        "target": {
-            "argument_id": "arg-0b5d1ae606",
-            "field": "Conc",
-            "statement": "We should buy camera a.",
-        },
     },
 }
 
@@ -111,6 +104,8 @@ async def run() -> None:
         agent="AG2",
         target_id="arg-0b5d1ae606",
         attack="rebut",
+        target_field="Conc",
+        target_statement="We should buy camera a.",
     )
 
     base_state = State(
@@ -147,10 +142,10 @@ async def run() -> None:
 
     if args.print_prompt:
         print("[second_round_p_main_prompt]")
-        print(main_argument_prompt(state, "AG1"))
+        print(build_main_argument_prompt(state, "AG1"))
         print()
 
-    update = await p_main(state)
+    update = await can_generate_main(state)
     payload = _record_argument_payload(update.get("current_argument"))
 
     print("[second_round_p_main]")

@@ -26,6 +26,7 @@ INTERNAL_STATE_FIELDS = {
     "warrant_result",
     "generalization_result",
     "integration_result",
+    "defeat_relations",
     "b_defeats_a",
     "c_defeats_b",
     "b_defeats_c",

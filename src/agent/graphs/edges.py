@@ -3,10 +3,10 @@ from __future__ import annotations
 from typing import Any
 
 
-def route_after_p_main(state: Any) -> str:
+def route_after_can_generate_main(state: Any) -> str:
     if state.error:
         return "finish_with_error"
-    if state.current_argument is None:
+    if state.main_argument_available is False:
         return "finish"
     return "o_defeat_a"
 
@@ -66,7 +66,7 @@ def route_after_thread(state: Any) -> str:
         return "finish"
     if state.ag1_thread_status is not None and state.ag2_thread_status is not None:
         return "extract_warrants"
-    return "p_main"
+    return "can_generate_main"
 
 
 def route_after_synthesis_step(state: Any) -> str:
@@ -80,4 +80,4 @@ def route_after_add_integrated_rule(state: Any) -> str:
         return "finish_with_error"
     if state.debate_round > state.max_turns:
         return "finish"
-    return "p_main"
+    return "can_generate_main"

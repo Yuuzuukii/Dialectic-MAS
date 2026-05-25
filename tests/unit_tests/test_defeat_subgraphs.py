@@ -5,12 +5,19 @@ from types import SimpleNamespace
 
 import pytest
 
+from agent.graphs import nodes
 from agent.graphs.defeat_workflow import run_defeat_subgraph, run_strict_defeat_subgraph
-from agent.graphs.nodes import (
-    argument_body_json,
-    record,
+from agent.graphs.nodes import argument_body_json
+from agent.schema.outputs.llm import (
+    Antecedent,
+    ArgumentBody,
+    AttackMetadata,
+    DefeatingArgumentOutput,
+    GeneralizedCriterion,
+    Rule,
+    TargetReference,
 )
-from agent.schema.outputs.schema import ArgumentBody
+from agent.schema.state import ArgumentRecord
 
 pytestmark = pytest.mark.anyio
 
@@ -23,7 +30,13 @@ def argument(agent: str, conc: list[str], ass: list[str] | None = None, attack: 
             "Ass": ass or [],
         }
     }
-    return record(agent, "defeat", json.dumps(payload), attack=attack)  # type: ignore[arg-type]
+    return ArgumentRecord(
+        type="defeat",
+        argument=json.dumps(payload),
+        support=[],
+        agent=agent,  # type: ignore[arg-type]
+        attack=attack,  # type: ignore[arg-type]
+    )
 
 
 async def test_rebut_defeats_when_target_side_cannot_undercut() -> None:
@@ -71,8 +84,8 @@ async def test_rebut_does_not_defeat_when_target_side_undercuts() -> None:
 
 
 async def test_undercut_defeats_when_valid() -> None:
-    attacker = argument("AG2", ["stock evidence exists"], attack="undercut")
-    target = argument("AG1", ["We should buy a"], ["no evidence of stock"])
+    attacker = argument("AG2", ["a is not available"], attack="undercut")
+    target = argument("AG1", ["We should buy a"], ["a is available"])
 
     result = await run_defeat_subgraph(
         SimpleNamespace(),
@@ -86,9 +99,26 @@ async def test_undercut_defeats_when_valid() -> None:
     assert result.attack == "undercut"
 
 
+async def test_undercut_does_not_defeat_without_contradicting_assumption() -> None:
+    attacker = argument("AG2", ["b is expensive"], attack="undercut")
+    target = argument("AG1", ["We should buy a"], ["a is available"])
+
+    result = await run_defeat_subgraph(
+        SimpleNamespace(),
+        attacker,
+        target,
+        "AG1",
+        relation_context="test",
+    )
+
+    assert result.defeats is False
+    assert result.attack is None
+    assert result.relations[-1].valid is False
+
+
 async def test_strict_defeat_reuses_reverse_defeat_check() -> None:
-    c = argument("AG1", ["stock evidence exists"], attack="undercut")
-    b = argument("AG2", ["We should not buy a"], ["no evidence of stock"], attack="rebut")
+    c = argument("AG1", ["a is not available"], attack="undercut")
+    b = argument("AG2", ["We should not buy a"], ["a is available"], attack="rebut")
 
     result = await run_strict_defeat_subgraph(
         SimpleNamespace(),
@@ -125,8 +155,130 @@ async def test_strict_defeat_false_when_reverse_defeat_also_holds() -> None:
 
 
 async def test_serialized_argument_payload_does_not_include_attack_metadata() -> None:
-    payload = json.loads(argument_body_json(ArgumentBody(rules=[], Conc=["We should buy a"], Ass=[])))
+    payload = json.loads(argument_body_json(ArgumentBody(rules=[])))
 
     assert set(payload["Argument"]) == {"rules", "Conc", "Ass"}
     assert "attack" not in payload["Argument"]
     assert "target" not in payload["Argument"]
+
+
+async def test_llm_argument_body_only_requests_rules() -> None:
+    assert set(ArgumentBody.model_fields) == {"rules"}
+
+
+async def test_llm_schema_does_not_request_generated_identifiers() -> None:
+    assert "id" not in Rule.model_fields
+    assert "id" not in GeneralizedCriterion.model_fields
+
+
+async def test_defeating_output_requests_declared_attack_target() -> None:
+    assert "Attack" in DefeatingArgumentOutput.model_fields
+    assert set(AttackMetadata.model_fields) == {"method", "target"}
+    assert set(TargetReference.model_fields) == {"field", "statement"}
+
+
+async def test_generate_attack_infers_rebut_and_target_metadata(monkeypatch) -> None:
+    async def available_rebut(*args, **kwargs):
+        return DefeatingArgumentOutput(
+            can_defeat="YES",
+            Argument=ArgumentBody(
+                rules=[
+                    Rule(
+                        antecedent=Antecedent(strong=["a exceeds the budget"]),
+                        consequent="We should not buy a",
+                    )
+                ]
+            ),
+            Attack=AttackMetadata(
+                method="rebut",
+                target=TargetReference(field="Conc", statement="We should buy a"),
+            ),
+        )
+
+    monkeypatch.setattr(nodes, "invoke_agent_structured", available_rebut)
+    target = argument("AG1", ["We should buy a"])
+    state = SimpleNamespace(
+        current_proponent="AG1",
+        history=[],
+        agent1_stance="",
+        agent2_stance="a exceeds the budget.",
+    )
+
+    generated = await nodes.generate_attack(state, "AG2", target, purpose="defeat_main")
+
+    assert generated is not None
+    assert generated.attack == "rebut"
+    assert generated.target_id == target.id
+    assert generated.target_field == "Conc"
+    assert generated.target_statement == "We should buy a"
+
+
+async def test_generate_attack_rejects_declared_target_not_attacked_by_argument(monkeypatch) -> None:
+    async def invalid_target(*args, **kwargs):
+        return DefeatingArgumentOutput(
+            can_defeat="YES",
+            Argument=ArgumentBody(
+                rules=[
+                    Rule(
+                        antecedent=Antecedent(strong=["a exceeds the budget"]),
+                        consequent="We should not buy a",
+                    )
+                ]
+            ),
+            Attack=AttackMetadata(
+                method="undercut",
+                target=TargetReference(field="Ass", statement="a is available"),
+            ),
+        )
+
+    monkeypatch.setattr(nodes, "invoke_agent_structured", invalid_target)
+    target = argument("AG1", ["We should buy a"], ["a is available"])
+    state = SimpleNamespace(
+        current_proponent="AG1",
+        history=[],
+        agent1_stance="",
+        agent2_stance="a exceeds the budget.",
+    )
+
+    generated = await nodes.generate_attack(state, "AG2", target, purpose="defeat_main")
+
+    assert generated is None
+
+
+async def test_declared_rebut_is_not_reclassified_as_undercut() -> None:
+    attacker = argument("AG2", ["a is not available"], attack="rebut")
+    attacker.target_field = "Ass"
+    attacker.target_statement = "a is available"
+    target = argument("AG1", ["We should buy a"], ["a is available"])
+
+    result = await run_defeat_subgraph(
+        SimpleNamespace(),
+        attacker,
+        target,
+        "AG1",
+        relation_context="test",
+    )
+
+    assert result.defeats is False
+    assert result.attack is None
+
+
+async def test_serialized_argument_payload_derives_conc_and_ass_from_rules() -> None:
+    payload = json.loads(
+        argument_body_json(
+            ArgumentBody(
+                rules=[
+                    Rule(
+                        antecedent=Antecedent(
+                            strong=["a is compact"],
+                            weak_negation=["not unavailable(a)"],
+                        ),
+                        consequent="we should buy a",
+                    )
+                ]
+            )
+        )
+    )
+
+    assert payload["Argument"]["Conc"] == ["we should buy a"]
+    assert payload["Argument"]["Ass"] == ["not unavailable(a)"]

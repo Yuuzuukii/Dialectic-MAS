@@ -9,13 +9,21 @@ import pytest
 
 from agent.graphs import nodes
 from agent.graphs.defeat_workflow import DefeatSubgraphResult
+from agent.schema.outputs.llm import Antecedent, ArgumentBody, Rule, UndercutOutput
+from agent.schema.state import ArgumentRecord
 
 pytestmark = pytest.mark.anyio
 
 
 def argument(agent: str, conc: list[str], ass: list[str] | None = None, attack: str | None = None):
     payload = {"Argument": {"rules": [], "Conc": conc, "Ass": ass or []}}
-    return nodes.record(agent, "defeat", json.dumps(payload), attack=attack)  # type: ignore[arg-type]
+    return ArgumentRecord(
+        type="defeat",
+        argument=json.dumps(payload),
+        support=[],
+        agent=agent,  # type: ignore[arg-type]
+        attack=attack,  # type: ignore[arg-type]
+    )
 
 
 async def test_validate_b_exposes_generated_undercut_in_history_and_update(monkeypatch) -> None:
@@ -68,6 +76,42 @@ async def test_cli_payload_labels_undercut_and_keeps_it_in_finish_history() -> N
     )
     finish_payload = cli._node_payload("finish", {"dialogue_history": history})
 
-    assert validation_payload["attack"] == "undercut"
+    assert validation_payload["metadata"]["attack"] == "undercut"
     assert validation_payload["thread_status"] == "justified"
     assert finish_payload["dialogue_history"][-1]["attack"] == "undercut"
+
+
+async def test_undercut_output_does_not_request_attack_metadata() -> None:
+    assert "Attack" not in UndercutOutput.model_fields
+
+
+async def test_generate_undercut_assigns_known_attack_metadata(monkeypatch) -> None:
+    async def available_undercut(*args, **kwargs):
+        return UndercutOutput(
+            can_undercut="YES",
+            Argument=ArgumentBody(
+                rules=[
+                    Rule(
+                        antecedent=Antecedent(strong=["a is not available"]),
+                        consequent="a is not available",
+                    )
+                ]
+            ),
+        )
+
+    monkeypatch.setattr(nodes, "invoke_agent_structured", available_undercut)
+    target = argument("AG2", ["We should eat a"], ["a is available"], attack="rebut")
+    state = SimpleNamespace(
+        current_proponent="AG1",
+        history=[],
+        agent1_stance="a is not available.",
+        agent2_stance="",
+    )
+
+    generated = await nodes.generate_undercut(state, "AG1", target)
+
+    assert generated is not None
+    assert generated.attack == "undercut"
+    assert generated.target_id == target.id
+    assert generated.target_field == "Ass"
+    assert generated.target_statement == "a is available"

@@ -1,27 +1,19 @@
 from __future__ import annotations
 
-import json
 import re
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Literal
 
 try:
-    from ..schema.outputs.schema import (
-        AgentName,
-        ArgumentRecord,
-        AttackType,
-        DefeatRelation,
-    )
+    from ..schema.state import ArgumentRecord, DefeatRelation
+    from ..schema.types import AgentName, AttackType
 except ImportError:  # pragma: no cover - supports LangGraph file-path loading.
-    from schema.outputs.schema import (
-        AgentName,
-        ArgumentRecord,
-        AttackType,
-        DefeatRelation,
-    )
+    from schema.state import ArgumentRecord, DefeatRelation
+    from schema.types import AgentName, AttackType
 
 BlockerGenerator = Callable[[Any, AgentName, ArgumentRecord], Awaitable[ArgumentRecord | None]]
+TargetField = Literal["Conc", "Ass"]
 
 
 @dataclass
@@ -39,65 +31,11 @@ class StrictDefeatSubgraphResult:
     reverse: DefeatSubgraphResult | None
 
 
-def extract_json_from_argument(argument_text: str | None) -> dict[str, Any]:
-    if not argument_text:
-        return {}
-    try:
-        if "```json" in argument_text:
-            json_start = argument_text.find("```json") + 7
-            json_end = argument_text.find("```", json_start)
-            json_str = argument_text[json_start:json_end].strip()
-        elif "```" in argument_text:
-            json_start = argument_text.find("```") + 3
-            json_end = argument_text.find("```", json_start)
-            json_str = argument_text[json_start:json_end].strip()
-        else:
-            json_start = argument_text.find("{")
-            json_end = argument_text.rfind("}") + 1
-            json_str = argument_text[json_start:json_end].strip()
-        return json.loads(json_str)
-    except Exception:
-        return {}
-
-
-def argument_payload(record: ArgumentRecord | None) -> dict[str, Any]:
-    if record is None:
-        return {}
-    return extract_json_from_argument(record.argument)
-
-
-def argument_body(record: ArgumentRecord | None) -> dict[str, Any]:
-    data = argument_payload(record)
-    body = data.get("Argument", {})
-    return body if isinstance(body, dict) else {}
-
-
-def list_text(value: Any) -> list[str]:
-    if not isinstance(value, list):
-        return []
-    return [item.strip() for item in value if isinstance(item, str) and item.strip()]
-
-
-def conc(record: ArgumentRecord | None) -> list[str]:
-    return list_text(argument_body(record).get("Conc"))
-
-
-def ass(record: ArgumentRecord | None) -> list[str]:
-    body = argument_body(record)
-    items = list_text(body.get("Ass"))
-    if items:
-        return items
-    rules = body.get("rules", [])
-    if not isinstance(rules, list):
-        return []
-    flattened: list[str] = []
-    for rule in rules:
-        if not isinstance(rule, dict):
-            continue
-        antecedent = rule.get("antecedent", {})
-        if isinstance(antecedent, dict):
-            flattened.extend(list_text(antecedent.get("weak_negation")))
-    return flattened
+@dataclass(frozen=True)
+class AttackMatch:
+    method: AttackType
+    field: TargetField
+    statement: str
 
 
 def normalize_statement(item: str) -> str:
@@ -139,45 +77,34 @@ def directly_contradicts(left: str, right: str) -> bool:
     )
 
 
-def rebuts(attacker: ArgumentRecord, target: ArgumentRecord) -> bool:
-    return any(directly_contradicts(a, t) for a in conc(attacker) for t in conc(target))
-
-
-def undercuts(attacker: ArgumentRecord, target: ArgumentRecord) -> bool:
-    return bool(conc(attacker)) and bool(ass(target))
-
-
-def valid_declared_attack(attacker: ArgumentRecord, target: ArgumentRecord) -> bool:
-    if attacker.attack == "undercut":
-        return undercuts(attacker, target)
-    if attacker.attack == "rebut":
-        return rebuts(attacker, target)
-    return False
-
-
-def infer_attack(attacker: ArgumentRecord, target: ArgumentRecord) -> AttackType | None:
-    if attacker.attack == "undercut" and undercuts(attacker, target):
-        return "undercut"
-    if attacker.attack == "rebut" and rebuts(attacker, target):
-        return "rebut"
-    if rebuts(attacker, target):
-        return "rebut"
-    if undercuts(attacker, target):
-        return "undercut"
+def find_attack(attacker: ArgumentRecord, target: ArgumentRecord) -> AttackMatch | None:
+    methods: tuple[AttackType, ...] = (attacker.attack,) if attacker.attack else ("rebut", "undercut")
+    for method in methods:
+        field: TargetField = "Conc" if method == "rebut" else "Ass"
+        if attacker.target_field is not None and attacker.target_field != field:
+            continue
+        statements = target.conclusions if field == "Conc" else target.assumptions
+        for statement in statements:
+            if attacker.target_statement is not None and statement != attacker.target_statement:
+                continue
+            if any(directly_contradicts(conclusion, statement) for conclusion in attacker.conclusions):
+                return AttackMatch(method, field, statement)
     return None
 
 
 def relation(
     attacker: ArgumentRecord,
     target: ArgumentRecord,
+    match: AttackMatch | None,
     valid: bool,
     reason: str,
-    attack: AttackType | None = None,
 ) -> DefeatRelation:
     return DefeatRelation(
         attacker_id=attacker.id,
         target_id=target.id,
-        attack=attack or attacker.attack or "rebut",
+        attack=match.method if match else attacker.attack or "rebut",
+        target_field=match.field if match else attacker.target_field,
+        target_statement=match.statement if match else attacker.target_statement,
         valid=valid,
         reason=reason,
     )
@@ -194,22 +121,24 @@ async def run_defeat_subgraph(
     allow_generated_blocker: bool = True,
     persist_metadata: bool = True,
 ) -> DefeatSubgraphResult:
-    attack = infer_attack(attacker, target)
-    if attack is None:
+    match = find_attack(attacker, target)
+    if match is None:
         return DefeatSubgraphResult(
             defeats=False,
             attack=None,
-            relations=[relation(attacker, target, False, f"{relation_context}: no valid rebut or undercut")],
+            relations=[relation(attacker, target, None, False, f"{relation_context}: no valid rebut or undercut")],
         )
 
     if persist_metadata:
-        attacker.attack = attack
+        attacker.attack = match.method
         attacker.target_id = target.id
-    if attack == "undercut":
+        attacker.target_field = match.field
+        attacker.target_statement = match.statement
+    if match.method == "undercut":
         return DefeatSubgraphResult(
             defeats=True,
-            attack=attack,
-            relations=[relation(attacker, target, True, f"{relation_context}: undercut defeats target", attack)],
+            attack=match.method,
+            relations=[relation(attacker, target, match, True, f"{relation_context}: undercut defeats target")],
         )
 
     if allow_generated_blocker and blocker_generator is not None:
@@ -217,17 +146,23 @@ async def run_defeat_subgraph(
         if blocker is not None:
             return DefeatSubgraphResult(
                 defeats=False,
-                attack=attack,
+                attack=match.method,
                 blocker=blocker,
                 relations=[
-                    relation(blocker, attacker, True, f"{relation_context}: rebut blocked by undercut")
+                    relation(
+                        blocker,
+                        attacker,
+                        find_attack(blocker, attacker),
+                        True,
+                        f"{relation_context}: rebut blocked by undercut",
+                    )
                 ],
             )
 
     return DefeatSubgraphResult(
         defeats=True,
-        attack=attack,
-        relations=[relation(attacker, target, True, f"{relation_context}: rebut not blocked by undercut", attack)],
+        attack=match.method,
+        relations=[relation(attacker, target, match, True, f"{relation_context}: rebut not blocked by undercut")],
     )
 
 

@@ -1,128 +1,119 @@
 class PromptTemplates:
-    LEARNED_FINDINGS = """
-Previous discussion result:
-- Do not repeat the same conclusion with the same concrete premises or warrant.
-- Do not restate a previously defeated or unresolved main argument as if it were new.
-- If IntegratedRules are available, use them to build a revised argument instead of copying an earlier one.
-"""
+    MAIN_ARGUMENT_AVAILABILITY = """
+Issue:
+{issue}
 
-    MAIN_ARGUMENT = """
 Task:
-Decide whether you can construct one main argument for your stance on the Issue.
-If you can, set can_generate to YES and construct the Argument.
-If you cannot construct a valid main argument, set can_generate to NO and omit Argument.
+Construct an argument that presents your position on the Issue, if such an argument can be formed from your knowledge.
 
-Rules:
-- The final consequent must directly answer the Issue.
-- If IntegratedRules are available in this round, use at least one of them as the basis of the new main argument.
-- In a later round, do not rebuild the same argument from the same concrete premises as your previous main argument.
-- A later-round argument may reach the same conclusion only if it explicitly uses a new IntegratedRule to resolve the previous conflict.
+Output:
+- If an argument can be constructed, set can_generate to YES and include Argument.
+- If no such argument can be constructed, set can_generate to NO and omit Argument.
 
-Argument requirements:
-- Use ordered rules.
-- Each rule has antecedent.strong, antecedent.weak_negation, and consequent.
-- Conc collects the consequents of the rules.
-- Ass collects all weak_negation entries.
+Argument Constraints:
+- Argument is a finite sequence of rule instances.
+- Each rule may use established premises in its strong antecedent and assumptions in its weak_negation antecedent.
+- Every strong antecedent used in a non-initial rule must be derived as the consequent of an earlier rule in the same Argument.
+- Every consequent except the final consequent must be used to support a later rule in the same Argument.
+- Do not include two rules with the same consequent.
+- The final rule must derive the conclusion that expresses your position on the Issue.
+- Output only rules in Argument; the system derives Conc and Ass from those rules.
+
+{revision_context}
 """
+
 
     DEFEATING_ARGUMENT = """
 Task:
-Decide whether you can defeat the target argument. If yes, construct one defeating argument.
+Construct a defeating argument against the target argument, if possible.
 
-Available attacks:
-- rebut: your Conc directly contradicts a target Conc.
-- undercut: your Conc directly contradicts or invalidates a target Ass.
+Terms:
+- rebut: Conc(attacker) explicitly negates Conc(target).
+- undercut: Conc(attacker) explicitly negates Ass(target).
 
-Constraints:
-- Use only your stance, background knowledge, and the target argument.
-- Do not invent facts or properties.
-- A different conclusion is not a rebut unless it directly contradicts the target conclusion.
-- If the target has no Ass, undercut is impossible.
-- If you are the Proponent, do not repeat your previous move in this branch.
-- If no valid rebut or undercut is available, set can_defeat to NO and omit Argument.
-
-Output shape:
-- Put only rules, Conc, and Ass inside Argument.
-- Put attack and target only inside Attack.
-- Do not put attack or target inside Argument.
+Rules:
+- Use your stance, background knowledge, and the target argument.
+- In one Argument, later rules must be derived from earlier rules.
+- Do not include independent side conclusions.
+- Output only rules in Argument; the system derives Conc and Ass from those rules.
+- If can_defeat is YES, include Argument and Attack.
+- If can_defeat is NO, omit Argument and Attack.
+- In Attack, declare the method and the exact target Conc or Ass statement attacked by Argument.
 """
 
     COUNTER_ARGUMENT = """
 Task:
-Decide whether you can defeat the target argument. If yes, construct one counterargument.
+Construct a counterargument against the target argument, if possible.
 
-Available attacks:
-- rebut: your Conc directly contradicts a target Conc.
-- undercut: your Conc directly contradicts or invalidates a target Ass.
+Terms:
+- rebut: Conc(attacker) explicitly negates Conc(target).
+- undercut: Conc(attacker) explicitly negates Ass(target).
 
-Constraints:
-- Use only your stance, background knowledge, and the target argument.
-- Do not invent facts or properties.
-- A different conclusion is not a rebut unless it directly contradicts the target conclusion.
-- If the target has no Ass, undercut is impossible.
-- If you are the Proponent, do not repeat your previous move in this branch.
-- If no valid rebut or undercut is available, set can_defeat to NO and omit Argument.
-
-Output shape:
-- Put only rules, Conc, and Ass inside Argument.
-- Put attack and target only inside Attack.
-- Do not put attack or target inside Argument.
-- The counterargument may later become the target of another defeat check, so its Argument payload must have the same schema as a main argument.
+Rules:
+- Use your stance, background knowledge, and the target argument.
+- In one Argument, later rules must be derived from earlier rules.
+- Do not include independent side conclusions.
+- Output only rules in Argument; the system derives Conc and Ass from those rules.
+- Proponent non-repetition rule: do not repeat a previous Proponent argument.
+- Repetition means deriving the same conclusion from the same or substantially
+  same rules, premises, or warrant.
+- A counterargument that only restates the original main argument is not allowed.
+- If the only possible counterargument repeats a previous Proponent argument,
+  set can_defeat to NO.
+- If can_defeat is YES, include Argument and Attack.
+- If can_defeat is NO, omit Argument and Attack.
+- In Attack, declare the method and the exact target Conc or Ass statement attacked by Argument.
 """
 
     UNDERCUT_CHECK = """
 Task:
-Decide whether you can undercut the target argument. If yes, construct one undercutting argument.
+Construct an undercutting argument against the target argument, if possible.
 
-Undercut:
-- Your Conc must directly contradict or invalidate one target Ass.
-- If the target has no Ass, set can_undercut to NO and omit Argument.
-- Use only your stance, background knowledge, and the target argument.
-- If you are the Proponent, do not repeat your previous move in this branch.
+Term:
+- undercut: Conc(attacker) explicitly negates Ass(target).
 
-Output shape:
-- Put only rules, Conc, and Ass inside Argument.
-- Put attack and target only inside Attack.
-- Do not put attack or target inside Argument.
+Rules:
+- Use your stance, background knowledge, and the target argument.
+- In one Argument, later rules must be derived from earlier rules.
+- Do not include independent side conclusions.
+- Output only rules in Argument; the system derives Conc and Ass from those rules.
+- If can_undercut is YES, include Argument.
+- If can_undercut is NO, omit Argument.
+- The system already records the attack type and target; do not output attack metadata.
 """
 
     VALIDATE_ATTACK = """
 Task:
 Validate the declared attack.
 
-Rules:
-- rebut is valid only if attacker.Conc directly contradicts target.Conc.
-- undercut is valid only if attacker.Conc directly invalidates target.Ass.
-- A different conclusion is not a rebut unless it directly contradicts the target conclusion.
+Terms:
+- rebut: Conc(attacker) explicitly negates Conc(target).
+- undercut: Conc(attacker) explicitly negates Ass(target).
 """
 
     GENERALIZATION = """
 Task:
-Extract generalized criteria from the two warrants.
+Generalize the given warrants.
 
 Rules:
-- Output reusable criteria, not a concrete answer to the Issue.
-- Do not mention specific objects such as a, b, or c.
-- Preserve the intent of the original warrants.
-- Avoid placeholders such as "criterion 1" or "condition 1".
+- Output reusable criteria.
+- Do not mention issue-specific entities.
 """
 
     INTEGRATION = """
 Task:
-Integrate the generalized criteria into one reusable rule.
+Integrate the generalized criteria.
 
 Rules:
-- Do not output a concrete answer to the Issue.
-- The rule must be reusable in a later main argument.
-- Preserve the combined intent of the criteria.
-- Avoid placeholders such as "integrated condition", "concrete integrated conditions", and "generalized conclusion".
-- Spell out the actual generalized conditions and consequent.
+- Output one reusable rule.
+- The rule may be used in a later main argument.
+- Do not combine alternative criteria with OR.
+- Prefer a balanced criterion that can compare how well later arguments satisfy the criteria.
 """
 
 
 PROMPTS = {
-    "learned_findings": PromptTemplates.LEARNED_FINDINGS,
-    "main_argument": PromptTemplates.MAIN_ARGUMENT,
+    "main_argument_availability": PromptTemplates.MAIN_ARGUMENT_AVAILABILITY,
     "defeating_argument": PromptTemplates.DEFEATING_ARGUMENT,
     "counter_argument": PromptTemplates.COUNTER_ARGUMENT,
     "undercut_check": PromptTemplates.UNDERCUT_CHECK,

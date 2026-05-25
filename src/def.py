@@ -105,17 +105,17 @@ def _record_argument_payload(record: Any) -> Any:
 def _record_metadata(record: Any) -> dict[str, Any]:
     if record is None:
         return {}
-    if hasattr(record, "model_dump"):
-        data = record.model_dump()
-    elif isinstance(record, dict):
-        data = record
-    else:
-        return {}
-    return {
-        key: data[key]
-        for key in ("id", "type", "agent", "attack", "target_id", "status")
-        if data.get(key) is not None
-    }
+    result: dict[str, Any] = {}
+    for key in ("id", "type", "agent", "attack", "target_id", "target_field", "target_statement", "status"):
+        value = getattr(record, key, None)
+        if value is not None:
+            result[key] = value
+    if isinstance(record, dict):
+        for key in ("id", "type", "agent", "attack", "target_id", "target_field", "target_statement", "status"):
+            value = record.get(key)
+            if value is not None:
+                result[key] = value
+    return result
 
 
 def _jsonable(value: Any) -> Any:
@@ -155,15 +155,20 @@ def _node_payload(node_name: str, update: dict[str, Any]) -> Any:
     if node_name == "update_learned_findings":
         return _jsonable({k: v for k, v in update.items() if v is not None})
 
-    if node_name in {"ag1_main", "ag2_main", "p_main"}:
+    if node_name in {"ag1_main", "ag2_main", "can_generate_main"}:
         payload = _record_argument_payload(update.get("current_argument"))
         if payload is not None:
+            result = {"argument": payload}
+            metadata = _record_metadata(update.get("current_argument"))
+            if metadata:
+                result["metadata"] = metadata
+            if update.get("main_argument_available") is not None:
+                result["main_argument_available"] = update["main_argument_available"]
+            if update.get("main_argument_unavailable_reason"):
+                result["main_argument_unavailable_reason"] = update["main_argument_unavailable_reason"]
             if update.get("learned_findings"):
-                return {
-                    "argument": payload,
-                    "learned_findings": update["learned_findings"],
-                }
-            return payload
+                result["learned_findings"] = update["learned_findings"]
+            return result
 
     if node_name in {
         "ag2_attack_ag1",
@@ -185,7 +190,16 @@ def _node_payload(node_name: str, update: dict[str, Any]) -> Any:
                 if payload is not None:
                     break
         if payload is not None:
-            result = {"argument": payload, **_record_metadata(record)}
+            record = update.get("last_generated_argument")
+            if record is None:
+                for key in ("b_argument", "c_argument", "d_argument"):
+                    record = update.get(key)
+                    if record is not None:
+                        break
+            result = {"argument": payload}
+            metadata = _record_metadata(record)
+            if metadata:
+                result["metadata"] = metadata
             if update.get("current_thread_status"):
                 result["thread_status"] = update["current_thread_status"]
             if update.get("learned_findings"):
@@ -204,6 +218,19 @@ def _node_payload(node_name: str, update: dict[str, Any]) -> Any:
                     "learned_findings": update.get("learned_findings"),
                 }
             return {"can_defeat": "NO"}
+        validation_payload = _status_payload(update)
+        for key in (
+            "last_can_defeat",
+            "b_defeats_a",
+            "c_defeats_b",
+            "b_defeats_c",
+            "c_strictly_defeats_b",
+        ):
+            if update.get(key) is not None:
+                validation_payload[key] = update[key]
+        if validation_payload:
+            return validation_payload
+        return None
 
     if node_name in {"extract_warrants", "generalize", "integrate", "add_integrated_rule"}:
         if node_name == "add_integrated_rule":
@@ -237,15 +264,12 @@ def _node_payload(node_name: str, update: dict[str, Any]) -> Any:
             "ag1_thread_status": update.get("ag1_thread_status"),
             "ag2_thread_status": update.get("ag2_thread_status"),
             "integrated_rules": update.get("integrated_rules"),
-            "defeat_relations": _jsonable(update.get("defeat_relations")),
             "learned_findings": update.get("learned_findings"),
             "error": update.get("error"),
         }
 
-        public_update = {k: v for k, v in update.items() if k not in INTERNAL_STATE_FIELDS}
-        return _jsonable({k: v for k, v in public_update.items() if v is not None})
-
-    return _jsonable({k: v for k, v in update.items() if v is not None})
+    public_update = {k: v for k, v in update.items() if k not in INTERNAL_STATE_FIELDS}
+    return _jsonable({k: v for k, v in public_update.items() if v is not None})
 
 
 def _print_node_output(node_name: str, payload: Any) -> None:

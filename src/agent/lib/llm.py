@@ -1,7 +1,9 @@
 import os
-from dotenv import load_dotenv
+
 from typing import Optional, Type, TypeVar, cast
-from langchain_core.messages import BaseMessage
+
+from dotenv import load_dotenv
+from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
 from langchain_openai.chat_models import ChatOpenAI
 from pydantic import BaseModel, SecretStr
 
@@ -46,6 +48,20 @@ async def call_llm_messages_structured(messages: list[BaseMessage], schema: Type
     structured_model = model_client.with_structured_output(schema)
     response = await structured_model.ainvoke(messages)
     return cast(T, response)
+
+
+async def invoke_agent_structured(
+    system_prompt: str,
+    human_prompt: str,
+    schema: Type[T],
+    model: str | None = None,
+) -> T:
+    return await call_llm_messages_structured(
+        [SystemMessage(content=system_prompt), HumanMessage(content=human_prompt)],
+        schema,
+        model or os.getenv("MODEL", "gpt-5-mini"),
+    )
+
 
 async def call_llm(prompt: str, model: str) -> str:
     model_client = _chat_openai(model)

@@ -5,16 +5,12 @@ from typing import Any, Optional
 
 from langgraph.graph import END, START, StateGraph
 
-from ..schema.outputs.schema import (
-    AgentName,
-    ArgumentRecord,
-    DebateStage,
-    DefeatRelation,
-)
+from ..schema.state import ArgumentRecord, DefeatRelation
+from ..schema.types import AgentName, DebateStage
 from .edges import (
     route_after_add_integrated_rule,
+    route_after_can_generate_main,
     route_after_o_defeat_a,
-    route_after_p_main,
     route_after_p_counter_b,
     route_after_synthesis_step,
     route_after_thread,
@@ -24,15 +20,14 @@ from .edges import (
 )
 from .nodes import (
     add_integrated_rule,
+    can_generate_main,
     extract_warrants,
     finish,
     finish_with_error,
     generalize,
-    initialize,
     integrate,
     o_defeat_a,
     p_counter_b,
-    p_main,
     route_after_thread_node,
     validate_b_defeats_a,
     validate_b_defeats_c,
@@ -67,6 +62,8 @@ class State:
     ag2_main_argument: Optional[ArgumentRecord] = None
     ag1_current_main_id: Optional[str] = None
     ag2_current_main_id: Optional[str] = None
+    main_argument_available: Optional[bool] = None
+    main_argument_unavailable_reason: Optional[str] = None
     ag1_thread_status: Optional[str] = None
     ag2_thread_status: Optional[str] = None
     current_thread_status: Optional[str] = None
@@ -103,8 +100,7 @@ class State:
 
 graph = (
     StateGraph(State)
-    .add_node("initialize", initialize)
-    .add_node("p_main", p_main)
+    .add_node("can_generate_main", can_generate_main)
     .add_node("o_defeat_a", o_defeat_a)
     .add_node("validate_b_defeats_a", validate_b_defeats_a)
     .add_node("p_counter_b", p_counter_b)
@@ -117,11 +113,10 @@ graph = (
     .add_node("add_integrated_rule", add_integrated_rule)
     .add_node("finish", finish)
     .add_node("finish_with_error", finish_with_error)
-    .add_edge(START, "initialize")
-    .add_edge("initialize", "p_main")
+    .add_edge(START, "can_generate_main")
     .add_conditional_edges(
-        "p_main",
-        route_after_p_main,
+        "can_generate_main",
+        route_after_can_generate_main,
         {
             "o_defeat_a": "o_defeat_a",
             "finish": "finish",
@@ -176,7 +171,7 @@ graph = (
         "route_after_thread",
         route_after_thread,
         {
-            "p_main": "p_main",
+            "can_generate_main": "can_generate_main",
             "extract_warrants": "extract_warrants",
             "finish": "finish",
             "finish_with_error": "finish_with_error",
@@ -200,7 +195,11 @@ graph = (
     .add_conditional_edges(
         "add_integrated_rule",
         route_after_add_integrated_rule,
-        {"p_main": "p_main", "finish": "finish", "finish_with_error": "finish_with_error"},
+        {
+            "can_generate_main": "can_generate_main",
+            "finish": "finish",
+            "finish_with_error": "finish_with_error",
+        },
     )
     .add_edge("finish", END)
     .add_edge("finish_with_error", END)
