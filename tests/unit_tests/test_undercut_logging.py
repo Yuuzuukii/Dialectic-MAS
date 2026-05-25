@@ -7,9 +7,9 @@ from types import SimpleNamespace
 
 import pytest
 
-from agent.graphs import nodes
-from agent.graphs.defeat_workflow import DefeatSubgraphResult
-from agent.schema.outputs.llm import Antecedent, ArgumentBody, Rule, UndercutOutput
+from agent import arguments, nodes
+from agent.defeats import DefeatSubgraphResult
+from agent.schema.llm_outputs import Antecedent, ArgumentBody, Rule, UndercutOutput
 from agent.schema.state import ArgumentRecord
 
 pytestmark = pytest.mark.anyio
@@ -59,7 +59,7 @@ async def test_validate_b_exposes_generated_undercut_in_history_and_update(monke
 
 
 async def test_cli_payload_labels_undercut_and_keeps_it_in_finish_history() -> None:
-    module_path = Path(__file__).parents[2] / "src" / "def.py"
+    module_path = Path(__file__).parents[2] / "src" / "cli.py"
     spec = importlib.util.spec_from_file_location("dialogue_cli", module_path)
     assert spec is not None and spec.loader is not None
     cli = importlib.util.module_from_spec(spec)
@@ -99,7 +99,7 @@ async def test_generate_undercut_assigns_known_attack_metadata(monkeypatch) -> N
             ),
         )
 
-    monkeypatch.setattr(nodes, "invoke_agent_structured", available_undercut)
+    monkeypatch.setattr(arguments, "invoke_agent_structured", available_undercut)
     target = argument("AG2", ["We should eat a"], ["a is available"], attack="rebut")
     state = SimpleNamespace(
         current_proponent="AG1",
@@ -108,7 +108,7 @@ async def test_generate_undercut_assigns_known_attack_metadata(monkeypatch) -> N
         agent2_stance="",
     )
 
-    generated = await nodes.generate_undercut(state, "AG1", target)
+    generated = await arguments.generate_undercut(state, "AG1", target)
 
     assert generated is not None
     assert generated.attack == "undercut"

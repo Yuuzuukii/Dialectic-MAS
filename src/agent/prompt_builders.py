@@ -4,11 +4,11 @@ import json
 from typing import Any
 
 try:
-    from ..schema.state import ArgumentRecord
-    from ..schema.types import AgentName
-    from .prompt import PromptTemplates
+    from .prompts import PromptTemplates
+    from .schema.state import ArgumentRecord
+    from .schema.types import AgentName
 except ImportError:  # pragma: no cover - supports LangGraph file-path loading.
-    from lib.prompt import PromptTemplates
+    from prompts import PromptTemplates
     from schema.state import ArgumentRecord
     from schema.types import AgentName
 

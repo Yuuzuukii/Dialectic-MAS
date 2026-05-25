@@ -1,6 +1,6 @@
 from langgraph.pregel import Pregel
 
-from agent.graphs.dialectic_workflow import graph
+from agent.workflow import graph
 
 
 def test_placeholder() -> None:

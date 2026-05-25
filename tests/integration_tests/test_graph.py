@@ -1,7 +1,7 @@
 import pytest
 
 from agent import graph
-from agent.graphs.dialectic_workflow import graph as compiled_graph
+from agent.workflow import graph as compiled_graph
 
 pytestmark = pytest.mark.anyio
 

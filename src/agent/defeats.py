@@ -6,8 +6,8 @@ from dataclasses import dataclass
 from typing import Any, Literal
 
 try:
-    from ..schema.state import ArgumentRecord, DefeatRelation
-    from ..schema.types import AgentName, AttackType
+    from .schema.state import ArgumentRecord, DefeatRelation
+    from .schema.types import AgentName, AttackType
 except ImportError:  # pragma: no cover - supports LangGraph file-path loading.
     from schema.state import ArgumentRecord, DefeatRelation
     from schema.types import AgentName, AttackType

@@ -11,17 +11,18 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from src.agent.graphs.dialectic_workflow import State
-from src.agent.graphs.nodes import can_generate_main, thread_finding
-from src.agent.lib.prompt_build import build_main_argument_prompt
+from src.agent.workflow import State
+from src.agent.nodes import can_generate_main
+from src.agent.prompt_builders import build_main_argument_prompt
 from src.agent.schema.state import ArgumentRecord
+from src.agent.threads import thread_finding
 
-def_module = importlib.import_module("def")
-AG1_STANCE = def_module.AG1_STANCE
-AG2_STANCE = def_module.AG2_STANCE
-QUESTION = def_module.QUESTION
-_jsonable = def_module._jsonable
-_record_argument_payload = def_module._record_argument_payload
+cli = importlib.import_module("cli")
+AG1_STANCE = cli.AG1_STANCE
+AG2_STANCE = cli.AG2_STANCE
+QUESTION = cli.QUESTION
+_jsonable = cli._jsonable
+_record_argument_payload = cli._record_argument_payload
 
 
 FIRST_MAIN_ARGUMENT = {

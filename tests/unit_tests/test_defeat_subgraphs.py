@@ -5,10 +5,10 @@ from types import SimpleNamespace
 
 import pytest
 
-from agent.graphs import nodes
-from agent.graphs.defeat_workflow import run_defeat_subgraph, run_strict_defeat_subgraph
-from agent.graphs.nodes import argument_body_json
-from agent.schema.outputs.llm import (
+from agent import arguments
+from agent.arguments import argument_body_json
+from agent.defeats import run_defeat_subgraph, run_strict_defeat_subgraph
+from agent.schema.llm_outputs import (
     Antecedent,
     ArgumentBody,
     AttackMetadata,
@@ -195,7 +195,7 @@ async def test_generate_attack_infers_rebut_and_target_metadata(monkeypatch) -> 
             ),
         )
 
-    monkeypatch.setattr(nodes, "invoke_agent_structured", available_rebut)
+    monkeypatch.setattr(arguments, "invoke_agent_structured", available_rebut)
     target = argument("AG1", ["We should buy a"])
     state = SimpleNamespace(
         current_proponent="AG1",
@@ -204,7 +204,7 @@ async def test_generate_attack_infers_rebut_and_target_metadata(monkeypatch) -> 
         agent2_stance="a exceeds the budget.",
     )
 
-    generated = await nodes.generate_attack(state, "AG2", target, purpose="defeat_main")
+    generated = await arguments.generate_attack(state, "AG2", target, purpose="defeat_main")
 
     assert generated is not None
     assert generated.attack == "rebut"
@@ -231,7 +231,7 @@ async def test_generate_attack_rejects_declared_target_not_attacked_by_argument(
             ),
         )
 
-    monkeypatch.setattr(nodes, "invoke_agent_structured", invalid_target)
+    monkeypatch.setattr(arguments, "invoke_agent_structured", invalid_target)
     target = argument("AG1", ["We should buy a"], ["a is available"])
     state = SimpleNamespace(
         current_proponent="AG1",
@@ -240,7 +240,7 @@ async def test_generate_attack_rejects_declared_target_not_attacked_by_argument(
         agent2_stance="a exceeds the budget.",
     )
 
-    generated = await nodes.generate_attack(state, "AG2", target, purpose="defeat_main")
+    generated = await arguments.generate_attack(state, "AG2", target, purpose="defeat_main")
 
     assert generated is None
 

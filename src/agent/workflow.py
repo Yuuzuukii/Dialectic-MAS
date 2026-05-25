@@ -5,8 +5,8 @@ from typing import Any, Optional
 
 from langgraph.graph import END, START, StateGraph
 
-from ..schema.state import ArgumentRecord, DefeatRelation
-from ..schema.types import AgentName, DebateStage
+from .schema.state import ArgumentRecord, DefeatRelation
+from .schema.types import AgentName, DebateStage
 from .edges import (
     route_after_add_integrated_rule,
     route_after_can_generate_main,

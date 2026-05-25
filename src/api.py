@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, Field, field_validator
 
-from src.agent.graphs.dialectic_workflow import State, graph
+from src.agent.workflow import State, graph
 
 app = FastAPI()
 

@@ -4,7 +4,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from ..types import AttackType
+from .types import AttackType
 
 
 # LLM出力：主張（主張可能 + 理由 + Argumentのメイン出力）

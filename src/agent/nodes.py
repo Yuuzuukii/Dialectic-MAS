@@ -1,239 +1,60 @@
+"""Graph node functions for the dialectical workflow."""
+
 from __future__ import annotations
 
 import json
-import os
 from typing import Any
 
-from dotenv import load_dotenv
-from langchain_core.messages import HumanMessage, SystemMessage
-
 try:
-    from ..lib.llm import call_llm_messages_structured
-    from ..lib.prompt_build import (
-        build_attack_prompt,
+    from .arguments import (
+        agent_stance,
+        argument_body_json,
+        generate_attack,
+        generate_undercut,
+    )
+    from .defeats import run_defeat_subgraph, run_strict_defeat_subgraph
+    from .llm import invoke_agent_structured
+    from .prompt_builders import (
         build_generalization_prompt,
         build_integration_prompt,
         build_main_argument_prompt,
-        build_undercut_prompt,
     )
-    from ..schema.outputs.llm import (
-        DefeatingArgumentOutput,
+    from .schema.llm_outputs import (
         GeneralizationOutput,
         IntegrationOutput,
         MainArgumentAvailabilityOutput,
-        UndercutOutput,
     )
-    from ..schema.state import ArgumentRecord, parse_serialized_payload
-    from ..schema.types import AgentName
-    from .defeat_workflow import (
-        find_attack,
-        run_defeat_subgraph,
-        run_strict_defeat_subgraph,
-    )
+    from .schema.state import ArgumentRecord, parse_serialized_payload
+    from .threads import complete_thread, dialogue_history
 except ImportError:  # pragma: no cover - supports LangGraph file-path loading.
-    from graphs.defeat_workflow import (
-        find_attack,
-        run_defeat_subgraph,
-        run_strict_defeat_subgraph,
+    from arguments import (
+        agent_stance,
+        argument_body_json,
+        generate_attack,
+        generate_undercut,
     )
-    from lib.llm import call_llm_messages_structured
-    from lib.prompt_build import (
-        build_attack_prompt,
+    from defeats import run_defeat_subgraph, run_strict_defeat_subgraph
+    from llm import invoke_agent_structured
+    from prompt_builders import (
         build_generalization_prompt,
         build_integration_prompt,
         build_main_argument_prompt,
-        build_undercut_prompt,
     )
-    from schema.outputs.llm import (
-        DefeatingArgumentOutput,
+    from schema.llm_outputs import (
         GeneralizationOutput,
         IntegrationOutput,
         MainArgumentAvailabilityOutput,
-        UndercutOutput,
     )
     from schema.state import ArgumentRecord, parse_serialized_payload
-    from schema.types import AgentName
-
-load_dotenv()
-
-MODEL = os.getenv("MODEL", "gpt-5-mini")
-
-
-def agent_stance(state: Any, agent: AgentName) -> str:
-    return state.agent1_stance if agent == "AG1" else state.agent2_stance
-
-
-def dialogue_history(history: list[ArgumentRecord]) -> list[dict[str, Any]]:
-    return [arg.to_dialogue_dict() for arg in history]
-
-async def invoke_agent_structured(system_prompt: str, human_prompt: str, schema: type[Any]) -> Any:
-    return await call_llm_messages_structured(
-        [SystemMessage(content=system_prompt), HumanMessage(content=human_prompt)],
-        schema,
-        MODEL,
-    )
-
-# Conc, Assを付け足す関数
-def argument_body_json(argument: Any) -> str:
-    body = argument.model_dump(exclude_none=True)
-    rules = body.get("rules", [])
-    conc_items: list[str] = []
-    ass_items: list[str] = []
-    if isinstance(rules, list):
-        for rule in rules:
-            if not isinstance(rule, dict):
-                continue
-            consequent = rule.get("consequent")
-            if isinstance(consequent, str) and consequent.strip():
-                conc_items.append(consequent.strip())
-            antecedent = rule.get("antecedent", {})
-            if not isinstance(antecedent, dict):
-                continue
-            weak_negation = antecedent.get("weak_negation", [])
-            if isinstance(weak_negation, list):
-                ass_items.extend(
-                    item.strip()
-                    for item in weak_negation
-                    if isinstance(item, str) and item.strip()
-                )
-    body["Conc"] = conc_items
-    body["Ass"] = ass_items
-    return json.dumps({"Argument": body}, ensure_ascii=False, indent=2)
-
-
-def thread_finding(state: Any, status: str) -> str | None:
-    if state.current_argument is None or state.b_argument is None:
-        return None
-    main_conc = "; ".join(state.current_argument.conclusions) or "the previous main argument"
-    defeat_conc = "; ".join(state.b_argument.conclusions) or "the defeating argument"
-    if status == "overruled":
-        return (
-            f"{state.current_proponent}'s previous main argument ({main_conc}) was overruled by "
-            f"{state.current_opponent}'s {state.b_argument.attack} ({defeat_conc}). "
-            "Do not repeat the same main argument unless this defeating reason is resolved."
-        )
-    if status == "defensible":
-        return (
-            f"{state.current_proponent}'s previous main argument ({main_conc}) remained defensible, "
-            f"with an unresolved conflict against {state.current_opponent}'s {state.b_argument.attack} ({defeat_conc}). "
-            "Do not repeat the same main argument as if the conflict were resolved."
-        )
-    return None
-
-# 反論生成
-async def generate_attack(
-    state: Any,
-    attacker: AgentName,
-    target: ArgumentRecord,
-    *,
-    purpose: str,
-) -> ArgumentRecord | None:
-    prompt = build_attack_prompt(state, attacker, target, purpose=purpose)
-    output = await invoke_agent_structured(agent_stance(state, attacker), prompt, DefeatingArgumentOutput)
-    if output.can_defeat != "YES" or output.Argument is None or output.Attack is None:
-        return None
-    response = argument_body_json(output.Argument)
-    generated = ArgumentRecord(
-        type="counter" if purpose == "defend_main" else "defeat",
-        argument=response,
-        support=[],
-        agent=attacker,
-        attack=output.Attack.method,
-        target_id=target.id,
-        target_field=output.Attack.target.field,
-        target_statement=output.Attack.target.statement,
-    )
-    if find_attack(generated, target) is None:
-        return None
-    return generated
-
-# undercut生成
-async def generate_undercut(
-    state: Any,
-    attacker: AgentName,
-    target: ArgumentRecord,
-) -> ArgumentRecord | None:
-    if not target.assumptions:
-        return None
-    prompt = build_undercut_prompt(state, attacker, target)
-    output = await invoke_agent_structured(agent_stance(state, attacker), prompt, UndercutOutput)
-    if output.can_undercut != "YES" or output.Argument is None:
-        return None
-    response = argument_body_json(output.Argument)
-    generated = ArgumentRecord(
-        type="defeat",
-        argument=response,
-        support=[],
-        agent=attacker,
-        attack="undercut",
-        target_id=target.id,
-    )
-    match = find_attack(generated, target)
-    if match is None:
-        return None
-    generated.target_field = match.field
-    generated.target_statement = match.statement
-    return generated
-
-
-def complete_thread(state: Any, status: str, extra_history: list[ArgumentRecord] | None = None) -> dict[str, Any]:
-    key = "ag1" if state.current_proponent == "AG1" else "ag2"
-    history = [*state.history]
-    if extra_history:
-        history.extend(extra_history)
-
-    update: dict[str, Any] = {
-        "current_thread_status": status,
-        "history": history,
-        "dialogue_history": dialogue_history(history),
-    }
-    finding = thread_finding(state, status)
-    if finding is not None:
-        learned_findings = [*state.learned_findings]
-        if finding not in learned_findings:
-            learned_findings.append(finding)
-        update["learned_findings"] = learned_findings
-    if key == "ag1":
-        update["ag1_thread_status"] = status
-    else:
-        update["ag2_thread_status"] = status
-
-    if status == "justified":
-        update["justified_argument"] = state.current_argument.argument if state.current_argument else None
-        update["justification_status"] = f"{key}_main_justified"
-    elif status == "overruled":
-        update["justification_status"] = f"{key}_main_overruled"
-
-    if status in {"defensible", "overruled"}:
-        if key == "ag1" and state.ag2_thread_status is None:
-            update["current_proponent"] = "AG2"
-            update["current_opponent"] = "AG1"
-            update["active_agent"] = "AG2"
-            update["current_argument"] = None
-            update["b_argument"] = None
-            update["c_argument"] = None
-            update["d_argument"] = None
-            update["b_argument_id"] = None
-            update["c_argument_id"] = None
-            update["d_argument_id"] = None
-            update["b_defeats_a"] = None
-            update["c_defeats_b"] = None
-            update["b_defeats_c"] = None
-            update["c_strictly_defeats_b"] = None
-            update["debate_stage"] = "ag2_main_thread"
-        else:
-            update["current_proponent"] = state.current_proponent
-            update["current_opponent"] = state.current_opponent
-    return update
+    from threads import complete_thread, dialogue_history
 
 
 # 主張ノード
 async def can_generate_main(state: Any) -> dict[str, Any]:
     agent = state.current_proponent
-    prompt = build_main_argument_prompt(state, agent)
     output = await invoke_agent_structured(
         agent_stance(state, agent),
-        prompt,
+        build_main_argument_prompt(state, agent),
         MainArgumentAvailabilityOutput,
     )
     can_generate = output.can_generate == "YES"
@@ -252,8 +73,12 @@ async def can_generate_main(state: Any) -> dict[str, Any]:
             "main_argument_unavailable_reason": output.reason,
         }
 
-    response = argument_body_json(output.Argument)
-    argument = ArgumentRecord(type="main", argument=response, support=[], agent=agent)
+    argument = ArgumentRecord(
+        type="main",
+        argument=argument_body_json(output.Argument),
+        support=[],
+        agent=agent,
+    )
     history = [*state.history, argument]
     update.update(
         {
@@ -294,6 +119,7 @@ async def can_generate_main(state: Any) -> dict[str, Any]:
         )
     return update
 
+
 # 反論ノード
 async def o_defeat_a(state: Any) -> dict[str, Any]:
     if state.current_argument is None:
@@ -316,6 +142,7 @@ async def o_defeat_a(state: Any) -> dict[str, Any]:
         "history": history,
         "dialogue_history": dialogue_history(history),
     }
+
 
 # defeat確認ノード
 async def validate_b_defeats_a(state: Any) -> dict[str, Any]:
@@ -343,6 +170,7 @@ async def validate_b_defeats_a(state: Any) -> dict[str, Any]:
         return update
     return {"defeat_relations": relations, "last_can_defeat": True, "b_defeats_a": True}
 
+
 # 主張を守るためのカウンターノード
 async def p_counter_b(state: Any) -> dict[str, Any]:
     if state.b_argument is None:
@@ -364,6 +192,7 @@ async def p_counter_b(state: Any) -> dict[str, Any]:
         "history": history,
         "dialogue_history": dialogue_history(history),
     }
+
 
 # カウンターのdefeat確認ノード
 async def validate_c_defeats_b(state: Any) -> dict[str, Any]:
@@ -390,6 +219,7 @@ async def validate_c_defeats_b(state: Any) -> dict[str, Any]:
         update["last_can_defeat"] = False
         return update
     return {"defeat_relations": relations, "last_can_defeat": True, "c_defeats_b": True}
+
 
 # カウンターのstrictly defeat確認ノード
 async def validate_b_defeats_c(state: Any) -> dict[str, Any]:
@@ -419,6 +249,7 @@ async def validate_b_defeats_c(state: Any) -> dict[str, Any]:
         update["c_strictly_defeats_b"] = False
     update["defeat_relations"] = relations
     return update
+
 
 # warrant抽出ノード
 async def extract_warrants(state: Any) -> dict[str, Any]:
@@ -451,6 +282,7 @@ async def extract_warrants(state: Any) -> dict[str, Any]:
     except Exception as exc:
         return {"error": f"Warrant抽出中にエラーが発生しました: {exc}"}
 
+
 # 汎化ノード
 async def generalize(state: Any) -> dict[str, Any]:
     if state.warrant_result is None:
@@ -462,6 +294,7 @@ async def generalize(state: Any) -> dict[str, Any]:
     )
     response = json.dumps(output.model_dump(exclude_none=True), ensure_ascii=False, indent=2)
     return {"generalization_result": response}
+
 
 # 統合ノード
 async def integrate(state: Any) -> dict[str, Any]:
@@ -478,7 +311,7 @@ async def integrate(state: Any) -> dict[str, Any]:
         return {"error": "統合結果から新しいルールを抽出できませんでした"}
     return {"integration_result": response, "integrated_rule": rule}
 
-# 合意核構築ノード
+
 def extract_integrated_rule(integration_result: str) -> str | None:
     data = parse_serialized_payload(integration_result)
     argument = data.get("Argument", {})
@@ -498,6 +331,8 @@ def extract_integrated_rule(integration_result: str) -> str | None:
         return rule.strip()
     return None
 
+
+# 合意核構築ノード
 async def add_integrated_rule(state: Any) -> dict[str, Any]:
     if not state.integrated_rule:
         return {"error": "No integrated rule to add."}
@@ -533,6 +368,7 @@ async def add_integrated_rule(state: Any) -> dict[str, Any]:
 
 async def route_after_thread_node(state: Any) -> dict[str, Any]:
     return {}
+
 
 async def finish(state: Any) -> dict[str, Any]:
     return {

@@ -5,11 +5,11 @@ from types import SimpleNamespace
 
 import pytest
 
-from agent.graphs.dialectic_workflow import State
-from agent.graphs.edges import route_after_can_generate_main
-from agent.graphs.nodes import can_generate_main
-from agent.lib.prompt_build import build_main_argument_prompt
-from agent.schema.outputs.llm import ArgumentBody
+from agent.edges import route_after_can_generate_main
+from agent.workflow import State
+from agent.nodes import can_generate_main
+from agent.prompt_builders import build_main_argument_prompt
+from agent.schema.llm_outputs import ArgumentBody
 from agent.schema.state import ArgumentRecord
 
 pytestmark = pytest.mark.anyio
@@ -86,7 +86,7 @@ async def test_can_generate_main_finishes_when_no_new_main_argument(monkeypatch)
             reason="All available main arguments were already presented.",
         )
 
-    monkeypatch.setattr("agent.graphs.nodes.invoke_agent_structured", no_new_argument)
+    monkeypatch.setattr("agent.nodes.invoke_agent_structured", no_new_argument)
 
     state = State(
         question="What camera should we buy?",
@@ -115,7 +115,7 @@ async def test_can_generate_main_routes_to_generation_when_available(monkeypatch
             Argument=ArgumentBody(rules=[]),
         )
 
-    monkeypatch.setattr("agent.graphs.nodes.invoke_agent_structured", has_new_argument)
+    monkeypatch.setattr("agent.nodes.invoke_agent_structured", has_new_argument)
 
     state = State(
         question="What camera should we buy?",
@@ -142,7 +142,7 @@ async def test_can_generate_main_errors_when_yes_without_argument(monkeypatch) -
             Argument=None,
         )
 
-    monkeypatch.setattr("agent.graphs.nodes.invoke_agent_structured", missing_argument)
+    monkeypatch.setattr("agent.nodes.invoke_agent_structured", missing_argument)
 
     state = State(
         question="What camera should we buy?",

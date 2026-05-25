@@ -313,7 +313,7 @@ async def run() -> None:
     print(json.dumps({"status": "loading_graph"}, ensure_ascii=False, indent=2), flush=True)
     print(flush=True)
 
-    from src.agent.graphs.dialectic_workflow import State, graph
+    from src.agent.workflow import State, graph
 
     file_input = _load_input(args.input)
     cli_input = {

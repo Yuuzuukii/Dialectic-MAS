@@ -1,9 +1,11 @@
+"""Thread bookkeeping helpers used by graph nodes."""
+
 from __future__ import annotations
 
 from typing import Any
 
 try:
-    from ..schema.state import ArgumentRecord
+    from .schema.state import ArgumentRecord
 except ImportError:  # pragma: no cover - supports LangGraph file-path loading.
     from schema.state import ArgumentRecord
 

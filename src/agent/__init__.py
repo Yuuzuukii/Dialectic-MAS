@@ -1,4 +1,4 @@
-"""New LangGraph Agent."""
+"""Dialect-MAS agent package."""
 
 __all__ = ["graph"]
 
@@ -6,7 +6,5 @@ __all__ = ["graph"]
 def __getattr__(name: str):
     if name != "graph":
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-
-    from .graphs.dialectic_workflow import graph
-
+    from .workflow import graph
     return graph
