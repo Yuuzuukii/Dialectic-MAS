@@ -6,14 +6,12 @@ import json
 from typing import Any
 
 try:
-    from .defeats import find_attack
     from .llm import invoke_agent_structured
     from .prompt_builders import build_attack_prompt, build_undercut_prompt
     from .schema.llm_outputs import ArgumentBody, DefeatingArgumentOutput, UndercutOutput
     from .schema.state import ArgumentRecord
     from .schema.types import AgentName
 except ImportError:  # pragma: no cover - supports LangGraph file-path loading.
-    from defeats import find_attack
     from llm import invoke_agent_structured
     from prompt_builders import build_attack_prompt, build_undercut_prompt
     from schema.llm_outputs import ArgumentBody, DefeatingArgumentOutput, UndercutOutput
@@ -62,7 +60,7 @@ async def generate_attack(
     )
     if output.can_defeat != "YES" or output.Argument is None or output.Attack is None:
         return None
-    generated = ArgumentRecord(
+    return ArgumentRecord(
         type="counter" if purpose == "defend_main" else "defeat",
         argument=argument_body_json(output.Argument),
         support=[],
@@ -72,7 +70,6 @@ async def generate_attack(
         target_field=output.Attack.target.field,
         target_statement=output.Attack.target.statement,
     )
-    return generated if find_attack(generated, target) is not None else None
 
 
 async def generate_undercut(
@@ -89,17 +86,12 @@ async def generate_undercut(
     )
     if output.can_undercut != "YES" or output.Argument is None:
         return None
-    generated = ArgumentRecord(
+    return ArgumentRecord(
         type="defeat",
         argument=argument_body_json(output.Argument),
         support=[],
         agent=attacker,
         attack="undercut",
         target_id=target.id,
+        target_field="Ass",
     )
-    match = find_attack(generated, target)
-    if match is None:
-        return None
-    generated.target_field = match.field
-    generated.target_statement = match.statement
-    return generated

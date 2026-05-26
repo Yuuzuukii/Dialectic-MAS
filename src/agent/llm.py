@@ -59,7 +59,7 @@ async def invoke_agent_structured(
     return await call_llm_messages_structured(
         [SystemMessage(content=system_prompt), HumanMessage(content=human_prompt)],
         schema,
-        model or os.getenv("MODEL", "gpt-5-mini"),
+        model or os.getenv("MODEL", "gpt-5.4-nano"),
     )
 
 

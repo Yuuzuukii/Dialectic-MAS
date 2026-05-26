@@ -104,9 +104,14 @@ class TargetReference(BaseModel):
 class GeneralizedCriterion(BaseModel):
     strong: list[str] = Field(default_factory=list, description="Generalized conditions derived from warrants.")
     consequent: str = Field(description="Generalized conclusion derived from the conditions.")
+    principle: str = Field(description="The underlying value or principle that makes this criterion rationally compelling (e.g. 'portability', 'practical performance').")
 
 # 統合出力の要素
 class IntegrationBody(BaseModel):
-    strong: list[str] = Field(default_factory=list, description="Integrated generalized conditions.")
     consequent: str = Field(description="Integrated generalized conclusion.")
-    rule: str = Field(description="Reusable rule added to integrated_rules for the next dialogue round.")
+    rule: str = Field(
+        description=(
+            "A single reusable rule formed by taking every 'strong' condition from all generalized criteria "
+            "and combining them with OR as alternative sufficient conditions leading to the consequent. "
+        )
+    )

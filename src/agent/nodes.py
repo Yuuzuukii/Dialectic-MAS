@@ -49,8 +49,8 @@ except ImportError:  # pragma: no cover - supports LangGraph file-path loading.
     from threads import complete_thread, dialogue_history
 
 
-# 主張ノード
 async def can_generate_main(state: Any) -> dict[str, Any]:
+    """Proponent が新しい主張 (A) を生成できるか判定し、可能なら生成して返す。"""
     agent = state.current_proponent
     output = await invoke_agent_structured(
         agent_stance(state, agent),
@@ -120,8 +120,8 @@ async def can_generate_main(state: Any) -> dict[str, Any]:
     return update
 
 
-# 反論ノード
 async def o_defeat_a(state: Any) -> dict[str, Any]:
+    """Opponent が Proponent の主張 A を攻撃する論証 (B) を生成する。"""
     if state.current_argument is None:
         return {"error": "No current main argument to attack."}
     argument = await generate_attack(
@@ -144,8 +144,8 @@ async def o_defeat_a(state: Any) -> dict[str, Any]:
     }
 
 
-# defeat確認ノード
 async def validate_b_defeats_a(state: Any) -> dict[str, Any]:
+    """B が A を defeat するか検証する。防御側の undercut があれば defeat を阻止する。"""
     if state.current_argument is None or state.b_argument is None:
         return {"error": "Cannot validate B defeats A without A and B."}
     result = await run_defeat_subgraph(
@@ -171,8 +171,8 @@ async def validate_b_defeats_a(state: Any) -> dict[str, Any]:
     return {"defeat_relations": relations, "last_can_defeat": True, "b_defeats_a": True}
 
 
-# 主張を守るためのカウンターノード
 async def p_counter_b(state: Any) -> dict[str, Any]:
+    """Proponent が Opponent の攻撃 B に対してカウンター論証 (C) を生成する。"""
     if state.b_argument is None:
         return {"error": "No B argument to counter."}
     argument = await generate_attack(
@@ -194,8 +194,8 @@ async def p_counter_b(state: Any) -> dict[str, Any]:
     }
 
 
-# カウンターのdefeat確認ノード
 async def validate_c_defeats_b(state: Any) -> dict[str, Any]:
+    """C が B を defeat するか検証する。defeat できなければ Proponent の主張は overruled。"""
     if state.b_argument is None or state.c_argument is None:
         return {"error": "Cannot validate C defeats B without B and C."}
     result = await run_defeat_subgraph(
@@ -221,8 +221,8 @@ async def validate_c_defeats_b(state: Any) -> dict[str, Any]:
     return {"defeat_relations": relations, "last_can_defeat": True, "c_defeats_b": True}
 
 
-# カウンターのstrictly defeat確認ノード
 async def validate_b_defeats_c(state: Any) -> dict[str, Any]:
+    """C が B を strictly defeat するか検証する。B が C を逆 defeat できなければ Proponent の主張は justified。"""
     if state.b_argument is None or state.c_argument is None:
         return {"error": "Cannot validate B defeats C without B and C."}
     result = await run_strict_defeat_subgraph(
@@ -251,8 +251,8 @@ async def validate_b_defeats_c(state: Any) -> dict[str, Any]:
     return update
 
 
-# warrant抽出ノード
 async def extract_warrants(state: Any) -> dict[str, Any]:
+    """AG1 と AG2 の主張それぞれの最終ルール (warrant) を抽出する。"""
     if state.ag1_main_argument is None or state.ag2_main_argument is None:
         return {"error": "AG1またはAG2のmain argumentが見つかりません"}
     try:
@@ -283,21 +283,24 @@ async def extract_warrants(state: Any) -> dict[str, Any]:
         return {"error": f"Warrant抽出中にエラーが発生しました: {exc}"}
 
 
-# 汎化ノード
 async def generalize(state: Any) -> dict[str, Any]:
+    """両エージェントの warrant を汎化し、再利用可能な基準を導出する。"""
     if state.warrant_result is None:
         return {"error": "Cannot generalize without warrants."}
     output = await invoke_agent_structured(
         state.agent1_stance,
-        build_generalization_prompt(state.warrant_result),
+        build_generalization_prompt(
+            state.warrant_result,
+            json.dumps(state.dialogue_history, ensure_ascii=False, indent=2),
+        ),
         GeneralizationOutput,
     )
     response = json.dumps(output.model_dump(exclude_none=True), ensure_ascii=False, indent=2)
     return {"generalization_result": response}
 
 
-# 統合ノード
 async def integrate(state: Any) -> dict[str, Any]:
+    """汎化された基準を一つの統合ルールにまとめ、次ラウンドで再利用できる形にする。"""
     if state.warrant_result is None or state.generalization_result is None:
         return {"error": "Cannot integrate without warrants and generalization."}
     output = await invoke_agent_structured(
@@ -315,8 +318,7 @@ async def integrate(state: Any) -> dict[str, Any]:
 def extract_integrated_rule(integration_result: str) -> str | None:
     data = parse_serialized_payload(integration_result)
     argument = data.get("Argument", {})
-    integration = argument.get("Integration", {}) if isinstance(argument, dict) else {}
-    rule = integration.get("rule") if isinstance(integration, dict) else None
+    rule = argument.get("rule") if isinstance(argument, dict) else None
     if isinstance(rule, str) and rule.strip():
         normalized = " ".join(rule.lower().split())
         placeholder_phrases = (
@@ -331,9 +333,8 @@ def extract_integrated_rule(integration_result: str) -> str | None:
         return rule.strip()
     return None
 
-
-# 合意核構築ノード
 async def add_integrated_rule(state: Any) -> dict[str, Any]:
+    """統合ルールを integrated_rules に追加し、次の debate round の初期状態にリセットする。"""
     if not state.integrated_rule:
         return {"error": "No integrated rule to add."}
     rules = [*state.integrated_rules]
@@ -367,10 +368,12 @@ async def add_integrated_rule(state: Any) -> dict[str, Any]:
 
 
 async def route_after_thread_node(state: Any) -> dict[str, Any]:
+    """スレッド完了後の条件分岐エッジが参照するランディングノード。本体は空。"""
     return {}
 
 
 async def finish(state: Any) -> dict[str, Any]:
+    """議論を正常終了し、対話履歴・正当化結果・統合ルールを最終状態として返す。"""
     return {
         "dialogue_history": dialogue_history(state.history),
         "justified_argument": state.justified_argument,
@@ -388,6 +391,7 @@ async def finish(state: Any) -> dict[str, Any]:
 
 
 async def finish_with_error(state: Any) -> dict[str, Any]:
+    """エラー情報を付与した状態で議論を終了する。"""
     result = await finish(state)
     result["error"] = state.error
     return result

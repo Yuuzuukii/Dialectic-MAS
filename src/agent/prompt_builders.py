@@ -17,24 +17,38 @@ def _main_argument_revision_context(state: Any, agent: AgentName) -> str:
     rules = getattr(state, "integrated_rules", [])
     if not rules:
         return ""
-    previous = [
+    previous_mains = [
         arg for arg in state.history if arg.type == "main" and arg.agent == agent
     ]
-    previous_payload = previous[-1].payload if previous else None
+    previous = previous_mains[-1] if previous_mains else None
 
     lines = [
         "Revision Context:",
-        "- Construct a new alternative main argument using the integrated rule.",
-        "- Do not repeat a previous main argument with the same conclusion and substantially the same warrant.",
+        "You have been in a debate, but your previous argument was not accepted — it was defeated by your opponent.",
+        "However, through the exchange, both parties have identified shared criteria that neither side can deny.",
+        "These are now given to you as integrated rules.",
+        "Your task is to propose a new argument built on these integrated rules.",
+        "- Your new argument must be different from the previous one: do not reuse the same conclusion or the same reasoning.",
+        "- Your new argument must not be vulnerable to the same attacks that defeated the previous one.",
+        "- Ground your argument in the integrated rules as much as possible.",
     ]
-    if previous_payload is not None:
-        lines.extend(
-            [
-                "Previous Main Argument:",
-                json.dumps(previous_payload, ensure_ascii=False),
-            ]
-        )
-    lines.append("Integrated Rules:")
+    if previous is not None:
+        lines.extend(["Previous Main Argument (defeated — do not repeat):", json.dumps(previous.payload, ensure_ascii=False)])
+        attacks = [arg for arg in state.history if arg.target_id == previous.id]
+        if attacks:
+            lines.append("Arguments that defeated your previous argument (do not make the same mistake):")
+            for atk in attacks:
+                lines.append(json.dumps(
+                    {
+                        "attack": atk.attack,
+                        "target_statement": atk.target_statement,
+                        "rules": atk.body.get("rules", []),
+                        "Conc": atk.conclusions,
+                        "Ass": atk.assumptions,
+                    },
+                    ensure_ascii=False,
+                ))
+    lines.append("Integrated Rules (use these as the basis of your new argument):")
     lines.extend(f"- {rule}" for rule in rules)
     return "\n".join(lines)
 
@@ -46,11 +60,10 @@ def _proponent_previous_moves_text(state: Any, agent: AgentName) -> str:
     if not previous:
         return ""
     lines = [
-        "ProponentPreviousMoves in this dialogue branch:",
+        "Your previous arguments in this dialogue branch:",
         (
-            "Non-repetition rule: if you are the Proponent, do not repeat the "
-            "same conclusion from the same or substantially same rules, premises, "
-            "or warrant as any item below."
+            "Non-repetition rule: do not repeat the same conclusion from the same "
+            "or substantially same rules, premises, or warrant as any item below."
         ),
     ]
     for arg in previous:
@@ -108,8 +121,12 @@ def build_undercut_prompt(state: Any, attacker: AgentName, target: ArgumentRecor
     )
 
 
-def build_generalization_prompt(warrant_result: str) -> str:
-    return f"{warrant_result}\n{PromptTemplates.GENERALIZATION}"
+def build_generalization_prompt(warrant_result: str, conversation_history: str) -> str:
+    return (
+        f"## Warrants\n{warrant_result}\n\n"
+        f"## Dialogue History\n{conversation_history}\n"
+        f"{PromptTemplates.GENERALIZATION}"
+    )
 
 
 def build_integration_prompt(warrant_result: str, generalization_result: str) -> str:

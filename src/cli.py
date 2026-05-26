@@ -4,68 +4,34 @@ import argparse
 import asyncio
 import json
 import sys
+from datetime import datetime
 from pathlib import Path
 from typing import Any
+
+# python3 src/cli.py --scenario curry 
 
 # プロジェクトのルートディレクトリを sys.path に追加
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-AG1_STANCE = """
-        Your stance:
-        a is curry rice.
-        c is curry noodles.
-        a has curry flavor.
-        c has curry flavor.
-        I do not want to eat b.
-        If a menu item has curry flavor, we should eat it.
-        If I do not want to eat something, we should not eat it.
-        """
+ROOT = Path(__file__).resolve().parent
+DATA_DIR = ROOT / "data"
 
-AG2_STANCE = """
-        Your stance:
-        b is Chinese noodles.
-        c is curry noodles.
-        b is a noodle dish.
-        c is a noodle dish.
-        I do not want to eat a.
-        If a menu item is a noodle dish, we should eat it.
-        If I do not want to eat something, we should not eat it.
-        """
 
-QUESTION = "What should we eat?"
+def _load_config() -> dict:
+    return json.loads((DATA_DIR / "config.json").read_text(encoding="utf-8"))
 
-INTERNAL_STATE_FIELDS = {
-    "last_generated_argument",
-    "current_argument",
-    "active_agent",
-    "debate_stage",
-    "turn_count",
-    "last_can_defeat",
-    "last_generated_argument_appended",
-    "ag1_main_argument",
-    "ag2_main_argument",
-    "ag1_pending",
-    "ag2_pending",
-    "history",
-    "dialogue_history",
-    "warrant_result",
-    "generalization_result",
-    "integration_result",
-    "defeat_relations",
-    "current_proponent",
-    "current_opponent",
-    "current_thread_status",
-    "b_argument",
-    "c_argument",
-    "d_argument",
-    "b_argument_id",
-    "c_argument_id",
-    "d_argument_id",
-    "b_defeats_a",
-    "c_defeats_b",
-    "b_defeats_c",
-    "c_strictly_defeats_b",
-}
+
+def _load_scenario(name: str) -> dict:
+    path = DATA_DIR / "scenarios" / f"{name}.json"
+    if not path.exists():
+        available = [p.stem for p in (DATA_DIR / "scenarios").glob("*.json")]
+        raise FileNotFoundError(f"Scenario '{name}' not found. Available: {available}")
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+_CONFIG = _load_config()
+INTERNAL_STATE_FIELDS: set[str] = set(_CONFIG["internal_state_fields"])
+DEFAULT_SCENARIO: str = _CONFIG["default_scenario"]
 
 
 def _parse_json_text(value: Any) -> Any:
@@ -288,14 +254,42 @@ def _load_input(path: str | None) -> dict[str, Any]:
     return json.loads(input_path.read_text(encoding="utf-8"))
 
 
+def _save_log(args: argparse.Namespace, graph_input: Any, final_state: dict[str, Any]) -> None:
+    logs_dir = Path(__file__).resolve().parents[1] / "logs"
+    logs_dir.mkdir(exist_ok=True)
+
+    log_entry = {
+        "timestamp": datetime.now().isoformat(timespec="seconds"),
+        "question": graph_input.question,
+        "agent1_stance": graph_input.agent1_stance,
+        "agent2_stance": graph_input.agent2_stance,
+        "dialogue_history": _jsonable(final_state.get("dialogue_history", [])),
+        "justified_argument": _parse_json_text(final_state.get("justified_argument")),
+        "justification_status": final_state.get("justification_status"),
+        "defeat_relations": _jsonable(final_state.get("defeat_relations", [])),
+        "ag1_thread_status": final_state.get("ag1_thread_status"),
+        "ag2_thread_status": final_state.get("ag2_thread_status"),
+        "integrated_rules": final_state.get("integrated_rules", []),
+        "learned_findings": final_state.get("learned_findings", []),
+        "error": final_state.get("error"),
+    }
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    log_path = logs_dir / f"{timestamp}.json"
+    log_path.write_text(json.dumps(log_entry, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"[system] log saved → {log_path}", flush=True)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Run the debate graph locally and stream each node output.",
     )
+    parser.add_argument("scenario", nargs="?", default=DEFAULT_SCENARIO,
+                        help=f"Scenario name under data/scenarios/ (default: {DEFAULT_SCENARIO})")
     parser.add_argument("--input", help="Path to a JSON file containing graph input.")
-    parser.add_argument("--question", default=QUESTION)
-    parser.add_argument("--agent1-stance", default=AG1_STANCE)
-    parser.add_argument("--agent2-stance", default=AG2_STANCE)
+    parser.add_argument("--question", default=None, help="Override scenario question.")
+    parser.add_argument("--agent1-stance", default=None, help="Override AG1 stance.")
+    parser.add_argument("--agent2-stance", default=None, help="Override AG2 stance.")
     parser.add_argument("--max-turns", type=int, default=5)
     parser.add_argument(
         "--additional-context",
@@ -309,6 +303,8 @@ async def run() -> None:
     parser = build_parser()
     args = parser.parse_args()
 
+    scenario = _load_scenario(args.scenario)
+
     print("[system]", flush=True)
     print(json.dumps({"status": "loading_graph"}, ensure_ascii=False, indent=2), flush=True)
     print(flush=True)
@@ -317,9 +313,9 @@ async def run() -> None:
 
     file_input = _load_input(args.input)
     cli_input = {
-        "question": args.question,
-        "agent1_stance": args.agent1_stance,
-        "agent2_stance": args.agent2_stance,
+        "question": args.question or scenario["question"],
+        "agent1_stance": args.agent1_stance or scenario["agent1_stance"],
+        "agent2_stance": args.agent2_stance or scenario["agent2_stance"],
         "max_turns": args.max_turns,
         "additional_context": json.loads(args.additional_context),
     }
@@ -329,10 +325,17 @@ async def run() -> None:
     print(json.dumps({"status": "starting_stream"}, ensure_ascii=False, indent=2), flush=True)
     print(flush=True)
 
+    final_state: dict[str, Any] = {}
+
     async for update in graph.astream(graph_input, stream_mode="updates"):
         for node_name, node_update in update.items():
             payload = _node_payload(node_name, node_update)
-            _print_node_output(node_name, payload)
+            if node_name not in {"finish", "finish_with_error"}:
+                _print_node_output(node_name, payload)
+            if node_name in {"finish", "finish_with_error"}:
+                final_state = node_update if isinstance(node_update, dict) else {}
+
+    _save_log(args, graph_input, final_state)
 
 
 if __name__ == "__main__":
