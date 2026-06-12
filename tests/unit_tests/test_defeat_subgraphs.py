@@ -195,7 +195,7 @@ async def test_generate_attack_infers_rebut_and_target_metadata(monkeypatch) -> 
             ),
         )
 
-    monkeypatch.setattr(arguments, "invoke_agent_structured", available_rebut)
+    monkeypatch.setattr(arguments, "invoke_agent_structured_messages", available_rebut)
     target = argument("AG1", ["We should buy a"])
     state = SimpleNamespace(
         current_proponent="AG1",
@@ -231,7 +231,7 @@ async def test_generate_attack_rejects_declared_target_not_attacked_by_argument(
             ),
         )
 
-    monkeypatch.setattr(arguments, "invoke_agent_structured", invalid_target)
+    monkeypatch.setattr(arguments, "invoke_agent_structured_messages", invalid_target)
     target = argument("AG1", ["We should buy a"], ["a is available"])
     state = SimpleNamespace(
         current_proponent="AG1",

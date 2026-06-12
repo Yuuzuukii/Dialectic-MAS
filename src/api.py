@@ -33,6 +33,7 @@ INTERNAL_STATE_FIELDS = {
     "c_strictly_defeats_b",
 }
 
+# RDFで与える
 AG1_STANCE = """
         Your stance:
         a is curry rice.

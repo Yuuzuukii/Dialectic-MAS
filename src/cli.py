@@ -4,6 +4,7 @@ import argparse
 import asyncio
 import json
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -14,7 +15,48 @@ from typing import Any
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 ROOT = Path(__file__).resolve().parent
-DATA_DIR = ROOT / "data"
+# データは eval/data に移行済み（ROOT=src のため、リポジトリルート配下の eval/data を参照する）。
+DATA_DIR = ROOT.parent / "eval" / "data"
+
+
+from langchain_core.callbacks import BaseCallbackHandler
+from langchain_core.outputs import LLMResult
+
+
+_PRICE_INPUT_PER_M = 0.25
+_PRICE_CACHED_PER_M = 0.025
+_PRICE_OUTPUT_PER_M = 2.00
+
+
+class _TokenUsageTracker(BaseCallbackHandler):
+    def __init__(self) -> None:
+        self.prompt_tokens = 0
+        self.cached_tokens = 0
+        self.completion_tokens = 0
+        self.total_tokens = 0
+
+    def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
+        token_usage = (response.llm_output or {}).get("token_usage", {})
+        self.prompt_tokens += token_usage.get("prompt_tokens", 0)
+        self.completion_tokens += token_usage.get("completion_tokens", 0)
+        self.total_tokens += token_usage.get("total_tokens", 0)
+        details = token_usage.get("prompt_tokens_details") or {}
+        self.cached_tokens += details.get("cached_tokens", 0)
+
+    def usage(self) -> dict[str, Any]:
+        non_cached = self.prompt_tokens - self.cached_tokens
+        cost = (
+            non_cached * _PRICE_INPUT_PER_M
+            + self.cached_tokens * _PRICE_CACHED_PER_M
+            + self.completion_tokens * _PRICE_OUTPUT_PER_M
+        ) / 1_000_000
+        return {
+            "prompt_tokens": self.prompt_tokens,
+            "cached_tokens": self.cached_tokens,
+            "completion_tokens": self.completion_tokens,
+            "total_tokens": self.total_tokens,
+            "total_cost_usd": round(cost, 6),
+        }
 
 
 def _load_config() -> dict:
@@ -254,9 +296,15 @@ def _load_input(path: str | None) -> dict[str, Any]:
     return json.loads(input_path.read_text(encoding="utf-8"))
 
 
-def _save_log(args: argparse.Namespace, graph_input: Any, final_state: dict[str, Any]) -> None:
-    logs_dir = Path(__file__).resolve().parents[1] / "logs"
-    logs_dir.mkdir(exist_ok=True)
+def _save_log(
+    args: argparse.Namespace,
+    graph_input: Any,
+    final_state: dict[str, Any],
+    elapsed: float,
+    usage: dict[str, Any] | None = None,
+) -> None:
+    logs_dir = Path(__file__).resolve().parents[1] / "eval" / "logs-v2"
+    logs_dir.mkdir(parents=True, exist_ok=True)
 
     log_entry = {
         "timestamp": datetime.now().isoformat(timespec="seconds"),
@@ -266,12 +314,18 @@ def _save_log(args: argparse.Namespace, graph_input: Any, final_state: dict[str,
         "dialogue_history": _jsonable(final_state.get("dialogue_history", [])),
         "justified_argument": _parse_json_text(final_state.get("justified_argument")),
         "justification_status": final_state.get("justification_status"),
+        "consensus_reached": final_state.get("consensus_reached"),
+        "final_answer": final_state.get("final_answer"),
         "defeat_relations": _jsonable(final_state.get("defeat_relations", [])),
         "ag1_thread_status": final_state.get("ag1_thread_status"),
         "ag2_thread_status": final_state.get("ag2_thread_status"),
         "integrated_rules": final_state.get("integrated_rules", []),
         "learned_findings": final_state.get("learned_findings", []),
         "error": final_state.get("error"),
+        "metrics": {
+            "elapsed_seconds": round(elapsed, 3),
+            **(usage or {}),
+        },
     }
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -290,7 +344,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--question", default=None, help="Override scenario question.")
     parser.add_argument("--agent1-stance", default=None, help="Override AG1 stance.")
     parser.add_argument("--agent2-stance", default=None, help="Override AG2 stance.")
-    parser.add_argument("--max-turns", type=int, default=5)
+    parser.add_argument("--max-turns", type=int, default=3)
     parser.add_argument(
         "--additional-context",
         default="{}",
@@ -309,6 +363,7 @@ async def run() -> None:
     print(json.dumps({"status": "loading_graph"}, ensure_ascii=False, indent=2), flush=True)
     print(flush=True)
 
+    from src.agent import conversation_log
     from src.agent.workflow import State, graph
 
     file_input = _load_input(args.input)
@@ -327,15 +382,40 @@ async def run() -> None:
 
     final_state: dict[str, Any] = {}
 
-    async for update in graph.astream(graph_input, stream_mode="updates"):
+    conversation_log.reset()
+    tracker = _TokenUsageTracker()
+    start = time.perf_counter()
+    async for update in graph.astream(
+        graph_input,
+        stream_mode="updates",
+        config={"callbacks": [tracker]},
+    ):
         for node_name, node_update in update.items():
             payload = _node_payload(node_name, node_update)
             if node_name not in {"finish", "finish_with_error"}:
                 _print_node_output(node_name, payload)
             if node_name in {"finish", "finish_with_error"}:
                 final_state = node_update if isinstance(node_update, dict) else {}
+    elapsed = time.perf_counter() - start
 
-    _save_log(args, graph_input, final_state)
+    _save_log(args, graph_input, final_state, elapsed, tracker.usage())
+    _save_conversation_log(conversation_log, args, graph_input)
+
+
+def _save_conversation_log(conversation_log: Any, args: argparse.Namespace, graph_input: Any) -> None:
+    outputs_dir = Path(__file__).resolve().parents[1] / "eval" / "logs-v2" / "outputs"
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    out_path = conversation_log.dump(
+        outputs_dir / f"{timestamp}.json",
+        metadata={
+            "timestamp": datetime.now().isoformat(timespec="seconds"),
+            "scenario": args.scenario,
+            "question": graph_input.question,
+            "agent1_stance": graph_input.agent1_stance,
+            "agent2_stance": graph_input.agent2_stance,
+        },
+    )
+    print(f"[system] conversation log saved → {out_path}", flush=True)
 
 
 if __name__ == "__main__":

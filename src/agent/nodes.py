@@ -7,18 +7,23 @@ from typing import Any
 
 try:
     from .arguments import (
-        agent_stance,
         argument_body_json,
         generate_attack,
         generate_undercut,
     )
     from .defeats import run_defeat_subgraph, run_strict_defeat_subgraph
-    from .llm import invoke_agent_structured
+    from .llm import (
+        call_llm_messages,
+        invoke_agent_structured,
+        invoke_agent_structured_messages,
+    )
     from .prompt_builders import (
         build_generalization_prompt,
         build_integration_prompt,
-        build_main_argument_prompt,
+        build_main_argument_messages,
+        compose_system,
     )
+    from .prompts import PromptTemplates
     from .schema.llm_outputs import (
         GeneralizationOutput,
         IntegrationOutput,
@@ -28,18 +33,23 @@ try:
     from .threads import complete_thread, dialogue_history
 except ImportError:  # pragma: no cover - supports LangGraph file-path loading.
     from arguments import (
-        agent_stance,
         argument_body_json,
         generate_attack,
         generate_undercut,
     )
     from defeats import run_defeat_subgraph, run_strict_defeat_subgraph
-    from llm import invoke_agent_structured
+    from llm import (
+        call_llm_messages,
+        invoke_agent_structured,
+        invoke_agent_structured_messages,
+    )
     from prompt_builders import (
         build_generalization_prompt,
         build_integration_prompt,
-        build_main_argument_prompt,
+        build_main_argument_messages,
+        compose_system,
     )
+    from prompts import PromptTemplates
     from schema.llm_outputs import (
         GeneralizationOutput,
         IntegrationOutput,
@@ -52,9 +62,9 @@ except ImportError:  # pragma: no cover - supports LangGraph file-path loading.
 async def can_generate_main(state: Any) -> dict[str, Any]:
     """Proponent が新しい主張 (A) を生成できるか判定し、可能なら生成して返す。"""
     agent = state.current_proponent
-    output = await invoke_agent_structured(
-        agent_stance(state, agent),
-        build_main_argument_prompt(state, agent),
+    messages = build_main_argument_messages(state, agent)
+    output = await invoke_agent_structured_messages(
+        messages,
         MainArgumentAvailabilityOutput,
     )
     can_generate = output.can_generate == "YES"
@@ -78,6 +88,7 @@ async def can_generate_main(state: Any) -> dict[str, Any]:
         argument=argument_body_json(output.Argument),
         support=[],
         agent=agent,
+        round=state.debate_round,
     )
     history = [*state.history, argument]
     update.update(
@@ -287,12 +298,13 @@ async def generalize(state: Any) -> dict[str, Any]:
     """両エージェントの warrant を汎化し、再利用可能な基準を導出する。"""
     if state.warrant_result is None:
         return {"error": "Cannot generalize without warrants."}
+    task_system, user_prompt = build_generalization_prompt(
+        state.warrant_result,
+        json.dumps(state.dialogue_history, ensure_ascii=False, indent=2),
+    )
     output = await invoke_agent_structured(
-        state.agent1_stance,
-        build_generalization_prompt(
-            state.warrant_result,
-            json.dumps(state.dialogue_history, ensure_ascii=False, indent=2),
-        ),
+        compose_system(state.agent1_stance, task_system),
+        user_prompt,
         GeneralizationOutput,
     )
     response = json.dumps(output.model_dump(exclude_none=True), ensure_ascii=False, indent=2)
@@ -303,9 +315,12 @@ async def integrate(state: Any) -> dict[str, Any]:
     """汎化された基準を一つの統合ルールにまとめ、次ラウンドで再利用できる形にする。"""
     if state.warrant_result is None or state.generalization_result is None:
         return {"error": "Cannot integrate without warrants and generalization."}
+    task_system, user_prompt = build_integration_prompt(
+        state.warrant_result, state.generalization_result
+    )
     output = await invoke_agent_structured(
-        state.agent1_stance,
-        build_integration_prompt(state.warrant_result, state.generalization_result),
+        compose_system(state.agent1_stance, task_system),
+        user_prompt,
         IntegrationOutput,
     )
     response = json.dumps(output.model_dump(exclude_none=True), ensure_ascii=False, indent=2)
@@ -340,8 +355,11 @@ async def add_integrated_rule(state: Any) -> dict[str, Any]:
     rules = [*state.integrated_rules]
     if state.integrated_rule not in rules:
         rules.append(state.integrated_rule)
+    new_round = state.debate_round + 1
     return {
-        "debate_round": state.debate_round + 1,
+        "debate_round": new_round,
+        # 次ラウンドが上限に達したら debate せず暫定回答へ（無限ループ防止）。
+        "finalize_mode": new_round >= state.max_turns,
         "integrated_rules": rules,
         "current_proponent": "AG1",
         "current_opponent": "AG2",
@@ -367,6 +385,66 @@ async def add_integrated_rule(state: Any) -> dict[str, Any]:
     }
 
 
+async def finalize_fallback(state: Any) -> dict[str, Any]:
+    """ラウンド上限到達時、integration rule で作った main arg を暫定回答の土台に据える。
+
+    debate を経た justified ではないため、合意なし (consensus_reached=False) を明示する。
+    """
+    if state.current_argument is None:
+        return {"error": "No integrated main argument available for fallback finalization."}
+    return {
+        "justified_argument": state.current_argument.argument,
+        "justification_status": "fallback_no_consensus",
+        "consensus_reached": False,
+    }
+
+
+async def generate_final_answer(state: Any) -> dict[str, Any]:
+    """対話履歴を踏まえて自然文回答を生成する。
+
+    通常は justified な主張から作る。合意に至らず暫定回答を作る場合
+    (consensus_reached is False) は、合意なしであることを明示する専用プロンプトを使う。
+    """
+    justified = state.justified_argument
+    if not justified:
+        return {"final_answer": None, "consensus_reached": state.consensus_reached}
+
+    status = state.justification_status or ""
+    if status.startswith("ag2"):
+        stance = state.agent2_stance
+    else:
+        stance = state.agent1_stance
+
+    import json as _json
+    import os
+    from langchain_core.messages import HumanMessage, SystemMessage
+
+    dialogue_history_str = _json.dumps(state.dialogue_history, ensure_ascii=False, indent=2)
+
+    if state.consensus_reached is False:
+        integrated_rules_str = "\n".join(f"- {rule}" for rule in state.integrated_rules) or "(none)"
+        system_prompt = compose_system(stance, PromptTemplates.FINAL_ANSWER_NO_CONSENSUS_SYSTEM)
+        user_prompt = PromptTemplates.FINAL_ANSWER_NO_CONSENSUS_USER.format(
+            question=state.question,
+            integrated_rules=integrated_rules_str,
+            dialogue_history=dialogue_history_str,
+            justified_argument=justified,
+        ).strip()
+    else:
+        system_prompt = compose_system(stance, PromptTemplates.FINAL_ANSWER_SYSTEM)
+        user_prompt = PromptTemplates.FINAL_ANSWER_USER.format(
+            question=state.question,
+            dialogue_history=dialogue_history_str,
+            justified_argument=justified,
+        ).strip()
+
+    answer = await call_llm_messages(
+        [SystemMessage(content=system_prompt), HumanMessage(content=user_prompt)],
+        model=os.getenv("MODEL", "gpt-5-mini"),
+    )
+    return {"final_answer": answer, "consensus_reached": state.consensus_reached}
+
+
 async def route_after_thread_node(state: Any) -> dict[str, Any]:
     """スレッド完了後の条件分岐エッジが参照するランディングノード。本体は空。"""
     return {}
@@ -378,7 +456,9 @@ async def finish(state: Any) -> dict[str, Any]:
         "dialogue_history": dialogue_history(state.history),
         "justified_argument": state.justified_argument,
         "justification_status": state.justification_status,
+        "consensus_reached": state.consensus_reached,
         "final_rebuttal": state.final_rebuttal,
+        "final_answer": state.final_answer,
         "integrated_rules": state.integrated_rules,
         "debate_round": state.debate_round,
         "main_argument_available": state.main_argument_available,

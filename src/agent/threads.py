@@ -35,13 +35,28 @@ def thread_finding(state: Any, status: str) -> str | None:
     return None
 
 
+def _annotate_main_status(
+    history: list[ArgumentRecord], main_id: str | None, status: str
+) -> list[ArgumentRecord]:
+    """スレッド完了時、対象 main レコードの status を後追いで埋める（不変＝コピーで差し替え）。"""
+    if main_id is None:
+        return history
+    return [
+        record.model_copy(update={"status": status}) if record.id == main_id else record
+        for record in history
+    ]
+
+
 def complete_thread(
     state: Any,
     status: str,
     extra_history: list[ArgumentRecord] | None = None,
 ) -> dict[str, Any]:
     key = "ag1" if state.current_proponent == "AG1" else "ag2"
-    history = [*state.history, *(extra_history or [])]
+    main_id = state.current_argument.id if state.current_argument else None
+    history = _annotate_main_status(
+        [*state.history, *(extra_history or [])], main_id, status
+    )
     update: dict[str, Any] = {
         "current_thread_status": status,
         "history": history,
@@ -56,6 +71,7 @@ def complete_thread(
     if status == "justified":
         update["justified_argument"] = state.current_argument.argument if state.current_argument else None
         update["justification_status"] = f"{key}_main_justified"
+        update["consensus_reached"] = True
     elif status == "overruled":
         update["justification_status"] = f"{key}_main_overruled"
 

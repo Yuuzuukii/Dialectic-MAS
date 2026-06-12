@@ -99,7 +99,7 @@ async def test_generate_undercut_assigns_known_attack_metadata(monkeypatch) -> N
             ),
         )
 
-    monkeypatch.setattr(arguments, "invoke_agent_structured", available_undercut)
+    monkeypatch.setattr(arguments, "invoke_agent_structured_messages", available_undercut)
     target = argument("AG2", ["We should eat a"], ["a is available"], attack="rebut")
     state = SimpleNamespace(
         current_proponent="AG1",

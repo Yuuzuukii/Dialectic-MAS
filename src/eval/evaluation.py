@@ -89,7 +89,11 @@ def build_eval_input(log: dict[str, Any]) -> dict[str, Any]:
     justified_text = "; ".join(justified_conc) if justified_conc else "(no conclusion)"
 
     return {
+        "mode": "schema",
+        "method_context": SCHEMA_METHOD_CONTEXT,
         "question": question,
+        "agent1_stance": log.get("agent1_stance") or "(not provided)",
+        "agent2_stance": log.get("agent2_stance") or "(not provided)",
         "ag1_initial_opinion": "\n".join(ag1_mains) if ag1_mains else "(none)",
         "ag2_initial_opinion": "\n".join(ag2_mains) if ag2_mains else "(none)",
         "debate_history": "\n\n".join(debate_lines) if debate_lines else "(no debate exchanges)",
@@ -99,8 +103,74 @@ def build_eval_input(log: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-FRAMEWORK_CONTEXT = """
-You are evaluating a multi-agent dialectical argumentation system based on ASPIC+.
+def build_eval_input_no_schema(log: dict[str, Any]) -> dict[str, Any]:
+    """スキーマなし版 (cli_no_schema.py) のログを、build_eval_input と同じ形に変換する。
+
+    free-text の各発話を schema 版の評価入力フィールドに対応付け、同一の評価器・
+    ルーブリック (evaluate_with_llm) で採点できるようにする。
+    """
+    dialogue: dict[str, Any] = log.get("dialogue", {}) or {}
+    ag2_counter = dialogue.get("ag2_counter", "")
+    ag1_counter = dialogue.get("ag1_counter", "")
+
+    debate_lines: list[str] = []
+    if ag2_counter:
+        debate_lines.append(f"[counter] AG2 → AG1:\n  {ag2_counter}")
+    if ag1_counter:
+        debate_lines.append(f"[counter] AG1 → AG2:\n  {ag1_counter}")
+
+    return {
+        "mode": "no-schema",
+        "method_context": NO_SCHEMA_METHOD_CONTEXT,
+        "question": log.get("question") or "",
+        "agent1_stance": log.get("agent1_stance") or "(not provided)",
+        "agent2_stance": log.get("agent2_stance") or "(not provided)",
+        "ag1_initial_opinion": dialogue.get("ag1_claim") or "(none)",
+        "ag2_initial_opinion": dialogue.get("ag2_claim") or "(none)",
+        "debate_history": "\n\n".join(debate_lines) if debate_lines else "(no debate exchanges)",
+        "integrated_rules": dialogue.get("agreement_core") or "(none)",
+        "justified_argument": dialogue.get("ag1_new_claim") or "(no conclusion)",
+        "justification_status": "no-schema",
+    }
+
+
+AXES = ("coherence", "originality", "dialecticality", "validity")
+
+
+def efficiency_metrics(log: dict[str, Any]) -> dict[str, Any]:
+    """ログの metrics から効率指標（時間・コスト・トークン）を取り出す。LLM 採点ではない。"""
+    metrics = log.get("metrics", {}) or {}
+    return {
+        "elapsed_seconds": metrics.get("elapsed_seconds"),
+        "total_cost_usd": metrics.get("total_cost_usd"),
+        "total_tokens": metrics.get("total_tokens"),
+    }
+
+
+def aggregate_scores(scores: list[dict[str, Any]]) -> dict[str, Any]:
+    """複数スコア dict を軸ごとに平均し、全軸平均 (average) と件数 (n) を付与する。"""
+    agg: dict[str, Any] = {}
+    for axis in AXES:
+        nums: list[float] = [
+            float(s[axis]) for s in scores if isinstance(s.get(axis), (int, float))
+        ]
+        agg[axis] = round(sum(nums) / len(nums), 2) if nums else None
+    axis_vals: list[float] = [agg[a] for a in AXES if isinstance(agg[a], (int, float))]
+    agg["average"] = round(sum(axis_vals) / len(axis_vals), 2) if axis_vals else None
+    agg["n"] = len(scores)
+    return agg
+
+
+COMMON_EVALUATION_CONTEXT = """
+You are evaluating a multi-agent dialogue between AG1 and AG2.
+
+Both agents have fixed stances. Judge whether the dialogue produces a coherent, useful, and fair final position
+from the information shown below. Use the method-specific context only to interpret the log format; do not reward
+or penalize a run merely because it uses, or does not use, a formal schema.
+""".strip()
+
+SCHEMA_METHOD_CONTEXT = """
+This run uses the proposed schema-based dialectical method, based on ASPIC+-style argumentation.
 
 --- Argument Schema ---
 Each argument is a sequence of rules. A rule has:
@@ -129,14 +199,41 @@ Each argument exposes:
   7. The argument that cannot be defeated is declared justified.
 """.strip()
 
-SCORING_INSTRUCTION = """
-Rate the above dialectical reasoning on a scale from 1 to 10 for each axis:
+NO_SCHEMA_METHOD_CONTEXT = """
+This run is the no-schema baseline.
 
-1. Coherence  – Does the justified argument follow logically from the debate and integrated rules?
-2. Originality – Does the final argument show novel insight beyond simply restating initial positions?
+--- Dialogue Format ---
+The agents produce free-text claims and counters without formal Conc/Ass fields, attack validation, or an explicit
+justification proof. The logged agreement core is a free-text synthesis of shared principles, and the final response
+is AG1's revised claim after considering that agreement core.
+
+--- Dialogue Flow ---
+  1. AG1 gives an initial claim from its stance.
+  2. AG2 counters AG1.
+  3. AG2 gives an initial claim from its stance.
+  4. AG1 counters AG2.
+  5. A shared agreement core is generated.
+  6. AG1 gives a revised final claim based on that agreement core.
+""".strip()
+
+SCORING_INSTRUCTION = """
+Rate the above dialectical reasoning on a scale from 1 to 10 for each of the following:
+
+1. Coherence      – Does the final synthesis follow logically from the initial opinion and counterarguments?
+2. Originality    – Does the synthesis demonstrate novel insight, creative framing, or non-obvious conclusions?
+3. Dialecticality – Does the response meaningfully integrate both perspectives, showing fair reasoning and synthesis?
+4. Validity       – Are the method's own dialectical commitments sound when re-examined from each agent's stance?
+                    For schema-based runs, check whether attacks, counters, status assignments, and justified/defensible
+                    outcomes are warranted by the stated Conc/Ass and stances. For no-schema runs, check whether the
+                    counters and final revised claim fairly answer the opposing stance and avoid unsupported concessions
+                    or ignored objections. A high score means the debate closes or synthesizes for good reasons; a low
+                    score means important stance-consistent objections were mishandled or overlooked.
 
 Scoring rubric:
-  9–10: Outstanding   7–8: Good   5–6: Adequate   1–4: Weak
+  9–10: Outstanding – excellent quality for the axis
+  7–8:  Good – solid, with minor issues
+  5–6:  Adequate – average quality, some issues
+  1–4:  Weak – lacking clarity, logic, originality, validity, or synthesis
 
 IMPORTANT: Rate strictly. Perfect scores are rare.
 
@@ -144,6 +241,8 @@ Respond ONLY with a JSON object:
 {
   "coherence": <int>,
   "originality": <int>,
+  "dialecticality": <int>,
+  "validity": <int>,
   "evaluator_model": "<model name>"
 }
 """.strip()
@@ -157,26 +256,37 @@ def evaluate_with_llm(response: dict[str, Any], evaluator_model: Any) -> dict[st
     Returns a dict with numeric scores and model info.
     """
     prompt = f"""
-{FRAMEWORK_CONTEXT}
+{COMMON_EVALUATION_CONTEXT}
+
+--- Method Context ---
+Mode: {response['mode']}
+
+{response['method_context']}
 
 --- Debate to Evaluate ---
 
 Question:
 {response['question']}
 
-AG1 Initial Opinion (Conc):
+AG1 Stance:
+{response['agent1_stance']}
+
+AG2 Stance:
+{response['agent2_stance']}
+
+AG1 Initial Position:
 {response['ag1_initial_opinion']}
 
-AG2 Initial Opinion (Conc):
+AG2 Initial Position:
 {response['ag2_initial_opinion']}
 
-Debate History (type / agent / attack / conclusion):
+Debate History:
 {response['debate_history']}
 
-Integrated Rules (derived from debate):
+Integrated Rules or Agreement Core:
 {response['integrated_rules']}
 
-Final Justified Argument (Conc):
+Final Output:
 {response['justified_argument']}
 Justification status: {response['justification_status']}
 
@@ -206,5 +316,7 @@ Justification status: {response['justification_status']}
         return {
             "coherence": None,
             "originality": None,
+            "dialecticality": None,
+            "validity": None,
             "evaluator_model": getattr(evaluator_model, "model", "unknown"),
         }

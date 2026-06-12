@@ -6,14 +6,14 @@ import json
 from typing import Any
 
 try:
-    from .llm import invoke_agent_structured
-    from .prompt_builders import build_attack_prompt, build_undercut_prompt
+    from .llm import invoke_agent_structured_messages
+    from .prompt_builders import build_attack_messages, build_undercut_messages
     from .schema.llm_outputs import ArgumentBody, DefeatingArgumentOutput, UndercutOutput
     from .schema.state import ArgumentRecord
     from .schema.types import AgentName
 except ImportError:  # pragma: no cover - supports LangGraph file-path loading.
-    from llm import invoke_agent_structured
-    from prompt_builders import build_attack_prompt, build_undercut_prompt
+    from llm import invoke_agent_structured_messages
+    from prompt_builders import build_attack_messages, build_undercut_messages
     from schema.llm_outputs import ArgumentBody, DefeatingArgumentOutput, UndercutOutput
     from schema.state import ArgumentRecord
     from schema.types import AgentName
@@ -53,11 +53,8 @@ async def generate_attack(
     *,
     purpose: str,
 ) -> ArgumentRecord | None:
-    output = await invoke_agent_structured(
-        agent_stance(state, attacker),
-        build_attack_prompt(state, attacker, target, purpose=purpose),
-        DefeatingArgumentOutput,
-    )
+    messages = build_attack_messages(state, attacker, target, purpose=purpose)
+    output = await invoke_agent_structured_messages(messages, DefeatingArgumentOutput)
     if output.can_defeat != "YES" or output.Argument is None or output.Attack is None:
         return None
     return ArgumentRecord(
@@ -69,6 +66,7 @@ async def generate_attack(
         target_id=target.id,
         target_field=output.Attack.target.field,
         target_statement=output.Attack.target.statement,
+        round=getattr(state, "debate_round", 1),
     )
 
 
@@ -79,11 +77,8 @@ async def generate_undercut(
 ) -> ArgumentRecord | None:
     if not target.assumptions:
         return None
-    output = await invoke_agent_structured(
-        agent_stance(state, attacker),
-        build_undercut_prompt(state, attacker, target),
-        UndercutOutput,
-    )
+    messages = build_undercut_messages(state, attacker, target)
+    output = await invoke_agent_structured_messages(messages, UndercutOutput)
     if output.can_undercut != "YES" or output.Argument is None:
         return None
     return ArgumentRecord(
@@ -94,4 +89,5 @@ async def generate_undercut(
         attack="undercut",
         target_id=target.id,
         target_field="Ass",
+        round=getattr(state, "debate_round", 1),
     )

@@ -51,6 +51,7 @@ class ArgumentRecord(BaseModel):
         description="Exact conclusion or assumption attacked by this argument.",
     )
     status: ArgumentStatus | None = Field(default=None, description="Dialectical status of the argument.")
+    round: int = Field(default=1, description="Debate round in which this argument was produced.")
 
     @classmethod
     def from_generated_body(
@@ -117,9 +118,32 @@ class ArgumentRecord(BaseModel):
                 assumptions.extend(_text_items(rule["antecedent"].get("weak_negation")))
         return assumptions
 
+    def message_content(self) -> str:
+        """履歴メッセージの content（JSON 文字列）を組む。
+
+        round / phase(type) / agent と、攻撃 turn の attack 情報・後追い記録された status を
+        畳み込み、本体は Argument ペイロードとして入れる。これで content だけで
+        「どのラウンドのどのフェーズの誰の発言で、どこをどう攻撃し、結果どうなったか」が辿れる。
+        """
+        data: dict[str, Any] = {
+            "id": self.id,
+            "round": self.round,
+            "phase": self.type,
+            "agent": self.agent,
+        }
+        if self.status is not None:
+            data["status"] = self.status
+        if self.type in {"defeat", "counter"}:
+            data["attack"] = self.attack
+            data["target_id"] = self.target_id
+            data["target_statement"] = self.target_statement
+        data["Argument"] = self.body
+        return json.dumps(data, ensure_ascii=False)
+
     def to_dialogue_dict(self) -> dict[str, Any]:
         return {
             "id": self.id,
+            "round": self.round,
             "type": self.type,
             "argument": self.argument,
             "support": self.support,

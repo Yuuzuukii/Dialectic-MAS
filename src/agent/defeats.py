@@ -15,6 +15,10 @@ BlockerGenerator = Callable[[Any, AgentName, ArgumentRecord], Awaitable[Argument
 TargetField = Literal["Conc", "Ass"]
 
 
+def _log(msg: str) -> None:
+    print(msg, flush=True)
+
+
 @dataclass
 class DefeatSubgraphResult:
     defeats: bool
@@ -74,13 +78,17 @@ async def run_defeat_subgraph(
     allow_generated_blocker: bool = True,
     persist_metadata: bool = True,
 ) -> DefeatSubgraphResult:
+    _log(f"[defeat_subgraph] {relation_context}")
     match = attack_from_metadata(attacker)
     if match is None:
+        _log(f"  → no attack metadata: not defeated")
         return DefeatSubgraphResult(
             defeats=False,
             attack=None,
             relations=[relation(attacker, target, None, False, f"{relation_context}: no attack metadata declared by LLM")],
         )
+
+    _log(f"  attack: {match.method} on {match.field} — \"{match.statement}\"")
 
     if persist_metadata:
         attacker.target_id = target.id
@@ -88,6 +96,7 @@ async def run_defeat_subgraph(
         attacker.target_statement = match.statement
 
     if match.method == "undercut":
+        _log(f"  → undercut: defeated")
         return DefeatSubgraphResult(
             defeats=True,
             attack=match.method,
@@ -95,8 +104,10 @@ async def run_defeat_subgraph(
         )
 
     if allow_generated_blocker and blocker_generator is not None:
+        _log(f"  rebut detected — trying to generate blocker (undercut) by {defender}")
         blocker = await blocker_generator(state, defender, attacker)
         if blocker is not None:
+            _log(f"  → blocker generated: rebut blocked, not defeated")
             return DefeatSubgraphResult(
                 defeats=False,
                 attack=match.method,
@@ -111,6 +122,7 @@ async def run_defeat_subgraph(
                     )
                 ],
             )
+        _log(f"  → no blocker: rebut succeeds, defeated")
 
     return DefeatSubgraphResult(
         defeats=True,
