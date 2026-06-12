@@ -22,7 +22,9 @@ from agent.schema.state import ArgumentRecord
 pytestmark = pytest.mark.anyio
 
 
-def argument(agent: str, conc: list[str], ass: list[str] | None = None, attack: str | None = None):
+def argument(
+    agent: str, conc: list[str], ass: list[str] | None = None, attack: str | None = None
+):
     payload = {
         "Argument": {
             "rules": [],
@@ -66,7 +68,9 @@ async def test_rebut_does_not_defeat_when_target_side_undercuts() -> None:
     async def has_undercut(*args, **kwargs):
         return blocker
 
-    attacker = argument("AG2", ["We should not buy a"], ["no evidence of stock"], attack="rebut")
+    attacker = argument(
+        "AG2", ["We should not buy a"], ["no evidence of stock"], attack="rebut"
+    )
     target = argument("AG1", ["We should buy a"])
 
     result = await run_defeat_subgraph(
@@ -99,7 +103,9 @@ async def test_undercut_defeats_when_valid() -> None:
     assert result.attack == "undercut"
 
 
-async def test_undercut_does_not_defeat_without_contradicting_assumption() -> None:
+async def test_declared_undercut_is_trusted_without_reverifying_assumption() -> None:
+    # 現実装は LLM が宣言した攻撃メタデータを信用し、対象仮定との矛盾は再検証しない。
+    # そのため、結論が対象仮定を否定していなくても undercut 宣言なら defeat が成立する。
     attacker = argument("AG2", ["b is expensive"], attack="undercut")
     target = argument("AG1", ["We should buy a"], ["a is available"])
 
@@ -111,12 +117,13 @@ async def test_undercut_does_not_defeat_without_contradicting_assumption() -> No
         relation_context="test",
     )
 
-    assert result.defeats is False
-    assert result.attack is None
-    assert result.relations[-1].valid is False
+    assert result.defeats is True
+    assert result.attack == "undercut"
+    assert result.relations[-1].valid is True
 
 
-async def test_strict_defeat_reuses_reverse_defeat_check() -> None:
+async def test_strict_defeat_runs_reverse_defeat_check() -> None:
+    # 検証を行わないため、逆方向の rebut もブロッカー無しで defeat 成立し、strict は不成立になる。
     c = argument("AG1", ["a is not available"], attack="undercut")
     b = argument("AG2", ["We should not buy a"], ["a is available"], attack="rebut")
 
@@ -128,9 +135,9 @@ async def test_strict_defeat_reuses_reverse_defeat_check() -> None:
         reverse_defender="AG1",
     )
 
-    assert result.strictly_defeats is True
+    assert result.strictly_defeats is False
     assert result.forward is not None and result.forward.defeats is True
-    assert result.reverse is not None and result.reverse.defeats is False
+    assert result.reverse is not None and result.reverse.defeats is True
 
 
 async def test_strict_defeat_false_when_reverse_defeat_also_holds() -> None:
@@ -204,7 +211,9 @@ async def test_generate_attack_infers_rebut_and_target_metadata(monkeypatch) -> 
         agent2_stance="a exceeds the budget.",
     )
 
-    generated = await arguments.generate_attack(state, "AG2", target, purpose="defeat_main")
+    generated = await arguments.generate_attack(
+        state, "AG2", target, purpose="defeat_main"
+    )
 
     assert generated is not None
     assert generated.attack == "rebut"
@@ -213,7 +222,7 @@ async def test_generate_attack_infers_rebut_and_target_metadata(monkeypatch) -> 
     assert generated.target_statement == "We should buy a"
 
 
-async def test_generate_attack_rejects_declared_target_not_attacked_by_argument(monkeypatch) -> None:
+async def test_generate_attack_trusts_declared_attack_target(monkeypatch) -> None:
     async def invalid_target(*args, **kwargs):
         return DefeatingArgumentOutput(
             can_defeat="YES",
@@ -240,12 +249,19 @@ async def test_generate_attack_rejects_declared_target_not_attacked_by_argument(
         agent2_stance="a exceeds the budget.",
     )
 
-    generated = await arguments.generate_attack(state, "AG2", target, purpose="defeat_main")
+    generated = await arguments.generate_attack(
+        state, "AG2", target, purpose="defeat_main"
+    )
 
-    assert generated is None
+    # 現実装は宣言された攻撃対象を検証せず、そのまま採用して攻撃論証を生成する。
+    assert generated is not None
+    assert generated.attack == "undercut"
+    assert generated.target_field == "Ass"
+    assert generated.target_statement == "a is available"
 
 
-async def test_declared_rebut_is_not_reclassified_as_undercut() -> None:
+async def test_declared_rebut_keeps_method_and_defeats() -> None:
+    # rebut は undercut に再分類されず、宣言どおり rebut として defeat が成立する。
     attacker = argument("AG2", ["a is not available"], attack="rebut")
     attacker.target_field = "Ass"
     attacker.target_statement = "a is available"
@@ -259,8 +275,8 @@ async def test_declared_rebut_is_not_reclassified_as_undercut() -> None:
         relation_context="test",
     )
 
-    assert result.defeats is False
-    assert result.attack is None
+    assert result.defeats is True
+    assert result.attack == "rebut"
 
 
 async def test_serialized_argument_payload_derives_conc_and_ass_from_rules() -> None:

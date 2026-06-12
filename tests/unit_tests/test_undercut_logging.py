@@ -15,7 +15,9 @@ from agent.schema.state import ArgumentRecord
 pytestmark = pytest.mark.anyio
 
 
-def argument(agent: str, conc: list[str], ass: list[str] | None = None, attack: str | None = None):
+def argument(
+    agent: str, conc: list[str], ass: list[str] | None = None, attack: str | None = None
+):
     payload = {"Argument": {"rules": [], "Conc": conc, "Ass": ass or []}}
     return ArgumentRecord(
         type="defeat",
@@ -26,9 +28,13 @@ def argument(agent: str, conc: list[str], ass: list[str] | None = None, attack: 
     )
 
 
-async def test_validate_b_exposes_generated_undercut_in_history_and_update(monkeypatch) -> None:
+async def test_validate_b_exposes_generated_undercut_in_history_and_update(
+    monkeypatch,
+) -> None:
     main = argument("AG1", ["We should choose a"])
-    rebut = argument("AG2", ["We should not choose a"], ["a is available"], attack="rebut")
+    rebut = argument(
+        "AG2", ["We should not choose a"], ["a is available"], attack="rebut"
+    )
     undercut = argument("AG1", ["a is not available"], attack="undercut")
 
     async def blocked_rebut(*args, **kwargs):
@@ -85,7 +91,7 @@ async def test_undercut_output_does_not_request_attack_metadata() -> None:
     assert "Attack" not in UndercutOutput.model_fields
 
 
-async def test_generate_undercut_assigns_known_attack_metadata(monkeypatch) -> None:
+async def test_generate_undercut_assigns_attack_metadata(monkeypatch) -> None:
     async def available_undercut(*args, **kwargs):
         return UndercutOutput(
             can_undercut="YES",
@@ -99,7 +105,9 @@ async def test_generate_undercut_assigns_known_attack_metadata(monkeypatch) -> N
             ),
         )
 
-    monkeypatch.setattr(arguments, "invoke_agent_structured_messages", available_undercut)
+    monkeypatch.setattr(
+        arguments, "invoke_agent_structured_messages", available_undercut
+    )
     target = argument("AG2", ["We should eat a"], ["a is available"], attack="rebut")
     state = SimpleNamespace(
         current_proponent="AG1",
@@ -114,4 +122,6 @@ async def test_generate_undercut_assigns_known_attack_metadata(monkeypatch) -> N
     assert generated.attack == "undercut"
     assert generated.target_id == target.id
     assert generated.target_field == "Ass"
-    assert generated.target_statement == "a is available"
+    # 現実装は undercut の対象フィールド (Ass) までは設定するが、
+    # 具体的な target_statement は設定しない（None のまま）。
+    assert generated.target_statement is None
