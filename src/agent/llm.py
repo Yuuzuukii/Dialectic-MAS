@@ -1,6 +1,5 @@
 import os
-
-from typing import Any, Optional, Type, TypeVar, cast
+from typing import Any, Type, TypeVar, cast
 
 from dotenv import load_dotenv
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
@@ -32,7 +31,7 @@ def _message_content_to_text(message: BaseMessage) -> str:
     return "\n".join(str(part) for part in content)
 
 
-def _chat_openai(model: str, temperature: Optional[float] = None) -> ChatOpenAI:
+def _chat_openai(model: str, temperature: float | None = None) -> ChatOpenAI:
     kwargs = {
         "model": model,
         "api_key": _openai_api_key(),
@@ -99,7 +98,7 @@ async def call_llm(prompt: str, model: str, config: RunnableConfig | None = None
     return text
 
 
-async def call_llm_messages(messages: list[BaseMessage], model: str, temperature: Optional[float] = 0.7) -> str:
+async def call_llm_messages(messages: list[BaseMessage], model: str, temperature: float | None = 0.7) -> str:
     model_client = _chat_openai(model, temperature=temperature)
     response = await model_client.ainvoke(messages)
     text = _message_content_to_text(response)

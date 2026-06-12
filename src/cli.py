@@ -22,7 +22,6 @@ DATA_DIR = ROOT.parent / "eval" / "data"
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.outputs import LLMResult
 
-
 _PRICE_INPUT_PER_M = 0.25
 _PRICE_CACHED_PER_M = 0.025
 _PRICE_OUTPUT_PER_M = 2.00

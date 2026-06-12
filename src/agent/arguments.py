@@ -8,7 +8,11 @@ from typing import Any
 try:
     from .llm import invoke_agent_structured_messages
     from .prompt_builders import build_attack_messages, build_undercut_messages
-    from .schema.llm_outputs import ArgumentBody, DefeatingArgumentOutput, UndercutOutput
+    from .schema.llm_outputs import (
+        ArgumentBody,
+        DefeatingArgumentOutput,
+        UndercutOutput,
+    )
     from .schema.state import ArgumentRecord
     from .schema.types import AgentName
 except ImportError:  # pragma: no cover - supports LangGraph file-path loading.

@@ -1,12 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 from langgraph.graph import END, START, StateGraph
 
-from .schema.state import ArgumentRecord, DefeatRelation
-from .schema.types import AgentName, DebateStage
 from .edges import (
     route_after_add_integrated_rule,
     route_after_can_generate_main,
@@ -35,6 +33,8 @@ from .nodes import (
     validate_b_defeats_c,
     validate_c_defeats_b,
 )
+from .schema.state import ArgumentRecord, DefeatRelation
+from .schema.types import AgentName, DebateStage
 
 
 @dataclass
@@ -52,7 +52,7 @@ class State:
     # ラウンド上限に達したら debate をスキップして暫定回答を作る。
     finalize_mode: bool = False
     # justified な決着（合意）に至ったか。fallback 暫定回答では False。
-    consensus_reached: Optional[bool] = None
+    consensus_reached: bool | None = None
 
     active_agent: AgentName = "AG1"
     current_proponent: AgentName = "AG1"
@@ -64,46 +64,46 @@ class State:
     dialogue_history: list[dict[str, Any]] = field(default_factory=list)
     defeat_relations: list[DefeatRelation] = field(default_factory=list)
 
-    current_argument: Optional[ArgumentRecord] = None
-    ag1_main_argument: Optional[ArgumentRecord] = None
-    ag2_main_argument: Optional[ArgumentRecord] = None
-    ag1_current_main_id: Optional[str] = None
-    ag2_current_main_id: Optional[str] = None
-    main_argument_available: Optional[bool] = None
-    main_argument_unavailable_reason: Optional[str] = None
-    ag1_thread_status: Optional[str] = None
-    ag2_thread_status: Optional[str] = None
-    current_thread_status: Optional[str] = None
+    current_argument: ArgumentRecord | None = None
+    ag1_main_argument: ArgumentRecord | None = None
+    ag2_main_argument: ArgumentRecord | None = None
+    ag1_current_main_id: str | None = None
+    ag2_current_main_id: str | None = None
+    main_argument_available: bool | None = None
+    main_argument_unavailable_reason: str | None = None
+    ag1_thread_status: str | None = None
+    ag2_thread_status: str | None = None
+    current_thread_status: str | None = None
 
-    b_argument: Optional[ArgumentRecord] = None
-    c_argument: Optional[ArgumentRecord] = None
-    d_argument: Optional[ArgumentRecord] = None
-    b_argument_id: Optional[str] = None
-    c_argument_id: Optional[str] = None
-    d_argument_id: Optional[str] = None
-    b_defeats_a: Optional[bool] = None
-    c_defeats_b: Optional[bool] = None
-    b_defeats_c: Optional[bool] = None
-    c_strictly_defeats_b: Optional[bool] = None
+    b_argument: ArgumentRecord | None = None
+    c_argument: ArgumentRecord | None = None
+    d_argument: ArgumentRecord | None = None
+    b_argument_id: str | None = None
+    c_argument_id: str | None = None
+    d_argument_id: str | None = None
+    b_defeats_a: bool | None = None
+    c_defeats_b: bool | None = None
+    b_defeats_c: bool | None = None
+    c_strictly_defeats_b: bool | None = None
 
     # Compatibility fields used by def.py and existing result consumers.
-    ag1_rejection_rebuttal: Optional[str] = None
+    ag1_rejection_rebuttal: str | None = None
     ag1_pending: bool = False
     ag2_pending: bool = False
-    last_can_defeat: Optional[bool] = None
-    last_generated_argument: Optional[ArgumentRecord] = None
+    last_can_defeat: bool | None = None
+    last_generated_argument: ArgumentRecord | None = None
     last_generated_argument_appended: bool = False
-    final_rebuttal: Optional[str] = None
+    final_rebuttal: str | None = None
 
-    warrant_result: Optional[str] = None
-    generalization_result: Optional[str] = None
-    integration_result: Optional[str] = None
-    integrated_rule: Optional[str] = None
+    warrant_result: str | None = None
+    generalization_result: str | None = None
+    integration_result: str | None = None
+    integrated_rule: str | None = None
 
-    justified_argument: Optional[str] = None
-    justification_status: Optional[str] = None
-    final_answer: Optional[str] = None
-    error: Optional[str] = None
+    justified_argument: str | None = None
+    justification_status: str | None = None
+    final_answer: str | None = None
+    error: str | None = None
 
 
 graph = (

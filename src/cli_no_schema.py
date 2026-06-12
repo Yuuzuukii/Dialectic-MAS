@@ -31,7 +31,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from src.agent.llm import call_llm
-from src.cli import DEFAULT_SCENARIO, _TokenUsageTracker, _load_scenario
+from src.cli import DEFAULT_SCENARIO, _load_scenario, _TokenUsageTracker
 
 MODEL = "gpt-5-mini"
 

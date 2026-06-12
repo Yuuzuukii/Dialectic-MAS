@@ -7,11 +7,11 @@ import pytest
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
 from agent.edges import route_after_can_generate_main
-from agent.workflow import State
 from agent.nodes import can_generate_main
 from agent.prompt_builders import build_main_argument_messages
 from agent.schema.llm_outputs import ArgumentBody
 from agent.schema.state import ArgumentRecord
+from agent.workflow import State
 
 pytestmark = pytest.mark.anyio
 

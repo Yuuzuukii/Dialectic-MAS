@@ -81,7 +81,7 @@ async def run_defeat_subgraph(
     _log(f"[defeat_subgraph] {relation_context}")
     match = attack_from_metadata(attacker)
     if match is None:
-        _log(f"  → no attack metadata: not defeated")
+        _log("  → no attack metadata: not defeated")
         return DefeatSubgraphResult(
             defeats=False,
             attack=None,
@@ -96,7 +96,7 @@ async def run_defeat_subgraph(
         attacker.target_statement = match.statement
 
     if match.method == "undercut":
-        _log(f"  → undercut: defeated")
+        _log("  → undercut: defeated")
         return DefeatSubgraphResult(
             defeats=True,
             attack=match.method,
@@ -107,7 +107,7 @@ async def run_defeat_subgraph(
         _log(f"  rebut detected — trying to generate blocker (undercut) by {defender}")
         blocker = await blocker_generator(state, defender, attacker)
         if blocker is not None:
-            _log(f"  → blocker generated: rebut blocked, not defeated")
+            _log("  → blocker generated: rebut blocked, not defeated")
             return DefeatSubgraphResult(
                 defeats=False,
                 attack=match.method,
@@ -122,7 +122,7 @@ async def run_defeat_subgraph(
                     )
                 ],
             )
-        _log(f"  → no blocker: rebut succeeds, defeated")
+        _log("  → no blocker: rebut succeeds, defeated")
 
     return DefeatSubgraphResult(
         defeats=True,

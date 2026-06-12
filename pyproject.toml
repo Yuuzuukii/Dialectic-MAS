@@ -38,9 +38,6 @@ lint.select = [
     "E",    # pycodestyle
     "F",    # pyflakes
     "I",    # isort
-    "D",    # pydocstyle
-    "D401", # First line should be in imperative mood
-    "T201",
     "UP",
 ]
 lint.ignore = [
@@ -48,14 +45,10 @@ lint.ignore = [
     "UP007",
     # We actually do want to import from typing_extensions
     "UP035",
-    # Relax the convention by _not_ requiring documentation for every function parameter.
-    "D417",
     "E501",
+    # Allow imports after sys.path manipulation / runtime guards in scripts.
+    "E402",
 ]
-[tool.ruff.lint.per-file-ignores]
-"tests/*" = ["D", "UP"]
-[tool.ruff.lint.pydocstyle]
-convention = "google"
 
 [dependency-groups]
 dev = [
