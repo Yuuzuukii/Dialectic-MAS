@@ -1,3 +1,5 @@
+"""議論状態に保持するレコード型（ArgumentRecord / DefeatRelation）とその補助関数."""
+
 from __future__ import annotations
 
 import json
@@ -10,6 +12,7 @@ from .types import AgentName, ArgumentStatus, ArgumentType, AttackType
 
 
 def parse_serialized_payload(text: str | None) -> dict[str, Any]:
+    """LLM 出力テキスト（コードフェンス等を含みうる）から JSON dict を抽出する."""
     if not text:
         return {}
     try:
@@ -35,6 +38,8 @@ def _text_items(value: Any) -> list[str]:
 
 # ログ
 class ArgumentRecord(BaseModel):
+    """議論履歴に積む 1 発言（主張・攻撃・防御）のレコード."""
+
     id: str = Field(default_factory=lambda: f"arg-{uuid4().hex[:10]}", description="Internal argument id.")
     type: ArgumentType = Field(description="main for an initial claim, defeat for an opponent attack, counter for a defense.")
     argument: str = Field(description="Serialized argument payload.")
@@ -65,6 +70,7 @@ class ArgumentRecord(BaseModel):
         target_field: Literal["Conc", "Ass"] | None = None,
         target_statement: str | None = None,
     ) -> Self:
+        """LLM 生成の ArgumentBody から Conc/Ass を導出して ArgumentRecord を作る."""
         argument = body.model_dump(exclude_none=True)
         rules = argument.get("rules", [])
         argument["Conc"] = [
@@ -93,19 +99,23 @@ class ArgumentRecord(BaseModel):
 
     @property
     def payload(self) -> dict[str, Any]:
+        """格納された argument 文字列をパースした JSON dict 全体を返す."""
         return parse_serialized_payload(self.argument)
 
     @property
     def body(self) -> dict[str, Any]:
+        """ペイロード内の Argument 本体 dict を返す."""
         body = self.payload.get("Argument", {})
         return body if isinstance(body, dict) else {}
 
     @property
     def conclusions(self) -> list[str]:
+        """この主張の結論（Conc）リストを返す."""
         return _text_items(self.body.get("Conc"))
 
     @property
     def assumptions(self) -> list[str]:
+        """この主張の仮定（Ass）リストを返す（無ければ rules から導出）."""
         items = _text_items(self.body.get("Ass"))
         if items:
             return items
@@ -119,7 +129,7 @@ class ArgumentRecord(BaseModel):
         return assumptions
 
     def message_content(self) -> str:
-        """履歴メッセージの content（JSON 文字列）を組む。
+        """履歴メッセージの content（JSON 文字列）を組む.
 
         round / phase(type) / agent と、攻撃 turn の attack 情報・後追い記録された status を
         畳み込み、本体は Argument ペイロードとして入れる。これで content だけで
@@ -141,6 +151,7 @@ class ArgumentRecord(BaseModel):
         return json.dumps(data, ensure_ascii=False)
 
     def to_dialogue_dict(self) -> dict[str, Any]:
+        """対話ログ出力用に全フィールドを dict 化する."""
         return {
             "id": self.id,
             "round": self.round,
@@ -157,6 +168,8 @@ class ArgumentRecord(BaseModel):
 
 
 class DefeatRelation(BaseModel):
+    """攻撃者と対象の間で検証された defeat 関係の記録."""
+
     attacker_id: str = Field(description="Id of the attacking argument.")
     target_id: str = Field(description="Id of the attacked argument.")
     attack: AttackType = Field(description="rebut or undercut.")

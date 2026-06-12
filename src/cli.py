@@ -1,3 +1,8 @@
+"""議論グラフをローカル実行し、各ノード出力を端末にストリームする CLI."""
+
+# print による端末出力と、sys.path 追加後の import はこの CLI では意図的。
+# ruff: noqa: T201, E402
+
 from __future__ import annotations
 
 import argparse
@@ -7,7 +12,7 @@ import sys
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 # python3 src/cli.py --scenario curry 
 
@@ -58,16 +63,16 @@ class _TokenUsageTracker(BaseCallbackHandler):
         }
 
 
-def _load_config() -> dict:
-    return json.loads((DATA_DIR / "config.json").read_text(encoding="utf-8"))
+def _load_config() -> dict[str, Any]:
+    return cast(dict[str, Any], json.loads((DATA_DIR / "config.json").read_text(encoding="utf-8")))
 
 
-def _load_scenario(name: str) -> dict:
+def _load_scenario(name: str) -> dict[str, Any]:
     path = DATA_DIR / "scenarios" / f"{name}.json"
     if not path.exists():
         available = [p.stem for p in (DATA_DIR / "scenarios").glob("*.json")]
         raise FileNotFoundError(f"Scenario '{name}' not found. Available: {available}")
-    return json.loads(path.read_text(encoding="utf-8"))
+    return cast(dict[str, Any], json.loads(path.read_text(encoding="utf-8")))
 
 
 _CONFIG = _load_config()
@@ -292,7 +297,7 @@ def _load_input(path: str | None) -> dict[str, Any]:
         return {}
 
     input_path = Path(path)
-    return json.loads(input_path.read_text(encoding="utf-8"))
+    return cast(dict[str, Any], json.loads(input_path.read_text(encoding="utf-8")))
 
 
 def _save_log(
@@ -334,6 +339,7 @@ def _save_log(
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """CLI 引数パーサを構築する."""
     parser = argparse.ArgumentParser(
         description="Run the debate graph locally and stream each node output.",
     )
@@ -353,6 +359,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 async def run() -> None:
+    """シナリオを読み込み、議論グラフを実行してログを保存する."""
     parser = build_parser()
     args = parser.parse_args()
 
@@ -385,7 +392,7 @@ async def run() -> None:
     tracker = _TokenUsageTracker()
     start = time.perf_counter()
     async for update in graph.astream(
-        graph_input,
+        graph_input,  # type: ignore[arg-type]  # dataclass State と Pregel の StateT 総称型の差異。
         stream_mode="updates",
         config={"callbacks": [tracker]},
     ):

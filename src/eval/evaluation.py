@@ -1,7 +1,9 @@
+"""LLM 評価用の入力整形・効率指標・スコア集計・LLM 採点を行うヘルパ群."""
+
 from __future__ import annotations
 
 import json
-from typing import Any
+from typing import Any, cast
 
 
 def _parse_argument_field(argument_str: str | Any) -> dict[str, Any]:
@@ -21,7 +23,7 @@ def _parse_argument_field(argument_str: str | Any) -> dict[str, Any]:
         if start >= 0 and end > start:
             text = text[start:end]
     try:
-        return json.loads(text)
+        return cast(dict[str, Any], json.loads(text))
     except (json.JSONDecodeError, ValueError):
         return {}
 
@@ -51,6 +53,7 @@ def _extract_ass(argument_str: str | Any) -> list[str]:
 
 
 def build_eval_input(log: dict[str, Any]) -> dict[str, Any]:
+    """スキーマ版の実行ログを、LLM 評価器へ渡す入力 dict に整形する."""
     question = log.get("question", "")
     dialogue_history: list[dict[str, Any]] = log.get("dialogue_history", [])
     integrated_rules: list[str] = log.get("integrated_rules") or []
@@ -104,7 +107,7 @@ def build_eval_input(log: dict[str, Any]) -> dict[str, Any]:
 
 
 def build_eval_input_no_schema(log: dict[str, Any]) -> dict[str, Any]:
-    """スキーマなし版 (cli_no_schema.py) のログを、build_eval_input と同じ形に変換する。
+    """スキーマなし版 (cli_no_schema.py) のログを、build_eval_input と同じ形に変換する.
 
     free-text の各発話を schema 版の評価入力フィールドに対応付け、同一の評価器・
     ルーブリック (evaluate_with_llm) で採点できるようにする。
@@ -138,7 +141,7 @@ AXES = ("coherence", "originality", "dialecticality", "validity")
 
 
 def efficiency_metrics(log: dict[str, Any]) -> dict[str, Any]:
-    """ログの metrics から効率指標（時間・コスト・トークン）を取り出す。LLM 採点ではない。"""
+    """ログの metrics から効率指標（時間・コスト・トークン）を取り出す（LLM 採点ではない）."""
     metrics = log.get("metrics", {}) or {}
     return {
         "elapsed_seconds": metrics.get("elapsed_seconds"),
@@ -148,7 +151,7 @@ def efficiency_metrics(log: dict[str, Any]) -> dict[str, Any]:
 
 
 def aggregate_scores(scores: list[dict[str, Any]]) -> dict[str, Any]:
-    """複数スコア dict を軸ごとに平均し、全軸平均 (average) と件数 (n) を付与する。"""
+    """複数スコア dict を軸ごとに平均し、全軸平均 (average) と件数 (n) を付与する."""
     agg: dict[str, Any] = {}
     for axis in AXES:
         nums: list[float] = [
@@ -249,8 +252,8 @@ Respond ONLY with a JSON object:
 
 
 def evaluate_with_llm(response: dict[str, Any], evaluator_model: Any) -> dict[str, Any]:
-    """
-    Evaluate a Dialect-MAS run using an LLM as evaluator.
+    """Evaluate a Dialect-MAS run using an LLM as evaluator.
+
     `response` should be the output of build_eval_input().
     `evaluator_model` must expose .model (str) and .invoke(prompt: str) -> str.
     Returns a dict with numeric scores and model info.
@@ -312,7 +315,7 @@ Justification status: {response['justification_status']}
         scores["evaluator_model"] = evaluator_model.model
         return scores
     except Exception as e:
-        print(f"Evaluation failed: {e}")
+        print(f"Evaluation failed: {e}")  # noqa: T201  # 評価失敗を端末へ知らせる診断出力。
         return {
             "coherence": None,
             "originality": None,

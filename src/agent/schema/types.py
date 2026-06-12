@@ -1,3 +1,5 @@
+"""議論システム全体で共有する Literal 型エイリアス定義."""
+
 from typing import Literal
 
 AgentName = Literal["AG1", "AG2"]

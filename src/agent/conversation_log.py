@@ -1,4 +1,4 @@
-"""エージェント呼び出しを role/content 形式で記録するための軽量レコーダ。
+"""エージェント呼び出しを role/content 形式で記録するための軽量レコーダ.
 
 各 LLM 呼び出しの入力メッセージ（system / user）とモデル応答（assistant）を
 role/content の組として収集し、cli.py から JSON にダンプするために使う。
@@ -22,13 +22,14 @@ _enabled = False
 
 
 def reset() -> None:
-    """記録を有効化し、バッファを空にする。実行開始時に呼ぶ。"""
+    """記録を有効化し、バッファを空にする（実行開始時に呼ぶ）."""
     global _records, _enabled
     _records = []
     _enabled = True
 
 
 def is_enabled() -> bool:
+    """記録が有効かどうかを返す."""
     return _enabled
 
 
@@ -45,7 +46,7 @@ def _content_of(message: BaseMessage) -> Any:
 
 
 def record(messages: list[BaseMessage], response_content: Any, *, model: str) -> None:
-    """1回の LLM 呼び出しを role/content 形式で記録する。
+    """1回の LLM 呼び出しを role/content 形式で記録する.
 
     messages: 送信した入力メッセージ列（system / user）。
     response_content: モデル応答の中身（テキスト or 構造化出力の dict）。assistant として記録する。
@@ -67,11 +68,12 @@ def record(messages: list[BaseMessage], response_content: Any, *, model: str) ->
 
 
 def records() -> list[dict[str, Any]]:
+    """記録済みの exchange リストを返す."""
     return _records
 
 
 def dump(path: str | Path, metadata: dict[str, Any] | None = None) -> Path:
-    """記録した全 exchange を JSON で書き出す。親ディレクトリは自動生成する。"""
+    """記録した全 exchange を JSON で書き出す（親ディレクトリは自動生成）."""
     out_path = Path(path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     payload: dict[str, Any] = {**(metadata or {}), "exchanges": _records}

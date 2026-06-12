@@ -1,3 +1,5 @@
+"""議論ワークフローの状態定義と LangGraph グラフの構築."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -39,6 +41,8 @@ from .schema.types import AgentName, DebateStage
 
 @dataclass
 class State:
+    """議論グラフ全体で共有される可変状態."""
+
     question: str
     agent1_stance: str
     agent2_stance: str

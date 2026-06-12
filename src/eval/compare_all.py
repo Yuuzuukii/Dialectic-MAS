@@ -1,5 +1,4 @@
-"""
-Compare schema (eval/logs-v2) vs no-schema (eval/logs-v1-no-schema) across ALL categories.
+"""Compare schema (eval/logs-v2) vs no-schema (eval/logs-v1-no-schema) across ALL categories.
 
 Reuses compare_category for each category, then aggregates a per-category breakdown
 and an overall score. Writes JSON plus a console table.
@@ -7,6 +6,9 @@ and an overall score. Writes JSON plus a console table.
 Usage:
     python src/eval/compare_all.py [--model gpt-5-mini]
 """
+
+# print による結果出力と、sys.path 追加後の import はこの評価スクリプトでは意図的。
+# ruff: noqa: T201, E402
 
 from __future__ import annotations
 
@@ -55,6 +57,7 @@ def compare_all(
     schema_root: Path = SCHEMA_ROOT,
     no_schema_root: Path = NO_SCHEMA_ROOT,
 ) -> dict[str, Any]:
+    """全カテゴリで schema 版と no-schema 版を比較し、カテゴリ別と総合スコアを返す."""
     categories: dict[str, Any] = {}
     schema_aggr: list[dict[str, Any]] = []
     noschema_aggr: list[dict[str, Any]] = []
@@ -74,7 +77,7 @@ def compare_all(
         if ca["no_schema"]["n"]:
             noschema_aggr.append(ca["no_schema"])
 
-    overall = {
+    overall: dict[str, Any] = {
         "schema": aggregate_scores(schema_aggr),
         "no_schema": aggregate_scores(noschema_aggr),
     }
@@ -88,6 +91,7 @@ def compare_all(
 
 
 def print_overall_table(result: dict[str, Any]) -> None:
+    """カテゴリ別内訳と総合スコアの表を端末に出力する."""
     print(f"\n=== Overall comparison (evaluator: {result['evaluator_model']}) ===\n")
     header = f"{'Category':<32}{'schema':>9}{'no-schema':>12}{'Δ':>9}"
     print(header)
@@ -108,6 +112,7 @@ def print_overall_table(result: dict[str, Any]) -> None:
 
 
 def main() -> None:
+    """CLI 引数を解析し、全カテゴリ比較を実行して結果を保存・表示する."""
     parser = argparse.ArgumentParser(description="Compare schema vs no-schema across all categories.")
     parser.add_argument(
         "--model",

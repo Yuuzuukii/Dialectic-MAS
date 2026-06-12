@@ -1,5 +1,4 @@
-"""
-Schema-free dialectical dialogue — baseline for comparison with Dialect-MAS.
+"""Schema-free dialectical dialogue — baseline for comparison with Dialect-MAS.
 
 Flow:
   1. AG1 main claim
@@ -13,6 +12,9 @@ Usage:
     python src/cli_no_schema.py
     python src/cli_no_schema.py --question "..." --agent1-stance "..." --agent2-stance "..."
 """
+
+# print による端末出力と、sys.path 追加後の import はこの CLI では意図的。
+# ruff: noqa: T201, E402
 
 from __future__ import annotations
 
@@ -37,6 +39,7 @@ MODEL = "gpt-5-mini"
 
 
 async def step(label: str, prompt: str, config: RunnableConfig | None = None) -> str:
+    """1 ステップ分のプロンプトを LLM に投げ、ラベル付きで出力して結果を返す."""
     print(f"[{label}]")
     result = await call_llm(prompt, MODEL, config=config)
     print(result)
@@ -45,6 +48,7 @@ async def step(label: str, prompt: str, config: RunnableConfig | None = None) ->
 
 
 async def run() -> None:
+    """スキーマなしの対話フローを順に実行し、ログを保存する."""
     parser = argparse.ArgumentParser(description="Schema-free dialectical dialogue.")
     parser.add_argument("scenario", nargs="?", default=DEFAULT_SCENARIO,
                         help=f"Scenario name under data/scenarios/ (default: {DEFAULT_SCENARIO})")

@@ -1,6 +1,8 @@
+"""各ノードへ渡す system/human メッセージ列を組み立てるプロンプトビルダ群."""
+
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
 
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
 
@@ -9,17 +11,18 @@ try:
     from .schema.state import ArgumentRecord
     from .schema.types import AgentName
 except ImportError:  # pragma: no cover - supports LangGraph file-path loading.
-    from prompts import PromptTemplates
-    from schema.state import ArgumentRecord
-    from schema.types import AgentName
+    from prompts import PromptTemplates  # type: ignore
+    from schema.state import ArgumentRecord  # type: ignore
+    from schema.types import AgentName  # type: ignore
 
 
 def _stance(state: Any, agent: AgentName) -> str:
-    return state.agent1_stance if agent == "AG1" else state.agent2_stance
+    """指定エージェントのスタンス文字列を返す."""
+    return cast(str, state.agent1_stance if agent == "AG1" else state.agent2_stance)
 
 
 def compose_system(stance: str, task_system: str) -> str:
-    """エージェントのスタンス（役割）とタスク定義を 1 つの system プロンプトに結合する。"""
+    """エージェントのスタンス（役割）とタスク定義を 1 つの system プロンプトに結合する."""
     stance = (stance or "").strip()
     task_system = task_system.strip()
     if not stance:
@@ -28,7 +31,7 @@ def compose_system(stance: str, task_system: str) -> str:
 
 
 def _agent_system(state: Any, agent: AgentName, task_system: str) -> str:
-    """エージェント identity + stance + タスク定義を 1 つの system プロンプトにする。"""
+    """エージェント identity + stance + タスク定義を 1 つの system プロンプトにする."""
     identity = (
         "<identity>\n"
         f'You are {agent} in this debate. In the message history, turns whose agent/name is "{agent}" '
@@ -39,7 +42,7 @@ def _agent_system(state: Any, agent: AgentName, task_system: str) -> str:
 
 
 def render_history(history: list[ArgumentRecord]) -> list[BaseMessage]:
-    """state.history を読み取り専用で受け取り、視点非依存のメッセージ列に変換する。
+    """state.history を読み取り専用で受け取り、視点非依存のメッセージ列に変換する.
 
     各 turn は AIMessage（assistant）とし、`name` に発言者 (AG1/AG2) を載せて区別する。
     content は ArgumentRecord.message_content()（round/phase/agent/attack/status + Argument の JSON）。
@@ -90,6 +93,7 @@ def _undercut_instruction(target: ArgumentRecord) -> str:
 
 
 def build_main_argument_messages(state: Any, agent: AgentName) -> list[BaseMessage]:
+    """主張生成ノード用の system/履歴/指示メッセージ列を組み立てる."""
     return [
         SystemMessage(content=_agent_system(state, agent, PromptTemplates.MAIN_ARGUMENT_SYSTEM)),
         *render_history(state.history),
@@ -104,6 +108,7 @@ def build_attack_messages(
     *,
     purpose: str,
 ) -> list[BaseMessage]:
+    """攻撃（反論/論駁）生成ノード用のメッセージ列を組み立てる."""
     task_system = (
         PromptTemplates.COUNTER_ARGUMENT_SYSTEM
         if purpose == "defend_main"
@@ -119,6 +124,7 @@ def build_attack_messages(
 def build_undercut_messages(
     state: Any, attacker: AgentName, target: ArgumentRecord
 ) -> list[BaseMessage]:
+    """Undercut 生成ノード用のメッセージ列を組み立てる."""
     return [
         SystemMessage(content=_agent_system(state, attacker, PromptTemplates.UNDERCUT_CHECK_SYSTEM)),
         *render_history(state.history),
@@ -131,6 +137,7 @@ def build_undercut_messages(
 def build_generalization_prompt(
     warrant_result: str, conversation_history: str
 ) -> tuple[str, str]:
+    """一般化（generalize）メタタスク用の (system, user) 文字列を組み立てる."""
     system = PromptTemplates.GENERALIZATION_SYSTEM.strip()
     user = f"## Warrants\n{warrant_result}\n\n## Dialogue History\n{conversation_history}"
     return system, user
@@ -139,6 +146,7 @@ def build_generalization_prompt(
 def build_integration_prompt(
     warrant_result: str, generalization_result: str
 ) -> tuple[str, str]:
+    """統合（integrate）メタタスク用の (system, user) 文字列を組み立てる."""
     system = PromptTemplates.INTEGRATION_SYSTEM.strip()
     user = f"{warrant_result}\n\n{generalization_result}"
     return system, user

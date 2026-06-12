@@ -1,3 +1,5 @@
+"""LLM の構造化出力（with_structured_output）に使う Pydantic スキーマ定義."""
+
 from __future__ import annotations
 
 from typing import Literal
@@ -9,6 +11,8 @@ from .types import AttackType
 
 # LLM出力：主張（主張可能 + 理由 + Argumentのメイン出力）
 class MainArgumentAvailabilityOutput(BaseModel):
+    """主張生成の可否と、可能な場合のメイン Argument 出力."""
+
     can_generate: Literal["YES", "NO"] = Field(
         description=(
             "determining whether you can make an argument regarding the given issue."
@@ -22,6 +26,8 @@ class MainArgumentAvailabilityOutput(BaseModel):
 
 # LLM出力：反論（反論可能 + 攻撃側Argument + 攻撃宣言）
 class DefeatingArgumentOutput(BaseModel):
+    """反論の可否と、攻撃側 Argument・攻撃宣言（Attack）出力."""
+
     can_defeat: Literal["YES", "NO"] = Field(description="YES only if a valid rebut or undercut is available.")
     Argument: ArgumentBody | None = Field(default=None, description="Defeating argument body, omitted when NO.")
     Attack: AttackMetadata | None = Field(
@@ -31,11 +37,15 @@ class DefeatingArgumentOutput(BaseModel):
 
 # LLM出力：defeat判定（rebutに対するundercut）（undercut可否 + Argumentのメイン出力）
 class UndercutOutput(BaseModel):
+    """undercut（仮定の無効化）の可否と Argument 出力."""
+
     can_undercut: Literal["YES", "NO"] = Field(description="YES only if a target Ass can be invalidated.")
     Argument: ArgumentBody | None = Field(default=None, description="Undercutting argument body, omitted when NO.")
 
 # LLM出力：汎化
 class GeneralizationOutput(BaseModel):
+    """汎化出力（対立する warrant から抽出した再利用可能な基準のリスト）."""
+
     Argument: list[GeneralizedCriterion] = Field(
         default_factory=list,
         description="Reusable criteria extracted from conflicting warrants.",
@@ -43,12 +53,16 @@ class GeneralizationOutput(BaseModel):
 
 # LLM出力：統合
 class IntegrationOutput(BaseModel):
+    """統合出力（汎化基準を統合した単一ルール）."""
+
     Argument: IntegrationBody = Field(description="Integration result.")
 
 # =======================================ヘルパ
 
 # Argumentのメイン出力
 class ArgumentBody(BaseModel):
+    """連鎖規則の列からなる Argument 本体."""
+
     rules: list[Rule] = Field(
         default_factory=list,
         description=(
@@ -62,11 +76,15 @@ class ArgumentBody(BaseModel):
 
 # 先行詞 + 帰結
 class Rule(BaseModel):
+    """先行詞（antecedent）と帰結（consequent）からなる 1 規則."""
+
     antecedent: Antecedent = Field(description="A conjunction used to lead to a conclusion")
     consequent: str = Field(description="A conclusion logically derived from conjunction")
 
 # 先行詞
 class Antecedent(BaseModel):
+    """規則の先行詞（strong 条件と weak_negation 仮定の連言）."""
+
     strong: list[str] = Field(
         default_factory=list,
         description="Established assumptions necessary to lead to a conclusion",
@@ -78,6 +96,8 @@ class Antecedent(BaseModel):
 
 # 攻撃側が提示する攻撃関係
 class AttackMetadata(BaseModel):
+    """攻撃側が宣言する攻撃方法（rebut/undercut）と対象参照."""
+
     method: AttackType = Field(
         description=(
             "Attack method used by this argument: "
@@ -93,6 +113,8 @@ class AttackMetadata(BaseModel):
 
 # 攻撃側が指定する攻撃対象
 class TargetReference(BaseModel):
+    """攻撃対象（対象 Argument 内の Conc または Ass の具体文）の参照."""
+
     field: Literal["Conc", "Ass"] = Field(
         description="Field attacked in the target argument: 'Conc' for a rebut; 'Ass' for an undercut."
     )
@@ -102,12 +124,16 @@ class TargetReference(BaseModel):
 
 # 汎化出力の要素
 class GeneralizedCriterion(BaseModel):
+    """汎化された 1 基準（条件・帰結・背後の原理）."""
+
     strong: list[str] = Field(default_factory=list, description="Generalized conditions derived from warrants.")
     consequent: str = Field(description="Generalized conclusion derived from the conditions.")
     principle: str = Field(description="The underlying value or principle that makes this criterion rationally compelling (e.g. 'portability', 'practical performance').")
 
 # 統合出力の要素
 class IntegrationBody(BaseModel):
+    """統合結果（汎化基準を OR 結合した単一の再利用可能ルール）."""
+
     consequent: str = Field(description="Integrated generalized conclusion.")
     rule: str = Field(
         description=(

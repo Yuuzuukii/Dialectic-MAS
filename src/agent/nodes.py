@@ -32,35 +32,35 @@ try:
     from .schema.state import ArgumentRecord, parse_serialized_payload
     from .threads import complete_thread, dialogue_history
 except ImportError:  # pragma: no cover - supports LangGraph file-path loading.
-    from arguments import (
+    from arguments import (  # type: ignore
         argument_body_json,
         generate_attack,
         generate_undercut,
     )
-    from defeats import run_defeat_subgraph, run_strict_defeat_subgraph
-    from llm import (
+    from defeats import run_defeat_subgraph, run_strict_defeat_subgraph  # type: ignore
+    from llm import (  # type: ignore
         call_llm_messages,
         invoke_agent_structured,
         invoke_agent_structured_messages,
     )
-    from prompt_builders import (
+    from prompt_builders import (  # type: ignore
         build_generalization_prompt,
         build_integration_prompt,
         build_main_argument_messages,
         compose_system,
     )
-    from prompts import PromptTemplates
-    from schema.llm_outputs import (
+    from prompts import PromptTemplates  # type: ignore
+    from schema.llm_outputs import (  # type: ignore
         GeneralizationOutput,
         IntegrationOutput,
         MainArgumentAvailabilityOutput,
     )
-    from schema.state import ArgumentRecord, parse_serialized_payload
-    from threads import complete_thread, dialogue_history
+    from schema.state import ArgumentRecord, parse_serialized_payload  # type: ignore
+    from threads import complete_thread, dialogue_history  # type: ignore
 
 
 async def can_generate_main(state: Any) -> dict[str, Any]:
-    """Proponent が新しい主張 (A) を生成できるか判定し、可能なら生成して返す。"""
+    """Proponent が新しい主張 (A) を生成できるか判定し、可能なら生成して返す."""
     agent = state.current_proponent
     messages = build_main_argument_messages(state, agent)
     output = await invoke_agent_structured_messages(
@@ -132,7 +132,7 @@ async def can_generate_main(state: Any) -> dict[str, Any]:
 
 
 async def o_defeat_a(state: Any) -> dict[str, Any]:
-    """Opponent が Proponent の主張 A を攻撃する論証 (B) を生成する。"""
+    """Opponent が Proponent の主張 A を攻撃する論証 (B) を生成する."""
     if state.current_argument is None:
         return {"error": "No current main argument to attack."}
     argument = await generate_attack(
@@ -156,7 +156,7 @@ async def o_defeat_a(state: Any) -> dict[str, Any]:
 
 
 async def validate_b_defeats_a(state: Any) -> dict[str, Any]:
-    """B が A を defeat するか検証する。防御側の undercut があれば defeat を阻止する。"""
+    """B が A を defeat するか検証する。防御側の undercut があれば defeat を阻止する."""
     if state.current_argument is None or state.b_argument is None:
         return {"error": "Cannot validate B defeats A without A and B."}
     result = await run_defeat_subgraph(
@@ -183,7 +183,7 @@ async def validate_b_defeats_a(state: Any) -> dict[str, Any]:
 
 
 async def p_counter_b(state: Any) -> dict[str, Any]:
-    """Proponent が Opponent の攻撃 B に対してカウンター論証 (C) を生成する。"""
+    """Proponent が Opponent の攻撃 B に対してカウンター論証 (C) を生成する."""
     if state.b_argument is None:
         return {"error": "No B argument to counter."}
     argument = await generate_attack(
@@ -206,7 +206,7 @@ async def p_counter_b(state: Any) -> dict[str, Any]:
 
 
 async def validate_c_defeats_b(state: Any) -> dict[str, Any]:
-    """C が B を defeat するか検証する。defeat できなければ Proponent の主張は overruled。"""
+    """C が B を defeat するか検証する。defeat できなければ Proponent の主張は overruled."""
     if state.b_argument is None or state.c_argument is None:
         return {"error": "Cannot validate C defeats B without B and C."}
     result = await run_defeat_subgraph(
@@ -233,7 +233,7 @@ async def validate_c_defeats_b(state: Any) -> dict[str, Any]:
 
 
 async def validate_b_defeats_c(state: Any) -> dict[str, Any]:
-    """C が B を strictly defeat するか検証する。B が C を逆 defeat できなければ Proponent の主張は justified。"""
+    """C が B を strictly defeat するか検証する。B が C を逆 defeat できなければ Proponent の主張は justified."""
     if state.b_argument is None or state.c_argument is None:
         return {"error": "Cannot validate B defeats C without B and C."}
     result = await run_strict_defeat_subgraph(
@@ -263,7 +263,7 @@ async def validate_b_defeats_c(state: Any) -> dict[str, Any]:
 
 
 async def extract_warrants(state: Any) -> dict[str, Any]:
-    """AG1 と AG2 の主張それぞれの最終ルール (warrant) を抽出する。"""
+    """AG1 と AG2 の主張それぞれの最終ルール (warrant) を抽出する."""
     if state.ag1_main_argument is None or state.ag2_main_argument is None:
         return {"error": "AG1またはAG2のmain argumentが見つかりません"}
     try:
@@ -295,7 +295,7 @@ async def extract_warrants(state: Any) -> dict[str, Any]:
 
 
 async def generalize(state: Any) -> dict[str, Any]:
-    """両エージェントの warrant を汎化し、再利用可能な基準を導出する。"""
+    """両エージェントの warrant を汎化し、再利用可能な基準を導出する."""
     if state.warrant_result is None:
         return {"error": "Cannot generalize without warrants."}
     task_system, user_prompt = build_generalization_prompt(
@@ -312,7 +312,7 @@ async def generalize(state: Any) -> dict[str, Any]:
 
 
 async def integrate(state: Any) -> dict[str, Any]:
-    """汎化された基準を一つの統合ルールにまとめ、次ラウンドで再利用できる形にする。"""
+    """汎化された基準を一つの統合ルールにまとめ、次ラウンドで再利用できる形にする."""
     if state.warrant_result is None or state.generalization_result is None:
         return {"error": "Cannot integrate without warrants and generalization."}
     task_system, user_prompt = build_integration_prompt(
@@ -331,6 +331,7 @@ async def integrate(state: Any) -> dict[str, Any]:
 
 
 def extract_integrated_rule(integration_result: str) -> str | None:
+    """統合結果ペイロードから統合ルール文字列を取り出す（プレースホルダは除外）."""
     data = parse_serialized_payload(integration_result)
     argument = data.get("Argument", {})
     rule = argument.get("rule") if isinstance(argument, dict) else None
@@ -349,7 +350,7 @@ def extract_integrated_rule(integration_result: str) -> str | None:
     return None
 
 async def add_integrated_rule(state: Any) -> dict[str, Any]:
-    """統合ルールを integrated_rules に追加し、次の debate round の初期状態にリセットする。"""
+    """統合ルールを integrated_rules に追加し、次の debate round の初期状態にリセットする."""
     if not state.integrated_rule:
         return {"error": "No integrated rule to add."}
     rules = [*state.integrated_rules]
@@ -386,7 +387,7 @@ async def add_integrated_rule(state: Any) -> dict[str, Any]:
 
 
 async def finalize_fallback(state: Any) -> dict[str, Any]:
-    """ラウンド上限到達時、integration rule で作った main arg を暫定回答の土台に据える。
+    """ラウンド上限到達時、integration rule で作った main arg を暫定回答の土台に据える.
 
     debate を経た justified ではないため、合意なし (consensus_reached=False) を明示する。
     """
@@ -400,7 +401,7 @@ async def finalize_fallback(state: Any) -> dict[str, Any]:
 
 
 async def generate_final_answer(state: Any) -> dict[str, Any]:
-    """対話履歴を踏まえて自然文回答を生成する。
+    """対話履歴を踏まえて自然文回答を生成する.
 
     通常は justified な主張から作る。合意に至らず暫定回答を作る場合
     (consensus_reached is False) は、合意なしであることを明示する専用プロンプトを使う。
@@ -447,12 +448,12 @@ async def generate_final_answer(state: Any) -> dict[str, Any]:
 
 
 async def route_after_thread_node(state: Any) -> dict[str, Any]:
-    """スレッド完了後の条件分岐エッジが参照するランディングノード。本体は空。"""
+    """スレッド完了後の条件分岐エッジが参照するランディングノード。本体は空."""
     return {}
 
 
 async def finish(state: Any) -> dict[str, Any]:
-    """議論を正常終了し、対話履歴・正当化結果・統合ルールを最終状態として返す。"""
+    """議論を正常終了し、対話履歴・正当化結果・統合ルールを最終状態として返す."""
     return {
         "dialogue_history": dialogue_history(state.history),
         "justified_argument": state.justified_argument,
@@ -472,7 +473,7 @@ async def finish(state: Any) -> dict[str, Any]:
 
 
 async def finish_with_error(state: Any) -> dict[str, Any]:
-    """エラー情報を付与した状態で議論を終了する。"""
+    """エラー情報を付与した状態で議論を終了する."""
     result = await finish(state)
     result["error"] = state.error
     return result

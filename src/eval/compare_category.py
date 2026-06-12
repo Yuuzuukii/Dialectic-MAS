@@ -1,5 +1,4 @@
-"""
-Compare schema (eval/logs-v2) vs no-schema (eval/logs-v1-no-schema) for ONE category.
+"""Compare schema (eval/logs-v2) vs no-schema (eval/logs-v1-no-schema) for ONE category.
 
 Scores every result log of each topic with the same LLM evaluator (3 axes:
 coherence / originality / dialecticality, 1-10), averages per topic and per
@@ -8,6 +7,9 @@ category, and writes the result as JSON plus a console table.
 Usage:
     python src/eval/compare_category.py <category> [--model gpt-5-mini]
 """
+
+# print による結果出力と、sys.path 追加後の import はこの評価スクリプトでは意図的。
+# ruff: noqa: T201, E402
 
 from __future__ import annotations
 
@@ -97,6 +99,7 @@ def compare_category(
     schema_root: Path = SCHEMA_ROOT,
     no_schema_root: Path = NO_SCHEMA_ROOT,
 ) -> dict[str, Any]:
+    """1 カテゴリ内の全トピックを採点し、schema/no-schema の比較結果を返す."""
     schema_topics = _topic_log_files(schema_root, category, no_schema=False)
     noschema_topics = _topic_log_files(no_schema_root, category, no_schema=True)
     topics = sorted(set(schema_topics) | set(noschema_topics))
@@ -120,7 +123,7 @@ def compare_category(
         if noschema_score["n"]:
             noschema_aggr.append(noschema_score)
 
-    category_average = {
+    category_average: dict[str, Any] = {
         "schema": aggregate_scores(schema_aggr),
         "no_schema": aggregate_scores(noschema_aggr),
     }
@@ -139,6 +142,7 @@ def _fmt(value: Any) -> str:
 
 
 def print_category_table(result: dict[str, Any]) -> None:
+    """カテゴリの比較結果をトピック別の表として端末に出力する."""
     print(f"\n=== Comparison: {result['category']} (evaluator: {result['evaluator_model']}) ===\n")
     header = f"{'Topic':<30}{'schema':>9}{'no-schema':>12}{'Δ':>9}"
     print(header)
@@ -164,6 +168,7 @@ def _save(result: dict[str, Any], filename: str) -> Path:
 
 
 def main() -> None:
+    """CLI 引数を解析し、指定カテゴリの比較を実行して結果を保存・表示する."""
     parser = argparse.ArgumentParser(description="Compare schema vs no-schema for one category.")
     parser.add_argument("category", help="Category name under eval/data/.")
     parser.add_argument(

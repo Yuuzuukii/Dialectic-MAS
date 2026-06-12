@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from typing import Any
+from typing import Any, cast
 
 try:
     from .llm import invoke_agent_structured_messages
@@ -16,15 +16,23 @@ try:
     from .schema.state import ArgumentRecord
     from .schema.types import AgentName
 except ImportError:  # pragma: no cover - supports LangGraph file-path loading.
-    from llm import invoke_agent_structured_messages
-    from prompt_builders import build_attack_messages, build_undercut_messages
-    from schema.llm_outputs import ArgumentBody, DefeatingArgumentOutput, UndercutOutput
-    from schema.state import ArgumentRecord
-    from schema.types import AgentName
+    from llm import invoke_agent_structured_messages  # type: ignore
+    from prompt_builders import (  # type: ignore
+        build_attack_messages,
+        build_undercut_messages,
+    )
+    from schema.llm_outputs import (  # type: ignore
+        ArgumentBody,
+        DefeatingArgumentOutput,
+        UndercutOutput,
+    )
+    from schema.state import ArgumentRecord  # type: ignore
+    from schema.types import AgentName  # type: ignore
 
 
 def agent_stance(state: Any, agent: AgentName) -> str:
-    return state.agent1_stance if agent == "AG1" else state.agent2_stance
+    """指定エージェントの立場（賛成/反対）を返す."""
+    return cast(str, state.agent1_stance if agent == "AG1" else state.agent2_stance)
 
 
 def argument_body_json(argument: ArgumentBody) -> str:
@@ -57,6 +65,7 @@ async def generate_attack(
     *,
     purpose: str,
 ) -> ArgumentRecord | None:
+    """攻撃（rebut/undermine）主張を LLM 生成し、ArgumentRecord 化する."""
     messages = build_attack_messages(state, attacker, target, purpose=purpose)
     output = await invoke_agent_structured_messages(messages, DefeatingArgumentOutput)
     if output.can_defeat != "YES" or output.Argument is None or output.Attack is None:
@@ -79,6 +88,7 @@ async def generate_undercut(
     attacker: AgentName,
     target: ArgumentRecord,
 ) -> ArgumentRecord | None:
+    """対象の仮定（Ass）を狙う undercut 主張を LLM 生成し、ArgumentRecord 化する."""
     if not target.assumptions:
         return None
     messages = build_undercut_messages(state, attacker, target)

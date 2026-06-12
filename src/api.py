@@ -1,6 +1,8 @@
+"""議論グラフを実行する FastAPI エンドポイント定義."""
+
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from fastapi import FastAPI
 from fastapi.encoders import jsonable_encoder
@@ -60,10 +62,13 @@ QUESTION = "What should we eat?"
 
 
 def public_result(result: dict[str, Any]) -> dict[str, Any]:
+    """内部状態フィールドを除いた、外部公開用の結果 dict を返す."""
     return {key: value for key, value in result.items() if key not in INTERNAL_STATE_FIELDS}
 
 
 class DialogueRequest(BaseModel):
+    """/invoke エンドポイントのリクエストボディ."""
+
     question: str = QUESTION
     agent1_stance: str = AG1_STANCE
     agent2_stance: str = AG2_STANCE
@@ -74,22 +79,25 @@ class DialogueRequest(BaseModel):
     @field_validator("agent1_stance", mode="before")
     @classmethod
     def default_agent1_stance_when_blank(cls, value: Any) -> str:
+        """agent1_stance が空なら既定スタンスで補完する."""
         if value is None or (isinstance(value, str) and not value.strip()):
             return AG1_STANCE
-        return value
+        return cast(str, value)
 
     @field_validator("agent2_stance", mode="before")
     @classmethod
     def default_agent2_stance_when_blank(cls, value: Any) -> str:
+        """agent2_stance が空なら既定スタンスで補完する."""
         if value is None or (isinstance(value, str) and not value.strip()):
             return AG2_STANCE
-        return value
+        return cast(str, value)
 
 
 @app.post("/invoke")
-async def invoke_dialogue(request: DialogueRequest):
+async def invoke_dialogue(request: DialogueRequest) -> dict[str, Any]:
+    """議論グラフを実行し、結果を保存してレスポンスを返す."""
     graph_input = State(**request.model_dump(exclude={"output_path"}))
-    result = await graph.ainvoke(graph_input)
+    result = await graph.ainvoke(graph_input)  # type: ignore[arg-type]
     encoded_result = jsonable_encoder(public_result(result))
 
     output_path = Path(request.output_path)
@@ -106,5 +114,6 @@ async def invoke_dialogue(request: DialogueRequest):
 
 
 @app.get("/")
-def health_check():
+def health_check() -> dict[str, str]:
+    """ヘルスチェック用エンドポイント."""
     return {"status": "ok"}

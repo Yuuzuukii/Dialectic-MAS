@@ -1,0 +1,1 @@
+"""Dialect-MAS source package."""

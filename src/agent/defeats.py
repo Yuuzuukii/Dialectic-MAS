@@ -1,3 +1,5 @@
+"""攻撃の成否判定（rebut/undermine/undercut）と defeat 関係を計算するサブグラフ."""
+
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
@@ -8,19 +10,21 @@ try:
     from .schema.state import ArgumentRecord, DefeatRelation
     from .schema.types import AgentName, AttackType
 except ImportError:  # pragma: no cover - supports LangGraph file-path loading.
-    from schema.state import ArgumentRecord, DefeatRelation
-    from schema.types import AgentName, AttackType
+    from schema.state import ArgumentRecord, DefeatRelation  # type: ignore
+    from schema.types import AgentName, AttackType  # type: ignore
 
 BlockerGenerator = Callable[[Any, AgentName, ArgumentRecord], Awaitable[ArgumentRecord | None]]
 TargetField = Literal["Conc", "Ass"]
 
 
 def _log(msg: str) -> None:
-    print(msg, flush=True)
+    print(msg, flush=True)  # noqa: T201  # 議論進行を端末へ出すための意図的なログ。
 
 
 @dataclass
 class DefeatSubgraphResult:
+    """単一方向の defeat 判定結果（成否・攻撃種別・関係・生成ブロッカー）."""
+
     defeats: bool
     attack: AttackType | None
     relations: list[DefeatRelation]
@@ -29,6 +33,8 @@ class DefeatSubgraphResult:
 
 @dataclass
 class StrictDefeatSubgraphResult:
+    """strict defeat（順方向が成立し逆方向が不成立）の判定結果."""
+
     strictly_defeats: bool
     forward: DefeatSubgraphResult | None
     reverse: DefeatSubgraphResult | None
@@ -36,13 +42,15 @@ class StrictDefeatSubgraphResult:
 
 @dataclass(frozen=True)
 class AttackMatch:
+    """攻撃メタデータから導いた攻撃種別・対象フィールド・対象文の組."""
+
     method: AttackType
     field: TargetField
     statement: str | None
 
 
 def attack_from_metadata(attacker: ArgumentRecord) -> AttackMatch | None:
-    """LLM が宣言した攻撃メタデータから AttackMatch を生成する。"""
+    """LLM が宣言した攻撃メタデータから AttackMatch を生成する."""
     if attacker.attack is None:
         return None
     field: TargetField = "Conc" if attacker.attack == "rebut" else "Ass"
@@ -56,6 +64,7 @@ def relation(
     valid: bool,
     reason: str,
 ) -> DefeatRelation:
+    """攻撃者・対象・判定結果から DefeatRelation レコードを組み立てる."""
     return DefeatRelation(
         attacker_id=attacker.id,
         target_id=target.id,
@@ -78,6 +87,7 @@ async def run_defeat_subgraph(
     allow_generated_blocker: bool = True,
     persist_metadata: bool = True,
 ) -> DefeatSubgraphResult:
+    """攻撃者が対象を破れるか判定する。undercut なら防御側がブロッカーを生成可能."""
     _log(f"[defeat_subgraph] {relation_context}")
     match = attack_from_metadata(attacker)
     if match is None:
@@ -141,6 +151,7 @@ async def run_strict_defeat_subgraph(
     blocker_generator: BlockerGenerator | None = None,
     forward_already_true: bool = False,
 ) -> StrictDefeatSubgraphResult:
+    """順方向・逆方向の defeat を判定し、strict defeat の成否を返す."""
     forward = None
     if not forward_already_true:
         forward = await run_defeat_subgraph(

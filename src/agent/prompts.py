@@ -1,3 +1,5 @@
+"""議論システムの全プロンプト定義（SYSTEM テンプレートと共有ブロック）."""
+
 # プロンプトは「SYSTEM（役割・論証の文法・タスク定義・出力契約）」と
 # 「USER（その手番でしか意味を持たない可変入力）」に分離して管理する。
 #
@@ -61,11 +63,13 @@ Use this history to avoid repeating defeated moves and to stay consistent with t
 
 
 def _system(*blocks: str) -> str:
-    """XML タグ付きブロックを空行区切りで連結して 1 つの system プロンプトにする。"""
+    """XML タグ付きブロックを空行区切りで連結して 1 つの system プロンプトにする."""
     return "\n\n".join(block.strip() for block in blocks if block and block.strip())
 
 
 class PromptTemplates:
+    """各ノードが参照する SYSTEM プロンプト文字列の名前空間."""
+
     # ---- System: argument-construction framework + task definitions ----
     MAIN_ARGUMENT_SYSTEM = _system(
         "<task>\nConstruct an argument for your position on the Issue.\n</task>",

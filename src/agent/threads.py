@@ -7,14 +7,16 @@ from typing import Any
 try:
     from .schema.state import ArgumentRecord
 except ImportError:  # pragma: no cover - supports LangGraph file-path loading.
-    from schema.state import ArgumentRecord
+    from schema.state import ArgumentRecord  # type: ignore
 
 
 def dialogue_history(history: list[ArgumentRecord]) -> list[dict[str, Any]]:
+    """引数履歴を対話ログ用の dict リストへ変換する."""
     return [argument.to_dialogue_dict() for argument in history]
 
 
 def thread_finding(state: Any, status: str) -> str | None:
+    """スレッド結果から、次の主張生成へ渡す learned finding 文を生成する."""
     if state.current_argument is None or state.b_argument is None:
         return None
     main_conclusion = "; ".join(state.current_argument.conclusions) or "the previous main argument"
@@ -38,7 +40,7 @@ def thread_finding(state: Any, status: str) -> str | None:
 def _annotate_main_status(
     history: list[ArgumentRecord], main_id: str | None, status: str
 ) -> list[ArgumentRecord]:
-    """スレッド完了時、対象 main レコードの status を後追いで埋める（不変＝コピーで差し替え）。"""
+    """スレッド完了時、対象 main レコードの status を後追いで埋める（不変＝コピーで差し替え）."""
     if main_id is None:
         return history
     return [
@@ -52,6 +54,7 @@ def complete_thread(
     status: str,
     extra_history: list[ArgumentRecord] | None = None,
 ) -> dict[str, Any]:
+    """スレッド完了時の状態更新 dict（履歴・status・合意フラグ等）を組み立てる."""
     key = "ag1" if state.current_proponent == "AG1" else "ag2"
     main_id = state.current_argument.id if state.current_argument else None
     history = _annotate_main_status(

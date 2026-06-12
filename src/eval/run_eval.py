@@ -1,11 +1,13 @@
-"""
-Evaluate a Dialect-MAS run log with an LLM evaluator.
+"""Evaluate a Dialect-MAS run log with an LLM evaluator.
 
 Usage:
     python src/eval/run_eval.py                        # latest log in logs/
     python src/eval/run_eval.py --log logs/foo.json
     python src/eval/run_eval.py --model gpt-4o
 """
+
+# print による結果出力と、sys.path 追加後の import はこの評価スクリプトでは意図的。
+# ruff: noqa: T201, E402
 
 from __future__ import annotations
 
@@ -14,6 +16,7 @@ import json
 import os
 import sys
 from pathlib import Path
+from typing import Any, cast
 
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
@@ -43,8 +46,8 @@ def _latest_log(logs_dir: Path) -> Path:
     return logs[-1]
 
 
-def _load_log(path: Path) -> dict:
-    return json.loads(path.read_text(encoding="utf-8"))
+def _load_log(path: Path) -> dict[str, Any]:
+    return cast(dict[str, Any], json.loads(path.read_text(encoding="utf-8")))
 
 
 def _resolve_log_path(raw_path: str) -> Path:
@@ -56,6 +59,7 @@ def _resolve_log_path(raw_path: str) -> Path:
 
 
 def resolve_evaluator_model(model_arg: str | None = None) -> str:
+    """評価器モデル名を引数・環境変数・既定値の優先順で解決する."""
     return (model_arg or os.getenv("MODEL") or DEFAULT_EVALUATOR_MODEL).strip()
 
 
@@ -74,8 +78,8 @@ class _EvaluatorModel:
         return "\n".join(str(part) for part in content)
 
 
-def _build_metrics(scores: dict, efficiency: dict) -> dict:
-    """LLM 採点4軸 + 効率(time/cost/tokens) を1つの metrics dict にまとめる。"""
+def _build_metrics(scores: dict[str, Any], efficiency: dict[str, Any]) -> dict[str, Any]:
+    """LLM 採点4軸 + 効率(time/cost/tokens) を1つの metrics dict にまとめる."""
     numeric: list[float] = [
         float(scores[a]) for a in AXES if isinstance(scores.get(a), (int, float))
     ]
@@ -87,11 +91,11 @@ def _build_metrics(scores: dict, efficiency: dict) -> dict:
     return metrics
 
 
-def _fmt_num(value, suffix: str = "") -> str:
+def _fmt_num(value: Any, suffix: str = "") -> str:
     return f"{value}{suffix}" if isinstance(value, (int, float)) else "N/A"
 
 
-def _print_scores(metrics: dict, log_path: Path, question: str) -> None:
+def _print_scores(metrics: dict[str, Any], log_path: Path, question: str) -> None:
     labels = {
         "coherence":      "Coherence     ",
         "originality":    "Originality   ",
@@ -125,6 +129,7 @@ def _print_scores(metrics: dict, log_path: Path, question: str) -> None:
 
 
 def main() -> None:
+    """ログを読み込み、LLM 評価と効率指標を計算して結果を出力する."""
     parser = argparse.ArgumentParser(description="Evaluate a Dialect-MAS run log.")
     parser.add_argument("--log", help="Path to the log JSON file.")
     parser.add_argument(

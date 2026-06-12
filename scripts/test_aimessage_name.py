@@ -1,4 +1,4 @@
-"""AIMessage の `name` がエージェント識別にどれだけ効くかを測る実験スクリプト。
+"""AIMessage の `name` がエージェント識別にどれだけ効くかを測る実験スクリプト.
 
 LangChain は `AIMessage(content=..., name="ag1")` を OpenAI へ
 `{"role": "assistant", "name": "ag1", "content": ...}` として送る
@@ -23,6 +23,9 @@ LangChain は `AIMessage(content=..., name="ag1")` を OpenAI へ
   PYTHONPATH=src .venv/bin/python scripts/test_aimessage_name.py --model gpt-4o --trials 12
   PYTHONPATH=src .venv/bin/python scripts/test_aimessage_name.py --show-payload
 """
+
+# print による結果出力はこの実験スクリプトでは意図的。
+# ruff: noqa: T201
 
 from __future__ import annotations
 
@@ -51,14 +54,14 @@ CONDITIONS = ("name_only", "label_only", "both", "none")
 
 
 class SecretAnswer(BaseModel):
-    """構造化出力。自分の秘密番号と、その判断理由。"""
+    """構造化出力。自分の秘密番号と、その判断理由."""
 
     secret_number: int = Field(description="あなた自身（指定されたエージェント）の秘密番号")
     reasoning: str = Field(description="どの発言を自分のものと判断したか、一言で")
 
 
 def _agent_message(condition: str, agent_id: str, secret: int) -> AIMessage:
-    """1エージェントの過去発言を、条件に応じて組み立てる。"""
+    """1エージェントの過去発言を、条件に応じて組み立てる."""
     bare = f"私の秘密番号は {secret} です。この番号で議論を続けます。"
     labeled = f"[{agent_id}] {bare}"
 
@@ -76,7 +79,7 @@ def _agent_message(condition: str, agent_id: str, secret: int) -> AIMessage:
 def build_messages(
     condition: str, self_id: str, other_id: str, self_secret: int, other_secret: int, self_first: bool
 ) -> list[BaseMessage]:
-    """system → 履歴(2発言) → 指示 の順でメッセージ列を作る。"""
+    """System → 履歴(2発言) → 指示 の順でメッセージ列を作る."""
     system = SystemMessage(
         content=(
             f"あなたはエージェント {self_id} です。{other_id} と議論しています。"
@@ -97,14 +100,14 @@ def build_messages(
 
 
 def _to_openai_dict(message: BaseMessage) -> dict[str, Any]:
-    """送ったメッセージを OpenAI 形式（role/name/content）に変換してログ用に返す。"""
+    """送ったメッセージを OpenAI 形式（role/name/content）に変換してログ用に返す."""
     from langchain_openai.chat_models.base import _convert_message_to_dict
 
     return _convert_message_to_dict(message)
 
 
 async def run_trial(condition: str, model: str, index: int) -> dict[str, Any]:
-    """1試行。割当と順序をランダム化して実行し、送受信を含むログ用 dict を返す。"""
+    """1試行。割当と順序をランダム化して実行し、送受信を含むログ用 dict を返す."""
     self_id, other_id = "ag1", "ag2"
     self_secret = random.randint(10, 99)
     other_secret = random.randint(10, 99)
@@ -134,6 +137,7 @@ async def run_trial(condition: str, model: str, index: int) -> dict[str, Any]:
 
 
 async def run_condition(condition: str, model: str, trials: int) -> tuple[float, list[dict[str, Any]]]:
+    """1条件を trials 回試行し、正答率と全レコードを返す（結果を端末に出力）."""
     records = await asyncio.gather(
         *(run_trial(condition, model, i) for i in range(trials))
     )
@@ -147,7 +151,7 @@ async def run_condition(condition: str, model: str, trials: int) -> tuple[float,
 
 
 def show_payload() -> None:
-    """LangChain が name をどう OpenAI 形式へ変換するか確認する。"""
+    """LangChain が name をどう OpenAI 形式へ変換するか確認する."""
     from langchain_openai.chat_models.base import _convert_message_to_dict
 
     print("=== LangChain → OpenAI 変換の確認 ===")
@@ -158,6 +162,7 @@ def show_payload() -> None:
 
 
 async def main() -> None:
+    """CLI 引数を解析し、全条件の実験を実行して結果を保存・表示する."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model", default=os.getenv("MODEL", "gpt-5-mini"))
     parser.add_argument("--trials", type=int, default=8, help="条件ごとの試行回数")
