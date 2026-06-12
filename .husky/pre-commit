@@ -1,0 +1,11 @@
+echo "[pre-commit] ruff check ..."
+uv run ruff check . || {
+  echo "[pre-commit] ruff のチェックに失敗しました。修正してから再コミットしてください（uv run ruff check . --fix）。" >&2
+  exit 1
+}
+
+echo "[pre-commit] mypy --strict src/ ..."
+uv run mypy --strict src/ || {
+  echo "[pre-commit] mypy の型チェックに失敗しました。修正してから再コミットしてください。" >&2
+  exit 1
+}
