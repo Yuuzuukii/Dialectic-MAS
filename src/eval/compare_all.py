@@ -1,4 +1,4 @@
-"""Compare schema (eval/logs-v2) vs no-schema (eval/logs-v1-no-schema) across ALL categories.
+"""Compare schema vs no-schema unified logs across ALL categories.
 
 Reuses compare_category for each category, then aggregates a per-category breakdown
 and an overall score. Writes JSON plus a console table.
@@ -38,7 +38,7 @@ from src.eval.compare_category import (
 from src.eval.evaluation import aggregate_scores
 from src.eval.run_eval import _EvaluatorModel, resolve_evaluator_model
 
-_EXCLUDE_DIRS = {"outputs"}
+_EXCLUDE_DIRS = set[str]()
 
 
 def _all_categories(schema_root: Path = SCHEMA_ROOT, no_schema_root: Path = NO_SCHEMA_ROOT) -> list[str]:
@@ -123,13 +123,13 @@ def main() -> None:
         "--schema-root",
         type=Path,
         default=SCHEMA_ROOT,
-        help="Root containing schema logs (default: eval/logs-v2).",
+        help="Root containing schema logs (default: logs).",
     )
     parser.add_argument(
         "--no-schema-root",
         type=Path,
         default=NO_SCHEMA_ROOT,
-        help="Root containing no-schema logs (default: eval/logs-v1-no-schema).",
+        help="Root containing no-schema logs (default: logs).",
     )
     parser.add_argument("--per-category-table", action="store_true",
                         help="Also print the per-topic table for each category.")

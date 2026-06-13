@@ -24,23 +24,34 @@ class MainArgumentAvailabilityOutput(BaseModel):
         description="Required only when can_generate is YES.",
     )
 
+
 # LLM出力：反論（反論可能 + 攻撃側Argument + 攻撃宣言）
 class DefeatingArgumentOutput(BaseModel):
     """反論の可否と、攻撃側 Argument・攻撃宣言（Attack）出力."""
 
-    can_defeat: Literal["YES", "NO"] = Field(description="YES only if a valid rebut or undercut is available.")
-    Argument: ArgumentBody | None = Field(default=None, description="Defeating argument body, omitted when NO.")
+    can_defeat: Literal["YES", "NO"] = Field(
+        description="YES only if a valid rebut or undercut is available."
+    )
+    Argument: ArgumentBody | None = Field(
+        default=None, description="Defeating argument body, omitted when NO."
+    )
     Attack: AttackMetadata | None = Field(
         default=None,
         description="Attack made by this argument against a specified item in the target argument, omitted when NO.",
     )
 
+
 # LLM出力：defeat判定（rebutに対するundercut）（undercut可否 + Argumentのメイン出力）
 class UndercutOutput(BaseModel):
     """undercut（仮定の無効化）の可否と Argument 出力."""
 
-    can_undercut: Literal["YES", "NO"] = Field(description="YES only if a target Ass can be invalidated.")
-    Argument: ArgumentBody | None = Field(default=None, description="Undercutting argument body, omitted when NO.")
+    can_undercut: Literal["YES", "NO"] = Field(
+        description="YES only if a target Ass can be invalidated."
+    )
+    Argument: ArgumentBody | None = Field(
+        default=None, description="Undercutting argument body, omitted when NO."
+    )
+
 
 # LLM出力：汎化
 class GeneralizationOutput(BaseModel):
@@ -51,13 +62,16 @@ class GeneralizationOutput(BaseModel):
         description="Reusable criteria extracted from conflicting warrants.",
     )
 
+
 # LLM出力：統合
 class IntegrationOutput(BaseModel):
     """統合出力（汎化基準を統合した単一ルール）."""
 
     Argument: IntegrationBody = Field(description="Integration result.")
 
+
 # =======================================ヘルパ
+
 
 # Argumentのメイン出力
 class ArgumentBody(BaseModel):
@@ -74,12 +88,18 @@ class ArgumentBody(BaseModel):
         ),
     )
 
+
 # 先行詞 + 帰結
 class Rule(BaseModel):
     """先行詞（antecedent）と帰結（consequent）からなる 1 規則."""
 
-    antecedent: Antecedent = Field(description="A conjunction used to lead to a conclusion")
-    consequent: str = Field(description="A conclusion logically derived from conjunction")
+    antecedent: Antecedent = Field(
+        description="A conjunction used to lead to a conclusion"
+    )
+    consequent: str = Field(
+        description="A conclusion logically derived from conjunction"
+    )
+
 
 # 先行詞
 class Antecedent(BaseModel):
@@ -93,6 +113,7 @@ class Antecedent(BaseModel):
         default_factory=list,
         description="Assumptions necessary to lead to a conclusion",
     )
+
 
 # 攻撃側が提示する攻撃関係
 class AttackMetadata(BaseModel):
@@ -111,6 +132,7 @@ class AttackMetadata(BaseModel):
         description="Conclusion or assumption in the target argument attacked by this argument."
     )
 
+
 # 攻撃側が指定する攻撃対象
 class TargetReference(BaseModel):
     """攻撃対象（対象 Argument 内の Conc または Ass の具体文）の参照."""
@@ -122,13 +144,22 @@ class TargetReference(BaseModel):
         description="Exact conclusion or assumption in the target argument attacked by this argument."
     )
 
+
 # 汎化出力の要素
 class GeneralizedCriterion(BaseModel):
     """汎化された 1 基準（条件・帰結・背後の原理）."""
 
-    strong: list[str] = Field(default_factory=list, description="Generalized conditions derived from warrants.")
-    consequent: str = Field(description="Generalized conclusion derived from the conditions.")
-    principle: str = Field(description="The underlying value or principle that makes this criterion rationally compelling (e.g. 'portability', 'practical performance').")
+    strong: list[str] = Field(
+        default_factory=list,
+        description="Generalized conditions derived from warrants.",
+    )
+    consequent: str = Field(
+        description="Generalized conclusion derived from the conditions."
+    )
+    principle: str = Field(
+        description="The underlying value or principle that makes this criterion rationally compelling (e.g. 'portability', 'practical performance')."
+    )
+
 
 # 統合出力の要素
 class IntegrationBody(BaseModel):

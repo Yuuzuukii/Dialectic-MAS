@@ -202,7 +202,7 @@ async def test_generate_attack_infers_rebut_and_target_metadata(monkeypatch) -> 
             ),
         )
 
-    monkeypatch.setattr(arguments, "invoke_agent_structured_messages", available_rebut)
+    monkeypatch.setattr(arguments, "chat_structured", available_rebut)
     target = argument("AG1", ["We should buy a"])
     state = SimpleNamespace(
         current_proponent="AG1",
@@ -212,7 +212,7 @@ async def test_generate_attack_infers_rebut_and_target_metadata(monkeypatch) -> 
     )
 
     generated = await arguments.generate_attack(
-        state, "AG2", target, purpose="defeat_main"
+        state, "AG2", target, purpose="defeat"
     )
 
     assert generated is not None
@@ -240,7 +240,7 @@ async def test_generate_attack_trusts_declared_attack_target(monkeypatch) -> Non
             ),
         )
 
-    monkeypatch.setattr(arguments, "invoke_agent_structured_messages", invalid_target)
+    monkeypatch.setattr(arguments, "chat_structured", invalid_target)
     target = argument("AG1", ["We should buy a"], ["a is available"])
     state = SimpleNamespace(
         current_proponent="AG1",
@@ -250,7 +250,7 @@ async def test_generate_attack_trusts_declared_attack_target(monkeypatch) -> Non
     )
 
     generated = await arguments.generate_attack(
-        state, "AG2", target, purpose="defeat_main"
+        state, "AG2", target, purpose="defeat"
     )
 
     # 現実装は宣言された攻撃対象を検証せず、そのまま採用して攻撃論証を生成する。

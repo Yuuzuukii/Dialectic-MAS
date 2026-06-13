@@ -107,20 +107,37 @@ def build_eval_input(log: dict[str, Any]) -> dict[str, Any]:
 
 
 def build_eval_input_no_schema(log: dict[str, Any]) -> dict[str, Any]:
-    """スキーマなし版 (cli_no_schema.py) のログを、build_eval_input と同じ形に変換する.
+    """スキーマなし版の統一ログを、build_eval_input と同じ形に変換する.
 
     free-text の各発話を schema 版の評価入力フィールドに対応付け、同一の評価器・
     ルーブリック (evaluate_with_llm) で採点できるようにする。
     """
-    dialogue: dict[str, Any] = log.get("dialogue", {}) or {}
-    ag2_counter = dialogue.get("ag2_counter", "")
-    ag1_counter = dialogue.get("ag1_counter", "")
+    dialogue_history: list[dict[str, Any]] = log.get("dialogue_history", []) or []
+
+    ag1_mains: list[str] = []
+    ag2_mains: list[str] = []
+    final_claim = log.get("justified_argument") or log.get("final_answer") or "(no conclusion)"
 
     debate_lines: list[str] = []
-    if ag2_counter:
-        debate_lines.append(f"[counter] AG2 → AG1:\n  {ag2_counter}")
-    if ag1_counter:
-        debate_lines.append(f"[counter] AG1 → AG2:\n  {ag1_counter}")
+    for record in dialogue_history:
+        rtype = record.get("type", "")
+        agent = record.get("agent", "")
+        argument = record.get("argument", "")
+        if rtype == "main" and agent == "AG1":
+            ag1_mains.append(argument)
+            if record.get("status") == "justified":
+                final_claim = argument
+        elif rtype == "main" and agent == "AG2":
+            ag2_mains.append(argument)
+        elif rtype in {"defeat", "counter"}:
+            target_id = record.get("target_id") or "—"
+            debate_lines.append(f"[{rtype}] {agent} (target: {target_id})\n  {argument}")
+
+    integrated_rules = log.get("integrated_rules") or []
+    if isinstance(integrated_rules, list):
+        integrated_rules_text = "\n".join(f"- {rule}" for rule in integrated_rules)
+    else:
+        integrated_rules_text = str(integrated_rules)
 
     return {
         "mode": "no-schema",
@@ -128,12 +145,12 @@ def build_eval_input_no_schema(log: dict[str, Any]) -> dict[str, Any]:
         "question": log.get("question") or "",
         "agent1_stance": log.get("agent1_stance") or "(not provided)",
         "agent2_stance": log.get("agent2_stance") or "(not provided)",
-        "ag1_initial_opinion": dialogue.get("ag1_claim") or "(none)",
-        "ag2_initial_opinion": dialogue.get("ag2_claim") or "(none)",
+        "ag1_initial_opinion": ag1_mains[0] if ag1_mains else "(none)",
+        "ag2_initial_opinion": ag2_mains[0] if ag2_mains else "(none)",
         "debate_history": "\n\n".join(debate_lines) if debate_lines else "(no debate exchanges)",
-        "integrated_rules": dialogue.get("agreement_core") or "(none)",
-        "justified_argument": dialogue.get("ag1_new_claim") or "(no conclusion)",
-        "justification_status": "no-schema",
+        "integrated_rules": integrated_rules_text or "(none)",
+        "justified_argument": final_claim,
+        "justification_status": log.get("justification_status") or "no_schema",
     }
 
 

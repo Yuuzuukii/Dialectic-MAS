@@ -39,7 +39,7 @@ DEFAULT_EVALUATOR_MODEL = "gpt-5-mini"
 
 
 def _latest_log(logs_dir: Path) -> Path:
-    logs = sorted(logs_dir.glob("*.json"))
+    logs = sorted(logs_dir.rglob("*.json"))
     if not logs:
         print(f"No log files found in {logs_dir}", file=sys.stderr)
         sys.exit(1)
@@ -140,7 +140,7 @@ def main() -> None:
     args = parser.parse_args()
     model = resolve_evaluator_model(args.model)
 
-    logs_dir = ROOT / "eval" / "logs-v2"
+    logs_dir = ROOT / "logs"
     log_path = _resolve_log_path(args.log) if args.log else _latest_log(logs_dir)
 
     if not log_path.exists():
@@ -148,7 +148,8 @@ def main() -> None:
         sys.exit(1)
 
     log = _load_log(log_path)
-    builder = build_eval_input_no_schema if log.get("mode") == "no-schema" else build_eval_input
+    method = log.get("method") or log.get("mode")
+    builder = build_eval_input_no_schema if method in {"no_schema", "no-schema"} else build_eval_input
     eval_input = builder(log)
     evaluator = _EvaluatorModel(model)
 

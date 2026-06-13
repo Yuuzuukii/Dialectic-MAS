@@ -6,9 +6,9 @@ from types import SimpleNamespace
 import pytest
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
+from agent.arguments import build_main_argument_messages
 from agent.edges import route_after_can_generate_main
 from agent.nodes import can_generate_main
-from agent.prompt_builders import build_main_argument_messages
 from agent.schema.llm_outputs import ArgumentBody
 from agent.schema.state import ArgumentRecord
 from agent.workflow import State
@@ -104,7 +104,7 @@ async def test_can_generate_main_finishes_when_no_new_main_argument(monkeypatch)
             reason="All available main arguments were already presented.",
         )
 
-    monkeypatch.setattr("agent.nodes.invoke_agent_structured_messages", no_new_argument)
+    monkeypatch.setattr("agent.arguments.chat_structured", no_new_argument)
 
     state = State(
         question="What camera should we buy?",
@@ -133,7 +133,7 @@ async def test_can_generate_main_routes_to_generation_when_available(monkeypatch
             Argument=ArgumentBody(rules=[]),
         )
 
-    monkeypatch.setattr("agent.nodes.invoke_agent_structured_messages", has_new_argument)
+    monkeypatch.setattr("agent.arguments.chat_structured", has_new_argument)
 
     state = State(
         question="What camera should we buy?",
@@ -161,7 +161,7 @@ async def test_can_generate_main_errors_when_yes_without_argument(monkeypatch) -
             Argument=None,
         )
 
-    monkeypatch.setattr("agent.nodes.invoke_agent_structured_messages", missing_argument)
+    monkeypatch.setattr("agent.arguments.chat_structured", missing_argument)
 
     state = State(
         question="What camera should we buy?",

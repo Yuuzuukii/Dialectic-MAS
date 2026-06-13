@@ -1,7 +1,6 @@
-"""Compare schema (eval/logs-v2) vs no-schema (eval/logs-v1-no-schema) for ONE category.
+"""Compare schema vs no-schema unified logs for ONE category.
 
-Scores every result log of each topic with the same LLM evaluator (3 axes:
-coherence / originality / dialecticality, 1-10), averages per topic and per
+Scores every result log of each topic with the same LLM evaluator, averages per topic and per
 category, and writes the result as JSON plus a console table.
 
 Usage:
@@ -35,8 +34,8 @@ from src.eval.evaluation import (
 )
 from src.eval.run_eval import _EvaluatorModel, resolve_evaluator_model
 
-SCHEMA_ROOT = ROOT / "eval" / "logs-v2"
-NO_SCHEMA_ROOT = ROOT / "eval" / "logs-v1-no-schema"
+SCHEMA_ROOT = ROOT / "logs"
+NO_SCHEMA_ROOT = ROOT / "logs"
 SCORES_DIR = ROOT / "eval" / "scores"
 
 
@@ -47,28 +46,33 @@ def _resolve_root(path: Path) -> Path:
     return root_relative if root_relative.exists() else path
 
 
+def _log_method(path: Path) -> str | None:
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    method = data.get("method") or data.get("mode")
+    if method == "no-schema":
+        return "no_schema"
+    return method if method in {"schema", "no_schema"} else None
+
+
 def _topic_log_files(root: Path, category: str, *, no_schema: bool) -> dict[str, list[Path]]:
     base = root / category
     if not base.is_dir():
         return {}
 
     topics: dict[str, list[Path]] = {}
+    expected_method = "no_schema" if no_schema else "schema"
 
-    # Current single-topic runner layout:
-    #   logs/<category>/<topic>.json
-    #   logs/<category>/no_schema/<topic>.json
-    flat_base = base / "no_schema" if no_schema and (base / "no_schema").is_dir() else base
-    if flat_base.is_dir():
-        for log_file in sorted(flat_base.glob("*.json")):
-            topics.setdefault(log_file.stem, []).append(log_file)
-
-    # Existing batch layout:
-    #   eval/logs-v2/<category>/<topic>/*.json
-    #   eval/logs-v1-no-schema/<category>/<topic>/*.json
     for topic_dir in sorted(base.iterdir()):
-        if not topic_dir.is_dir() or topic_dir.name in {"outputs", "no_schema"}:
+        if not topic_dir.is_dir():
             continue
-        files = sorted(topic_dir.glob("*.json"))
+        files = [
+            log_file
+            for log_file in sorted(topic_dir.glob("*.json"))
+            if _log_method(log_file) == expected_method
+        ]
         if files:
             topics.setdefault(topic_dir.name, []).extend(files)
 
@@ -170,7 +174,7 @@ def _save(result: dict[str, Any], filename: str) -> Path:
 def main() -> None:
     """CLI 引数を解析し、指定カテゴリの比較を実行して結果を保存・表示する."""
     parser = argparse.ArgumentParser(description="Compare schema vs no-schema for one category.")
-    parser.add_argument("category", help="Category name under eval/data/.")
+    parser.add_argument("category", help="Category name under logs/.")
     parser.add_argument(
         "--model",
         default=None,
@@ -180,13 +184,13 @@ def main() -> None:
         "--schema-root",
         type=Path,
         default=SCHEMA_ROOT,
-        help="Root containing schema logs (default: eval/logs-v2).",
+        help="Root containing schema logs (default: logs).",
     )
     parser.add_argument(
         "--no-schema-root",
         type=Path,
         default=NO_SCHEMA_ROOT,
-        help="Root containing no-schema logs (default: eval/logs-v1-no-schema).",
+        help="Root containing no-schema logs (default: logs).",
     )
     args = parser.parse_args()
     model = resolve_evaluator_model(args.model)
