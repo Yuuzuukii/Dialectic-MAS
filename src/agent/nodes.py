@@ -1,95 +1,144 @@
-"""Graph node functions for the dialectical workflow."""
+"""Graph node functions for the dialectical workflow.
+
+ノードは「`arguments.generate_*` を呼んで結果を状態 dict に整形する」ことに専念する。
+スレッド進行の簿記ヘルパ（dialogue_history / complete_thread 等）も本ファイルに置く。
+"""
 
 from __future__ import annotations
 
 import json
 from typing import Any
 
-try:
-    from .arguments import (
-        argument_body_json,
-        generate_attack,
-        generate_undercut,
+from . import arguments
+from .arguments import generate_attack, generate_undercut
+from .defeats import run_defeat_subgraph, run_strict_defeat_subgraph
+from .schema.state import ArgumentRecord, parse_serialized_payload
+
+# ============================================================================
+# スレッド進行の簿記ヘルパ（旧 threads.py から移設）
+# ============================================================================
+
+
+def dialogue_history(history: list[ArgumentRecord]) -> list[dict[str, Any]]:
+    """引数履歴を対話ログ用の dict リストへ変換する."""
+    return [argument.to_dialogue_dict() for argument in history]
+
+
+def thread_finding(state: Any, status: str) -> str | None:
+    """スレッド結果から、次の主張生成へ渡す learned finding 文を生成する."""
+    if state.current_argument is None or state.b_argument is None:
+        return None
+    main_conclusion = (
+        "; ".join(state.current_argument.conclusions) or "the previous main argument"
     )
-    from .defeats import run_defeat_subgraph, run_strict_defeat_subgraph
-    from .llm import (
-        call_llm_messages,
-        invoke_agent_structured,
-        invoke_agent_structured_messages,
+    defeating_conclusion = (
+        "; ".join(state.b_argument.conclusions) or "the defeating argument"
     )
-    from .prompt_builders import (
-        build_generalization_prompt,
-        build_integration_prompt,
-        build_main_argument_messages,
-        compose_system,
+    if status == "overruled":
+        return (
+            f"{state.current_proponent}'s previous main argument ({main_conclusion}) was overruled by "
+            f"{state.current_opponent}'s {state.b_argument.attack} ({defeating_conclusion}). "
+            "Do not repeat the same main argument unless this defeating reason is resolved."
+        )
+    if status == "defensible":
+        return (
+            f"{state.current_proponent}'s previous main argument ({main_conclusion}) remained defensible, "
+            f"with an unresolved conflict against {state.current_opponent}'s {state.b_argument.attack} "
+            f"({defeating_conclusion}). "
+            "Do not repeat the same main argument as if the conflict were resolved."
+        )
+    return None
+
+
+def _annotate_main_status(
+    history: list[ArgumentRecord], main_id: str | None, status: str
+) -> list[ArgumentRecord]:
+    """スレッド完了時、対象 main レコードの status を後追いで埋める（不変＝コピーで差し替え）."""
+    if main_id is None:
+        return history
+    return [
+        record.model_copy(update={"status": status}) if record.id == main_id else record
+        for record in history
+    ]
+
+
+def complete_thread(
+    state: Any,
+    status: str,
+    extra_history: list[ArgumentRecord] | None = None,
+) -> dict[str, Any]:
+    """スレッド完了時の状態更新 dict（履歴・status・合意フラグ等）を組み立てる."""
+    key = "ag1" if state.current_proponent == "AG1" else "ag2"
+    main_id = state.current_argument.id if state.current_argument else None
+    history = _annotate_main_status(
+        [*state.history, *(extra_history or [])], main_id, status
     )
-    from .prompts import PromptTemplates
-    from .schema.llm_outputs import (
-        GeneralizationOutput,
-        IntegrationOutput,
-        MainArgumentAvailabilityOutput,
-    )
-    from .schema.state import ArgumentRecord, parse_serialized_payload
-    from .threads import complete_thread, dialogue_history
-except ImportError:  # pragma: no cover - supports LangGraph file-path loading.
-    from arguments import (  # type: ignore
-        argument_body_json,
-        generate_attack,
-        generate_undercut,
-    )
-    from defeats import run_defeat_subgraph, run_strict_defeat_subgraph  # type: ignore
-    from llm import (  # type: ignore
-        call_llm_messages,
-        invoke_agent_structured,
-        invoke_agent_structured_messages,
-    )
-    from prompt_builders import (  # type: ignore
-        build_generalization_prompt,
-        build_integration_prompt,
-        build_main_argument_messages,
-        compose_system,
-    )
-    from prompts import PromptTemplates  # type: ignore
-    from schema.llm_outputs import (  # type: ignore
-        GeneralizationOutput,
-        IntegrationOutput,
-        MainArgumentAvailabilityOutput,
-    )
-    from schema.state import ArgumentRecord, parse_serialized_payload  # type: ignore
-    from threads import complete_thread, dialogue_history  # type: ignore
+    update: dict[str, Any] = {
+        "current_thread_status": status,
+        "history": history,
+        "dialogue_history": dialogue_history(history),
+        f"{key}_thread_status": status,
+    }
+
+    finding = thread_finding(state, status)
+    if finding is not None and finding not in state.learned_findings:
+        update["learned_findings"] = [*state.learned_findings, finding]
+
+    if status == "justified":
+        update["justified_argument"] = (
+            state.current_argument.argument if state.current_argument else None
+        )
+        update["justification_status"] = f"{key}_main_justified"
+        update["consensus_reached"] = True
+    elif status == "overruled":
+        update["justification_status"] = f"{key}_main_overruled"
+
+    if status in {"defensible", "overruled"}:
+        update["current_proponent"] = state.current_proponent
+        update["current_opponent"] = state.current_opponent
+        if key == "ag1" and state.ag2_thread_status is None:
+            update.update(
+                {
+                    "current_proponent": "AG2",
+                    "current_opponent": "AG1",
+                    "active_agent": "AG2",
+                    "current_argument": None,
+                    "b_argument": None,
+                    "c_argument": None,
+                    "d_argument": None,
+                    "b_argument_id": None,
+                    "c_argument_id": None,
+                    "d_argument_id": None,
+                    "b_defeats_a": None,
+                    "c_defeats_b": None,
+                    "b_defeats_c": None,
+                    "c_strictly_defeats_b": None,
+                    "debate_stage": "ag2_main_thread",
+                }
+            )
+    return update
 
 
 async def can_generate_main(state: Any) -> dict[str, Any]:
     """Proponent が新しい主張 (A) を生成できるか判定し、可能なら生成して返す."""
     agent = state.current_proponent
-    messages = build_main_argument_messages(state, agent)
-    output = await invoke_agent_structured_messages(
-        messages,
-        MainArgumentAvailabilityOutput,
-    )
-    can_generate = output.can_generate == "YES"
+    result = await arguments.generate_main(state, agent)
     update: dict[str, Any] = {
-        "main_argument_available": can_generate,
-        "main_argument_unavailable_reason": None if can_generate else output.reason,
+        "main_argument_available": result.available,
+        "main_argument_unavailable_reason": None if result.available else result.reason,
     }
-    if not can_generate:
+    if not result.available:
         update["justification_status"] = "no_new_main_argument"
         return update
 
-    if output.Argument is None:
+    if result.argument is None:
         return {
             "error": "Main argument availability was YES but no Argument was generated.",
             "main_argument_available": False,
-            "main_argument_unavailable_reason": output.reason,
+            "main_argument_unavailable_reason": result.reason,
         }
 
-    argument = ArgumentRecord(
-        type="main",
-        argument=argument_body_json(output.Argument),
-        support=[],
-        agent=agent,
-        round=state.debate_round,
-    )
+    argument = result.argument
     history = [*state.history, argument]
     update.update(
         {
@@ -139,7 +188,7 @@ async def o_defeat_a(state: Any) -> dict[str, Any]:
         state,
         state.current_opponent,
         state.current_argument,
-        purpose="defeat_main",
+        purpose="defeat",
     )
     if argument is None:
         return complete_thread(state, "justified")
@@ -190,7 +239,7 @@ async def p_counter_b(state: Any) -> dict[str, Any]:
         state,
         state.current_proponent,
         state.b_argument,
-        purpose="defend_main",
+        purpose="counter",
     )
     if argument is None:
         return complete_thread(state, "overruled")
@@ -274,7 +323,9 @@ async def extract_warrants(state: Any) -> dict[str, Any]:
                 "warrant": {
                     "antecedent": {
                         "strong": ag1_last_rule["antecedent"].get("strong", []),
-                        "weak_negation": ag1_last_rule["antecedent"].get("weak_negation", []),
+                        "weak_negation": ag1_last_rule["antecedent"].get(
+                            "weak_negation", []
+                        ),
                     },
                     "consequent": ag1_last_rule["consequent"],
                 }
@@ -283,13 +334,17 @@ async def extract_warrants(state: Any) -> dict[str, Any]:
                 "warrant": {
                     "antecedent": {
                         "strong": ag2_last_rule["antecedent"].get("strong", []),
-                        "weak_negation": ag2_last_rule["antecedent"].get("weak_negation", []),
+                        "weak_negation": ag2_last_rule["antecedent"].get(
+                            "weak_negation", []
+                        ),
                     },
                     "consequent": ag2_last_rule["consequent"],
                 }
             },
         }
-        return {"warrant_result": json.dumps(warrant_json, ensure_ascii=False, indent=2)}
+        return {
+            "warrant_result": json.dumps(warrant_json, ensure_ascii=False, indent=2)
+        }
     except Exception as exc:
         return {"error": f"Warrant抽出中にエラーが発生しました: {exc}"}
 
@@ -298,16 +353,10 @@ async def generalize(state: Any) -> dict[str, Any]:
     """両エージェントの warrant を汎化し、再利用可能な基準を導出する."""
     if state.warrant_result is None:
         return {"error": "Cannot generalize without warrants."}
-    task_system, user_prompt = build_generalization_prompt(
-        state.warrant_result,
-        json.dumps(state.dialogue_history, ensure_ascii=False, indent=2),
+    output = await arguments.generate_generalization(state)
+    response = json.dumps(
+        output.model_dump(exclude_none=True), ensure_ascii=False, indent=2
     )
-    output = await invoke_agent_structured(
-        compose_system(state.agent1_stance, task_system),
-        user_prompt,
-        GeneralizationOutput,
-    )
-    response = json.dumps(output.model_dump(exclude_none=True), ensure_ascii=False, indent=2)
     return {"generalization_result": response}
 
 
@@ -315,15 +364,10 @@ async def integrate(state: Any) -> dict[str, Any]:
     """汎化された基準を一つの統合ルールにまとめ、次ラウンドで再利用できる形にする."""
     if state.warrant_result is None or state.generalization_result is None:
         return {"error": "Cannot integrate without warrants and generalization."}
-    task_system, user_prompt = build_integration_prompt(
-        state.warrant_result, state.generalization_result
+    output = await arguments.generate_integration(state)
+    response = json.dumps(
+        output.model_dump(exclude_none=True), ensure_ascii=False, indent=2
     )
-    output = await invoke_agent_structured(
-        compose_system(state.agent1_stance, task_system),
-        user_prompt,
-        IntegrationOutput,
-    )
-    response = json.dumps(output.model_dump(exclude_none=True), ensure_ascii=False, indent=2)
     rule = extract_integrated_rule(response)
     if rule is None:
         return {"error": "統合結果から新しいルールを抽出できませんでした"}
@@ -348,6 +392,7 @@ def extract_integrated_rule(integration_result: str) -> str | None:
             return None
         return rule.strip()
     return None
+
 
 async def add_integrated_rule(state: Any) -> dict[str, Any]:
     """統合ルールを integrated_rules に追加し、次の debate round の初期状態にリセットする."""
@@ -392,7 +437,9 @@ async def finalize_fallback(state: Any) -> dict[str, Any]:
     debate を経た justified ではないため、合意なし (consensus_reached=False) を明示する。
     """
     if state.current_argument is None:
-        return {"error": "No integrated main argument available for fallback finalization."}
+        return {
+            "error": "No integrated main argument available for fallback finalization."
+        }
     return {
         "justified_argument": state.current_argument.argument,
         "justification_status": "fallback_no_consensus",
@@ -406,44 +453,9 @@ async def generate_final_answer(state: Any) -> dict[str, Any]:
     通常は justified な主張から作る。合意に至らず暫定回答を作る場合
     (consensus_reached is False) は、合意なしであることを明示する専用プロンプトを使う。
     """
-    justified = state.justified_argument
-    if not justified:
+    if not state.justified_argument:
         return {"final_answer": None, "consensus_reached": state.consensus_reached}
-
-    status = state.justification_status or ""
-    if status.startswith("ag2"):
-        stance = state.agent2_stance
-    else:
-        stance = state.agent1_stance
-
-    import json as _json
-    import os
-
-    from langchain_core.messages import HumanMessage, SystemMessage
-
-    dialogue_history_str = _json.dumps(state.dialogue_history, ensure_ascii=False, indent=2)
-
-    if state.consensus_reached is False:
-        integrated_rules_str = "\n".join(f"- {rule}" for rule in state.integrated_rules) or "(none)"
-        system_prompt = compose_system(stance, PromptTemplates.FINAL_ANSWER_NO_CONSENSUS_SYSTEM)
-        user_prompt = PromptTemplates.FINAL_ANSWER_NO_CONSENSUS_USER.format(
-            question=state.question,
-            integrated_rules=integrated_rules_str,
-            dialogue_history=dialogue_history_str,
-            justified_argument=justified,
-        ).strip()
-    else:
-        system_prompt = compose_system(stance, PromptTemplates.FINAL_ANSWER_SYSTEM)
-        user_prompt = PromptTemplates.FINAL_ANSWER_USER.format(
-            question=state.question,
-            dialogue_history=dialogue_history_str,
-            justified_argument=justified,
-        ).strip()
-
-    answer = await call_llm_messages(
-        [SystemMessage(content=system_prompt), HumanMessage(content=user_prompt)],
-        model=os.getenv("MODEL", "gpt-5-mini"),
-    )
+    answer = await arguments.generate_final_answer(state)
     return {"final_answer": answer, "consensus_reached": state.consensus_reached}
 
 

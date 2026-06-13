@@ -6,14 +6,12 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import Any, Literal
 
-try:
-    from .schema.state import ArgumentRecord, DefeatRelation
-    from .schema.types import AgentName, AttackType
-except ImportError:  # pragma: no cover - supports LangGraph file-path loading.
-    from schema.state import ArgumentRecord, DefeatRelation  # type: ignore
-    from schema.types import AgentName, AttackType  # type: ignore
+from .schema.state import ArgumentRecord, DefeatRelation
+from .schema.types import AgentName, AttackType
 
-BlockerGenerator = Callable[[Any, AgentName, ArgumentRecord], Awaitable[ArgumentRecord | None]]
+BlockerGenerator = Callable[
+    [Any, AgentName, ArgumentRecord], Awaitable[ArgumentRecord | None]
+]
 TargetField = Literal["Conc", "Ass"]
 
 
@@ -95,10 +93,18 @@ async def run_defeat_subgraph(
         return DefeatSubgraphResult(
             defeats=False,
             attack=None,
-            relations=[relation(attacker, target, None, False, f"{relation_context}: no attack metadata declared by LLM")],
+            relations=[
+                relation(
+                    attacker,
+                    target,
+                    None,
+                    False,
+                    f"{relation_context}: no attack metadata declared by LLM",
+                )
+            ],
         )
 
-    _log(f"  attack: {match.method} on {match.field} — \"{match.statement}\"")
+    _log(f'  attack: {match.method} on {match.field} — "{match.statement}"')
 
     if persist_metadata:
         attacker.target_id = target.id
@@ -110,7 +116,15 @@ async def run_defeat_subgraph(
         return DefeatSubgraphResult(
             defeats=True,
             attack=match.method,
-            relations=[relation(attacker, target, match, True, f"{relation_context}: undercut defeats target")],
+            relations=[
+                relation(
+                    attacker,
+                    target,
+                    match,
+                    True,
+                    f"{relation_context}: undercut defeats target",
+                )
+            ],
         )
 
     if allow_generated_blocker and blocker_generator is not None:
@@ -137,7 +151,15 @@ async def run_defeat_subgraph(
     return DefeatSubgraphResult(
         defeats=True,
         attack=match.method,
-        relations=[relation(attacker, target, match, True, f"{relation_context}: rebut not blocked by undercut")],
+        relations=[
+            relation(
+                attacker,
+                target,
+                match,
+                True,
+                f"{relation_context}: rebut not blocked by undercut",
+            )
+        ],
     )
 
 

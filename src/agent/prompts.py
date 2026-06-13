@@ -1,4 +1,4 @@
-"""議論システムの全プロンプト定義（SYSTEM テンプレートと共有ブロック）."""
+"""議論システムの全プロンプト定義（SYSTEM テンプレート・共有ブロック・補助ビルダ）."""
 
 # プロンプトは「SYSTEM（役割・論証の文法・タスク定義・出力契約）」と
 # 「USER（その手番でしか意味を持たない可変入力）」に分離して管理する。
@@ -9,6 +9,14 @@
 #   テンプレート間の重複＝矛盾混入を避ける。
 # - with_structured_output のスキーマ（schema/llm_outputs.py）と自然言語指示を矛盾させない。
 #   連鎖規則の詳細は ArgumentBody スキーマ側が担保するため、ここでは要点のみ記す。
+# - SYSTEM/USER の合成・指示文の組み立て（補助ビルダ）も本ファイルに集約し、
+#   実際のメッセージ列の組み立て（呼び出し側）は arguments.py が行う。
+
+from __future__ import annotations
+
+from typing import Any
+
+from .schema.types import AgentName
 
 # ---- 共有ブロック（複数テンプレートで再利用） ----
 
@@ -123,7 +131,7 @@ class PromptTemplates:
         "</output>",
     )
 
-    UNDERCUT_CHECK_SYSTEM = _system(
+    UNDERCUT_SYSTEM = _system(
         "<task>\nConstruct an undercutting argument against the target argument.\n</task>",
         _PROTOCOL_FLOW,
         _HISTORY_FORMAT,
@@ -178,13 +186,6 @@ class PromptTemplates:
     )
 
     # ---- User: per-turn variable input ----
-    MAIN_ARGUMENT_USER = """
-Issue:
-{issue}
-
-{revision_context}
-"""
-
     FINAL_ANSWER_USER = """
 Question: {question}
 
@@ -209,17 +210,73 @@ Provisional main argument built on the integrated rules:
 """
 
 
-# 後方互換のための参照テーブル（値は SYSTEM/USER テンプレートを指す）。
-PROMPTS = {
-    "main_argument_system": PromptTemplates.MAIN_ARGUMENT_SYSTEM,
-    "main_argument_user": PromptTemplates.MAIN_ARGUMENT_USER,
-    "defeating_argument_system": PromptTemplates.DEFEATING_ARGUMENT_SYSTEM,
-    "counter_argument_system": PromptTemplates.COUNTER_ARGUMENT_SYSTEM,
-    "undercut_check_system": PromptTemplates.UNDERCUT_CHECK_SYSTEM,
-    "generalization_system": PromptTemplates.GENERALIZATION_SYSTEM,
-    "integration_system": PromptTemplates.INTEGRATION_SYSTEM,
-    "final_answer_system": PromptTemplates.FINAL_ANSWER_SYSTEM,
-    "final_answer_user": PromptTemplates.FINAL_ANSWER_USER,
-    "final_answer_no_consensus_system": PromptTemplates.FINAL_ANSWER_NO_CONSENSUS_SYSTEM,
-    "final_answer_no_consensus_user": PromptTemplates.FINAL_ANSWER_NO_CONSENSUS_USER,
+# ---- 補助ビルダ（SYSTEM 合成・手番ごとの指示文） ----
+# 役割: ここでは「何を伝えるか（テキスト）」だけを組み立てる。
+#       実際のメッセージ列（System + 履歴 + Human）の組み立ては arguments.py が行う。
+
+# defeat フェーズ用 SYSTEM と counter フェーズ用 SYSTEM の対応表。
+ATTACK_SYSTEM = {
+    "defeat": PromptTemplates.DEFEATING_ARGUMENT_SYSTEM,
+    "counter": PromptTemplates.COUNTER_ARGUMENT_SYSTEM,
 }
+
+
+def compose_system(stance: str, task_system: str) -> str:
+    """エージェントのスタンス（役割）とタスク定義を 1 つの system プロンプトに結合する."""
+    stance = (stance or "").strip()
+    task_system = task_system.strip()
+    if not stance:
+        return task_system
+    return f"{stance}\n\n{task_system}"
+
+
+def agent_system(stance: str, agent: AgentName, task_system: str) -> str:
+    """エージェント identity + stance + タスク定義を 1 つの system プロンプトにする."""
+    identity = (
+        "<identity>\n"
+        f'You are {agent} in this debate. In the message history, turns whose agent/name is "{agent}" '
+        "are your own past turns; the other agent is your opponent.\n"
+        "</identity>"
+    )
+    return f"{identity}\n\n{compose_system(stance, task_system)}"
+
+
+def main_instruction(state: Any) -> str:
+    """主張生成の手番に渡す指示文（Issue + 改訂ラウンドなら統合ルール）を組む."""
+    issue = state.question
+    rules = getattr(state, "integrated_rules", []) or []
+    debate_round = getattr(state, "debate_round", 1)
+    lines = [
+        f"Round {debate_round}. Construct your main argument for the Issue.",
+        f"Issue: {issue}",
+    ]
+    if rules:
+        lines += [
+            "",
+            "This is a revision round: your earlier main arguments (shown in the history) were defeated.",
+            "Ground your NEW main argument in the integrated rules below, make it different from every earlier",
+            "main argument, and ensure it is not vulnerable to the same attacks that defeated them:",
+            *[f"- {rule}" for rule in rules],
+        ]
+    return "\n".join(lines)
+
+
+def attack_instruction(purpose: str, target_id: str) -> str:
+    """攻撃（defeat/counter）の手番に渡す指示文を組む."""
+    if purpose == "counter":
+        return (
+            "Construct a counterargument that defends your main argument against the latest attack "
+            f"(id={target_id}) shown in the history."
+        )
+    return (
+        "Construct a defeating argument against your opponent's latest argument "
+        f"(id={target_id}) shown in the history."
+    )
+
+
+def undercut_instruction(target_id: str) -> str:
+    """Undercut の手番に渡す指示文を組む."""
+    return (
+        f"Construct an undercutting argument against the argument (id={target_id}) shown in the history, "
+        "by negating one of its assumptions (Ass)."
+    )

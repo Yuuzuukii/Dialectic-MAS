@@ -65,7 +65,7 @@ async def test_validate_b_exposes_generated_undercut_in_history_and_update(
 
 
 async def test_cli_payload_labels_undercut_and_keeps_it_in_finish_history() -> None:
-    module_path = Path(__file__).parents[2] / "src" / "cli.py"
+    module_path = Path(__file__).parents[2] / "src" / "dialogue" / "common.py"
     spec = importlib.util.spec_from_file_location("dialogue_cli", module_path)
     assert spec is not None and spec.loader is not None
     cli = importlib.util.module_from_spec(spec)
@@ -106,7 +106,7 @@ async def test_generate_undercut_assigns_attack_metadata(monkeypatch) -> None:
         )
 
     monkeypatch.setattr(
-        arguments, "invoke_agent_structured_messages", available_undercut
+        arguments, "chat_structured", available_undercut
     )
     target = argument("AG2", ["We should eat a"], ["a is available"], attack="rebut")
     state = SimpleNamespace(

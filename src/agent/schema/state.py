@@ -40,13 +40,24 @@ def _text_items(value: Any) -> list[str]:
 class ArgumentRecord(BaseModel):
     """議論履歴に積む 1 発言（主張・攻撃・防御）のレコード."""
 
-    id: str = Field(default_factory=lambda: f"arg-{uuid4().hex[:10]}", description="Internal argument id.")
-    type: ArgumentType = Field(description="main for an initial claim, defeat for an opponent attack, counter for a defense.")
+    id: str = Field(
+        default_factory=lambda: f"arg-{uuid4().hex[:10]}",
+        description="Internal argument id.",
+    )
+    type: ArgumentType = Field(
+        description="main for an initial claim, defeat for an opponent attack, counter for a defense."
+    )
     argument: str = Field(description="Serialized argument payload.")
-    support: list[str] = Field(default_factory=list, description="Optional supporting facts or references.")
+    support: list[str] = Field(
+        default_factory=list, description="Optional supporting facts or references."
+    )
     agent: AgentName = Field(description="Agent that produced this argument.")
-    target_id: str | None = Field(default=None, description="Argument id targeted by this defeating argument.")
-    attack: AttackType | None = Field(default=None, description="Attack type: rebut or undercut.")
+    target_id: str | None = Field(
+        default=None, description="Argument id targeted by this defeating argument."
+    )
+    attack: AttackType | None = Field(
+        default=None, description="Attack type: rebut or undercut."
+    )
     target_field: Literal["Conc", "Ass"] | None = Field(
         default=None,
         description="Field in the targeted argument attacked by this argument.",
@@ -55,8 +66,12 @@ class ArgumentRecord(BaseModel):
         default=None,
         description="Exact conclusion or assumption attacked by this argument.",
     )
-    status: ArgumentStatus | None = Field(default=None, description="Dialectical status of the argument.")
-    round: int = Field(default=1, description="Debate round in which this argument was produced.")
+    status: ArgumentStatus | None = Field(
+        default=None, description="Dialectical status of the argument."
+    )
+    round: int = Field(
+        default=1, description="Debate round in which this argument was produced."
+    )
 
     @classmethod
     def from_generated_body(
@@ -181,5 +196,9 @@ class DefeatRelation(BaseModel):
         default=None,
         description="Exact target statement on which this attack was validated.",
     )
-    valid: bool = Field(description="Whether the attack satisfies the defeat condition.")
-    reason: str | None = Field(default=None, description="Short explanation of the validation result.")
+    valid: bool = Field(
+        description="Whether the attack satisfies the defeat condition."
+    )
+    reason: str | None = Field(
+        default=None, description="Short explanation of the validation result."
+    )
