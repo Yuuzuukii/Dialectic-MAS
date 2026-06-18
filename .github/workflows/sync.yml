@@ -85,6 +85,14 @@ jobs:
 
           chmod 600 ~/.ssh/config
 
+      - name: Inspect deploy_key structure (no secret content printed)
+        run: |
+          echo "Bytes: $(wc -c < ~/.ssh/deploy_key)"
+          echo "Lines: $(wc -l < ~/.ssh/deploy_key)"
+          echo "First line: $(head -1 ~/.ssh/deploy_key)"
+          echo "Last line: $(tail -1 ~/.ssh/deploy_key)"
+          echo "CRLF lines: $(grep -c $'\r' ~/.ssh/deploy_key || true)"
+
       - name: Show deploy key fingerprint
         run: |
           ssh-keygen -y -f ~/.ssh/deploy_key | ssh-keygen -lf -
