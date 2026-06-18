@@ -53,9 +53,8 @@ jobs:
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
 
-          echo "${{ secrets.DEPLOY_SSH_KEY }}" | base64 -d > ~/.ssh/deploy_key
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keygen -y -f ~/.ssh/deploy_key > /dev/null
 
           ssh-keyscan -p ${{ secrets.PROXY_PORT || 22 }} \
             ${{ secrets.PROXY_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
@@ -85,6 +84,17 @@ jobs:
           SSHEOF
 
           chmod 600 ~/.ssh/config
+
+      - name: Show deploy key fingerprint
+        run: |
+          ssh-keygen -y -f ~/.ssh/deploy_key | ssh-keygen -lf -
+
+      # ─── 接続テスト ───
+      - name: Debug SSH
+        run: |
+          ssh -G target | egrep 'user|hostname|port|proxyjump|identityfile'
+          ls -la ~/.ssh
+          ssh -vvv target "echo ok"
 
       # ─── ファイル同期 (rsync over ProxyJump) ───
       - name: Sync files to Swan
