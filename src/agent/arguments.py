@@ -186,7 +186,10 @@ async def generate_main(state: Any, agent: AgentName) -> MainGeneration:
         if _output_mode(state) == "no_schema"
         else MainArgumentAvailabilityOutput
     )
-    output = await chat_structured(messages, schema)
+    output = cast(
+        "MainArgumentAvailabilityOutputFree | MainArgumentAvailabilityOutput",
+        await chat_structured(messages, schema),
+    )
     if output.can_generate != "YES":
         return MainGeneration(available=False, reason=output.reason, argument=None)
     if output.Argument is None:
@@ -215,7 +218,10 @@ async def generate_attack(
         if _output_mode(state) == "no_schema"
         else DefeatingArgumentOutput
     )
-    output = await chat_structured(messages, schema)
+    output = cast(
+        "DefeatingArgumentOutputFree | DefeatingArgumentOutput",
+        await chat_structured(messages, schema),
+    )
     if output.can_defeat != "YES" or output.Argument is None or output.Attack is None:
         return None
     return ArgumentRecord(
@@ -241,7 +247,10 @@ async def generate_undercut(
         return None
     messages = build_undercut_messages(state, attacker, target)
     schema = UndercutOutputFree if _output_mode(state) == "no_schema" else UndercutOutput
-    output = await chat_structured(messages, schema)
+    output = cast(
+        "UndercutOutputFree | UndercutOutput",
+        await chat_structured(messages, schema),
+    )
     if output.can_undercut != "YES" or output.Argument is None:
         return None
     return ArgumentRecord(

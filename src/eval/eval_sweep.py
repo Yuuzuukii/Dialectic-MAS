@@ -6,6 +6,9 @@ Usage:
     python src/eval/eval_sweep.py --sweep logs/sweep/artificial_intelligence_20260616_011149 --out results.json
 """
 
+# print による結果出力と、sys.path 追加後の import はこの評価スクリプトでは意図的。
+# ruff: noqa: T201, E402, I001
+
 from __future__ import annotations
 
 import argparse
@@ -66,7 +69,7 @@ def _collect_logs(sweep_dir: Path) -> list[tuple[str, Path]]:
 def _aggregate_by_group(
     results: list[dict[str, Any]],
 ) -> dict[str, dict[str, Any]]:
-    """results を turns ごとにグループ化して平均を計算する."""
+    """Results を turns ごとにグループ化して平均を計算する."""
     groups: dict[str, list[dict[str, Any]]] = {}
     for r in results:
         key = f"turns{r['turns']:02d}"
@@ -144,6 +147,7 @@ def _print_summary(summary: dict[str, dict[str, Any]], all_results: list[dict[st
 
 
 def main() -> None:
+    """Sweep ディレクトリ配下の全ログを評価し、結果をまとめて出力する."""
     parser = argparse.ArgumentParser(description="Batch-evaluate all logs under a sweep directory.")
     parser.add_argument("--sweep", required=True, help="Path to the sweep directory.")
     parser.add_argument("--model", default=None, help="Evaluator model name.")

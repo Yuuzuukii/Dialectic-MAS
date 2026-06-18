@@ -8,6 +8,9 @@ ag1 に「あなた自身が提案したものは？」と尋ねて、ag1 自身
     cd src && python test_name_identity.py
 """
 
+# print による結果出力はこの手動確認用スクリプトでは意図的。
+# ruff: noqa: T201, D103
+
 import asyncio
 import os
 
