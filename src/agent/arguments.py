@@ -3,6 +3,12 @@
 各手番（main / attack[defeat,counter] / undercut）と合成（generalize / integrate）、
 最終回答（final_answer）の生成を、メッセージ組み立て→LLM 呼び出し→結果整形まで一括で行う。
 ノード（nodes.py）はこれらの generate_* を呼ぶだけで、状態の整形に専念する。
+
+`_output_mode(state)` で schema / no_schema を切り替える。両条件とも with_structured_output
+による構造化出力を使うが、no_schema では Argument 本体（ArgumentBody の rules/Conc/Ass）の
+スキーマを取り除き、自由な natural-language テキストとして出力させる。can_generate /
+can_defeat / can_undercut の可否判定と Attack（rebut/undercut + target）のメタデータは、
+弁証法的な状態遷移を機械的に決定するために両条件で構造化出力のまま保持する。
 """
 
 from __future__ import annotations
@@ -16,21 +22,28 @@ from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, System
 
 from .llm import chat_structured, chat_text
 from .prompts import (
-    ATTACK_SYSTEM,
     PromptTemplates,
     agent_system,
     attack_instruction,
     compose_system,
+    generalization_instruction,
+    integration_instruction,
     main_instruction,
+    synthesis_system,
     undercut_instruction,
 )
 from .schema.llm_outputs import (
     ArgumentBody,
     DefeatingArgumentOutput,
+    DefeatingArgumentOutputFree,
     GeneralizationOutput,
+    GeneralizationOutputFree,
     IntegrationOutput,
+    IntegrationOutputFree,
     MainArgumentAvailabilityOutput,
+    MainArgumentAvailabilityOutputFree,
     UndercutOutput,
+    UndercutOutputFree,
 )
 from .schema.state import ArgumentRecord
 from .schema.types import AgentName
@@ -50,27 +63,45 @@ def _stance(state: Any, agent: AgentName) -> str:
     return cast(str, state.agent1_stance if agent == "AG1" else state.agent2_stance)
 
 
-def render_history(history: list[ArgumentRecord]) -> list[BaseMessage]:
-    """state.history を読み取り専用で受け取り、視点非依存のメッセージ列に変換する.
+def _output_mode(state: Any) -> str:
+    """state.output_mode を返す（未設定なら既定の "schema"）."""
+    return cast(str, getattr(state, "output_mode", "schema"))
 
-    各 turn は AIMessage（assistant）とし、`name` に発言者 (AG1/AG2) を載せて区別する。
-    content は ArgumentRecord.message_content()（round/phase/agent/attack/status + Argument の JSON）。
-    state は一切変更しない（毎回まっさらな新リストを返す）。
+
+def argument_message_content(record: ArgumentRecord) -> str:
+    """LLM 履歴の AIMessage に入れる Argument 本体だけを返す."""
+    body = record.body
+    if body:
+        return json.dumps(body, ensure_ascii=False, indent=2)
+    return record.argument
+
+
+def render_history(history: list[Any]) -> list[BaseMessage]:
+    """state.history を読み取り専用で受け取り、LLM 用メッセージ列に変換する.
+
+    新設計では state.history は BaseMessage のリスト。古いテストや移行中の呼び出しで
+    ArgumentRecord が渡された場合だけ、Argument 本体のみの AIMessage として互換変換する。
     """
-    return [
-        AIMessage(content=record.message_content(), name=record.agent)
-        for record in history
-    ]
+    messages: list[BaseMessage] = []
+    for item in history:
+        if isinstance(item, BaseMessage):
+            messages.append(item)
+        elif isinstance(item, ArgumentRecord):
+            messages.append(
+                AIMessage(content=argument_message_content(item), name=item.agent)
+            )
+    return messages
 
 
 def build_main_argument_messages(state: Any, agent: AgentName) -> list[BaseMessage]:
     """主張生成用の system/履歴/指示メッセージ列を組み立てる."""
+    template = (
+        PromptTemplates.ARGUMENT_SYSTEM_NO_SCHEMA
+        if _output_mode(state) == "no_schema"
+        else PromptTemplates.ARGUMENT_SYSTEM
+    )
     return [
-        SystemMessage(
-            content=agent_system(
-                _stance(state, agent), agent, PromptTemplates.MAIN_ARGUMENT_SYSTEM
-            )
-        ),
+        SystemMessage(content=agent_system(_stance(state, agent), agent, template)),
         *render_history(state.history),
         HumanMessage(content=main_instruction(state)),
     ]
@@ -80,12 +111,20 @@ def build_attack_messages(
     state: Any, attacker: AgentName, target: ArgumentRecord, *, purpose: str
 ) -> list[BaseMessage]:
     """攻撃（defeat/counter）生成用のメッセージ列を組み立てる."""
+    template = (
+        PromptTemplates.ARGUMENT_SYSTEM_NO_SCHEMA
+        if _output_mode(state) == "no_schema"
+        else PromptTemplates.ARGUMENT_SYSTEM
+    )
+    main_argument = getattr(state, "current_argument", None)
     return [
-        SystemMessage(
-            content=agent_system(_stance(state, attacker), attacker, ATTACK_SYSTEM[purpose])
-        ),
+        SystemMessage(content=agent_system(_stance(state, attacker), attacker, template)),
         *render_history(state.history),
-        HumanMessage(content=attack_instruction(purpose, target.id)),
+        HumanMessage(
+            content=attack_instruction(
+                purpose, target, state=state, main_argument=main_argument
+            )
+        ),
     ]
 
 
@@ -93,14 +132,15 @@ def build_undercut_messages(
     state: Any, attacker: AgentName, target: ArgumentRecord
 ) -> list[BaseMessage]:
     """Undercut 生成用のメッセージ列を組み立てる."""
+    template = (
+        PromptTemplates.ARGUMENT_SYSTEM_NO_SCHEMA
+        if _output_mode(state) == "no_schema"
+        else PromptTemplates.ARGUMENT_SYSTEM
+    )
     return [
-        SystemMessage(
-            content=agent_system(
-                _stance(state, attacker), attacker, PromptTemplates.UNDERCUT_SYSTEM
-            )
-        ),
+        SystemMessage(content=agent_system(_stance(state, attacker), attacker, template)),
         *render_history(state.history),
-        HumanMessage(content=undercut_instruction(target.id)),
+        HumanMessage(content=undercut_instruction(target, state=state)),
     ]
 
 
@@ -127,17 +167,33 @@ def argument_body_json(argument: ArgumentBody) -> str:
     return json.dumps({"Argument": body}, ensure_ascii=False, indent=2)
 
 
+def _serialize_argument(state: Any, output_argument: ArgumentBody | str) -> str:
+    """Argument 出力を ArgumentRecord.argument に格納する文字列へ整形する.
+
+    schema: ArgumentBody から Conc/Ass を導出した JSON。
+    no_schema: 自由記述テキストそのまま（前後の空白のみ除去）。
+    """
+    if _output_mode(state) == "no_schema":
+        return cast(str, output_argument).strip()
+    return argument_body_json(cast(ArgumentBody, output_argument))
+
+
 async def generate_main(state: Any, agent: AgentName) -> MainGeneration:
     """Proponent の新しい主張 (A) を生成できるか判定し、可能なら ArgumentRecord 化する."""
     messages = build_main_argument_messages(state, agent)
-    output = await chat_structured(messages, MainArgumentAvailabilityOutput)
+    schema = (
+        MainArgumentAvailabilityOutputFree
+        if _output_mode(state) == "no_schema"
+        else MainArgumentAvailabilityOutput
+    )
+    output = await chat_structured(messages, schema)
     if output.can_generate != "YES":
         return MainGeneration(available=False, reason=output.reason, argument=None)
     if output.Argument is None:
         return MainGeneration(available=True, reason=output.reason, argument=None)
     argument = ArgumentRecord(
         type="main",
-        argument=argument_body_json(output.Argument),
+        argument=_serialize_argument(state, output.Argument),
         support=[],
         agent=agent,
         round=state.debate_round,
@@ -154,12 +210,17 @@ async def generate_attack(
 ) -> ArgumentRecord | None:
     """攻撃（defeat/counter）主張を LLM 生成し、ArgumentRecord 化する."""
     messages = build_attack_messages(state, attacker, target, purpose=purpose)
-    output = await chat_structured(messages, DefeatingArgumentOutput)
+    schema = (
+        DefeatingArgumentOutputFree
+        if _output_mode(state) == "no_schema"
+        else DefeatingArgumentOutput
+    )
+    output = await chat_structured(messages, schema)
     if output.can_defeat != "YES" or output.Argument is None or output.Attack is None:
         return None
     return ArgumentRecord(
         type="counter" if purpose == "counter" else "defeat",
-        argument=argument_body_json(output.Argument),
+        argument=_serialize_argument(state, output.Argument),
         support=[],
         agent=attacker,
         attack=output.Attack.method,
@@ -176,15 +237,16 @@ async def generate_undercut(
     target: ArgumentRecord,
 ) -> ArgumentRecord | None:
     """対象の仮定（Ass）を狙う undercut 主張を LLM 生成し、ArgumentRecord 化する."""
-    if not target.assumptions:
+    if _output_mode(state) == "schema" and not target.assumptions:
         return None
     messages = build_undercut_messages(state, attacker, target)
-    output = await chat_structured(messages, UndercutOutput)
+    schema = UndercutOutputFree if _output_mode(state) == "no_schema" else UndercutOutput
+    output = await chat_structured(messages, schema)
     if output.can_undercut != "YES" or output.Argument is None:
         return None
     return ArgumentRecord(
         type="defeat",
-        argument=argument_body_json(output.Argument),
+        argument=_serialize_argument(state, output.Argument),
         support=[],
         agent=attacker,
         attack="undercut",
@@ -194,26 +256,35 @@ async def generate_undercut(
     )
 
 
-async def generate_generalization(state: Any) -> GeneralizationOutput:
+async def generate_generalization(state: Any) -> GeneralizationOutput | GeneralizationOutputFree:
     """両エージェントの warrant を汎化し、再利用可能な基準を導出する."""
-    dialogue_history = json.dumps(state.dialogue_history, ensure_ascii=False, indent=2)
-    system = compose_system(
-        state.agent1_stance, PromptTemplates.GENERALIZATION_SYSTEM
+    template = (
+        PromptTemplates.GENERALIZATION_SYSTEM_NO_SCHEMA
+        if _output_mode(state) == "no_schema"
+        else PromptTemplates.GENERALIZATION_SYSTEM
     )
-    user = f"## Warrants\n{state.warrant_result}\n\n## Dialogue History\n{dialogue_history}"
+    system = synthesis_system("AG1", state.agent1_stance, template)
+    user = generalization_instruction(state)
+    schema = (
+        GeneralizationOutputFree if _output_mode(state) == "no_schema" else GeneralizationOutput
+    )
     return await chat_structured(
-        [SystemMessage(content=system), HumanMessage(content=user)],
-        GeneralizationOutput,
+        [SystemMessage(content=system), HumanMessage(content=user)], schema
     )
 
 
-async def generate_integration(state: Any) -> IntegrationOutput:
+async def generate_integration(state: Any) -> IntegrationOutput | IntegrationOutputFree:
     """汎化された基準を一つの統合ルールにまとめる."""
-    system = compose_system(state.agent1_stance, PromptTemplates.INTEGRATION_SYSTEM)
-    user = f"{state.warrant_result}\n\n{state.generalization_result}"
+    template = (
+        PromptTemplates.INTEGRATION_SYSTEM_NO_SCHEMA
+        if _output_mode(state) == "no_schema"
+        else PromptTemplates.INTEGRATION_SYSTEM
+    )
+    system = synthesis_system("AG1", state.agent1_stance, template)
+    user = integration_instruction(state)
+    schema = IntegrationOutputFree if _output_mode(state) == "no_schema" else IntegrationOutput
     return await chat_structured(
-        [SystemMessage(content=system), HumanMessage(content=user)],
-        IntegrationOutput,
+        [SystemMessage(content=system), HumanMessage(content=user)], schema
     )
 
 

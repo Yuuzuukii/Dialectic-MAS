@@ -1,0 +1,110 @@
+##############################################################################
+# Dialect-MAS – サーバー同期 (main ブランチ → ProxyJump SSH rsync)
+#
+# ■ トリガー
+#   - main ブランチへの push
+#   - 手動実行 (workflow_dispatch)
+#
+# ■ ネットワーク構成
+#   GitHub Actions (クラウド)
+#       │ SSH (ポート22)
+#       ▼
+#   踏み台サーバー (Global-Albatross)  ← グローバル IP
+#       │ ProxyJump
+#       ▼
+#   Swan                               ← プライベート IP
+#
+# ■ 必要な GitHub Secrets
+#
+#   ── 踏み台サーバー ──
+#   PROXY_HOST         : 踏み台のグローバル IP
+#   PROXY_USER         : 踏み台の SSH ユーザー名
+#   PROXY_PORT         : 踏み台の SSH ポート
+#
+#   ── Swan ──
+#   DEPLOY_HOST        : Swan のプライベート IP
+#   DEPLOY_USER        : Swan の SSH ユーザー名
+#   DEPLOY_PORT        : Swan の SSH ポート
+#   DEPLOY_PATH        : リモート側の配置パス (例: /home/yuzuki/Dialectical-MAS)
+#
+#   ── 共通 ──
+#   DEPLOY_SSH_KEY     : SSH 秘密鍵
+#
+##############################################################################
+
+name: Sync to Swan
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ─── SSH & ProxyJump の設定 ───
+      - name: Setup SSH with ProxyJump
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          ssh-keyscan -p ${{ secrets.PROXY_PORT || 22 }} \
+            ${{ secrets.PROXY_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+
+          ssh -i ~/.ssh/deploy_key \
+              -p ${{ secrets.PROXY_PORT || 22 }} \
+              -o StrictHostKeyChecking=no \
+              ${{ secrets.PROXY_USER }}@${{ secrets.PROXY_HOST }} \
+              "ssh-keyscan -p ${{ secrets.DEPLOY_PORT || 22 }} ${{ secrets.DEPLOY_HOST }} 2>/dev/null" \
+              >> ~/.ssh/known_hosts 2>/dev/null || true
+
+          cat > ~/.ssh/config << SSHEOF
+          Host bastion
+            HostName ${{ secrets.PROXY_HOST }}
+            User ${{ secrets.PROXY_USER }}
+            Port ${{ secrets.PROXY_PORT || 22 }}
+            IdentityFile ~/.ssh/deploy_key
+            StrictHostKeyChecking no
+
+          Host target
+            HostName ${{ secrets.DEPLOY_HOST }}
+            User ${{ secrets.DEPLOY_USER }}
+            Port ${{ secrets.DEPLOY_PORT || 22 }}
+            IdentityFile ~/.ssh/deploy_key
+            ProxyJump bastion
+            StrictHostKeyChecking no
+          SSHEOF
+
+          chmod 600 ~/.ssh/config
+
+      # ─── ファイル同期 (rsync over ProxyJump) ───
+      - name: Sync files to Swan
+        run: |
+          rsync -avz --delete \
+            --exclude='.git' \
+            --exclude='.DS_Store' \
+            --exclude='__pycache__' \
+            --exclude='*.pyc' \
+            --exclude='*.egg-info/' \
+            --exclude='.venv/' \
+            --exclude='node_modules/' \
+            --exclude='.langgraph_api/' \
+            --exclude='.env' \
+            --exclude='.env.*' \
+            -e "ssh" \
+            ./ target:${{ secrets.DEPLOY_PATH }}/
+
+      # ─── クリーンアップ ───
+      - name: Cleanup SSH credentials
+        if: always()
+        run: |
+          rm -f ~/.ssh/deploy_key
+          rm -f ~/.ssh/config

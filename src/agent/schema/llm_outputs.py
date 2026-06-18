@@ -70,6 +70,84 @@ class IntegrationOutput(BaseModel):
     Argument: IntegrationBody = Field(description="Integration result.")
 
 
+# =======================================no_schema 条件用（Argument が自由記述）
+
+
+# LLM出力：主張（no_schema）。can_generate/reason は構造化のまま、Argument は自由記述。
+class MainArgumentAvailabilityOutputFree(BaseModel):
+    """主張生成の可否と、可能な場合のメイン Argument（自由記述）."""
+
+    can_generate: Literal["YES", "NO"] = Field(
+        description=(
+            "determining whether you can make an argument regarding the given issue."
+        )
+    )
+    reason: str = Field(description="Brief reason for the availability decision.")
+    Argument: str | None = Field(
+        default=None,
+        description="Free natural-language argument. Required only when can_generate is YES.",
+    )
+
+
+# LLM出力：反論（no_schema）。can_defeat/Attack は構造化のまま、Argument は自由記述。
+class DefeatingArgumentOutputFree(BaseModel):
+    """反論の可否と、攻撃側 Argument（自由記述）・攻撃宣言（Attack）出力."""
+
+    can_defeat: Literal["YES", "NO"] = Field(
+        description="YES only if a valid rebut or undercut is available."
+    )
+    Argument: str | None = Field(
+        default=None, description="Free natural-language defeating argument, omitted when NO."
+    )
+    Attack: AttackMetadata | None = Field(
+        default=None,
+        description="Attack made by this argument against a specified part of the target argument, omitted when NO.",
+    )
+
+
+# LLM出力：undercut（no_schema）。can_undercut は構造化のまま、Argument は自由記述。
+class UndercutOutputFree(BaseModel):
+    """undercut（仮定の無効化）の可否と Argument（自由記述）出力."""
+
+    can_undercut: Literal["YES", "NO"] = Field(
+        description="YES only if a target assumption can be invalidated."
+    )
+    Argument: str | None = Field(
+        default=None, description="Free natural-language undercutting argument, omitted when NO."
+    )
+
+
+# LLM出力：汎化（no_schema）。各基準を自由記述の文として列挙する。
+class GeneralizationOutputFree(BaseModel):
+    """汎化出力（no_schema; 自由記述の基準のリスト）."""
+
+    Argument: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Reusable criteria extracted from conflicting warrants, each as a short "
+            "natural-language statement of condition(s) -> conclusion, naming the underlying principle."
+        ),
+    )
+
+
+# LLM出力：統合（no_schema）。統合ルールを自由記述の文として返す。
+class IntegrationBodyFree(BaseModel):
+    """統合結果（no_schema; 自由記述の単一ルール）."""
+
+    rule: str = Field(
+        description=(
+            "A single integrated rule, expressed in natural language, that subsumes every "
+            "generalized criterion via OR and is applicable to future arguments."
+        )
+    )
+
+
+class IntegrationOutputFree(BaseModel):
+    """統合出力（no_schema）."""
+
+    Argument: IntegrationBodyFree = Field(description="Integration result.")
+
+
 # =======================================ヘルパ
 
 

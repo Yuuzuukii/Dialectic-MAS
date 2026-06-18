@@ -9,9 +9,12 @@ from __future__ import annotations
 import json
 from typing import Any
 
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
+
 from . import arguments
-from .arguments import generate_attack, generate_undercut
+from .arguments import argument_message_content, generate_attack, generate_undercut
 from .defeats import run_defeat_subgraph, run_strict_defeat_subgraph
+from .prompts import attack_instruction, main_instruction
 from .schema.state import ArgumentRecord, parse_serialized_payload
 
 # ============================================================================
@@ -22,6 +25,36 @@ from .schema.state import ArgumentRecord, parse_serialized_payload
 def dialogue_history(history: list[ArgumentRecord]) -> list[dict[str, Any]]:
     """引数履歴を対話ログ用の dict リストへ変換する."""
     return [argument.to_dialogue_dict() for argument in history]
+
+
+def _records(state: Any) -> list[ArgumentRecord]:
+    """簿記用 ArgumentRecord リストを返す（移行前 history への互換も含む）."""
+    records = getattr(state, "argument_records", None)
+    if records is not None:
+        return list(records)
+    return [
+        item
+        for item in getattr(state, "history", [])
+        if isinstance(item, ArgumentRecord)
+    ]
+
+
+def _message_history(state: Any) -> list[BaseMessage]:
+    """LLM 用 BaseMessage 履歴を返す."""
+    return [
+        item for item in getattr(state, "history", []) if isinstance(item, BaseMessage)
+    ]
+
+
+def _append_turn(
+    state: Any, instruction: str, argument: ArgumentRecord
+) -> list[BaseMessage]:
+    """実際に送った HumanMessage と発話 AIMessage を履歴に追加する."""
+    return [
+        *_message_history(state),
+        HumanMessage(content=instruction),
+        AIMessage(content=argument_message_content(argument), name=argument.agent),
+    ]
 
 
 def thread_finding(state: Any, status: str) -> str | None:
@@ -70,19 +103,20 @@ def complete_thread(
     """スレッド完了時の状態更新 dict（履歴・status・合意フラグ等）を組み立てる."""
     key = "ag1" if state.current_proponent == "AG1" else "ag2"
     main_id = state.current_argument.id if state.current_argument else None
-    history = _annotate_main_status(
-        [*state.history, *(extra_history or [])], main_id, status
+    records = _annotate_main_status(
+        [*_records(state), *(extra_history or [])], main_id, status
     )
     update: dict[str, Any] = {
         "current_thread_status": status,
-        "history": history,
-        "dialogue_history": dialogue_history(history),
+        "argument_records": records,
+        "dialogue_history": dialogue_history(records),
         f"{key}_thread_status": status,
     }
 
     finding = thread_finding(state, status)
     if finding is not None and finding not in state.learned_findings:
         update["learned_findings"] = [*state.learned_findings, finding]
+        update[f"{key}_revision_context"] = finding
 
     if status == "justified":
         update["justified_argument"] = (
@@ -93,29 +127,6 @@ def complete_thread(
     elif status == "overruled":
         update["justification_status"] = f"{key}_main_overruled"
 
-    if status in {"defensible", "overruled"}:
-        update["current_proponent"] = state.current_proponent
-        update["current_opponent"] = state.current_opponent
-        if key == "ag1" and state.ag2_thread_status is None:
-            update.update(
-                {
-                    "current_proponent": "AG2",
-                    "current_opponent": "AG1",
-                    "active_agent": "AG2",
-                    "current_argument": None,
-                    "b_argument": None,
-                    "c_argument": None,
-                    "d_argument": None,
-                    "b_argument_id": None,
-                    "c_argument_id": None,
-                    "d_argument_id": None,
-                    "b_defeats_a": None,
-                    "c_defeats_b": None,
-                    "b_defeats_c": None,
-                    "c_strictly_defeats_b": None,
-                    "debate_stage": "ag2_main_thread",
-                }
-            )
     return update
 
 
@@ -139,12 +150,15 @@ async def can_generate_main(state: Any) -> dict[str, Any]:
         }
 
     argument = result.argument
-    history = [*state.history, argument]
+    instruction = main_instruction(state)
+    history = _append_turn(state, instruction, argument)
+    records = [*_records(state), argument]
     update.update(
         {
             "active_agent": "AG2" if agent == "AG1" else "AG1",
             "current_argument": argument,
             "current_thread_status": None,
+            "main_attempt_count": state.main_attempt_count + 1,
             "b_argument": None,
             "c_argument": None,
             "d_argument": None,
@@ -156,7 +170,8 @@ async def can_generate_main(state: Any) -> dict[str, Any]:
             "b_defeats_c": None,
             "c_strictly_defeats_b": None,
             "history": history,
-            "dialogue_history": dialogue_history(history),
+            "argument_records": records,
+            "dialogue_history": dialogue_history(records),
         }
     )
     if agent == "AG1":
@@ -180,6 +195,29 @@ async def can_generate_main(state: Any) -> dict[str, Any]:
     return update
 
 
+async def advance_to_ag2(state: Any) -> dict[str, Any]:
+    """AG1 がこれ以上 main argument を生成できなくなったとき、AG2 の手番に切り替える."""
+    return {
+        "current_proponent": "AG2",
+        "current_opponent": "AG1",
+        "active_agent": "AG2",
+        "current_argument": None,
+        "current_thread_status": None,
+        "main_attempt_count": 0,
+        "b_argument": None,
+        "c_argument": None,
+        "d_argument": None,
+        "b_argument_id": None,
+        "c_argument_id": None,
+        "d_argument_id": None,
+        "b_defeats_a": None,
+        "c_defeats_b": None,
+        "b_defeats_c": None,
+        "c_strictly_defeats_b": None,
+        "debate_stage": "ag2_main_thread",
+    }
+
+
 async def o_defeat_a(state: Any) -> dict[str, Any]:
     """Opponent が Proponent の主張 A を攻撃する論証 (B) を生成する."""
     if state.current_argument is None:
@@ -192,7 +230,9 @@ async def o_defeat_a(state: Any) -> dict[str, Any]:
     )
     if argument is None:
         return complete_thread(state, "justified")
-    history = [*state.history, argument]
+    instruction = attack_instruction("defeat", state.current_argument, state=state)
+    history = _append_turn(state, instruction, argument)
+    records = [*_records(state), argument]
     return {
         "active_agent": state.current_proponent,
         "b_argument": argument,
@@ -200,7 +240,8 @@ async def o_defeat_a(state: Any) -> dict[str, Any]:
         "last_generated_argument": argument,
         "last_can_defeat": None,
         "history": history,
-        "dialogue_history": dialogue_history(history),
+        "argument_records": records,
+        "dialogue_history": dialogue_history(records),
     }
 
 
@@ -243,14 +284,19 @@ async def p_counter_b(state: Any) -> dict[str, Any]:
     )
     if argument is None:
         return complete_thread(state, "overruled")
-    history = [*state.history, argument]
+    instruction = attack_instruction(
+        "counter", state.b_argument, state=state, main_argument=state.current_argument
+    )
+    history = _append_turn(state, instruction, argument)
+    records = [*_records(state), argument]
     return {
         "active_agent": state.current_opponent,
         "c_argument": argument,
         "c_argument_id": argument.id,
         "last_generated_argument": argument,
         "history": history,
-        "dialogue_history": dialogue_history(history),
+        "argument_records": records,
+        "dialogue_history": dialogue_history(records),
     }
 
 
@@ -312,14 +358,27 @@ async def validate_b_defeats_c(state: Any) -> dict[str, Any]:
 
 
 async def extract_warrants(state: Any) -> dict[str, Any]:
-    """AG1 と AG2 の主張それぞれの最終ルール (warrant) を抽出する."""
+    """AG1 と AG2 の主張それぞれの最終ルール (warrant) を抽出する.
+
+    no_schema では Argument に rules/Conc/Ass の構造がないため、main argument の
+    自由記述テキストそのものを warrant として渡す。
+    """
     if state.ag1_main_argument is None or state.ag2_main_argument is None:
         return {"error": "AG1またはAG2のmain argumentが見つかりません"}
+    if state.output_mode == "no_schema":
+        warrant_json = {
+            "Argument1": {"agent": "AG1", "warrant": state.ag1_main_argument.argument},
+            "Argument2": {"agent": "AG2", "warrant": state.ag2_main_argument.argument},
+        }
+        return {
+            "warrant_result": json.dumps(warrant_json, ensure_ascii=False, indent=2)
+        }
     try:
         ag1_last_rule = state.ag1_main_argument.body.get("rules", [])[-1]
         ag2_last_rule = state.ag2_main_argument.body.get("rules", [])[-1]
         warrant_json = {
             "Argument1": {
+                "agent": "AG1",
                 "warrant": {
                     "antecedent": {
                         "strong": ag1_last_rule["antecedent"].get("strong", []),
@@ -331,6 +390,7 @@ async def extract_warrants(state: Any) -> dict[str, Any]:
                 }
             },
             "Argument2": {
+                "agent": "AG2",
                 "warrant": {
                     "antecedent": {
                         "strong": ag2_last_rule["antecedent"].get("strong", []),
@@ -411,6 +471,7 @@ async def add_integrated_rule(state: Any) -> dict[str, Any]:
         "current_opponent": "AG2",
         "active_agent": "AG1",
         "debate_stage": "ag1_main_thread",
+        "main_attempt_count": 0,
         "ag1_main_argument": None,
         "ag2_main_argument": None,
         "ag1_thread_status": None,
@@ -467,7 +528,7 @@ async def route_after_thread_node(state: Any) -> dict[str, Any]:
 async def finish(state: Any) -> dict[str, Any]:
     """議論を正常終了し、対話履歴・正当化結果・統合ルールを最終状態として返す."""
     return {
-        "dialogue_history": dialogue_history(state.history),
+        "dialogue_history": dialogue_history(_records(state)),
         "justified_argument": state.justified_argument,
         "justification_status": state.justification_status,
         "consensus_reached": state.consensus_reached,

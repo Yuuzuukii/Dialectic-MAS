@@ -35,122 +35,73 @@ def _extract_conc(argument_str: str | Any) -> list[str]:
     return [c for c in conc if isinstance(c, str) and c.strip()]
 
 
-def _extract_ass(argument_str: str | Any) -> list[str]:
-    parsed = _parse_argument_field(argument_str)
-    body = parsed.get("Argument", parsed)
-    ass = body.get("Ass", [])
-    if ass:
-        return [a for a in ass if isinstance(a, str) and a.strip()]
-    rules = body.get("rules", [])
-    result: list[str] = []
-    for rule in rules:
-        if isinstance(rule, dict) and isinstance(rule.get("antecedent"), dict):
-            result.extend(
-                a for a in rule["antecedent"].get("weak_negation", [])
-                if isinstance(a, str) and a.strip()
-            )
-    return result
+def _format_turn(argument: Any) -> str:
+    """1 ターン分の発話 (argument) を評価器向けの読みやすいテキストに整形する.
 
-
-def build_eval_input(log: dict[str, Any]) -> dict[str, Any]:
-    """スキーマ版の実行ログを、LLM 評価器へ渡す入力 dict に整形する."""
-    question = log.get("question", "")
-    dialogue_history: list[dict[str, Any]] = log.get("dialogue_history", [])
-    integrated_rules: list[str] = log.get("integrated_rules") or []
-    justification_status: str = log.get("justification_status") or ""
-
-    ag1_mains: list[str] = []
-    ag2_mains: list[str] = []
-    debate_lines: list[str] = []
-
-    for record in dialogue_history:
-        rtype = record.get("type", "")
-        agent = record.get("agent", "")
-        argument_str = record.get("argument", "")
-        conc = _extract_conc(argument_str)
-        ass = _extract_ass(argument_str)
-
-        if rtype == "main":
-            text = "; ".join(conc) if conc else "(no conclusion)"
-            if agent == "AG1":
-                ag1_mains.append(text)
-            elif agent == "AG2":
-                ag2_mains.append(text)
-        elif rtype in {"defeat", "counter"}:
-            attack = record.get("attack") or "—"
-            target_id = record.get("target_id") or "—"
-            conc_text = "; ".join(conc) if conc else "(no conclusion)"
-            ass_text = "; ".join(ass) if ass else "none"
-            debate_lines.append(
-                f"[{rtype}] {agent} (attack: {attack}, target: {target_id})\n"
-                f"  Conc: {conc_text}\n"
-                f"  Ass:  {ass_text}"
-            )
-
-    justified_raw = log.get("justified_argument")
-    justified_conc = _extract_conc(justified_raw)
-    justified_text = "; ".join(justified_conc) if justified_conc else "(no conclusion)"
-
-    return {
-        "mode": "schema",
-        "method_context": SCHEMA_METHOD_CONTEXT,
-        "question": question,
-        "agent1_stance": log.get("agent1_stance") or "(not provided)",
-        "agent2_stance": log.get("agent2_stance") or "(not provided)",
-        "ag1_initial_opinion": "\n".join(ag1_mains) if ag1_mains else "(none)",
-        "ag2_initial_opinion": "\n".join(ag2_mains) if ag2_mains else "(none)",
-        "debate_history": "\n\n".join(debate_lines) if debate_lines else "(no debate exchanges)",
-        "integrated_rules": "\n".join(f"- {r}" for r in integrated_rules) if integrated_rules else "(none)",
-        "justified_argument": justified_text,
-        "justification_status": justification_status,
-    }
-
-
-def build_eval_input_no_schema(log: dict[str, Any]) -> dict[str, Any]:
-    """スキーマなし版の統一ログを、build_eval_input と同じ形に変換する.
-
-    free-text の各発話を schema 版の評価入力フィールドに対応付け、同一の評価器・
-    ルーブリック (evaluate_with_llm) で採点できるようにする。
+    schema: {"Argument": {"rules": [...], "Conc": [...], "Ass": [...]}} 形式の dict。
+    no_schema: 自由記述の文字列。
     """
-    dialogue_history: list[dict[str, Any]] = log.get("dialogue_history", []) or []
+    if isinstance(argument, str):
+        text = argument.strip()
+        return text if text else "(no argument)"
 
-    ag1_mains: list[str] = []
-    ag2_mains: list[str] = []
-    final_claim = log.get("justified_argument") or log.get("final_answer") or "(no conclusion)"
+    if not isinstance(argument, dict):
+        return "(no argument)"
 
-    debate_lines: list[str] = []
-    for record in dialogue_history:
-        rtype = record.get("type", "")
-        agent = record.get("agent", "")
-        argument = record.get("argument", "")
-        if rtype == "main" and agent == "AG1":
-            ag1_mains.append(argument)
-            if record.get("status") == "justified":
-                final_claim = argument
-        elif rtype == "main" and agent == "AG2":
-            ag2_mains.append(argument)
-        elif rtype in {"defeat", "counter"}:
-            target_id = record.get("target_id") or "—"
-            debate_lines.append(f"[{rtype}] {agent} (target: {target_id})\n  {argument}")
+    body = argument.get("Argument", argument)
+    if not isinstance(body, dict):
+        return "(no argument)"
 
-    integrated_rules = log.get("integrated_rules") or []
-    if isinstance(integrated_rules, list):
-        integrated_rules_text = "\n".join(f"- {rule}" for rule in integrated_rules)
-    else:
-        integrated_rules_text = str(integrated_rules)
+    lines: list[str] = []
+    rules = body.get("rules") or []
+    for i, rule in enumerate(rules, 1):
+        if not isinstance(rule, dict):
+            continue
+        antecedent = rule.get("antecedent") or {}
+        strong = antecedent.get("strong") or []
+        weak = antecedent.get("weak_negation") or []
+        lines.append(f"  Rule {i}:")
+        for premise in strong:
+            lines.append(f"    - {premise}")
+        for assumption in weak:
+            lines.append(f"    - (assumption) {assumption}")
+        consequent = rule.get("consequent")
+        if consequent:
+            lines.append(f"    => {consequent}")
+
+    conc = _extract_conc(argument)
+    if conc:
+        lines.append("  Conclusion: " + "; ".join(conc))
+
+    return "\n".join(lines) if lines else "(no argument)"
+
+
+def build_eval_input(log: dict[str, Any], *, mode: str = "schema") -> dict[str, Any]:
+    """実行ログを、LLM 評価器へ渡す入力 dict に整形する.
+
+    ログは question / agent1_stance / agent2_stance / dialogue_history
+    (各ターンの {agent, argument}) / final_answer / metrics のみを持つ。
+    schema / no_schema は argument の表現形式（構造化 JSON か自由記述テキストか）が
+    異なるだけで、整形ロジックは共通。`mode` に応じて method_context だけ切り替える。
+    """
+    dialogue_history: list[dict[str, Any]] = log.get("dialogue_history") or []
+
+    transcript_lines = [
+        f"[Turn {i}] {record.get('agent', '?')}:\n{_format_turn(record.get('argument'))}"
+        for i, record in enumerate(dialogue_history, start=1)
+    ]
+
+    final_answer = log.get("final_answer")
+    final_answer_text = final_answer.strip() if isinstance(final_answer, str) and final_answer.strip() else "(no final answer)"
 
     return {
-        "mode": "no-schema",
-        "method_context": NO_SCHEMA_METHOD_CONTEXT,
-        "question": log.get("question") or "",
+        "mode": mode,
+        "method_context": SCHEMA_METHOD_CONTEXT if mode == "schema" else NO_SCHEMA_METHOD_CONTEXT,
+        "question": log.get("question", ""),
         "agent1_stance": log.get("agent1_stance") or "(not provided)",
         "agent2_stance": log.get("agent2_stance") or "(not provided)",
-        "ag1_initial_opinion": ag1_mains[0] if ag1_mains else "(none)",
-        "ag2_initial_opinion": ag2_mains[0] if ag2_mains else "(none)",
-        "debate_history": "\n\n".join(debate_lines) if debate_lines else "(no debate exchanges)",
-        "integrated_rules": integrated_rules_text or "(none)",
-        "justified_argument": final_claim,
-        "justification_status": log.get("justification_status") or "no_schema",
+        "debate_transcript": "\n\n".join(transcript_lines) if transcript_lines else "(no dialogue)",
+        "final_answer": final_answer_text,
     }
 
 
@@ -184,56 +135,44 @@ def aggregate_scores(scores: list[dict[str, Any]]) -> dict[str, Any]:
 COMMON_EVALUATION_CONTEXT = """
 You are evaluating a multi-agent dialogue between AG1 and AG2.
 
-Both agents have fixed stances. Judge whether the dialogue produces a coherent, useful, and fair final position
-from the information shown below. Use the method-specific context only to interpret the log format; do not reward
-or penalize a run merely because it uses, or does not use, a formal schema.
+Both agents have fixed stances. The debate transcript below lists each agent's turns in chronological
+order (labeled "[Turn N] AGENT:"); turns alternate roughly as: each agent states a main argument for
+its stance, the opponent attacks it (rebutting its conclusion or undercutting an assumption it relies
+on), the original agent defends or counters, and so on. Once both sides' reasoning is exhausted, the
+agents extract and integrate shared rules from the debate and produce a final answer.
+
+Judge whether the dialogue produces a coherent, useful, and fair final position from the information
+shown below. Use the method-specific context only to interpret the argument format; do not reward or
+penalize a run merely because it uses, or does not use, a formal schema.
 """.strip()
 
 SCHEMA_METHOD_CONTEXT = """
 This run uses the proposed schema-based dialectical method, based on ASPIC+-style argumentation.
 
---- Argument Schema ---
-Each argument is a sequence of rules. A rule has:
-  - antecedent:
-      - strong:         Established premises (must hold for the rule to fire)
-      - weak_negation:  Defeasible assumptions (can be attacked by undercut)
-  - consequent: The conclusion derived from the antecedent
+--- Argument Format ---
+Each turn's argument is a sequence of rules. A rule has:
+  - Premises:    Established premises (must hold for the rule to fire), and any premises marked
+                 "(assumption)" are defeasible assumptions that an opponent may attack by undercut.
+  - Conclusion:  The conclusion derived from the premises ("=>").
+A turn may also list its overall "Conclusion" — the conclusion(s) it ultimately puts forward.
 
-Each argument exposes:
-  - Conc: list of conclusions (consequents of the final rule)
-  - Ass:  list of defeasible assumptions (weak_negation items across all rules)
-
---- Attack Types ---
-  - rebut:    The attacker's Conc explicitly negates a Conc of the target argument.
+--- Attacks ---
+  - rebut:    An agent's argument explicitly negates a conclusion of the target argument.
               (direct clash of conclusions)
-  - undercut: The attacker's Conc explicitly negates an Ass of the target argument.
+  - undercut: An agent's argument explicitly negates an assumption the target argument relies on.
               (attacks a defeasible assumption the target relies on)
-
---- Dialogue Flow ---
-  1. Each agent (AG1, AG2) generates a main argument for their position.
-  2. The opponent attempts to defeat it (rebut or undercut) → type "defeat"
-  3. The proponent counters the defeat → type "counter"
-  4. Defeat validity is checked; if cycles resolve, the thread closes.
-  5. Warrants are extracted, generalized, and integrated into reusable rules.
-  6. A new main argument is generated using the integrated rules.
-  7. The argument that cannot be defeated is declared justified.
 """.strip()
 
 NO_SCHEMA_METHOD_CONTEXT = """
-This run is the no-schema baseline.
+This run uses the same dialectical protocol and dialogue flow as the schema-based method (see below),
+but each agent's argument is expressed as free natural-language reasoning instead of a structured
+rules/Conclusion representation.
 
---- Dialogue Format ---
-The agents produce free-text claims and counters without formal Conc/Ass fields, attack validation, or an explicit
-justification proof. The logged agreement core is a free-text synthesis of shared principles, and the final response
-is AG1's revised claim after considering that agreement core.
-
---- Dialogue Flow ---
-  1. AG1 gives an initial claim from its stance.
-  2. AG2 counters AG1.
-  3. AG2 gives an initial claim from its stance.
-  4. AG1 counters AG2.
-  5. A shared agreement core is generated.
-  6. AG1 gives a revised final claim based on that agreement core.
+--- Attacks ---
+  - rebut:    An agent's argument explicitly negates the target argument's stated conclusion.
+              (direct clash of conclusions)
+  - undercut: An agent's argument explicitly negates an assumption the target argument relies on.
+              (attacks a defeasible assumption the target relies on)
 """.strip()
 
 SCORING_INSTRUCTION = """
@@ -243,11 +182,11 @@ Rate the above dialectical reasoning on a scale from 1 to 10 for each of the fol
 2. Originality    – Does the synthesis demonstrate novel insight, creative framing, or non-obvious conclusions?
 3. Dialecticality – Does the response meaningfully integrate both perspectives, showing fair reasoning and synthesis?
 4. Validity       – Are the method's own dialectical commitments sound when re-examined from each agent's stance?
-                    For schema-based runs, check whether attacks, counters, status assignments, and justified/defensible
-                    outcomes are warranted by the stated Conc/Ass and stances. For no-schema runs, check whether the
-                    counters and final revised claim fairly answer the opposing stance and avoid unsupported concessions
-                    or ignored objections. A high score means the debate closes or synthesizes for good reasons; a low
-                    score means important stance-consistent objections were mishandled or overlooked.
+                    Check whether each turn's attacks (rebut/undercut) and counters genuinely target the
+                    conclusions or assumptions they claim to, and whether the final answer is fairly warranted
+                    by the transcript and both agents' stances. A high score means the debate closes or
+                    synthesizes for good reasons; a low score means important stance-consistent objections
+                    were mishandled, ignored, or unsupported.
 
 Scoring rubric:
   9–10: Outstanding – excellent quality for the axis
@@ -294,21 +233,11 @@ AG1 Stance:
 AG2 Stance:
 {response['agent2_stance']}
 
-AG1 Initial Position:
-{response['ag1_initial_opinion']}
+Debate Transcript (chronological, each turn is one agent's argument):
+{response['debate_transcript']}
 
-AG2 Initial Position:
-{response['ag2_initial_opinion']}
-
-Debate History:
-{response['debate_history']}
-
-Integrated Rules or Agreement Core:
-{response['integrated_rules']}
-
-Final Output:
-{response['justified_argument']}
-Justification status: {response['justification_status']}
+Final Answer:
+{response['final_answer']}
 
 ---
 

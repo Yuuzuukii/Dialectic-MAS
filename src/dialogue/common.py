@@ -5,7 +5,6 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
-import os
 import sys
 import time
 from datetime import datetime
@@ -14,7 +13,6 @@ from typing import Any, Literal, cast
 
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.outputs import LLMResult
-from langchain_core.runnables import RunnableConfig
 
 ROOT = Path(__file__).resolve().parents[2]
 DATASETS_DIR = ROOT / "datasets"
@@ -109,16 +107,96 @@ def _record_metadata(record: Any) -> dict[str, Any]:
     if record is None:
         return {}
     result: dict[str, Any] = {}
-    for key in ("id", "type", "agent", "attack", "target_id", "target_field", "target_statement", "status"):
+    keys = (
+        "id",
+        "round",
+        "type",
+        "agent",
+        "attack",
+        "target_id",
+        "target_field",
+        "target_statement",
+        "status",
+    )
+    for key in keys:
         value = getattr(record, key, None)
         if value is not None:
             result[key] = value
     if isinstance(record, dict):
-        for key in ("id", "type", "agent", "attack", "target_id", "target_field", "target_statement", "status"):
+        for key in keys:
             value = record.get(key)
             if value is not None:
                 result[key] = value
     return result
+
+
+def _record_id(record: Any) -> str | None:
+    if record is None:
+        return None
+    value = getattr(record, "id", None)
+    if isinstance(value, str):
+        return value
+    if isinstance(record, dict) and isinstance(record.get("id"), str):
+        return cast(str, record["id"])
+    return None
+
+
+def _format_argument_for_terminal(argument: Any) -> str:
+    """Argument payload を JSON schema の形のまま端末表示する."""
+    if isinstance(argument, str):
+        text = argument.strip()
+        return text if text else "(no argument)"
+
+    if not isinstance(argument, dict):
+        return "(no argument)"
+
+    return json.dumps(argument, ensure_ascii=False, indent=2)
+
+
+def _print_argument_turn(record: Any, seen_ids: set[str]) -> None:
+    """生成された発話を一度だけ端末へ出す."""
+    record_id = _record_id(record)
+    if record_id is not None:
+        if record_id in seen_ids:
+            return
+        seen_ids.add(record_id)
+
+    payload = _record_argument_payload(record)
+    if payload is None:
+        return
+
+    metadata = _record_metadata(record)
+    agent = metadata.get("agent", "?")
+    argument_type = metadata.get("type", "?")
+    round_no = metadata.get("round")
+    header_parts = ["[turn]"]
+    if round_no is not None:
+        header_parts.append(f"round {round_no}")
+    header_parts.append(str(agent))
+    header_parts.append(str(argument_type))
+    if metadata.get("attack"):
+        header_parts.append(f"({metadata['attack']} on {metadata.get('target_field', '?')})")
+    print(" ".join(header_parts), flush=True)  # noqa: T201
+    if record_id is not None:
+        print(f"  id: {record_id}", flush=True)  # noqa: T201
+    if metadata.get("target_id"):
+        print(f"  target: {metadata['target_id']}", flush=True)  # noqa: T201
+    if metadata.get("target_statement"):
+        print(f"  target_statement: {metadata['target_statement']}", flush=True)  # noqa: T201
+    print(_format_argument_for_terminal(payload), flush=True)  # noqa: T201
+    print("", flush=True)  # noqa: T201
+
+
+def _print_stream_update(
+    node_name: str, update: dict[str, Any], seen_ids: set[str]
+) -> None:
+    """LangGraph の node update から発話を拾って端末へ出す."""
+    if node_name in {"can_generate_main", "o_defeat_a", "p_counter_b"}:
+        record = update.get("current_argument") or update.get("last_generated_argument")
+        _print_argument_turn(record, seen_ids)
+        return
+    if node_name.startswith("validate_"):
+        _print_argument_turn(update.get("last_generated_argument"), seen_ids)
 
 
 def _node_payload(node_name: str, update: dict[str, Any]) -> Any:
@@ -198,18 +276,12 @@ def save_log(log: dict[str, Any], path: Path) -> Path:
 def base_log(
     *,
     method: Method,
-    topic_path: Path,
     topic_data: dict[str, Any],
     elapsed: float,
     usage: dict[str, Any],
 ) -> dict[str, Any]:
-    category, topic = topic_identity(topic_path)
     return {
-        "timestamp": datetime.now().isoformat(timespec="seconds"),
         "method": method,
-        "category": category,
-        "topic": topic,
-        "source_path": str(topic_path),
         "question": topic_data["question"],
         "agent1_stance": topic_data["agent1_stance"],
         "agent2_stance": topic_data["agent2_stance"],
@@ -220,194 +292,113 @@ def base_log(
     }
 
 
-async def run_schema_topic_once(
+def _speech_log(history: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """対話履歴から、各エージェントの発話（agent/argument）だけを抜き出す."""
+    return [
+        {"agent": record.get("agent"), "argument": record.get("argument")}
+        for record in history
+    ]
+
+
+async def _run_topic_once(
+    method: Method,
     topic_file: str | Path,
     *,
     max_turns: int = 3,
+    max_main_argument_attempts: int | None = None,
     output_root: Path = LOGS_DIR,
     run_index: int | None = None,
 ) -> Path:
+    """schema / no_schema 共通の実行ロジック.
+
+    両条件とも同じ LangGraph（討論プロトコル・プロンプト）を使い、
+    `State.output_mode` だけを切り替える（no_schema は Argument 本体の rules/Conc/Ass
+    スキーマを取り除き、自由記述の natural language として出力させる）。
+    """
     from src.agent.workflow import State, graph
 
     topic_path, topic_data = load_topic(topic_file)
     tracker = TokenUsageTracker()
-    graph_input = State(
-        question=topic_data["question"],
-        agent1_stance=topic_data["agent1_stance"],
-        agent2_stance=topic_data["agent2_stance"],
-        max_turns=max_turns,
-        additional_context=cast(dict[str, Any], topic_data.get("additional_context", {})),
-    )
+    state_kwargs: dict[str, Any] = {
+        "question": topic_data["question"],
+        "agent1_stance": topic_data["agent1_stance"],
+        "agent2_stance": topic_data["agent2_stance"],
+        "max_turns": max_turns,
+        "additional_context": cast(dict[str, Any], topic_data.get("additional_context", {})),
+        "output_mode": method,
+    }
+    if max_main_argument_attempts is not None:
+        state_kwargs["max_main_argument_attempts"] = max_main_argument_attempts
+    graph_input = State(**state_kwargs)
 
     start = time.perf_counter()
-    result = await graph.ainvoke(
+    result: dict[str, Any] = dict(graph_input.__dict__)
+    seen_argument_ids: set[str] = set()
+    async for event in graph.astream(
         graph_input,  # type: ignore[arg-type]
         config={"callbacks": [tracker]},
-    )
+        stream_mode="updates",
+    ):
+        if not isinstance(event, dict):
+            continue
+        for node_name, update in event.items():
+            if not isinstance(update, dict):
+                continue
+            _print_stream_update(node_name, update, seen_argument_ids)
+            result.update(update)
     elapsed = time.perf_counter() - start
     final_state = _jsonable(result)
 
     log = base_log(
-        method="schema",
-        topic_path=topic_path,
+        method=method,
         topic_data=topic_data,
         elapsed=elapsed,
         usage=tracker.usage(),
     )
-    log.update(
-        {
-            "dialogue_history": final_state.get("dialogue_history", []),
-            "integrated_rules": final_state.get("integrated_rules", []),
-            "justified_argument": final_state.get("justified_argument"),
-            "justification_status": final_state.get("justification_status"),
-            "consensus_reached": final_state.get("consensus_reached"),
-            "final_answer": final_state.get("final_answer"),
-            "ag1_thread_status": final_state.get("ag1_thread_status"),
-            "ag2_thread_status": final_state.get("ag2_thread_status"),
-            "error": final_state.get("error"),
-        }
-    )
-    path = save_log(log, output_path("schema", topic_path, output_root, run_index))
+    log["dialogue_history"] = _speech_log(final_state.get("dialogue_history", []))
+    log["final_answer"] = final_state.get("final_answer")
+    error = final_state.get("error")
+    if error is not None:
+        log["error"] = error
+    path = save_log(log, output_path(method, topic_path, output_root, run_index))
     print(f"[system] log saved -> {path}", flush=True)
     return path
 
 
-def _free_text_record(
+async def run_schema_topic_once(
+    topic_file: str | Path,
     *,
-    idx: int,
-    rtype: str,
-    agent: str,
-    argument: str,
-    target_id: str | None = None,
-    status: str | None = None,
-) -> dict[str, Any]:
-    return {
-        "id": f"no-schema-{idx}",
-        "round": 1,
-        "type": rtype,
-        "argument": argument,
-        "support": [],
-        "agent": agent,
-        "target_id": target_id,
-        "attack": None,
-        "target_field": None,
-        "target_statement": None,
-        "status": status,
-    }
+    max_turns: int = 3,
+    max_main_argument_attempts: int | None = None,
+    output_root: Path = LOGS_DIR,
+    run_index: int | None = None,
+) -> Path:
+    return await _run_topic_once(
+        "schema",
+        topic_file,
+        max_turns=max_turns,
+        max_main_argument_attempts=max_main_argument_attempts,
+        output_root=output_root,
+        run_index=run_index,
+    )
 
 
 async def run_no_schema_topic_once(
     topic_file: str | Path,
     *,
+    max_turns: int = 3,
+    max_main_argument_attempts: int | None = None,
     output_root: Path = LOGS_DIR,
     run_index: int | None = None,
 ) -> Path:
-    from langchain_core.messages import HumanMessage
-
-    from src.agent.llm import chat_text
-
-    topic_path, topic_data = load_topic(topic_file)
-    model = os.getenv("MODEL", "gpt-5-mini")
-    tracker = TokenUsageTracker()
-    config: RunnableConfig = {"callbacks": [tracker]}
-    q = topic_data["question"]
-    s1 = topic_data["agent1_stance"]
-    s2 = topic_data["agent2_stance"]
-
-    async def step(label: str, prompt: str) -> str:
-        print(f"[{label}]", flush=True)
-        result = await chat_text(
-            [HumanMessage(content=prompt)], model=model, config=config
-        )
-        print(result, flush=True)
-        print(flush=True)
-        return result
-
-    start = time.perf_counter()
-    ag1_claim = await step("AG1 main claim", f"""\
-You are AG1 in a dialogue. Answer the question from your stance.
-
-Question: {q}
-Your stance: {s1}
-
-State your argument in 2-3 sentences.""")
-    ag2_counter = await step("AG2 counter to AG1", f"""\
-You are AG2 in a dialogue. Counter the argument below.
-
-Question: {q}
-AG1's argument: {ag1_claim}
-Your stance: {s2}
-
-State your counterargument in 2-3 sentences.""")
-    ag2_claim = await step("AG2 main claim", f"""\
-You are AG2 in a dialogue. Answer the question from your stance.
-
-Question: {q}
-Your stance: {s2}
-
-State your argument in 2-3 sentences.""")
-    ag1_counter = await step("AG1 counter to AG2", f"""\
-You are AG1 in a dialogue. Counter the argument below.
-
-Question: {q}
-AG2's argument: {ag2_claim}
-Your stance: {s1}
-
-State your counterargument in 2-3 sentences.""")
-    agreement_core = await step("Agreement core", f"""\
-Two agents have debated the following question.
-
-Question: {q}
-
-AG1 argued: {ag1_claim}
-AG2 argued: {ag2_claim}
-AG1 countered AG2 with: {ag1_counter}
-AG2 countered AG1 with: {ag2_counter}
-
-Identify the shared values or criteria both agents implicitly agree on.
-State the agreement core as 1-2 abstract principles.""")
-    ag1_new_claim = await step("AG1 new claim after agreement", f"""\
-You are AG1. Based on the agreement core below, revise your argument for the question.
-
-Question: {q}
-Your original stance: {s1}
-Agreement core: {agreement_core}
-
-State your updated argument in 2-3 sentences.""")
-    elapsed = time.perf_counter() - start
-
-    dialogue_history = [
-        _free_text_record(idx=1, rtype="main", agent="AG1", argument=ag1_claim),
-        _free_text_record(idx=2, rtype="defeat", agent="AG2", argument=ag2_counter, target_id="no-schema-1"),
-        _free_text_record(idx=3, rtype="main", agent="AG2", argument=ag2_claim),
-        _free_text_record(idx=4, rtype="counter", agent="AG1", argument=ag1_counter, target_id="no-schema-3"),
-        _free_text_record(idx=5, rtype="synthesis", agent="system", argument=agreement_core),
-        _free_text_record(idx=6, rtype="main", agent="AG1", argument=ag1_new_claim, status="justified"),
-    ]
-
-    log = base_log(
-        method="no_schema",
-        topic_path=topic_path,
-        topic_data=topic_data,
-        elapsed=elapsed,
-        usage=tracker.usage(),
+    return await _run_topic_once(
+        "no_schema",
+        topic_file,
+        max_turns=max_turns,
+        max_main_argument_attempts=max_main_argument_attempts,
+        output_root=output_root,
+        run_index=run_index,
     )
-    log.update(
-        {
-            "dialogue_history": dialogue_history,
-            "integrated_rules": [agreement_core],
-            "justified_argument": ag1_new_claim,
-            "justification_status": "no_schema",
-            "consensus_reached": None,
-            "final_answer": ag1_new_claim,
-            "ag1_thread_status": None,
-            "ag2_thread_status": None,
-            "error": None,
-        }
-    )
-    path = save_log(log, output_path("no_schema", topic_path, output_root, run_index))
-    print(f"[system] log saved -> {path}", flush=True)
-    return path
 
 
 async def run_category(
@@ -416,6 +407,7 @@ async def run_category(
     *,
     runs: int = 1,
     max_turns: int = 3,
+    max_main_argument_attempts: int | None = None,
     output_root: Path = LOGS_DIR,
     continue_on_error: bool = True,
 ) -> list[Path]:
@@ -432,6 +424,7 @@ async def run_category(
                         await run_schema_topic_once(
                             topic_file,
                             max_turns=max_turns,
+                            max_main_argument_attempts=max_main_argument_attempts,
                             output_root=output_root,
                             run_index=index if runs > 1 else None,
                         )
@@ -440,6 +433,8 @@ async def run_category(
                     saved.append(
                         await run_no_schema_topic_once(
                             topic_file,
+                            max_turns=max_turns,
+                            max_main_argument_attempts=max_main_argument_attempts,
                             output_root=output_root,
                             run_index=index if runs > 1 else None,
                         )
@@ -455,7 +450,8 @@ def topic_parser(description: str) -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument("json_file", help="Path to a topic JSON file.")
     parser.add_argument("--runs", type=int, default=1, help="Number of runs for this topic.")
-    parser.add_argument("--max-turns", type=int, default=3, help="Schema method max turns; ignored by no-schema.")
+    parser.add_argument("--max-turns", type=int, default=3, help="Maximum debate rounds (used by both schema and no-schema).")
+    parser.add_argument("--max-main-argument-attempts", type=int, default=None, help="Per-round main argument retry cap (defaults to State's MAX_MAIN_ARGUMENT_ATTEMPTS env default).")
     parser.add_argument("--output-root", type=Path, default=LOGS_DIR, help="Root directory for logs.")
     return parser
 
@@ -464,7 +460,8 @@ def category_parser(description: str) -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument("category", help="Category name under datasets/ or a category directory path.")
     parser.add_argument("--runs", type=int, default=1, help="Number of runs per topic.")
-    parser.add_argument("--max-turns", type=int, default=3, help="Schema method max turns; ignored by no-schema.")
+    parser.add_argument("--max-turns", type=int, default=3, help="Maximum debate rounds (used by both schema and no-schema).")
+    parser.add_argument("--max-main-argument-attempts", type=int, default=None, help="Per-round main argument retry cap (defaults to State's MAX_MAIN_ARGUMENT_ATTEMPTS env default).")
     parser.add_argument("--output-root", type=Path, default=LOGS_DIR, help="Root directory for logs.")
     parser.add_argument("--fail-fast", action="store_true", help="Stop on the first topic failure.")
     return parser
@@ -478,6 +475,7 @@ async def run_topic_repeated(method: Method, args: argparse.Namespace) -> list[P
                 await run_schema_topic_once(
                     args.json_file,
                     max_turns=args.max_turns,
+                    max_main_argument_attempts=args.max_main_argument_attempts,
                     output_root=args.output_root,
                     run_index=index if args.runs > 1 else None,
                 )
@@ -486,6 +484,8 @@ async def run_topic_repeated(method: Method, args: argparse.Namespace) -> list[P
             saved.append(
                 await run_no_schema_topic_once(
                     args.json_file,
+                    max_turns=args.max_turns,
+                    max_main_argument_attempts=args.max_main_argument_attempts,
                     output_root=args.output_root,
                     run_index=index if args.runs > 1 else None,
                 )
@@ -506,6 +506,7 @@ def main_category(method: Method, description: str) -> None:
             args.category,
             runs=args.runs,
             max_turns=args.max_turns,
+            max_main_argument_attempts=args.max_main_argument_attempts,
             output_root=args.output_root,
             continue_on_error=not args.fail_fast,
         )

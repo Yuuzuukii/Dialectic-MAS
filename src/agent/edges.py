@@ -2,7 +2,14 @@
 
 from __future__ import annotations
 
+import os
 from typing import Any
+
+
+def _int_env(name: str, default: int) -> int:
+    """環境変数を int として読む。未設定または空文字なら default を返す."""
+    value = os.getenv(name)
+    return int(value) if value else default
 
 
 def route_after_can_generate_main(state: Any) -> str:
@@ -10,7 +17,9 @@ def route_after_can_generate_main(state: Any) -> str:
     if state.error:
         return "finish_with_error"
     if state.main_argument_available is False:
-        return "finish"
+        if state.current_proponent == "AG1":
+            return "advance_to_ag2"
+        return "extract_warrants"
     if state.finalize_mode:
         return "finalize_fallback"
     return "o_defeat_a"
@@ -70,14 +79,19 @@ def route_after_validate_b_defeats_c(state: Any) -> str:
 
 
 def route_after_thread(state: Any) -> str:
-    """1スレッド分の議論終了後、次スレッド・統合・主張生成のいずれへ進むか決める."""
+    """1スレッド分の議論終了後、次の遷移先を決める."""
     if state.error:
         return "finish_with_error"
     if state.current_thread_status == "justified":
         return "generate_final_answer"
-    if state.ag1_thread_status is not None and state.ag2_thread_status is not None:
-        return "extract_warrants"
-    return "can_generate_main"
+    # justified 以外（overruled / defensible）→ 試行回数の上限に達していなければ
+    # 同じ proponent に別の main argument を試させる。
+    if state.main_attempt_count < state.max_main_argument_attempts:
+        return "can_generate_main"
+    # 上限に達した場合は can_generate_main を呼ばず、available=NO のときと同じ遷移を行う。
+    if state.current_proponent == "AG1":
+        return "advance_to_ag2"
+    return "extract_warrants"
 
 
 def route_after_synthesis_step(state: Any) -> str:
@@ -93,6 +107,6 @@ def route_after_add_integrated_rule(state: Any) -> str:
         return "finish_with_error"
     # finalize_mode のときは can_generate_main → finalize_fallback で確実に終端するため、
     # ここでは常に can_generate_main へ戻す。上限超過は安全弁として finish。
-    if state.debate_round > state.max_turns:
+    if state.debate_round > state.max_turns + 1:
         return "finish"
     return "can_generate_main"

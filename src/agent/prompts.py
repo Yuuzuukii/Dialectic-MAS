@@ -22,18 +22,33 @@ from .schema.types import AgentName
 
 _GROUNDING = """\
 <grounding>
-- Your values and priorities come from your stance. You may use general knowledge to identify real-world options that satisfy them.
+- Your values and priorities come from your stance.
+- Your argument must be grounded in that stance.
+- You may use general knowledge only when it helps identify real-world options or reasons that satisfy your stance.
 </grounding>"""
 
-_ARGUMENT_FORMAT = """\
-<argument_format>
-- An argument is a finite sequence of rules r_1, ..., r_n.
-- Each rule has an antecedent (strong premises + weak_negation assumptions) and a consequent it derives.
+_ARGUMENTATION_RULES = """\
+<argumentation_rules>
+- State the premises and assumptions you rely on.
+- Do not introduce new factual claims as strong premises; each strong premise must be stated or directly derived from your stance, the target argument, prior dialogue history, or integrated rules.
+- The conclusion must follow directly from the stated reasoning, with no implicit logical leap.
+- The final conclusion must clearly express your opinion on the Issue in a concise and specific way.
+- Be concise; do not pad the reasoning with repetition.
+</argumentation_rules>"""
+
+_SCHEMA_OVERLAY = """\
+<schema_overlay>
+Represent Argument as a structured object consisting of rules, Conc, and Ass.
+- rules is a finite sequence of rules r_1, ..., r_n.
+- Each rule has an antecedent and a consequent.
+- Antecedents may contain strong premises and weak_negation assumptions.
 - Every rule must have at least one explicit strong or weak_negation antecedent; never derive a consequent from an empty antecedent.
-- Each consequent must follow directly from its antecedents, with no implicit logical leap.
-- Strong antecedents of r_i (i > 1) must be consequents of earlier rules; every non-final consequent must reappear as a strong antecedent of a later rule.
+- Strong antecedents of r_i (i > 1) must be consequents of earlier rules.
+- Every non-final consequent must reappear as a strong antecedent of a later rule.
+- Conc contains the conclusions derived by the rules.
+- Ass contains the weak_negation assumptions used by the rules.
 - Use as few rules as possible; a single rule suffices when your stance directly supports the conclusion.
-</argument_format>"""
+</schema_overlay>"""
 
 _ATTACK_TYPES = """\
 <attack_types>
@@ -69,6 +84,16 @@ Prior turns of this debate are provided as preceding messages. Each message's co
 Use this history to avoid repeating defeated moves and to stay consistent with the current round and integrated rules.
 </history_format>"""
 
+_HISTORY_FORMAT_FREE = """\
+<history_format>
+Prior turns of this debate are provided as preceding messages. Each message's content is a JSON object:
+  {"id", "round", "phase", "agent", ["status"], ["attack","target_id","target_statement"], "Argument": "<free-text argument>"}
+- "phase" is one of main / defeat / counter; "status" (on a main, when known) is its thread outcome above.
+- "attack"/"target_id"/"target_statement" (on defeat/counter) show exactly what was attacked.
+- A message whose "agent"/name equals YOUR identity is your own past turn; the other agent's are your opponent's.
+Use this history to avoid repeating defeated moves and to stay consistent with the current round and integrated rules.
+</history_format>"""
+
 
 def _system(*blocks: str) -> str:
     """XML タグ付きブロックを空行区切りで連結して 1 つの system プロンプトにする."""
@@ -78,90 +103,87 @@ def _system(*blocks: str) -> str:
 class PromptTemplates:
     """各ノードが参照する SYSTEM プロンプト文字列の名前空間."""
 
-    # ---- System: argument-construction framework + task definitions ----
-    MAIN_ARGUMENT_SYSTEM = _system(
-        "<task>\nConstruct an argument for your position on the Issue.\n</task>",
-        _PROTOCOL_FLOW,
-        _HISTORY_FORMAT,
+    # ---- System: shared argument-construction framework ----
+    ARGUMENT_SYSTEM_NO_SCHEMA = _system(
         _GROUNDING,
-        _ARGUMENT_FORMAT,
-        "<conclusion>\n"
-        "- The final conclusion must clearly express your opinion on the Issue, stated in a concise and specific way.\n"
-        "</conclusion>",
-        "<output>\n"
-        "- If you can construct such an argument: set can_generate=YES and include Argument.\n"
-        "- Otherwise: set can_generate=NO and omit Argument.\n"
-        "</output>",
+        _ARGUMENTATION_RULES,
     )
 
-    DEFEATING_ARGUMENT_SYSTEM = _system(
-        "<task>\nConstruct a defeating argument against the target argument.\n</task>",
-        _PROTOCOL_FLOW,
-        _HISTORY_FORMAT,
-        _GROUNDING,
-        _ATTACK_TYPES,
-        _ARGUMENT_FORMAT,
-        "<defeat_conditions>\n"
-        "- rebut may target only an exact statement in Conc(target); undercut may target only an exact statement in Ass(target), never a strong premise.\n"
-        "- For a rebut, your rules must directly derive the negation of the targeted conclusion. Supporting a different option does not by itself negate the target.\n"
-        "- Do not declare an attack whose targeted statement does not appear in the required field.\n"
-        "- If the negation cannot be directly derived, set can_defeat=NO.\n"
-        "</defeat_conditions>",
-        "<output>\n"
-        "- If a valid attack exists: set can_defeat=YES, and include Argument and Attack (method + exact targeted statement).\n"
-        "- Otherwise: set can_defeat=NO and omit Argument and Attack.\n"
-        "</output>",
+    ARGUMENT_SYSTEM = _system(
+        ARGUMENT_SYSTEM_NO_SCHEMA,
+        _SCHEMA_OVERLAY,
     )
 
-    COUNTER_ARGUMENT_SYSTEM = _system(
-        "<task>\nConstruct a counterargument against the target argument that defends your position.\n</task>",
-        _PROTOCOL_FLOW,
-        _HISTORY_FORMAT,
-        _GROUNDING,
-        _ATTACK_TYPES,
-        _ARGUMENT_FORMAT,
-        "<non_repetition>\n"
-        "- Do not derive the same conclusion from substantially the same rules or warrant as any of your previous arguments.\n"
-        "- A counterargument that merely restates your original main argument is not allowed.\n"
-        "- If the only available counterargument would repeat a previous argument, set can_defeat=NO.\n"
-        "</non_repetition>",
-        "<output>\n"
-        "- If a valid attack exists: set can_defeat=YES, and include Argument and Attack (method + exact targeted statement).\n"
-        "- Otherwise: set can_defeat=NO and omit Argument and Attack.\n"
-        "</output>",
+    # Backward-compatible names. The phase-specific task now lives in HumanMessage.
+    MAIN_ARGUMENT_SYSTEM = ARGUMENT_SYSTEM
+    MAIN_ARGUMENT_SYSTEM_NO_SCHEMA = ARGUMENT_SYSTEM_NO_SCHEMA
+    DEFEATING_ARGUMENT_SYSTEM = ARGUMENT_SYSTEM
+    DEFEATING_ARGUMENT_SYSTEM_NO_SCHEMA = ARGUMENT_SYSTEM_NO_SCHEMA
+    COUNTER_ARGUMENT_SYSTEM = ARGUMENT_SYSTEM
+    COUNTER_ARGUMENT_SYSTEM_NO_SCHEMA = ARGUMENT_SYSTEM_NO_SCHEMA
+    UNDERCUT_SYSTEM = ARGUMENT_SYSTEM
+    UNDERCUT_SYSTEM_NO_SCHEMA = ARGUMENT_SYSTEM_NO_SCHEMA
+
+    _GENERALIZATION_SYSTEM_BASE = _system(
+        "<role>\n"
+        "You are AG1 in this debate.\n"
+        "You now act as the synthesis operator for the debate.\n"
+        "Your task is to generalize each side's warrant into a reusable criterion for future arguments.\n"
+        "</role>",
+        "<stance>\n{stance}\n</stance>",
+        "<generalization_principles>\n"
+        "- Treat both sides' warrants as inputs to be preserved at the level of value or principle.\n"
+        "- Do not discard AG2's warrant merely because it conflicts with AG1's stance.\n"
+        "- Do not simply restate AG1's own warrant as the synthesis result.\n"
+        "- Abstract away from issue-specific entities, examples, and one-off facts.\n"
+        "- Preserve the condition under which each warrant is rationally compelling.\n"
+        "- Preserve the conclusion type supported by each warrant.\n"
+        "- Do not choose a winner between the two sides during generalization.\n"
+        "- Do not produce a final answer to the original Issue.\n"
+        "</generalization_principles>",
     )
 
-    UNDERCUT_SYSTEM = _system(
-        "<task>\nConstruct an undercutting argument against the target argument.\n</task>",
-        _PROTOCOL_FLOW,
-        _HISTORY_FORMAT,
-        _GROUNDING,
-        _ATTACK_TYPES,
-        _ARGUMENT_FORMAT,
-        "<output>\n"
-        "- If a conclusion of your argument can explicitly negate an assumption (Ass) of the target: set can_undercut=YES and include Argument.\n"
-        "- Otherwise: set can_undercut=NO and omit Argument.\n"
-        "</output>",
-    )
+    GENERALIZATION_SYSTEM_NO_SCHEMA = _GENERALIZATION_SYSTEM_BASE
 
     GENERALIZATION_SYSTEM = _system(
-        "<task>\nGeneralize each warrant into a reusable abstract criterion.\n</task>",
-        "<rules>\n"
-        "- Abstract away from issue-specific entities.\n"
-        "- For each warrant, identify the underlying value or principle that makes it rationally compelling.\n"
-        "- Express that principle as the criterion's conditions (strong) and conclusion (consequent).\n"
-        "- Record the principle name explicitly.\n"
-        "</rules>",
+        _GENERALIZATION_SYSTEM_BASE,
+        "<schema_overlay>\n"
+        "Represent each generalized criterion as a structured object.\n"
+        "- strong: generalized condition(s) under which the criterion applies.\n"
+        "- consequent: the generalized conclusion supported by those conditions.\n"
+        "- principle: a short name or phrase for the underlying value or principle.\n"
+        "</schema_overlay>",
     )
 
+    _INTEGRATION_SYSTEM_BASE = _system(
+        "<role>\n"
+        "You are AG1 in this debate.\n"
+        "You now act as the synthesis operator for the debate.\n"
+        "Your task is to integrate generalized criteria into one reusable rule for the next debate round.\n"
+        "</role>",
+        "<stance>\n{stance}\n</stance>",
+        "<integration_principles>\n"
+        "- The integrated rule must preserve every generalized criterion as an alternative sufficient condition.\n"
+        "- The integrated rule must be more abstract than any individual criterion.\n"
+        "- The integrated rule must not merely list the criteria without unifying them.\n"
+        "- The integrated rule must be usable by either side in the next round.\n"
+        "- Do not discard AG2's generalized criterion merely because it conflicts with AG1's stance.\n"
+        "- Do not simply restate AG1's own criterion as the integrated rule.\n"
+        "- Do not produce a final answer to the original Issue.\n"
+        "</integration_principles>",
+    )
+
+    INTEGRATION_SYSTEM_NO_SCHEMA = _INTEGRATION_SYSTEM_BASE
+
     INTEGRATION_SYSTEM = _system(
-        "<task>\nIntegrate the generalized criteria into one reusable rule.\n</task>",
-        "<rules>\n"
-        "- Identify the shared higher-level principle that unifies the underlying values of all criteria.\n"
-        "- Express that principle as a single abstract rule whose antecedent covers each criterion as an alternative sufficient condition (OR).\n"
-        "- The rule should be more abstract than any individual criterion, not merely a list of them.\n"
-        "- Output one rule applicable to future arguments.\n"
-        "</rules>",
+        _INTEGRATION_SYSTEM_BASE,
+        "<schema_overlay>\n"
+        "Represent the integrated rule as one structured reusable rule.\n"
+        "- The antecedent should cover each generalized criterion as an alternative sufficient condition.\n"
+        "- Use OR to combine alternative sufficient conditions.\n"
+        "- The consequent should state the shared generalized conclusion.\n"
+        "- The result must be one rule, not multiple unrelated rules.\n"
+        "</schema_overlay>",
     )
 
     FINAL_ANSWER_SYSTEM = _system(
@@ -220,14 +242,15 @@ ATTACK_SYSTEM = {
     "counter": PromptTemplates.COUNTER_ARGUMENT_SYSTEM,
 }
 
+ATTACK_SYSTEM_NO_SCHEMA = {
+    "defeat": PromptTemplates.DEFEATING_ARGUMENT_SYSTEM_NO_SCHEMA,
+    "counter": PromptTemplates.COUNTER_ARGUMENT_SYSTEM_NO_SCHEMA,
+}
+
 
 def compose_system(stance: str, task_system: str) -> str:
     """エージェントのスタンス（役割）とタスク定義を 1 つの system プロンプトに結合する."""
-    stance = (stance or "").strip()
-    task_system = task_system.strip()
-    if not stance:
-        return task_system
-    return f"{stance}\n\n{task_system}"
+    return _system(stance, task_system)
 
 
 def agent_system(stance: str, agent: AgentName, task_system: str) -> str:
@@ -238,45 +261,230 @@ def agent_system(stance: str, agent: AgentName, task_system: str) -> str:
         "are your own past turns; the other agent is your opponent.\n"
         "</identity>"
     )
-    return f"{identity}\n\n{compose_system(stance, task_system)}"
+    return _system(identity, compose_system(stance, task_system))
+
+
+def synthesis_system(agent: AgentName, stance: str, task_system: str) -> str:
+    """統合フェーズ用の AG1 synthesis system を組み立てる."""
+    return task_system.format(agent=agent, stance=stance)
 
 
 def main_instruction(state: Any) -> str:
-    """主張生成の手番に渡す指示文（Issue + 改訂ラウンドなら統合ルール）を組む."""
+    """主張生成の手番に渡す指示文（Issue + 改訂コンテキストなら統合ルール）を組む."""
     issue = state.question
     rules = getattr(state, "integrated_rules", []) or []
     debate_round = getattr(state, "debate_round", 1)
     lines = [
+        "<task>",
         f"Round {debate_round}. Construct your main argument for the Issue.",
-        f"Issue: {issue}",
+        "</task>",
+        "",
+        "<issue>",
+        issue,
+        "</issue>",
+        "",
+        "<issue_answer_scope>",
+        "Your main argument must answer the Issue directly.",
+        "Every rule consequent must either be an intermediate fact needed to support your direct answer or the direct answer itself.",
+        "</issue_answer_scope>",
     ]
-    if rules:
-        lines += [
-            "",
-            "This is a revision round: your earlier main arguments (shown in the history) were defeated.",
-            "Ground your NEW main argument in the integrated rules below, make it different from every earlier",
-            "main argument, and ensure it is not vulnerable to the same attacks that defeated them:",
-            *[f"- {rule}" for rule in rules],
-        ]
+
+    revision_context = (
+        getattr(state, "ag1_revision_context", None)
+        if getattr(state, "current_proponent", "AG1") == "AG1"
+        else getattr(state, "ag2_revision_context", None)
+    )
+
+    if revision_context or rules:
+        block = ["", "<revision_context>"]
+        if revision_context:
+            block += [revision_context, ""]
+        else:
+            block += ["This is a revision round.", ""]
+        block.append(
+            "Do not repeat the same main argument unless the defeating reason is resolved."
+        )
+        if rules:
+            block.append("Ground your NEW main argument in the integrated rules below.")
+        block.append("</revision_context>")
+        lines += block
+
+        if rules:
+            lines += [
+                "",
+                "<integrated_rules>",
+                *[f"- {rule}" for rule in rules],
+                "</integrated_rules>",
+            ]
+
+    lines += [
+        "",
+        "<response_contract>",
+        "If you can construct a main argument, set can_generate=YES and include Argument.",
+        "Otherwise, set can_generate=NO and omit Argument.",
+        "</response_contract>",
+    ]
     return "\n".join(lines)
 
 
-def attack_instruction(purpose: str, target_id: str) -> str:
-    """攻撃（defeat/counter）の手番に渡す指示文を組む."""
-    if purpose == "counter":
-        return (
-            "Construct a counterargument that defends your main argument against the latest attack "
-            f"(id={target_id}) shown in the history."
-        )
-    return (
-        "Construct a defeating argument against your opponent's latest argument "
-        f"(id={target_id}) shown in the history."
+def _target_block(target: Any) -> str:
+    """ArgumentRecord target を HumanMessage 内に埋め込む短い XML ブロックへ変換する."""
+    return "\n".join(
+        [
+            "<target>",
+            f"id: {target.id}",
+            f"agent: {target.agent}",
+            "argument:",
+            target.argument,
+            "</target>",
+        ]
     )
 
 
-def undercut_instruction(target_id: str) -> str:
+def attack_instruction(
+    purpose: str,
+    target: Any,
+    state: Any | None = None,
+    main_argument: Any | None = None,
+) -> str:
+    """攻撃（defeat/counter）の手番に渡す指示文を組む."""
+    debate_round = getattr(state, "debate_round", 1) if state is not None else 1
+    issue = getattr(state, "question", "") if state is not None else ""
+    if purpose == "counter":
+        blocks = [
+            "<task>",
+            f"Round {debate_round}. Construct a counterargument that defends your prior main argument against the target attack.",
+            "</task>",
+            "",
+            "<issue>",
+            issue,
+            "</issue>",
+            "",
+        ]
+        if main_argument is not None:
+            blocks += [
+                "<your_prior_main_argument>",
+                f"id: {main_argument.id}",
+                main_argument.argument,
+                "</your_prior_main_argument>",
+                "",
+            ]
+        blocks += [
+            _target_block(target),
+            "",
+            "<attack_conditions>",
+            "- Your counterargument must defeat the target attack.",
+            "- You may use rebut or undercut.",
+            "- rebut: your argument must directly negate the target's stated conclusion.",
+            "- undercut: your argument must directly negate an assumption the target relies on.",
+            "- Do not attack a claim or assumption that is not present in the target argument.",
+            "</attack_conditions>",
+            "",
+            "<non_repetition>",
+            "Do not merely restate your original main argument.",
+            "Do not derive the same conclusion from substantially the same reasoning as any of your previous arguments.",
+            "If the only available counterargument would repeat a previous argument, set can_defeat=NO.",
+            "</non_repetition>",
+            "",
+            "<response_contract>",
+            "If a valid counterargument exists, set can_defeat=YES and include Argument and Attack.",
+            "Otherwise, set can_defeat=NO and omit Argument and Attack.",
+            "</response_contract>",
+        ]
+        return "\n".join(blocks)
+    return "\n".join(
+        [
+            "<task>",
+            f"Round {debate_round}. Construct a defeating argument against the target argument.",
+            "</task>",
+            "",
+            "<issue>",
+            issue,
+            "</issue>",
+            "",
+            _target_block(target),
+            "",
+            "<attack_conditions>",
+            "- You may use rebut or undercut.",
+            "- rebut: your argument must directly negate the target's stated conclusion.",
+            "- undercut: your argument must directly negate an assumption the target relies on.",
+            "- Do not attack a claim or assumption that is not present in the target argument.",
+            "- Supporting a different option does not by itself count as negating the target.",
+            "</attack_conditions>",
+            "",
+            "<response_contract>",
+            "If a valid attack exists, set can_defeat=YES and include Argument and Attack.",
+            "Otherwise, set can_defeat=NO and omit Argument and Attack.",
+            "</response_contract>",
+        ]
+    )
+
+
+def undercut_instruction(target: Any, state: Any | None = None) -> str:
     """Undercut の手番に渡す指示文を組む."""
-    return (
-        f"Construct an undercutting argument against the argument (id={target_id}) shown in the history, "
-        "by negating one of its assumptions (Ass)."
+    debate_round = getattr(state, "debate_round", 1) if state is not None else 1
+    issue = getattr(state, "question", "") if state is not None else ""
+    return "\n".join(
+        [
+            "<task>",
+            f"Round {debate_round}. Construct an undercutting argument against the target argument.",
+            "</task>",
+            "",
+            "<issue>",
+            issue,
+            "</issue>",
+            "",
+            _target_block(target),
+            "",
+            "<response_contract>",
+            "If your argument can explicitly negate an assumption the target relies on, set can_undercut=YES and include Argument.",
+            "Otherwise, set can_undercut=NO and omit Argument.",
+            "</response_contract>",
+        ]
+    )
+
+
+def generalization_instruction(state: Any) -> str:
+    """汎化フェーズの HumanMessage を組み立てる."""
+    return "\n".join(
+        [
+            "<task>",
+            "Generalize the warrants into reusable criteria.",
+            "</task>",
+            "",
+            "<warrants>",
+            str(state.warrant_result or ""),
+            "</warrants>",
+            "",
+            "<response_contract>",
+            "Return generalized criteria only.",
+            "Do not return an integrated rule yet.",
+            "Do not answer the original Issue.",
+            "</response_contract>",
+        ]
+    )
+
+
+def integration_instruction(state: Any) -> str:
+    """統合フェーズの HumanMessage を組み立てる."""
+    return "\n".join(
+        [
+            "<task>",
+            "Integrate the generalized criteria into one reusable rule.",
+            "</task>",
+            "",
+            "<warrants>",
+            str(state.warrant_result or ""),
+            "</warrants>",
+            "",
+            "<generalized_criteria>",
+            str(state.generalization_result or ""),
+            "</generalized_criteria>",
+            "",
+            "<response_contract>",
+            "Return exactly one integrated rule.",
+            "The rule must be applicable to future main arguments.",
+            "Do not answer the original Issue.",
+            "</response_contract>",
+        ]
     )

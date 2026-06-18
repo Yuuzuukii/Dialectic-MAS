@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Literal
 
+from langchain_core.messages import BaseMessage
 from langgraph.graph import END, START, StateGraph
 
 from .edges import (
+    _int_env,
     route_after_add_integrated_rule,
     route_after_can_generate_main,
     route_after_o_defeat_a,
@@ -20,6 +22,7 @@ from .edges import (
 )
 from .nodes import (
     add_integrated_rule,
+    advance_to_ag2,
     can_generate_main,
     extract_warrants,
     finalize_fallback,
@@ -46,8 +49,17 @@ class State:
     question: str
     agent1_stance: str
     agent2_stance: str
-    max_turns: int = 5
+    # 議論ラウンド（debate_round）の上限。環境変数 MAX_TURNS で上書きできる。
+    max_turns: int = _int_env("MAX_TURNS", 5)
+    # 1ラウンド・1 proponent あたりの main argument 試行回数の上限（安全装置）。
+    # 環境変数 MAX_MAIN_ARGUMENT_ATTEMPTS で上書きできる。
+    max_main_argument_attempts: int = _int_env("MAX_MAIN_ARGUMENT_ATTEMPTS", 5)
     additional_context: dict[str, Any] = field(default_factory=dict)
+    # "schema": Argument 本体（rules/Conc/Ass）も with_structured_output のスキーマで強制する。
+    # "no_schema": 同一プロンプト・同一グラフだが、Argument 本体は自由記述の natural language。
+    # can_generate/can_defeat/can_undercut の可否判定と Attack（rebut/undercut + target）は
+    # 弁証法的な状態遷移の機械的決定のため両条件で構造化出力のまま保持する。
+    output_mode: Literal["schema", "no_schema"] = "schema"
 
     debate_round: int = 1
     learned_findings: list[str] = field(default_factory=list)
@@ -63,10 +75,18 @@ class State:
     current_opponent: AgentName = "AG2"
     debate_stage: DebateStage = "ag1_main_thread"
     turn_count: int = 0
+    # 同一ラウンド・同一 proponent が main argument を試行した回数（安全装置）。
+    main_attempt_count: int = 0
 
-    history: list[ArgumentRecord] = field(default_factory=list)
+    # LLM に再送する通常の対話履歴。各ターンは HumanMessage(question/instruction)
+    # と AIMessage(Argument only, name=agent) のペアとして保存する。
+    history: list[BaseMessage] = field(default_factory=list)
+    # 検証・target 解決・出力ログ用の構造化された論証簿記。
+    argument_records: list[ArgumentRecord] = field(default_factory=list)
     dialogue_history: list[dict[str, Any]] = field(default_factory=list)
     defeat_relations: list[DefeatRelation] = field(default_factory=list)
+    ag1_revision_context: str | None = None
+    ag2_revision_context: str | None = None
 
     current_argument: ArgumentRecord | None = None
     ag1_main_argument: ArgumentRecord | None = None
@@ -125,6 +145,7 @@ graph = (
     .add_node("integrate", integrate)
     .add_node("add_integrated_rule", add_integrated_rule)
     .add_node("generate_final_answer", generate_final_answer)
+    .add_node("advance_to_ag2", advance_to_ag2)
     .add_node("finish", finish)
     .add_node("finish_with_error", finish_with_error)
     .add_edge(START, "can_generate_main")
@@ -134,10 +155,12 @@ graph = (
         {
             "o_defeat_a": "o_defeat_a",
             "finalize_fallback": "finalize_fallback",
-            "finish": "finish",
+            "advance_to_ag2": "advance_to_ag2",
+            "extract_warrants": "extract_warrants",
             "finish_with_error": "finish_with_error",
         },
     )
+    .add_edge("advance_to_ag2", "can_generate_main")
     .add_edge("finalize_fallback", "generate_final_answer")
     .add_conditional_edges(
         "o_defeat_a",
@@ -189,9 +212,9 @@ graph = (
         route_after_thread,
         {
             "can_generate_main": "can_generate_main",
+            "advance_to_ag2": "advance_to_ag2",
             "extract_warrants": "extract_warrants",
             "generate_final_answer": "generate_final_answer",
-            "finish": "finish",
             "finish_with_error": "finish_with_error",
         },
     )

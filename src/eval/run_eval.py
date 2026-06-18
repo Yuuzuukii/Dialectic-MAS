@@ -30,7 +30,6 @@ load_dotenv(ROOT / ".env")
 from src.eval.evaluation import (
     AXES,
     build_eval_input,
-    build_eval_input_no_schema,
     efficiency_metrics,
     evaluate_with_llm,
 )
@@ -149,8 +148,8 @@ def main() -> None:
 
     log = _load_log(log_path)
     method = log.get("method") or log.get("mode")
-    builder = build_eval_input_no_schema if method in {"no_schema", "no-schema"} else build_eval_input
-    eval_input = builder(log)
+    mode = "no_schema" if method in {"no_schema", "no-schema"} else "schema"
+    eval_input = build_eval_input(log, mode=mode)
     evaluator = _EvaluatorModel(model)
 
     print(f"Evaluating {log_path.name} with {model} ...")

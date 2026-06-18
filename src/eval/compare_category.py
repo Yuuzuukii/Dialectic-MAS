@@ -29,7 +29,6 @@ load_dotenv(ROOT / ".env")
 from src.eval.evaluation import (
     aggregate_scores,
     build_eval_input,
-    build_eval_input_no_schema,
     evaluate_with_llm,
 )
 from src.eval.run_eval import _EvaluatorModel, resolve_evaluator_model
@@ -80,11 +79,11 @@ def _topic_log_files(root: Path, category: str, *, no_schema: bool) -> dict[str,
 
 
 def _score_topic(log_files: list[Path], evaluator: Any, *, no_schema: bool) -> dict[str, Any]:
-    builder = build_eval_input_no_schema if no_schema else build_eval_input
+    mode = "no_schema" if no_schema else "schema"
     scores: list[dict[str, Any]] = []
     for log_file in sorted(log_files):
         log = json.loads(log_file.read_text(encoding="utf-8"))
-        scores.append(evaluate_with_llm(builder(log), evaluator))
+        scores.append(evaluate_with_llm(build_eval_input(log, mode=mode), evaluator))
     return aggregate_scores(scores)
 
 

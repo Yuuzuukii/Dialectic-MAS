@@ -162,7 +162,9 @@ class ArgumentRecord(BaseModel):
             data["attack"] = self.attack
             data["target_id"] = self.target_id
             data["target_statement"] = self.target_statement
-        data["Argument"] = self.body
+        body = self.body
+        # no_schema: argument は構造化 Argument を持たないため、自由記述の本文をそのまま渡す。
+        data["Argument"] = body if body else self.argument
         return json.dumps(data, ensure_ascii=False)
 
     def to_dialogue_dict(self) -> dict[str, Any]:
