@@ -1,4 +1,4 @@
-"""Overnight sweep: 1 topic x (protocol loop limit) x (main argument loop limit).
+"""Overnight sweep (no_schema 版): 1 topic x (protocol loop limit) x (main argument loop limit).
 
 ある1つのトピックに対して、以下の組み合わせ（3 x 10 = 30 通り）をそれぞれ実行する。
 
@@ -6,8 +6,11 @@
 - 主張のループ上限（1ラウンド・1 proponent あたりの main argument 試行回数の上限
   = State.max_main_argument_attempts）: 1〜10
 
+schema 版（run_loop_sweep.py）と同じプロトコルを使い、State.output_mode のみ
+"no_schema" にして自由記述形式の出力を生成する。
+
 ログは
-  logs/sweep/<topic_stem>_<開始時刻>/turns{T:02d}_attempts{A:02d}/scenarios/<topic_stem>/schema_*.json
+  logs/sweep/<topic_stem>_<開始時刻>/turns{T:02d}_attempts{A:02d}/scenarios/<topic_stem>/no_schema_*.json
 に保存される。
 """
 
@@ -24,9 +27,9 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 try:
-    from src.dialogue.common import LOGS_DIR, run_schema_topic_once
+    from src.dialogue.common import LOGS_DIR, run_no_schema_topic_once
 except ModuleNotFoundError:  # pragma: no cover - direct file execution.
-    from common import LOGS_DIR, run_schema_topic_once  # type: ignore
+    from common import LOGS_DIR, run_no_schema_topic_once  # type: ignore
 
 # プロトコルのループ上限（State.max_turns）の候補。
 PROTOCOL_MAX_TURNS = (1, 5, 10)
@@ -36,7 +39,7 @@ MAIN_ARGUMENT_MAX_ATTEMPTS = range(1, 11)
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Sweep protocol/main-argument loop limits for one topic."
+        description="Sweep protocol/main-argument loop limits for one topic (no_schema)."
     )
     parser.add_argument(
         "json_file",
@@ -54,31 +57,7 @@ def parse_args() -> argparse.Namespace:
         default=LOGS_DIR / "sweep",
         help="Root directory for sweep logs.",
     )
-    parser.add_argument(
-        "--only",
-        type=str,
-        default=None,
-        help=(
-            "未完了の組み合わせだけ再実行する場合に指定。"
-            "'max_turns:max_attempts' を ',' 区切りで列挙（例: '10:8,10:9,10:10'）。"
-            "未指定なら全combos(3x10)を実行。"
-        ),
-    )
     return parser.parse_args()
-
-
-def parse_only(only: str | None) -> list[tuple[int, int]] | None:
-    """'--only' 文字列を [(max_turns, max_attempts), ...] に変換する."""
-    if only is None:
-        return None
-    combos: list[tuple[int, int]] = []
-    for token in only.split(","):
-        token = token.strip()
-        if not token:
-            continue
-        turns_str, attempts_str = token.split(":")
-        combos.append((int(turns_str), int(attempts_str)))
-    return combos
 
 
 async def main() -> None:
@@ -87,7 +66,7 @@ async def main() -> None:
     started = datetime.now().strftime("%Y%m%d_%H%M%S")
     sweep_root = args.output_root / f"{topic_file.stem}_{started}"
 
-    combos = parse_only(args.only) or [
+    combos = [
         (max_turns, max_attempts)
         for max_turns in PROTOCOL_MAX_TURNS
         for max_attempts in MAIN_ARGUMENT_MAX_ATTEMPTS
@@ -105,7 +84,7 @@ async def main() -> None:
         )
         for run_index in range(1, args.runs + 1):
             try:
-                await run_schema_topic_once(
+                await run_no_schema_topic_once(
                     topic_file,
                     max_turns=max_turns,
                     max_main_argument_attempts=max_attempts,
