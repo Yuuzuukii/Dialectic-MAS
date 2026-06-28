@@ -21,7 +21,7 @@ from pydantic import SecretStr
 
 load_dotenv()
 
-MODEL = "gpt-5-mini"
+MODEL = "gpt-5.4-mini"
 
 
 async def main() -> None:

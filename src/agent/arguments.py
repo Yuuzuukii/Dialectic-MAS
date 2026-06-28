@@ -24,8 +24,8 @@ from .llm import chat_structured, chat_text
 from .prompts import (
     PromptTemplates,
     agent_system,
+    attack_extends_instruction,
     attack_instruction,
-    compose_system,
     generalization_instruction,
     integration_instruction,
     main_instruction,
@@ -34,6 +34,7 @@ from .prompts import (
 )
 from .schema.llm_outputs import (
     ArgumentBody,
+    AttackExtendsOutput,
     DefeatingArgumentOutput,
     DefeatingArgumentOutputFree,
     GeneralizationOutput,
@@ -265,6 +266,30 @@ async def generate_undercut(
     )
 
 
+async def ask_attack_extends(
+    state: Any,
+    attacker: AgentName,
+    b_argument: ArgumentRecord,
+    c_argument: ArgumentRecord,
+) -> bool:
+    """B（attackerが既に行った攻撃）が、相手の新しいカウンターCにも及ぶかを問う.
+
+    B の作者である attacker 自身に YES/NO で尋ねる（新しい論証は生成しない）.
+    """
+    system = agent_system(
+        _stance(state, attacker), attacker, PromptTemplates.ATTACK_EXTENDS_SYSTEM
+    )
+    messages = [
+        SystemMessage(content=system),
+        *render_history(state.history),
+        HumanMessage(
+            content=attack_extends_instruction(b_argument, c_argument, state=state)
+        ),
+    ]
+    output = await chat_structured(messages, AttackExtendsOutput)
+    return output.attack_extends == "YES"
+
+
 async def generate_generalization(state: Any) -> GeneralizationOutput | GeneralizationOutputFree:
     """両エージェントの warrant を汎化し、再利用可能な基準を導出する."""
     template = (
@@ -302,34 +327,36 @@ async def generate_final_answer(state: Any) -> str:
 
     通常は justified な主張から作る。合意に至らず暫定回答を作る場合
     (consensus_reached is False) は、合意なしであることを明示する専用プロンプトを使う。
+    justified された側が AG1/AG2 のどちらであっても、AG1 が中立な統合役として
+    客観的に書く（generalize/integrate と同じ「AG1=synthesis operator」の役割分担）。
     """
     justified = state.justified_argument
-    status = state.justification_status or ""
-    stance = state.agent2_stance if status.startswith("ag2") else state.agent1_stance
     dialogue_history = json.dumps(state.dialogue_history, ensure_ascii=False, indent=2)
 
     if state.consensus_reached is False:
         integrated_rules = (
             "\n".join(f"- {rule}" for rule in state.integrated_rules) or "(none)"
         )
-        system = compose_system(
-            stance, PromptTemplates.FINAL_ANSWER_NO_CONSENSUS_SYSTEM
-        )
+        system = PromptTemplates.FINAL_ANSWER_NO_CONSENSUS_SYSTEM
         user = PromptTemplates.FINAL_ANSWER_NO_CONSENSUS_USER.format(
             question=state.question,
+            agent1_stance=state.agent1_stance,
+            agent2_stance=state.agent2_stance,
             integrated_rules=integrated_rules,
             dialogue_history=dialogue_history,
             justified_argument=justified,
         ).strip()
     else:
-        system = compose_system(stance, PromptTemplates.FINAL_ANSWER_SYSTEM)
+        system = PromptTemplates.FINAL_ANSWER_SYSTEM
         user = PromptTemplates.FINAL_ANSWER_USER.format(
             question=state.question,
+            agent1_stance=state.agent1_stance,
+            agent2_stance=state.agent2_stance,
             dialogue_history=dialogue_history,
             justified_argument=justified,
         ).strip()
 
     return await chat_text(
         [SystemMessage(content=system), HumanMessage(content=user)],
-        model=os.getenv("MODEL", "gpt-5-mini"),
+        model=os.getenv("MODEL", "gpt-5.4-mini"),
     )

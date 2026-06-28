@@ -50,6 +50,21 @@ def _parse_turns(folder_name: str) -> int | None:
     return int(m.group(1)) if m else None
 
 
+def _parse_attempts(folder_name: str) -> int | None:
+    """turnsXX_attemptsYY から main argument 試行回数上限を抽出する."""
+    m = re.match(r"turns\d+_attempts(\d+)", folder_name)
+    return int(m.group(1)) if m else None
+
+
+def _normalize_method(method: str | None) -> str:
+    """ログの method/mode フィールドを schema/no_schema/free_debate/mad の4値に正規化する."""
+    if method in {"no_schema", "no-schema"}:
+        return "no_schema"
+    if method in {"free_debate", "mad"}:
+        return method
+    return "schema"
+
+
 def _collect_logs(sweep_dir: Path) -> list[tuple[str, Path]]:
     """sweepディレクトリ配下のJSONファイルを (フォルダ名, パス) のリストで返す.
 
@@ -152,6 +167,12 @@ def main() -> None:
     parser.add_argument("--sweep", required=True, help="Path to the sweep directory.")
     parser.add_argument("--model", default=None, help="Evaluator model name.")
     parser.add_argument("--out", default=None, help="Path to save full results JSON.")
+    parser.add_argument(
+        "--method",
+        choices=("schema", "no_schema", "free_debate", "mad"),
+        default=None,
+        help="指定すると、その手法のログだけを評価する（未指定なら sweep 配下の全手法を評価）。",
+    )
     args = parser.parse_args()
 
     model_name = resolve_evaluator_model(args.model)
@@ -163,13 +184,23 @@ def main() -> None:
         sys.exit(1)
 
     entries = _collect_logs(sweep_dir)
+    if args.method:
+        entries = [
+            (folder, log_path)
+            for folder, log_path in entries
+            if _normalize_method(
+                json.loads(log_path.read_text(encoding="utf-8")).get("method")
+                or json.loads(log_path.read_text(encoding="utf-8")).get("mode")
+            )
+            == args.method
+        ]
     if not entries:
         print(f"No JSON files found under {sweep_dir}", file=sys.stderr)
         sys.exit(1)
 
     evaluator = _EvaluatorModel(model_name)
     print(f"Evaluating {len(entries)} logs with {model_name} ...")
-    print(f"Sweep: {sweep_dir}")
+    print(f"Sweep: {sweep_dir}" + (f" (method={args.method})" if args.method else ""))
     print()
 
     all_results: list[dict[str, Any]] = []
@@ -179,8 +210,7 @@ def main() -> None:
         print(f"[{i:02d}/{len(entries)}] {folder} ...", end=" ", flush=True)
 
         log = json.loads(log_path.read_text(encoding="utf-8"))
-        method = log.get("method") or log.get("mode")
-        mode = "no_schema" if method in {"no_schema", "no-schema"} else "schema"
+        mode = _normalize_method(log.get("method") or log.get("mode"))
         eval_input = build_eval_input(log, mode=mode)
         scores = evaluate_with_llm(eval_input, evaluator)
         metrics = _build_metrics(scores, efficiency_metrics(log))
@@ -189,6 +219,8 @@ def main() -> None:
             "folder": folder,
             "log_file": str(log_path.relative_to(sweep_dir)),
             "turns": turns,
+            "attempts": _parse_attempts(folder),
+            "method": mode,
             **metrics,
         }
         all_results.append(result)

@@ -8,7 +8,7 @@ from types import SimpleNamespace
 import pytest
 
 from agent import arguments, nodes
-from agent.defeats import DefeatSubgraphResult
+from agent.argumentation_model import AttackEvaluation
 from agent.schema.llm_outputs import Antecedent, ArgumentBody, Rule, UndercutOutput
 from agent.schema.state import ArgumentRecord
 
@@ -38,14 +38,14 @@ async def test_validate_b_exposes_generated_undercut_in_history_and_update(
     undercut = argument("AG1", ["a is not available"], attack="undercut")
 
     async def blocked_rebut(*args, **kwargs):
-        return DefeatSubgraphResult(
+        return AttackEvaluation(
             defeats=False,
             attack="rebut",
             relations=[],
             blocker=undercut,
         )
 
-    monkeypatch.setattr(nodes, "run_defeat_subgraph", blocked_rebut)
+    monkeypatch.setattr(nodes, "evaluate_attack", blocked_rebut)
     state = SimpleNamespace(
         current_argument=main,
         b_argument=rebut,

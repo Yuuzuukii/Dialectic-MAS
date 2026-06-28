@@ -124,6 +124,9 @@ class PromptTemplates:
     UNDERCUT_SYSTEM = ARGUMENT_SYSTEM
     UNDERCUT_SYSTEM_NO_SCHEMA = ARGUMENT_SYSTEM_NO_SCHEMA
 
+    # 自分の攻撃(B)が相手の新しいカウンター(C)にも及ぶかを尋ねる手番用（schema/no_schema共通）。
+    ATTACK_EXTENDS_SYSTEM = _system(_GROUNDING)
+
     _GENERALIZATION_SYSTEM_BASE = _system(
         "<role>\n"
         "You are AG1 in this debate.\n"
@@ -186,23 +189,51 @@ class PromptTemplates:
         "</schema_overlay>",
     )
 
+    # justified側: AG1が常に客観的な統合役として最終回答を書く（justifiedされたのが
+    # AG1/AG2どちらのstanceでも、勝った側の代弁者ではなく中立な報告者として書く）。
     FINAL_ANSWER_SYSTEM = _system(
-        "<task>\nYou participated in a dialectical debate on a question, and your argument was justified. Write the final answer.\n</task>",
+        "<role>\n"
+        "You are AG1 in this debate.\n"
+        "You now act as a neutral synthesizer reporting the debate's outcome, not as an "
+        "advocate for either stance.\n"
+        "</role>",
+        "<task>\n"
+        "One side's argument was justified in the debate: it withstood the opponent's "
+        "strongest objections. Write the final answer to the original question.\n"
+        "</task>",
         "<style>\n"
-        "- Write a concise answer to the question in natural language from your perspective.\n"
-        "- State your position clearly and briefly explain the key reasoning that was upheld through the debate.\n"
+        "- Write objectively, as a report of what the debate established — not as 'my "
+        "opinion' or 'your stance'.\n"
+        "- State the conclusion that was justified, the opponent's key objection(s) it had "
+        "to survive, and specifically why those objections did not overturn it.\n"
+        "- Ground the answer in the substance of the dialogue history below, not only the "
+        "bare justified conclusion — reflect what was actually argued and rebutted over the "
+        "course of the debate, not just the final move.\n"
         "</style>",
     )
 
     # 合意（justified な決着）に至らないままラウンド上限に達したときの暫定回答。
+    # こちらも同様にAG1が客観的な統合役として書く。
     FINAL_ANSWER_NO_CONSENSUS_SYSTEM = _system(
+        "<role>\n"
+        "You are AG1 in this debate.\n"
+        "You now act as a neutral synthesizer reporting the debate's outcome, not as an "
+        "advocate for either stance.\n"
+        "</role>",
         "<context>\n"
-        "The dialectical debate reached its round limit WITHOUT either side's argument being justified, so no consensus was reached.\n"
+        "The dialectical debate reached its round limit WITHOUT either side's argument "
+        "being justified, so no consensus was reached.\n"
         "</context>",
-        "<task>\nProduce a provisional, best-effort answer grounded in the integrated rules that neither side could deny.\n</task>",
+        "<task>\nProduce a provisional, best-effort answer grounded in the integrated rules "
+        "that neither side could deny.\n</task>",
         "<style>\n"
-        "- Make it explicit that this is a provisional answer and that no agreement was reached in the debate.\n"
-        "- Base your reasoning on the integrated rules and the provisional main argument built on them.\n"
+        "- Make it explicit that this is a provisional answer and that no agreement was "
+        "reached in the debate.\n"
+        "- Base your reasoning on the integrated rules and the provisional main argument "
+        "built on them.\n"
+        "- Ground the answer in the substance of the dialogue history below, not only the "
+        "bare integrated rules — reflect what both sides actually argued, not just the "
+        "final compromise.\n"
         "- Be concise: state the provisional position and the shared rules it rests on.\n"
         "</style>",
     )
@@ -211,15 +242,21 @@ class PromptTemplates:
     FINAL_ANSWER_USER = """
 Question: {question}
 
+AG1 Stance: {agent1_stance}
+AG2 Stance: {agent2_stance}
+
 Dialogue history:
 {dialogue_history}
 
-Your justified argument:
+The argument that was justified:
 {justified_argument}
 """
 
     FINAL_ANSWER_NO_CONSENSUS_USER = """
 Question: {question}
+
+AG1 Stance: {agent1_stance}
+AG2 Stance: {agent2_stance}
 
 No consensus was reached within the debate limit. The following integrated rules were agreed as undeniable by both sides:
 {integrated_rules}
@@ -230,6 +267,71 @@ Dialogue history:
 Provisional main argument built on the integrated rules:
 {justified_argument}
 """
+
+    # ---- Free debate (弁証法プロトコルを使わない自由討議ベースライン) ----
+    # rebut/undercut/justified 等の概念を持ち込まない、自由記述の主張のみ。
+    # 原論文(Du et al.)に倣い、簡潔さ・構造化禁止といった独自の style 指示は付与しない。
+    FREE_DEBATE_TURN_SYSTEM = _system(_GROUNDING)
+
+    # ラウンド上限到達後、AG1 が両者の発言を踏まえて短い統合サマリーを作る。
+    # warrant/generalization/integrated rule 等の ASPIC+ 概念は持ち込まない。
+    FREE_DEBATE_INTEGRATION_SYSTEM = _system(
+        "<role>\n"
+        "You are AG1 in this debate.\n"
+        "You now act as a neutral synthesizer of the free debate above.\n"
+        "Your task is to summarize the key reasoning each side relied on into a short shared synthesis.\n"
+        "</role>",
+        "<stance>\n{stance}\n</stance>",
+        "<integration_principles>\n"
+        "- Capture the core reasoning each side relied on, not just their final positions.\n"
+        "- Do not discard AG2's reasoning merely because it conflicts with AG1's stance.\n"
+        "- Do not simply restate AG1's own argument as the synthesis.\n"
+        "- Do not produce a final answer to the original question.\n"
+        "- Be concise: a short paragraph, not a full restatement of the transcript.\n"
+        "</integration_principles>",
+    )
+
+    FREE_DEBATE_INTEGRATION_USER = """
+Question: {question}
+
+Dialogue history:
+{dialogue_history}
+"""
+
+    FREE_DEBATE_FINAL_ANSWER_SYSTEM = _system(
+        "<task>\nBased on the debate so far, write the final answer.\n</task>",
+    )
+
+    FREE_DEBATE_FINAL_ANSWER_USER = """
+Question: {question}
+
+Synthesis of both sides' reasoning:
+{integrated_summary}
+
+Dialogue history:
+{dialogue_history}
+"""
+
+    # ---- MAD (Multi-Agent Debate; Du et al. 流の相互反論ベースライン) ----
+    # free_debate と異なり、各ターンで相手の直前の主張へ反論することだけを簡潔に要求する
+    # （rebut の手順を細かく規定しない。具体的な反論の仕方は指示文(_round_instruction)側で
+    # 「argue against」と一言伝えるのみ）。
+    # ラウンド上限後は AG1/AG2 のいずれでもない、独立した judge が対話全体から最終回答を作る。
+    MAD_TURN_SYSTEM = _system(_GROUNDING)
+
+    # 独立した judge（AG1/AG2 のいずれでもない）が対話全体から最終回答を作る。
+    MAD_JUDGE_SYSTEM = _system(
+        "<role>\nYou are an independent judge. You did not participate in this debate.\n</role>",
+        "<task>\nBased on the debate so far, write the final answer.\n</task>",
+    )
+
+    MAD_JUDGE_USER = """
+Question: {question}
+
+Dialogue history:
+{dialogue_history}
+"""
+
 
 
 # ---- 補助ビルダ（SYSTEM 合成・手番ごとの指示文） ----
@@ -439,6 +541,60 @@ def undercut_instruction(target: Any, state: Any | None = None) -> str:
             "<response_contract>",
             "If your argument can explicitly negate an assumption the target relies on, set can_undercut=YES and include Argument.",
             "Otherwise, set can_undercut=NO and omit Argument.",
+            "</response_contract>",
+        ]
+    )
+
+
+def attack_extends_instruction(
+    b_argument: Any, c_argument: Any, state: Any | None = None
+) -> str:
+    """自分の攻撃(B)が相手の新しいカウンター(C)にも及ぶかを尋ねる手番の指示文を組む.
+
+    判定基準は字面の一致（同じ statement が残っているか）ではなく、
+    「自分の攻撃の主張を真だと認めた場合、相手の新しい結論が成り立たなくなるか」
+    という実質的な脅威性。相手が自分の攻撃内容を前提として受け入れた上で、それでも
+    自分の結論は揺るがないと論じている（譲歩した上で結論を守っている）場合は、
+    もはやその攻撃は新しい結論を脅かしていないので NO とする。
+    """
+    issue = getattr(state, "question", "") if state is not None else ""
+    return "\n".join(
+        [
+            "<task>",
+            "You previously attacked the target argument below; that attack is labeled "
+            "<your_attack>. The opponent has now produced a new counterargument, labeled "
+            "<new_counter>, in response.",
+            "Determine whether your attack still poses a live threat to the new "
+            "counterargument: if the claim your attack makes is true, does the new "
+            "counterargument's conclusion fail to hold?",
+            "</task>",
+            "",
+            "<issue>",
+            issue,
+            "</issue>",
+            "",
+            "<your_attack>",
+            f"id: {b_argument.id}",
+            f"attack method: {b_argument.attack}",
+            f"statement you negated: {b_argument.target_statement}",
+            "your argument:",
+            b_argument.argument,
+            "</your_attack>",
+            "",
+            "<new_counter>",
+            f"id: {c_argument.id}",
+            "argument:",
+            c_argument.argument,
+            "</new_counter>",
+            "",
+            "<response_contract>",
+            "Set attack_extends=YES only if accepting your attack's claim as true would "
+            "force rejection of the new counterargument's conclusion.",
+            "Set attack_extends=NO if the new counterargument's conclusion already holds "
+            "even when granting your attack's claim — for example, if the new "
+            "counterargument concedes the point your attack makes and argues its "
+            "conclusion stands anyway. Merely sharing the same wording or topic as your "
+            "attack's target is not enough by itself to set YES.",
             "</response_contract>",
         ]
     )

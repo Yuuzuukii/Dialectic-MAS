@@ -53,6 +53,22 @@ class UndercutOutput(BaseModel):
     )
 
 
+# LLM出力：B（自分の攻撃）がC（相手の新しいカウンター）にも及ぶかの自己判定
+class AttackExtendsOutput(BaseModel):
+    """自分の攻撃の対象（statement）が、相手の新しい論証にも依然として存在するかの判定.
+
+    自分の攻撃が依然としてそれを否定しているかどうかの YES/NO 判定.
+    """
+
+    attack_extends: Literal["YES", "NO"] = Field(
+        description=(
+            "YES only if the new counterargument still relies on or still asserts the exact "
+            "statement your attack negated. NO if the new counterargument abandoned or "
+            "replaced that statement, so your attack no longer applies to it."
+        )
+    )
+
+
 # LLM出力：汎化
 class GeneralizationOutput(BaseModel):
     """汎化出力（対立する warrant から抽出した再利用可能な基準のリスト）."""

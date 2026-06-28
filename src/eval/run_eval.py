@@ -34,7 +34,7 @@ from src.eval.evaluation import (
     evaluate_with_llm,
 )
 
-DEFAULT_EVALUATOR_MODEL = "gpt-5-mini"
+DEFAULT_EVALUATOR_MODEL = "gpt-5.4-mini"
 
 
 def _latest_log(logs_dir: Path) -> Path:
@@ -134,7 +134,7 @@ def main() -> None:
     parser.add_argument(
         "--model",
         default=None,
-        help="Evaluator model name. Defaults to MODEL from .env, then gpt-5-mini.",
+        help="Evaluator model name. Defaults to MODEL from .env, then gpt-5.4-mini.",
     )
     args = parser.parse_args()
     model = resolve_evaluator_model(args.model)

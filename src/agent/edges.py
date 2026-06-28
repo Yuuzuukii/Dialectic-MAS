@@ -12,6 +12,23 @@ def _int_env(name: str, default: int) -> int:
     return int(value) if value else default
 
 
+def route_round_entry(state: Any) -> str:
+    """各ラウンドの開始点（プロトコル周回数の判定）.
+
+    ラウンド上限に達したかどうかを、主張可否判定よりも前に・無条件で判定する
+    関門。START 直後と、統合フェーズ（add_integrated_rule）の直後の両方から
+    呼ばれる。ここで上限到達と判定されれば、主張可否判定を一切経由せず
+    finalize_fallback（→generate_final_answer）に直行するため、
+    「上限到達後に主張可否判定の結果でfinal_answer生成が握り潰される」という
+    旧実装のバグはこの構造では発生し得ない。
+    """
+    if state.error:
+        return "finish_with_error"
+    if state.debate_round > state.max_turns:
+        return "finalize_fallback"
+    return "can_generate_main"
+
+
 def route_after_can_generate_main(state: Any) -> str:
     """主張生成の可否判定後の遷移先を決める."""
     if state.error:
@@ -20,8 +37,6 @@ def route_after_can_generate_main(state: Any) -> str:
         if state.current_proponent == "AG1":
             return "advance_to_ag2"
         return "extract_warrants"
-    if state.finalize_mode:
-        return "finalize_fallback"
     return "o_defeat_a"
 
 
@@ -101,12 +116,3 @@ def route_after_synthesis_step(state: Any) -> str:
     return "next"
 
 
-def route_after_add_integrated_rule(state: Any) -> str:
-    """統合ルール追加後、議論継続か終了かを決める."""
-    if state.error:
-        return "finish_with_error"
-    # finalize_mode のときは can_generate_main → finalize_fallback で確実に終端するため、
-    # ここでは常に can_generate_main へ戻す。上限超過は安全弁として finish。
-    if state.debate_round > state.max_turns + 1:
-        return "finish"
-    return "can_generate_main"

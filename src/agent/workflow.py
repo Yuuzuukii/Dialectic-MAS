@@ -10,7 +10,6 @@ from langgraph.graph import END, START, StateGraph
 
 from .edges import (
     _int_env,
-    route_after_add_integrated_rule,
     route_after_can_generate_main,
     route_after_o_defeat_a,
     route_after_p_counter_b,
@@ -19,6 +18,7 @@ from .edges import (
     route_after_validate_b_defeats_a,
     route_after_validate_b_defeats_c,
     route_after_validate_c_defeats_b,
+    route_round_entry,
 )
 from .nodes import (
     add_integrated_rule,
@@ -65,8 +65,6 @@ class State:
     learned_findings: list[str] = field(default_factory=list)
     integrated_rules: list[str] = field(default_factory=list)
 
-    # ラウンド上限に達したら debate をスキップして暫定回答を作る。
-    finalize_mode: bool = False
     # justified な決着（合意）に至ったか。fallback 暫定回答では False。
     consensus_reached: bool | None = None
 
@@ -101,10 +99,8 @@ class State:
 
     b_argument: ArgumentRecord | None = None
     c_argument: ArgumentRecord | None = None
-    d_argument: ArgumentRecord | None = None
     b_argument_id: str | None = None
     c_argument_id: str | None = None
-    d_argument_id: str | None = None
     b_defeats_a: bool | None = None
     c_defeats_b: bool | None = None
     b_defeats_c: bool | None = None
@@ -148,13 +144,20 @@ graph = (
     .add_node("advance_to_ag2", advance_to_ag2)
     .add_node("finish", finish)
     .add_node("finish_with_error", finish_with_error)
-    .add_edge(START, "can_generate_main")
+    .add_conditional_edges(
+        START,
+        route_round_entry,
+        {
+            "can_generate_main": "can_generate_main",
+            "finalize_fallback": "finalize_fallback",
+            "finish_with_error": "finish_with_error",
+        },
+    )
     .add_conditional_edges(
         "can_generate_main",
         route_after_can_generate_main,
         {
             "o_defeat_a": "o_defeat_a",
-            "finalize_fallback": "finalize_fallback",
             "advance_to_ag2": "advance_to_ag2",
             "extract_warrants": "extract_warrants",
             "finish_with_error": "finish_with_error",
@@ -235,10 +238,10 @@ graph = (
     )
     .add_conditional_edges(
         "add_integrated_rule",
-        route_after_add_integrated_rule,
+        route_round_entry,
         {
             "can_generate_main": "can_generate_main",
-            "finish": "finish",
+            "finalize_fallback": "finalize_fallback",
             "finish_with_error": "finish_with_error",
         },
     )

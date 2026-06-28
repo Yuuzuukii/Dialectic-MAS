@@ -21,7 +21,7 @@ LOGS_DIR = ROOT / "logs"
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-Method = Literal["schema", "no_schema"]
+Method = Literal["schema", "no_schema", "free_debate", "mad"]
 
 _PRICE_INPUT_PER_M = 0.25
 _PRICE_CACHED_PER_M = 0.025
@@ -399,6 +399,120 @@ async def run_no_schema_topic_once(
         output_root=output_root,
         run_index=run_index,
     )
+
+
+async def run_free_debate_topic_once(
+    topic_file: str | Path,
+    *,
+    max_turns: int = 3,
+    output_root: Path = LOGS_DIR,
+    run_index: int | None = None,
+) -> Path:
+    """弁証法プロトコルを使わない自由討議ベースラインを1トピック実行する.
+
+    schema/no_schema と異なるグラフ・State（free_debate.FreeDebateState）を使うため、
+    `_run_topic_once` を流用せず専用の実行ロジックを持つ。main argument 再試行という
+    概念が無いため `max_main_argument_attempts` は存在しない。
+    """
+    from src.agent.free_debate import FreeDebateState, graph_free_debate
+
+    topic_path, topic_data = load_topic(topic_file)
+    tracker = TokenUsageTracker()
+    graph_input = FreeDebateState(
+        question=topic_data["question"],
+        agent1_stance=topic_data["agent1_stance"],
+        agent2_stance=topic_data["agent2_stance"],
+        max_turns=max_turns,
+    )
+
+    start = time.perf_counter()
+    result: dict[str, Any] = dict(graph_input.__dict__)
+    async for event in graph_free_debate.astream(
+        graph_input,  # type: ignore[arg-type]
+        config={"callbacks": [tracker]},
+        stream_mode="updates",
+    ):
+        if not isinstance(event, dict):
+            continue
+        for node_name, update in event.items():
+            if not isinstance(update, dict):
+                continue
+            if node_name in ("ag1_turn", "ag2_turn") and update.get("dialogue_history"):
+                record = update["dialogue_history"][-1]
+                print(f"[turn] round {record['round']} {record['agent']}", flush=True)  # noqa: T201
+                print(record["argument"], flush=True)  # noqa: T201
+                print("", flush=True)  # noqa: T201
+            result.update(update)
+    elapsed = time.perf_counter() - start
+
+    log = base_log(
+        method="free_debate",
+        topic_data=topic_data,
+        elapsed=elapsed,
+        usage=tracker.usage(),
+    )
+    log["dialogue_history"] = result.get("dialogue_history", [])
+    log["final_answer"] = result.get("final_answer")
+    path = save_log(log, output_path("free_debate", topic_path, output_root, run_index))
+    print(f"[system] log saved -> {path}", flush=True)
+    return path
+
+
+async def run_mad_topic_once(
+    topic_file: str | Path,
+    *,
+    max_turns: int = 3,
+    output_root: Path = LOGS_DIR,
+    run_index: int | None = None,
+) -> Path:
+    """MAD（相互反論型マルチエージェントディベート）ベースラインを1トピック実行する.
+
+    free_debate と同じグラフ構造（schema/no_schema と異なる State）だが、各ターンで
+    明示的な反論を要求し、ラウンド上限後は独立した judge が最終回答を作る点が異なる
+    （`free_debate.graph_free_debate` ではなく `mad.graph_mad` を使う）。
+    """
+    from src.agent.mad import MADState, graph_mad
+
+    topic_path, topic_data = load_topic(topic_file)
+    tracker = TokenUsageTracker()
+    graph_input = MADState(
+        question=topic_data["question"],
+        agent1_stance=topic_data["agent1_stance"],
+        agent2_stance=topic_data["agent2_stance"],
+        max_turns=max_turns,
+    )
+
+    start = time.perf_counter()
+    result: dict[str, Any] = dict(graph_input.__dict__)
+    async for event in graph_mad.astream(
+        graph_input,  # type: ignore[arg-type]
+        config={"callbacks": [tracker]},
+        stream_mode="updates",
+    ):
+        if not isinstance(event, dict):
+            continue
+        for node_name, update in event.items():
+            if not isinstance(update, dict):
+                continue
+            if node_name in ("ag1_turn", "ag2_turn") and update.get("dialogue_history"):
+                record = update["dialogue_history"][-1]
+                print(f"[turn] round {record['round']} {record['agent']}", flush=True)  # noqa: T201
+                print(record["argument"], flush=True)  # noqa: T201
+                print("", flush=True)  # noqa: T201
+            result.update(update)
+    elapsed = time.perf_counter() - start
+
+    log = base_log(
+        method="mad",
+        topic_data=topic_data,
+        elapsed=elapsed,
+        usage=tracker.usage(),
+    )
+    log["dialogue_history"] = result.get("dialogue_history", [])
+    log["final_answer"] = result.get("final_answer")
+    path = save_log(log, output_path("mad", topic_path, output_root, run_index))
+    print(f"[system] log saved -> {path}", flush=True)
+    return path
 
 
 async def run_category(

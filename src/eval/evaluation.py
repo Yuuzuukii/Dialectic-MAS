@@ -14,9 +14,9 @@ def _parse_argument_field(argument_str: str | Any) -> dict[str, Any]:
     text = argument_str.strip()
     if "```json" in text:
         start = text.find("```json") + len("```json")
-        text = text[start: text.find("```", start)].strip()
+        text = text[start : text.find("```", start)].strip()
     elif text.startswith("```"):
-        text = text[3: text.rfind("```")].strip()
+        text = text[3 : text.rfind("```")].strip()
     else:
         start = text.find("{")
         end = text.rfind("}") + 1
@@ -81,8 +81,8 @@ def build_eval_input(log: dict[str, Any], *, mode: str = "schema") -> dict[str, 
 
     ログは question / agent1_stance / agent2_stance / dialogue_history
     (各ターンの {agent, argument}) / final_answer / metrics のみを持つ。
-    schema / no_schema は argument の表現形式（構造化 JSON か自由記述テキストか）が
-    異なるだけで、整形ロジックは共通。`mode` に応じて method_context だけ切り替える。
+    schema / no_schema / free_debate / mad は argument の表現形式・対話構造が異なるだけで、
+    整形ロジックは共通。`mode` に応じて method_context だけ切り替える。
     """
     dialogue_history: list[dict[str, Any]] = log.get("dialogue_history") or []
 
@@ -92,15 +92,27 @@ def build_eval_input(log: dict[str, Any], *, mode: str = "schema") -> dict[str, 
     ]
 
     final_answer = log.get("final_answer")
-    final_answer_text = final_answer.strip() if isinstance(final_answer, str) and final_answer.strip() else "(no final answer)"
+    final_answer_text = (
+        final_answer.strip()
+        if isinstance(final_answer, str) and final_answer.strip()
+        else "(no final answer)"
+    )
+
+    if mode in ("free_debate", "mad"):
+        method_context = ""
+    elif mode == "no_schema":
+        method_context = DIALECTICAL_PROTOCOL_CONTEXT
+    else:
+        method_context = f"{DIALECTICAL_PROTOCOL_CONTEXT}\n\n{SCHEMA_METHOD_CONTEXT}"
 
     return {
-        "mode": mode,
-        "method_context": SCHEMA_METHOD_CONTEXT if mode == "schema" else NO_SCHEMA_METHOD_CONTEXT,
+        "method_context": method_context,
         "question": log.get("question", ""),
         "agent1_stance": log.get("agent1_stance") or "(not provided)",
         "agent2_stance": log.get("agent2_stance") or "(not provided)",
-        "debate_transcript": "\n\n".join(transcript_lines) if transcript_lines else "(no dialogue)",
+        "debate_transcript": "\n\n".join(transcript_lines)
+        if transcript_lines
+        else "(no dialogue)",
         "final_answer": final_answer_text,
     }
 
@@ -135,26 +147,17 @@ def aggregate_scores(scores: list[dict[str, Any]]) -> dict[str, Any]:
 COMMON_EVALUATION_CONTEXT = """
 You are evaluating a multi-agent dialogue between AG1 and AG2.
 
-Both agents have fixed stances. The debate transcript below lists each agent's turns in chronological
-order (labeled "[Turn N] AGENT:"); turns alternate roughly as: each agent states a main argument for
-its stance, the opponent attacks it (rebutting its conclusion or undercutting an assumption it relies
-on), the original agent defends or counters, and so on. Once both sides' reasoning is exhausted, the
-agents extract and integrate shared rules from the debate and produce a final answer.
-
-Judge whether the dialogue produces a coherent, useful, and fair final position from the information
-shown below. Use the method-specific context only to interpret the argument format; do not reward or
-penalize a run merely because it uses, or does not use, a formal schema.
+Both agents have fixed, opposing stances on the question. The debate transcript below lists each
+agent's turns in chronological order (labeled "[Turn N] AGENT:"). The exact turn-taking structure
+(whether turns are labeled main/attack/counter, or are unstructured free-form turns) depends on the
+context below.
 """.strip()
 
-SCHEMA_METHOD_CONTEXT = """
-This run uses the proposed schema-based dialectical method, based on ASPIC+-style argumentation.
-
---- Argument Format ---
-Each turn's argument is a sequence of rules. A rule has:
-  - Premises:    Established premises (must hold for the rule to fire), and any premises marked
-                 "(assumption)" are defeasible assumptions that an opponent may attack by undercut.
-  - Conclusion:  The conclusion derived from the premises ("=>").
-A turn may also list its overall "Conclusion" — the conclusion(s) it ultimately puts forward.
+DIALECTICAL_PROTOCOL_CONTEXT = """
+Turns alternate roughly as: each agent states a main argument for its stance, the opponent attacks
+it (rebutting its conclusion or undercutting an assumption it relies on), the original agent defends
+or counters, and so on. Once both sides' reasoning is exhausted, the agents extract and integrate
+shared rules from the debate and produce a final answer.
 
 --- Attacks ---
   - rebut:    An agent's argument explicitly negates a conclusion of the target argument.
@@ -163,16 +166,22 @@ A turn may also list its overall "Conclusion" — the conclusion(s) it ultimatel
               (attacks a defeasible assumption the target relies on)
 """.strip()
 
-NO_SCHEMA_METHOD_CONTEXT = """
-This run uses the same dialectical protocol and dialogue flow as the schema-based method (see below),
-but each agent's argument is expressed as free natural-language reasoning instead of a structured
-rules/Conclusion representation.
+SCHEMA_METHOD_CONTEXT = """
+Each turn's argument is expressed using a structured argumentation model rather than free
+natural-language text.
 
---- Attacks ---
-  - rebut:    An agent's argument explicitly negates the target argument's stated conclusion.
-              (direct clash of conclusions)
-  - undercut: An agent's argument explicitly negates an assumption the target argument relies on.
-              (attacks a defeasible assumption the target relies on)
+--- Argument Format ---
+Each turn's argument is a sequence of rules r_1, ..., r_n. A rule has:
+  - Premises:    Established premises (must hold for the rule to fire), and any premises marked
+                 "(assumption)" are defeasible assumptions (members of Ass) that an opponent may
+                 attack by undercut.
+  - Conclusion:  The conclusion derived from the premises ("=>").
+Rules chain together: a strong premise of rule r_i (i > 1) is typically the conclusion of an
+earlier rule r_j (j < i), so a later rule's conclusion may rest on multiple earlier rules. An
+attack on an intermediate conclusion can therefore invalidate every later rule that depends on it,
+not just the rule that stated it.
+A turn may also list its overall "Conclusion" — the final conclusion(s) (Conc) it ultimately puts
+forward, as opposed to intermediate conclusions used only to feed later rules.
 """.strip()
 
 SCORING_INSTRUCTION = """
@@ -217,27 +226,24 @@ def evaluate_with_llm(response: dict[str, Any], evaluator_model: Any) -> dict[st
     prompt = f"""
 {COMMON_EVALUATION_CONTEXT}
 
---- Method Context ---
-Mode: {response['mode']}
-
-{response['method_context']}
+{response["method_context"]}
 
 --- Debate to Evaluate ---
 
 Question:
-{response['question']}
+{response["question"]}
 
 AG1 Stance:
-{response['agent1_stance']}
+{response["agent1_stance"]}
 
 AG2 Stance:
-{response['agent2_stance']}
+{response["agent2_stance"]}
 
 Debate Transcript (chronological, each turn is one agent's argument):
-{response['debate_transcript']}
+{response["debate_transcript"]}
 
 Final Answer:
-{response['final_answer']}
+{response["final_answer"]}
 
 ---
 
@@ -249,9 +255,9 @@ Final Answer:
         text = raw.strip()
         if "```json" in text:
             start = text.find("```json") + len("```json")
-            text = text[start: text.find("```", start)].strip()
+            text = text[start : text.find("```", start)].strip()
         elif text.startswith("```"):
-            text = text[3: text.rfind("```")].strip()
+            text = text[3 : text.rfind("```")].strip()
         else:
             start = text.find("{")
             end = text.rfind("}") + 1

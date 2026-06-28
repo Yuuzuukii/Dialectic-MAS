@@ -12,8 +12,13 @@ from typing import Any
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 
 from . import arguments
-from .arguments import argument_message_content, generate_attack, generate_undercut
-from .defeats import run_defeat_subgraph, run_strict_defeat_subgraph
+from .argumentation_model import evaluate_attack
+from .arguments import (
+    argument_message_content,
+    ask_attack_extends,
+    generate_attack,
+    generate_undercut,
+)
 from .prompts import attack_instruction, main_instruction
 from .schema.state import ArgumentRecord, parse_serialized_payload
 
@@ -161,10 +166,8 @@ async def can_generate_main(state: Any) -> dict[str, Any]:
             "main_attempt_count": state.main_attempt_count + 1,
             "b_argument": None,
             "c_argument": None,
-            "d_argument": None,
             "b_argument_id": None,
             "c_argument_id": None,
-            "d_argument_id": None,
             "b_defeats_a": None,
             "c_defeats_b": None,
             "b_defeats_c": None,
@@ -206,10 +209,8 @@ async def advance_to_ag2(state: Any) -> dict[str, Any]:
         "main_attempt_count": 0,
         "b_argument": None,
         "c_argument": None,
-        "d_argument": None,
         "b_argument_id": None,
         "c_argument_id": None,
-        "d_argument_id": None,
         "b_defeats_a": None,
         "c_defeats_b": None,
         "b_defeats_c": None,
@@ -249,7 +250,7 @@ async def validate_b_defeats_a(state: Any) -> dict[str, Any]:
     """B が A を defeat するか検証する。防御側の undercut があれば defeat を阻止する."""
     if state.current_argument is None or state.b_argument is None:
         return {"error": "Cannot validate B defeats A without A and B."}
-    result = await run_defeat_subgraph(
+    result = await evaluate_attack(
         state,
         state.b_argument,
         state.current_argument,
@@ -304,7 +305,7 @@ async def validate_c_defeats_b(state: Any) -> dict[str, Any]:
     """C が B を defeat するか検証する。defeat できなければ Proponent の主張は overruled."""
     if state.b_argument is None or state.c_argument is None:
         return {"error": "Cannot validate C defeats B without B and C."}
-    result = await run_defeat_subgraph(
+    result = await evaluate_attack(
         state,
         state.c_argument,
         state.b_argument,
@@ -328,32 +329,52 @@ async def validate_c_defeats_b(state: Any) -> dict[str, Any]:
 
 
 async def validate_b_defeats_c(state: Any) -> dict[str, Any]:
-    """C が B を strictly defeat するか検証する。B が C を逆 defeat できなければ Proponent の主張は justified."""
+    """B（Opponentの元の攻撃）が C（Proponentの新しいカウンター）にも及ぶかを確認する.
+
+    B の作者である Opponent 自身に確認する。及ばないなら Proponent の主張は justified。
+    及ぶ場合のみ、従来通り defeat subgraph で B が C を破れるかを判定する
+    （破れなければ justified、破れれば defensible）。
+
+    新しい論証は生成しない（C へのさらなる反論を作らせると無限再帰になり、
+    ASPIC+ の A-B-C 一往復という設計にも合わなくなるため）。
+    """
     if state.b_argument is None or state.c_argument is None:
         return {"error": "Cannot validate B defeats C without B and C."}
-    result = await run_strict_defeat_subgraph(
-        state,
-        state.c_argument,
-        state.b_argument,
-        forward_defender=state.current_opponent,
-        reverse_defender=state.current_proponent,
-        blocker_generator=generate_undercut,
-        forward_already_true=True,
+    extends = await ask_attack_extends(
+        state, state.current_opponent, state.b_argument, state.c_argument
     )
-    relations = [*state.defeat_relations]
-    if result.forward is not None:
-        relations.extend(result.forward.relations)
-    if result.reverse is not None:
-        relations.extend(result.reverse.relations)
-    if result.strictly_defeats:
+    print(  # noqa: T201  # 診断用: 後で削除予定
+        f"[argumentation_model] B attacks C? -> {'YES' if extends else 'NO'}",
+        flush=True,
+    )
+    if not extends:
         update = complete_thread(state, "justified")
+        update["b_defeats_c"] = False
+        update["c_strictly_defeats_b"] = True
+        return update
+    result = await evaluate_attack(
+        state,
+        state.b_argument,
+        state.c_argument,
+        state.current_proponent,
+        relation_context="B defeats C",
+        blocker_generator=generate_undercut,
+    )
+    if not result.defeats:
+        update = complete_thread(
+            state,
+            "justified",
+            [result.blocker] if result.blocker is not None else None,
+        )
+        if result.blocker is not None:
+            update["last_generated_argument"] = result.blocker
         update["b_defeats_c"] = False
         update["c_strictly_defeats_b"] = True
     else:
         update = complete_thread(state, "defensible")
         update["b_defeats_c"] = True
         update["c_strictly_defeats_b"] = False
-    update["defeat_relations"] = relations
+    update["defeat_relations"] = [*state.defeat_relations, *result.relations]
     return update
 
 
@@ -464,8 +485,6 @@ async def add_integrated_rule(state: Any) -> dict[str, Any]:
     new_round = state.debate_round + 1
     return {
         "debate_round": new_round,
-        # 次ラウンドが上限に達したら debate せず暫定回答へ（無限ループ防止）。
-        "finalize_mode": new_round >= state.max_turns,
         "integrated_rules": rules,
         "current_proponent": "AG1",
         "current_opponent": "AG2",
@@ -480,7 +499,6 @@ async def add_integrated_rule(state: Any) -> dict[str, Any]:
         "current_argument": None,
         "b_argument": None,
         "c_argument": None,
-        "d_argument": None,
         "b_defeats_a": None,
         "c_defeats_b": None,
         "b_defeats_c": None,
@@ -496,13 +514,20 @@ async def finalize_fallback(state: Any) -> dict[str, Any]:
     """ラウンド上限到達時、integration rule で作った main arg を暫定回答の土台に据える.
 
     debate を経た justified ではないため、合意なし (consensus_reached=False) を明示する。
+    finalize ラウンドで新しい main argument が一つも生成されなかった場合（双方が
+    "main_argument_available=False" と判定した場合）は、current_argument が無いため、
+    代わりに直前までに積まれた integrated_rules の最後のルールを土台にする。
     """
-    if state.current_argument is None:
+    if state.current_argument is not None:
+        justified_argument = state.current_argument.argument
+    elif state.integrated_rules:
+        justified_argument = state.integrated_rules[-1]
+    else:
         return {
             "error": "No integrated main argument available for fallback finalization."
         }
     return {
-        "justified_argument": state.current_argument.argument,
+        "justified_argument": justified_argument,
         "justification_status": "fallback_no_consensus",
         "consensus_reached": False,
     }

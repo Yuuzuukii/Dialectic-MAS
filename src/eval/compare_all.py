@@ -4,7 +4,7 @@ Reuses compare_category for each category, then aggregates a per-category breakd
 and an overall score. Writes JSON plus a console table.
 
 Usage:
-    python src/eval/compare_all.py [--model gpt-5-mini]
+    python src/eval/compare_all.py [--model gpt-5.4-mini]
 """
 
 # print による結果出力と、sys.path 追加後の import はこの評価スクリプトでは意図的。
@@ -117,7 +117,7 @@ def main() -> None:
     parser.add_argument(
         "--model",
         default=None,
-        help="Evaluator model name. Defaults to MODEL from .env, then gpt-5-mini.",
+        help="Evaluator model name. Defaults to MODEL from .env, then gpt-5.4-mini.",
     )
     parser.add_argument(
         "--schema-root",

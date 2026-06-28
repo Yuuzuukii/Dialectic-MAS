@@ -6,8 +6,8 @@ from types import SimpleNamespace
 import pytest
 
 from agent import arguments
+from agent.argumentation_model import evaluate_attack
 from agent.arguments import argument_body_json
-from agent.defeats import run_defeat_subgraph, run_strict_defeat_subgraph
 from agent.schema.llm_outputs import (
     Antecedent,
     ArgumentBody,
@@ -48,7 +48,7 @@ async def test_rebut_defeats_when_target_side_cannot_undercut() -> None:
     attacker = argument("AG2", ["We should not buy a"], attack="rebut")
     target = argument("AG1", ["We should buy a"])
 
-    result = await run_defeat_subgraph(
+    result = await evaluate_attack(
         SimpleNamespace(),
         attacker,
         target,
@@ -73,7 +73,7 @@ async def test_rebut_does_not_defeat_when_target_side_undercuts() -> None:
     )
     target = argument("AG1", ["We should buy a"])
 
-    result = await run_defeat_subgraph(
+    result = await evaluate_attack(
         SimpleNamespace(),
         attacker,
         target,
@@ -91,7 +91,7 @@ async def test_undercut_defeats_when_valid() -> None:
     attacker = argument("AG2", ["a is not available"], attack="undercut")
     target = argument("AG1", ["We should buy a"], ["a is available"])
 
-    result = await run_defeat_subgraph(
+    result = await evaluate_attack(
         SimpleNamespace(),
         attacker,
         target,
@@ -109,7 +109,7 @@ async def test_declared_undercut_is_trusted_without_reverifying_assumption() -> 
     attacker = argument("AG2", ["b is expensive"], attack="undercut")
     target = argument("AG1", ["We should buy a"], ["a is available"])
 
-    result = await run_defeat_subgraph(
+    result = await evaluate_attack(
         SimpleNamespace(),
         attacker,
         target,
@@ -120,45 +120,6 @@ async def test_declared_undercut_is_trusted_without_reverifying_assumption() -> 
     assert result.defeats is True
     assert result.attack == "undercut"
     assert result.relations[-1].valid is True
-
-
-async def test_strict_defeat_runs_reverse_defeat_check() -> None:
-    # 検証を行わないため、逆方向の rebut もブロッカー無しで defeat 成立し、strict は不成立になる。
-    c = argument("AG1", ["a is not available"], attack="undercut")
-    b = argument("AG2", ["We should not buy a"], ["a is available"], attack="rebut")
-
-    result = await run_strict_defeat_subgraph(
-        SimpleNamespace(),
-        c,
-        b,
-        forward_defender="AG2",
-        reverse_defender="AG1",
-    )
-
-    assert result.strictly_defeats is False
-    assert result.forward is not None and result.forward.defeats is True
-    assert result.reverse is not None and result.reverse.defeats is True
-
-
-async def test_strict_defeat_false_when_reverse_defeat_also_holds() -> None:
-    async def no_undercut(*args, **kwargs):
-        return None
-
-    c = argument("AG1", ["We should buy a"], attack="rebut")
-    b = argument("AG2", ["We should not buy a"], attack="rebut")
-
-    result = await run_strict_defeat_subgraph(
-        SimpleNamespace(),
-        c,
-        b,
-        forward_defender="AG2",
-        reverse_defender="AG1",
-        blocker_generator=no_undercut,
-    )
-
-    assert result.strictly_defeats is False
-    assert result.forward is not None and result.forward.defeats is True
-    assert result.reverse is not None and result.reverse.defeats is True
 
 
 async def test_serialized_argument_payload_does_not_include_attack_metadata() -> None:
@@ -267,7 +228,7 @@ async def test_declared_rebut_keeps_method_and_defeats() -> None:
     attacker.target_statement = "a is available"
     target = argument("AG1", ["We should buy a"], ["a is available"])
 
-    result = await run_defeat_subgraph(
+    result = await evaluate_attack(
         SimpleNamespace(),
         attacker,
         target,

@@ -1,0 +1,157 @@
+{
+  "method": "schema",
+  "question": "What dish should we eat?",
+  "agent1_stance": "Your stance:\na is curry rice.\nc is curry noodles.\na has curry flavor.\nc has curry flavor.\nb is not acceptable to you.\nIf a menu has curry flavor, we should eat it.\nIf something is not acceptable to you, we should not eat it.",
+  "agent2_stance": "Your stance:\nb is Chinese noodles.\nb is a noodle dish.\nc is a noodle dish.\na is not acceptable to you.\nIf a menu is a noodle dish, we should eat it.\nIf something is not acceptable to you, we should not eat it.",
+  "metrics": {
+    "elapsed_seconds": 11.789,
+    "prompt_tokens": 17091,
+    "cached_tokens": 1280,
+    "completion_tokens": 778,
+    "total_tokens": 17869,
+    "total_cost_usd": 0.005541
+  },
+  "dialogue_history": [
+    {
+      "agent": "AG1",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "a has curry flavor"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "we should eat a"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "c has curry flavor"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "we should eat c"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "b is not acceptable to you"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "we should not eat b"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "we should eat a",
+                  "we should eat c",
+                  "we should not eat b"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "we should eat a or c, and not b"
+            }
+          ],
+          "Conc": [
+            "we should eat a",
+            "we should eat c",
+            "we should not eat b",
+            "we should eat a or c, and not b"
+          ],
+          "Ass": []
+        }
+      }
+    },
+    {
+      "agent": "AG2",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "b is Chinese noodles"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "we should eat b"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "we should eat b"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "we should eat Chinese noodles"
+            }
+          ],
+          "Conc": [
+            "we should eat b",
+            "we should eat Chinese noodles"
+          ],
+          "Ass": []
+        }
+      }
+    },
+    {
+      "agent": "AG1",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "b is not acceptable to you"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "we should not eat b"
+            }
+          ],
+          "Conc": [
+            "we should not eat b"
+          ],
+          "Ass": []
+        }
+      }
+    },
+    {
+      "agent": "AG1",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "a has curry flavor"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "we should eat a"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "we should eat a"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "we should eat curry rice"
+            }
+          ],
+          "Conc": [
+            "we should eat a",
+            "we should eat curry rice"
+          ],
+          "Ass": []
+        }
+      }
+    }
+  ],
+  "final_answer": "The justified conclusion was to eat **a, i.e. curry rice**.\n\nWhy this survived the debate:\n- **a has curry flavor**, and the agreed rule says that if a menu has curry flavor, **we should eat it**. So the case for **a** is directly supported.\n- From **we should eat a**, the final rule concludes **we should eat curry rice**. So the chosen dish is identified as **curry rice**.\n\nWhat the opponent raised, and why it did not overturn this:\n- AG2 tried to support **b** by saying **b is Chinese noodles** and therefore **we should eat b**.\n- But AG1’s counter was stronger on the same target: **b is not acceptable to you**, and the rule says that if something is not acceptable, **we should not eat it**.\n- So the attempt to recommend **b** was defeated by a direct disqualifier.\n- AG2 also noted **a is not acceptable to you**, but that was not part of the accepted, justified argument that survived. In the actual debate outcome, the argument for **a** remained the one marked justified, and no successful rebuttal overturned it.\n\nSo the debate established: **we should eat curry rice**."
+}

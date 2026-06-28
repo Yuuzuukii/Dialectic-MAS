@@ -13,7 +13,7 @@ load_dotenv()
 
 T = TypeVar("T", bound=BaseModel)
 
-_DEFAULT_MODEL = "gpt-5-mini"
+_DEFAULT_MODEL = "gpt-5.4-mini"
 
 
 def _model_name(model: str | None) -> str:
