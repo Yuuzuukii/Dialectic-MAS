@@ -231,55 +231,8 @@ def evaluate_constraint_preservation(
         }
 
 
-def structural_constructiveness(log: dict[str, Any]) -> dict[str, Any]:
-    """dialogue_history の attack メタデータから建設性の決定論的サブ指標を計算する.
-
-    LLM 採点（散文の流暢さに引きずられる）が拾えない「構造的な建設性」を測る。
-    schema / no_schema 両方に適用可能（どちらも attack/target_id/target_statement を持つ）。
-
-    - specificity     : 攻撃ターンのうち、実在の先行ターン(target_id)を指し、かつ具体的な
-                        対象文(target_statement)を持つ割合。
-    - target_diversity: 攻撃ターンのうち、(target_id, target_statement) が過去の攻撃と重複
-                        しない割合（同じ点の蒸し返しでない度合い）。
-    - structural_constructiveness: 上記2つの平均（0–1）。
-    """
-    history = log.get("dialogue_history") or []
-    ids = {r.get("id") for r in history if isinstance(r, dict) and r.get("id")}
-    attacks = [
-        r for r in history if isinstance(r, dict) and r.get("attack")
-    ]
-    n = len(attacks)
-    if n == 0:
-        return {
-            "specificity": None,
-            "target_diversity": None,
-            "structural_constructiveness": None,
-            "n_attacks": 0,
-        }
-    specific = 0
-    novel = 0
-    seen: set[tuple[Any, str]] = set()
-    for a in attacks:
-        target_id = a.get("target_id")
-        statement = (a.get("target_statement") or "").strip()
-        if target_id in ids and statement:
-            specific += 1
-        key = (target_id, statement)
-        if key not in seen:
-            novel += 1
-        seen.add(key)
-    specificity = specific / n
-    diversity = novel / n
-    return {
-        "specificity": round(specificity, 4),
-        "target_diversity": round(diversity, 4),
-        "structural_constructiveness": round((specificity + diversity) / 2, 4),
-        "n_attacks": n,
-    }
-
-
 def evaluate_rubrics(log: dict[str, Any], evaluator_model: Any) -> dict[str, Any]:
-    """1件のログを Constructiveness / Constraint Preservation（LLM）＋決定論的な構造指標で採点する.
+    """1件のログを Constructiveness / Constraint Preservation（LLM）で採点する.
 
     `build_eval_input` は1回だけ呼び、そこから transcript 用の入力と
     stance/final_answer 用の入力の両方を切り出す（整形ロジックの二重実装を避ける）。
@@ -287,31 +240,20 @@ def evaluate_rubrics(log: dict[str, Any], evaluator_model: Any) -> dict[str, Any
     eval_input = build_eval_input(log)
     constructiveness = evaluate_constructiveness(eval_input, evaluator_model)
     constraint_preservation = evaluate_constraint_preservation(eval_input, evaluator_model)
-    structural = structural_constructiveness(log)
     return {
         "constructiveness": constructiveness.get("constructiveness"),
         "constraint_preservation": constraint_preservation.get("constraint_preservation"),
-        "specificity": structural["specificity"],
-        "target_diversity": structural["target_diversity"],
-        "structural_constructiveness": structural["structural_constructiveness"],
         "evaluator_model": evaluator_model.model,
     }
 
 
-# LLM 採点2軸に加えて保持する決定論的サブ指標（structural_constructiveness 系）。
-_STRUCTURAL_KEYS = ("specificity", "target_diversity", "structural_constructiveness")
-
-
 def build_metrics_v2(scores: dict[str, Any], efficiency: dict[str, Any]) -> dict[str, Any]:
-    """新ルーブリック2軸 + 決定論的な構造指標 + 効率(time/cost/tokens) を1つの metrics dict にまとめる."""
+    """新ルーブリック2軸 + 効率(time/cost/tokens) を1つの metrics dict にまとめる."""
     metrics = {axis: scores.get(axis) for axis in AXES_V2}
     numeric = [
         float(v) for a in AXES_V2 if isinstance((v := metrics.get(a)), (int, float))
     ]
     metrics["quality_average_v2"] = round(sum(numeric) / len(numeric), 2) if numeric else None
-    # 決定論的サブ指標を落とさず持ち回る（schema/no_schema 以外は None のまま）。
-    for key in _STRUCTURAL_KEYS:
-        metrics[key] = scores.get(key)
     metrics.update(efficiency)
     metrics["evaluator_model"] = scores.get("evaluator_model", "unknown")
     return metrics
