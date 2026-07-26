@@ -50,7 +50,7 @@ def test_schema_main_argument_rendered_as_utterance() -> None:
     }
     transcript = evaluation.build_eval_input(log)["debate_transcript"]
 
-    assert "[Turn 1] AG1 (main argument)" in transcript
+    assert "[Turn 1] AG1 (new argument)" in transcript
     assert (
         "'a' is in stock. If something is in stock, we can buy it. "
         "Therefore, We should buy 'a'." in transcript
@@ -90,9 +90,9 @@ def test_schema_attack_turn_names_target_statement() -> None:
     }
     transcript = evaluation.build_eval_input(log)["debate_transcript"]
 
-    assert "[Turn 2] AG2 (rebut — responds to [Turn 1])" in transcript
+    assert "[Turn 2] AG2 (responding to [Turn 1])" in transcript
     assert (
-        'I have a counter argument against the opinion "We should buy \'a\'". '
+        'I disagree with your conclusion that "We should buy \'a\'". '
         "'a' is out of stock. If something is out of stock, we don't buy it. "
         "Therefore, We should not buy 'a'." in transcript
     )
@@ -128,8 +128,7 @@ def test_schema_undercut_uses_premise_wording_and_assumptions_are_rendered() -> 
     transcript = evaluation.build_eval_input(log)["debate_transcript"]
 
     assert (
-        'I have a counter argument against the premise "stock levels are reliable".'
-        in transcript
+        'Your premise that "stock levels are reliable" does not hold.' in transcript
     )
     assert "(This relies on the assumption that stock levels are reliable.)" in transcript
 
@@ -165,7 +164,7 @@ def test_no_schema_keeps_raw_text_with_attack_label() -> None:
     assert "Actually a is expensive, so the reasoning fails." in transcript
     # ラベル側に攻撃対象を明示する
     assert (
-        '[Turn 2] AG2 (undercut — responds to [Turn 1] — attacks the premise "a is cheap")'
+        '[Turn 2] AG2 (responding to [Turn 1], challenging its premise: "a is cheap")'
         in transcript
     )
 

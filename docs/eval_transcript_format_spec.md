@@ -80,8 +80,8 @@ def _speech_log(history: list[dict[str, Any]]) -> list[dict[str, Any]]:
   しない。その1つ上のレイヤーであるログエントリに、攻撃系の発話（defeat/counter/
   undercut）が**どの前提・結論を狙ったのか**を残す。これが無いと、schemaを自然文に
   変換する際（§4.2/§5.1）の
-  `I have a counter argument against the opinion {…}` の `{…}` に代入するものが
-  存在しなくなる。`target_statement`（狙われた文そのもの）が代入元、`target_field`
+  `I disagree with your conclusion that {…}` / `Your premise that {…} does not hold`
+  の `{…}` に代入するものが存在しなくなる。`target_statement`（狙われた文そのもの）が代入元、`target_field`
   （Conc / Ass）が「結論への反論か前提への反論か」の使い分け元、`target_id` が
   Turn番号への解決元。
 - **`status`（主張の状態）**: main argument のスレッド決着
@@ -145,8 +145,9 @@ mad / free_debate はこの関数を経由しない経路（`src/dialogue/common
 - 本仕様の例文は日本語だが、**実際の描画は議論本文の言語（英語）**で行う。英語の
   正準テンプレート:
   - main: `{grounds}. Therefore, {conclusion}.`
-  - rebut: `I have a counter argument against the opinion "{target_statement}". {grounds}. Therefore, {conclusion}.`
-  - undercut: `I have a counter argument against the premise "{target_statement}". {grounds}. Therefore, {conclusion}.`
+  - rebut: `I disagree with your conclusion that "{target_statement}". {grounds}. Therefore, {conclusion}.`
+  - undercut: `Your premise that "{target_statement}" does not hold. {grounds}. Therefore, {conclusion}.`
+  - ※ 手番種別（rebut/undercut）を機械的に宣言せず、実際の議論の言い出しに近づける。
 
 > **この「反論がある」冒頭文はschemaの機械的組み立て（§5.1）にのみ適用する。**
 > no_schema/mad/free_debateは元の発話をそのまま使う方針（§5.2）のままなので、
@@ -187,7 +188,8 @@ mad / free_debate はこの関数を経由しない経路（`src/dialogue/common
   - main argument（`type == "main"`、`attack` が None）:
     `f"{grounds}. Therefore, {conclusion}."`
   - 攻撃ターン（`type` が `defeat`/`counter`、`attack`/`target_field`/`target_statement` あり）:
-    `f"I have a counter argument against the {'opinion' if target_field == 'Conc' else 'premise'} \"{target_statement}\". {grounds}. Therefore, {conclusion}."`
+    - Conc攻撃(rebut): `f'I disagree with your conclusion that "{target_statement}". {grounds}. Therefore, {conclusion}.'`
+    - Ass攻撃(undercut): `f'Your premise that "{target_statement}" does not hold. {grounds}. Therefore, {conclusion}.'`
   - いずれも第三者の報告調（`〜という結論を出しました` / `The agent concluded ...`）は使わない。
 - **主張の状態（status）**: main argument の record に `status`
   （justified / overruled / defensible）が §3.1 で保存されるようになる。評価用

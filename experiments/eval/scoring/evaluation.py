@@ -12,6 +12,21 @@ def _strip_period(text: str) -> str:
     return t[:-1] if t.endswith(".") else t
 
 
+def _lowercase_first(text: str) -> str:
+    """先頭1文字を小文字化する（"So The target..." のような不自然な大文字化を防ぐ）.
+
+    元の consequent/strong は文頭を想定した大文字始まりだが、ここでは "So" の後に
+    続く節として埋め込むため小文字始まりにする。先頭の単語が "I" や全て大文字
+    （頭字語）の場合はそのまま保つ。
+    """
+    if not text:
+        return text
+    first_word = text.split(" ", 1)[0].rstrip(".,;:")
+    if first_word == "I" or (len(first_word) > 1 and first_word.isupper()):
+        return text
+    return text[0].lower() + text[1:]
+
+
 def _strip_leading_connective(text: str) -> str:
     """文頭の接続語（Therefore, / Thus, / Hence,）を除く.
 
@@ -37,17 +52,20 @@ def _schema_utterance(argument_body: dict[str, Any], turn: dict[str, Any]) -> st
     - 各 rule を `{grounds}. {So|Therefore,} {consequent}.` の推論ステップとして描画
       （中間 rule は "So"、最終 rule は "Therefore,"）。
     - weak_negation（未検証の前提）は末尾に付記。
-    - 攻撃ターン（attack/target_statement あり）は冒頭に反論の対象を明示:
-      `I have a counter argument against the {opinion|premise} "{target_statement}".`
+    - 攻撃ターンは、手番種別を機械的に宣言せず、自然な議論の言い出しで対象を示す:
+      rebut（Conc攻撃）→ `I disagree with your conclusion that "{target_statement}".`
+      undercut（Ass攻撃）→ `Your premise that "{target_statement}" does not hold.`
     """
     rules = argument_body.get("rules") or []
     parts: list[str] = []
     if turn.get("attack") and turn.get("target_statement"):
-        noun = "opinion" if turn.get("target_field") == "Conc" else "premise"
-        parts.append(
-            f"I have a counter argument against the {noun} "
-            f'"{_strip_period(str(turn["target_statement"]))}".'
-        )
+        target = _strip_period(str(turn["target_statement"]))
+        if turn.get("target_field") == "Conc":
+            # rebut: 相手の結論に反対する自然な言い出し（「私は〜と思わない」）
+            parts.append(f'I disagree with your conclusion that "{target}".')
+        else:
+            # undercut: 相手が依拠する前提を崩す（「そもそもあなたの〜という前提は成り立たない」）
+            parts.append(f'Your premise that "{target}" does not hold.')
 
     # chain 構造では非末尾 consequent が次 rule の strong 前提に再出現する。そのまま
     # rule 単位で描画すると同じ結論文が二重に出るため、consequent と一致する strong は
@@ -76,10 +94,13 @@ def _schema_utterance(argument_body: dict[str, Any], turn: dict[str, Any]) -> st
         consequent = _strip_leading_connective(_strip_period(str(rule.get("consequent", ""))))
         grounds = ". ".join(strongs)
         connector = "Therefore," if i == n - 1 else "So"
-        if grounds and consequent:
-            parts.append(f"{grounds}. {connector} {consequent}.")
-        elif consequent:
-            parts.append(f"{connector} {consequent}.")
+        # "Therefore," は文頭の接続詞として自然（大文字始まりのまま）だが、
+        # "So" は同一文内の従属節として続けるので、後ろの節は小文字始まりにする。
+        connected_consequent = consequent if connector == "Therefore," else _lowercase_first(consequent)
+        if grounds and connected_consequent:
+            parts.append(f"{grounds}. {connector} {connected_consequent}.")
+        elif connected_consequent:
+            parts.append(f"{connector} {connected_consequent}.")
         elif grounds:
             parts.append(f"{grounds}.")
 
@@ -92,37 +113,42 @@ def _schema_utterance(argument_body: dict[str, Any], turn: dict[str, Any]) -> st
 def _turn_label(index: int, turn: dict[str, Any], id_to_no: dict[str, int]) -> str:
     """1ターン分のラベル行（誰が・何に対しての発話か）を組み立てる.
 
-    - schema（発話体変換される）: 対象の中身は発話本体に出るので、ラベルは
-      `(attack — responds to [Turn X])` の軽い参照のみ。
-    - no_schema（原文のまま）: 発話本体に対象が出ないので、ラベル側に
-      攻撃対象（結論/前提とその文）を明示する。
-    - attack メタ情報が無いターン（mad/free_debate/main）: 種別のみ。
+    評価器はプロトコル用語を知らないので、rebut / undercut / main といった内部語彙は
+    ラベルに出さず、平易な言葉（new argument / responding to [Turn X] /
+    challenges its conclusion|premise）で議論の流れを説明する。
+
+    - schema（発話体変換される）: 対象の中身は発話本体（「your conclusion that…」/
+      「Your premise that…」）に出るので、ラベルは参照のみ。
+    - no_schema（原文のまま）: 発話本体に対象が出ないとは限らないので、ラベル側に
+      何の結論／前提に反論しているかを補足する。
+    - main / mad / free_debate: 新しい主張として示す。
     """
     agent = turn.get("agent", "?")
     attack = turn.get("attack")
     if not attack:
         if turn.get("type") == "main":
-            return f"[Turn {index}] {agent} (main argument)"
+            return f"[Turn {index}] {agent} (new argument)"
         return f"[Turn {index}] {agent}:"
 
-    ref = ""
     target_id = turn.get("target_id")
     if isinstance(target_id, str) and target_id in id_to_no:
-        ref = f" — responds to [Turn {id_to_no[target_id]}]"
+        ref = f"responding to [Turn {id_to_no[target_id]}]"
+    else:
+        ref = "responding to an earlier argument"
 
     argument = turn.get("argument")
     is_schema = isinstance(argument, dict)
     if is_schema:
-        return f"[Turn {index}] {agent} ({attack}{ref})"
+        return f"[Turn {index}] {agent} ({ref})"
 
     target_statement = turn.get("target_statement")
     if target_statement:
-        noun = "opinion" if turn.get("target_field") == "Conc" else "premise"
+        noun = "conclusion" if turn.get("target_field") == "Conc" else "premise"
         return (
-            f"[Turn {index}] {agent} ({attack}{ref} — "
-            f'attacks the {noun} "{_strip_period(str(target_statement))}")'
+            f"[Turn {index}] {agent} ({ref}, "
+            f'challenging its {noun}: "{_strip_period(str(target_statement))}")'
         )
-    return f"[Turn {index}] {agent} ({attack}{ref})"
+    return f"[Turn {index}] {agent} ({ref})"
 
 
 def _format_turn_unified(turn: dict[str, Any], index: int, id_to_no: dict[str, int]) -> str:

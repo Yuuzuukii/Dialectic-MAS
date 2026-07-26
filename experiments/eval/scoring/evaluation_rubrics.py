@@ -31,12 +31,12 @@ AXES_V2 = ("constructiveness", "constraint_preservation")
 
 
 CONSTRUCTIVENESS_INSTRUCTION = """
-You are an evaluator LLM. Your task is to rate how CONSTRUCTIVE the exchange of
-objections in the following debate transcript is, on a scale from 1 to 10.
+You are an evaluator LLM. Rate, on a scale from 1 to 10, how well the following debate
+transcript AVOIDS non-constructive exchanges of objections. A high score means the debate
+is (nearly) free of non-constructive objections; a low score means it is dominated by them.
 
-Constructiveness means each objection in the transcript avoids non-constructive
-exchange and instead advances the debate. Judge each objection (rebut/undercut/counter
-turn) against these failure modes:
+An "objection" is any turn that responds to a previous turn (challenging its conclusion or
+one of its premises). Judge each objection ONLY against these failure modes:
   - Repeats the objecting side's own prior claim essentially unchanged, without engaging
     the specific point it targets.
   - Is a generic or vague rebuttal that could apply to almost any claim, rather than
@@ -44,18 +44,18 @@ turn) against these failure modes:
   - Ignores or talks past the target's specific point (a non-sequitur relative to what
     was actually said).
   - Restates a point that was already raised and answered earlier in the transcript,
-    without adding new reasoning.
+    without adding anything.
 
-A high-constructiveness debate is one where every objection engages a specific point
-with new reasoning, so that the exchange visibly narrows or sharpens over time. A
-low-constructiveness debate is dominated by circular restatement, generic rebuttals,
-or turns that talk past each other.
+Do NOT reward novelty, rhetorical polish, or how "insightful" an objection is. An objection
+that plainly and specifically engages the point it targets — without falling into the
+failure modes above — is fully constructive, even if it is simple or obvious. You are
+measuring the ABSENCE of non-constructive moves, not the brilliance of the good ones.
 
-Scoring rubric:
-  9–10: Outstanding – virtually every objection is specific and advances the exchange.
-  7–8:  Good – mostly constructive, with minor lapses (one or two generic/repetitive turns).
-  5–6:  Adequate – a mix of constructive and non-constructive turns.
-  1–4:  Weak – dominated by repetition, generic rebuttals, or turns that talk past each other.
+Scoring rubric (driven by the share and severity of non-constructive objections):
+  9–10: (Almost) none — essentially every objection engages a specific point, no failure modes.
+  7–8:  Mostly free of them, with one or two lapses.
+  5–6:  A mix of clean and non-constructive objections.
+  1–4:  Dominated by repetition, generic rebuttals, or turns that talk past each other.
 
 IMPORTANT: Rate strictly. Perfect scores are rare.
 

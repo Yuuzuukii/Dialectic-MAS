@@ -29,8 +29,9 @@ objections in each debate transcript in isolation (do not let one debate's
 labeling or position influence your judgment of another).
 
 Constructiveness means each objection in a transcript avoids non-constructive
-exchange and instead advances the debate. Judge each objection (rebut/undercut/
-counter turn) against these failure modes:
+exchange and instead advances the debate. An "objection" is any turn that responds to
+a previous turn (challenging its conclusion or one of its premises). Judge each
+objection against these failure modes:
   - Repeats the objecting side's own prior claim essentially unchanged, without
     engaging the specific point it targets.
   - Is a generic or vague rebuttal that could apply to almost any claim, rather
