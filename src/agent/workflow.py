@@ -11,6 +11,7 @@ from langgraph.graph import END, START, StateGraph
 from .edges import (
     _int_env,
     route_after_can_generate_main,
+    route_after_extract_warrants,
     route_after_o_defeat_a,
     route_after_p_counter_b,
     route_after_synthesis_step,
@@ -51,9 +52,9 @@ class State:
     agent2_stance: str
     # 議論ラウンド（debate_round）の上限。環境変数 MAX_TURNS で上書きできる。
     max_turns: int = _int_env("MAX_TURNS", 5)
-    # 1ラウンド・1 proponent あたりの main argument 試行回数の上限（安全装置）。
-    # 環境変数 MAX_MAIN_ARGUMENT_ATTEMPTS で上書きできる。
-    max_main_argument_attempts: int = _int_env("MAX_MAIN_ARGUMENT_ATTEMPTS", 5)
+    # 1つの main argument に対して、Opponent が攻撃 (B) を再生成できる回数の上限（安全装置）。
+    # 環境変数 MAX_ATTACK_ATTEMPTS で上書きできる。
+    max_attack_attempts: int = _int_env("MAX_ATTACK_ATTEMPTS", 5)
     additional_context: dict[str, Any] = field(default_factory=dict)
     # "schema": Argument 本体（rules/Conc/Ass）も with_structured_output のスキーマで強制する。
     # "no_schema": 同一プロンプト・同一グラフだが、Argument 本体は自由記述の natural language。
@@ -73,8 +74,11 @@ class State:
     current_opponent: AgentName = "AG2"
     debate_stage: DebateStage = "ag1_main_thread"
     turn_count: int = 0
-    # 同一ラウンド・同一 proponent が main argument を試行した回数（安全装置）。
-    main_attempt_count: int = 0
+    # 同一 main argument に対して、Opponent が攻撃 (B) を生成し直した回数（安全装置）。
+    attack_attempt_count: int = 0
+    # validate_b_defeats_a / validate_b_defeats_c が「もう一度 o_defeat_a で
+    # 別の攻撃を試させる」と判断したことを示すフラグ（ルーティング用）。
+    thread_needs_retry: bool = False
 
     # LLM に再送する通常の対話履歴。各ターンは HumanMessage(question/instruction)
     # と AIMessage(Argument only, name=agent) のペアとして保存する。
@@ -171,6 +175,7 @@ graph = (
         {
             "validate_b_defeats_a": "validate_b_defeats_a",
             "generate_final_answer": "generate_final_answer",
+            "route_after_thread": "route_after_thread",
             "finish": "finish",
             "finish_with_error": "finish_with_error",
         },
@@ -180,6 +185,7 @@ graph = (
         route_after_validate_b_defeats_a,
         {
             "p_counter_b": "p_counter_b",
+            "o_defeat_a": "o_defeat_a",
             "generate_final_answer": "generate_final_answer",
             "finish_with_error": "finish_with_error",
         },
@@ -207,6 +213,7 @@ graph = (
         route_after_validate_b_defeats_c,
         {
             "route_after_thread": "route_after_thread",
+            "o_defeat_a": "o_defeat_a",
             "finish_with_error": "finish_with_error",
         },
     )
@@ -214,7 +221,6 @@ graph = (
         "route_after_thread",
         route_after_thread,
         {
-            "can_generate_main": "can_generate_main",
             "advance_to_ag2": "advance_to_ag2",
             "extract_warrants": "extract_warrants",
             "generate_final_answer": "generate_final_answer",
@@ -223,8 +229,12 @@ graph = (
     )
     .add_conditional_edges(
         "extract_warrants",
-        route_after_synthesis_step,
-        {"next": "generalize", "finish_with_error": "finish_with_error"},
+        route_after_extract_warrants,
+        {
+            "next": "generalize",
+            "finalize_fallback": "finalize_fallback",
+            "finish_with_error": "finish_with_error",
+        },
     )
     .add_conditional_edges(
         "generalize",

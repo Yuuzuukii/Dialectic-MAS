@@ -41,11 +41,19 @@ def route_after_can_generate_main(state: Any) -> str:
 
 
 def route_after_o_defeat_a(state: Any) -> str:
-    """相手の主張 A に対する自己反論ステップ後の遷移先を決める."""
+    """相手の主張 A に対する自己反論ステップ後の遷移先を決める.
+
+    `o_defeat_a` はリトライ回数の上限に達した場合、新しい攻撃を生成せずに
+    `current_thread_status="defensible"` で即座に返ってくる（予算切れによる打ち切り
+    は、真の手詰まりである justified とは区別する）。この場合は他の overruled /
+    defensible と同様 route_after_thread に合流させる。
+    """
     if state.error:
         return "finish_with_error"
     if state.current_thread_status == "justified":
         return "generate_final_answer"
+    if state.current_thread_status == "defensible":
+        return "route_after_thread"
     if state.b_argument is None:
         return "finish"
     return "validate_b_defeats_a"
@@ -57,6 +65,8 @@ def route_after_validate_b_defeats_a(state: Any) -> str:
         return "finish_with_error"
     if state.current_thread_status == "justified":
         return "generate_final_answer"
+    if state.thread_needs_retry:
+        return "o_defeat_a"
     if state.b_defeats_a is True:
         return "p_counter_b"
     return "finish_with_error"
@@ -88,22 +98,26 @@ def route_after_validate_b_defeats_c(state: Any) -> str:
     """B が C を破り返す関係の検証後の遷移先を決める."""
     if state.error:
         return "finish_with_error"
+    if state.thread_needs_retry:
+        return "o_defeat_a"
     if state.current_thread_status in {"justified", "defensible"}:
         return "route_after_thread"
     return "finish_with_error"
 
 
 def route_after_thread(state: Any) -> str:
-    """1スレッド分の議論終了後、次の遷移先を決める."""
+    """1スレッド分の議論終了後、次の遷移先を決める.
+
+    justified なら最終回答へ。overruled / defensible（= Opponent の攻撃が最後まで
+    通った、または攻撃のリトライ予算が尽きて未決着に終わった）なら、Proponent の
+    main argument はこの1本で確定とし、同じ main argument へのリトライはしない
+    （Opponentの攻撃リトライ回数の上限判定は o_defeat_a の入り口で既に行われている）。
+    次の proponent（AG2）に手番を渡すか、両者が出し切っていれば統合フェーズへ進む。
+    """
     if state.error:
         return "finish_with_error"
     if state.current_thread_status == "justified":
         return "generate_final_answer"
-    # justified 以外（overruled / defensible）→ 試行回数の上限に達していなければ
-    # 同じ proponent に別の main argument を試させる。
-    if state.main_attempt_count < state.max_main_argument_attempts:
-        return "can_generate_main"
-    # 上限に達した場合は can_generate_main を呼ばず、available=NO のときと同じ遷移を行う。
     if state.current_proponent == "AG1":
         return "advance_to_ag2"
     return "extract_warrants"
@@ -113,6 +127,21 @@ def route_after_synthesis_step(state: Any) -> str:
     """統合ステップ後の遷移先を決める."""
     if state.error:
         return "finish_with_error"
+    return "next"
+
+
+def route_after_extract_warrants(state: Any) -> str:
+    """ワラント抽出後の遷移先を決める.
+
+    AG1・AG2 のどちらかが今ラウンドで新しい main argument を生成できなかった場合、
+    次ラウンド用のルールを両者から統合する材料が揃わない（統合しても使われない：
+    片方が主張を尽くした時点で次ラウンドは行われない）。この場合は
+    generalize/integrate をスキップし、finalize_fallback で決着させる。
+    """
+    if state.error:
+        return "finish_with_error"
+    if state.ag1_main_argument is None or state.ag2_main_argument is None:
+        return "finalize_fallback"
     return "next"
 
 

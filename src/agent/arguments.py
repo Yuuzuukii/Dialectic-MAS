@@ -30,6 +30,7 @@ from .prompts import (
     integration_instruction,
     main_instruction,
     synthesis_system,
+    target_engagement_instruction,
     undercut_instruction,
 )
 from .schema.llm_outputs import (
@@ -70,11 +71,31 @@ def _output_mode(state: Any) -> str:
 
 
 def argument_message_content(record: ArgumentRecord) -> str:
-    """LLM 履歴の AIMessage に入れる Argument 本体だけを返す."""
+    """LLM 履歴の AIMessage に入れる内容を返す.
+
+    schema: id/round/phase/agent/status/attack/target_id/target_statement を含む envelope +
+    Argument 本体（_HISTORY_FORMAT が説明する形）。従来は Argument 本体（rules/Conc/Ass）
+    だけを渡しており、どのターンが誰の何を攻撃したものかという attack メタデータが
+    ArgumentRecord には保持されているのに履歴からは完全に欠落していた（実装バグ）。
+    no_schema: 自由記述テキストそのまま（従来通り）。
+    """
     body = record.body
-    if body:
-        return json.dumps(body, ensure_ascii=False, indent=2)
-    return record.argument
+    if not body:
+        return record.argument
+    envelope: dict[str, Any] = {
+        "id": record.id,
+        "round": record.round,
+        "phase": record.type,
+        "agent": record.agent,
+    }
+    if record.status is not None:
+        envelope["status"] = record.status
+    if record.attack is not None:
+        envelope["attack"] = record.attack
+        envelope["target_id"] = record.target_id
+        envelope["target_statement"] = record.target_statement
+    envelope["Argument"] = body
+    return json.dumps(envelope, ensure_ascii=False, indent=2)
 
 
 def render_history(history: list[Any]) -> list[BaseMessage]:
@@ -108,7 +129,28 @@ def build_main_argument_messages(state: Any, agent: AgentName) -> list[BaseMessa
     ]
 
 
-def build_attack_messages(
+async def _target_engagement_point(
+    state: Any, attacker: AgentName, target: ArgumentRecord, template: str
+) -> str:
+    """本体の Argument を組み立てる前に、狙う弱点を一言で言語化させる（schema条件専用）.
+
+    Attack.target と Argument.rules を1回の生成で同時に埋めさせると、両者が独立に
+    生成されて反論の中身が対象の具体的な内容に触れないまま一般論で済まされることが
+    実測で確認された。ここで軽量な自由記述の一段階を先に挟み、その結果を本体生成の
+    指示（attack_instruction の target_engagement_point）に埋め込むことで、対象への
+    言及を本体の推論の前提条件にする。
+    """
+    messages = [
+        SystemMessage(
+            content=agent_system(_stance(state, attacker), attacker, template)
+        ),
+        HumanMessage(content=target_engagement_instruction(target)),
+    ]
+    text = await chat_text(messages)
+    return text.strip()
+
+
+async def build_attack_messages(
     state: Any, attacker: AgentName, target: ArgumentRecord, *, purpose: str
 ) -> list[BaseMessage]:
     """攻撃（defeat/counter）生成用のメッセージ列を組み立てる."""
@@ -118,12 +160,23 @@ def build_attack_messages(
         else PromptTemplates.ARGUMENT_SYSTEM
     )
     main_argument = getattr(state, "current_argument", None)
+    engagement_point = (
+        await _target_engagement_point(state, attacker, target, template)
+        if _output_mode(state) != "no_schema"
+        else None
+    )
     return [
-        SystemMessage(content=agent_system(_stance(state, attacker), attacker, template)),
+        SystemMessage(
+            content=agent_system(_stance(state, attacker), attacker, template)
+        ),
         *render_history(state.history),
         HumanMessage(
             content=attack_instruction(
-                purpose, target, state=state, main_argument=main_argument
+                purpose,
+                target,
+                state=state,
+                main_argument=main_argument,
+                engagement_point=engagement_point,
             )
         ),
     ]
@@ -139,7 +192,9 @@ def build_undercut_messages(
         else PromptTemplates.ARGUMENT_SYSTEM
     )
     return [
-        SystemMessage(content=agent_system(_stance(state, attacker), attacker, template)),
+        SystemMessage(
+            content=agent_system(_stance(state, attacker), attacker, template)
+        ),
         *render_history(state.history),
         HumanMessage(content=undercut_instruction(target, state=state)),
     ]
@@ -179,6 +234,79 @@ def _serialize_argument(state: Any, output_argument: ArgumentBody | str) -> str:
     return argument_body_json(cast(ArgumentBody, output_argument))
 
 
+def validate_argument_body(body: ArgumentBody) -> list[str]:
+    """各 rule の形式的不変条件を機械的に検証し、違反メッセージのリストを返す（空=適合）.
+
+    以前は _SCHEMA_OVERLAY と ArgumentBody.rules の description に散文で二重に書いていた
+    連鎖制約を、生成プロンプトから外してここで決定論的に検証する（GPT-5 の推論予算を
+    帳簿付けに費やさせないため）。
+
+    ここで強制するのは「連鎖として素直に望ましい」2条件のみ:
+      1. 2つ以上の rule が同じ consequent を持たない（重複禁止）。
+      2. 非末尾 consequent は、後続 rule の strong 先行詞として再利用される（連結性）。
+    旧仕様の「r_i (i>1) の strong 先行詞はすべて先行 consequent でなければならない」は、
+    後段で新しい前提事実を導入する妥当な論証まで弾くため、あえて強制しない。
+    """
+    rules = body.rules or []
+    consequents = [(rule.consequent or "").strip() for rule in rules]
+    violations: list[str] = []
+
+    seen: set[str] = set()
+    for consequent in consequents:
+        if consequent and consequent in seen:
+            violations.append(f'two rules share the same consequent: "{consequent}"')
+        seen.add(consequent)
+
+    used_as_strong: set[str] = set()
+    for rule in rules:
+        for strong in rule.antecedent.strong or []:
+            stripped = (strong or "").strip()
+            if stripped:
+                used_as_strong.add(stripped)
+    for index, consequent in enumerate(consequents[:-1]):
+        if consequent and consequent not in used_as_strong:
+            violations.append(
+                f"non-final consequent of rule {index + 1} is never used by a "
+                f'later rule: "{consequent}"'
+            )
+    return violations
+
+
+def _repair_instruction(violations: list[str]) -> str:
+    """検証で見つかった連鎖違反を、再生成時に添える矯正指示へ整形する."""
+    bullet = "\n".join(f"- {violation}" for violation in violations)
+    return (
+        "<repair>\n"
+        "Your previous Argument's rules did not form a connected chain:\n"
+        f"{bullet}\n"
+        "Regenerate the Argument so that every non-final consequent is reused as a "
+        "strong antecedent of a later rule, and no two rules share the same "
+        "consequent. Keep the substance of your reasoning; only fix the structure.\n"
+        "</repair>"
+    )
+
+
+async def _generate_structured_argument(
+    messages: list[BaseMessage], schema: Any
+) -> Any:
+    """構造化 Argument を生成し、形式的不変条件に違反した場合のみ1回だけ再生成する.
+
+    schema 系のみ矯正メッセージを添えて再生成する。
+    no_schema（Argument が自由記述文字列）や Argument を含まない出力はそのまま返す。
+    再生成後は結果の可否によらずそのまま採用し、無限ループや hard fail は避ける。
+    """
+    output = await chat_structured(messages, schema)
+    body = getattr(output, "Argument", None)
+    if isinstance(body, ArgumentBody):
+        violations = validate_argument_body(body)
+        if violations:
+            output = await chat_structured(
+                [*messages, HumanMessage(content=_repair_instruction(violations))],
+                schema,
+            )
+    return output
+
+
 async def generate_main(state: Any, agent: AgentName) -> MainGeneration:
     """Proponent の新しい主張 (A) を生成できるか判定し、可能なら ArgumentRecord 化する."""
     messages = build_main_argument_messages(state, agent)
@@ -189,7 +317,7 @@ async def generate_main(state: Any, agent: AgentName) -> MainGeneration:
     )
     output = cast(
         "MainArgumentAvailabilityOutputFree | MainArgumentAvailabilityOutput",
-        await chat_structured(messages, schema),
+        await _generate_structured_argument(messages, schema),
     )
     if output.can_generate != "YES":
         return MainGeneration(available=False, reason=output.reason, argument=None)
@@ -212,8 +340,17 @@ async def generate_attack(
     *,
     purpose: str,
 ) -> ArgumentRecord | None:
-    """攻撃（defeat/counter）主張を LLM 生成し、ArgumentRecord 化する."""
-    messages = build_attack_messages(state, attacker, target, purpose=purpose)
+    """攻撃（defeat/counter）主張を LLM 生成し、ArgumentRecord 化する.
+
+    purpose="defeat" のリトライ（o_defeat_a が同一 target に対して別候補 B' を試す2回目
+    以降）では、生成された攻撃自身に has_new_point（このスレッド内の既存の試みと比べて
+    実質的に新しい角度か）を自己申告させる。生成の指示（attack_instruction）は変更せず、
+    通常どおり生成させた上で事後的に判定するだけなので、生成内容そのものを歪めない
+    （過去に試した「別の対象を攻撃しろ」「内容を変えろ」という生成時介入とは異なる）。
+    False なら can_defeat=NO と同様に None を返し、新しい攻撃が尽きたとみなして
+    スレッドを終える（mad/free_debate の has_new_point 早期停止と同じ発想）。
+    """
+    messages = await build_attack_messages(state, attacker, target, purpose=purpose)
     schema = (
         DefeatingArgumentOutputFree
         if _output_mode(state) == "no_schema"
@@ -221,9 +358,15 @@ async def generate_attack(
     )
     output = cast(
         "DefeatingArgumentOutputFree | DefeatingArgumentOutput",
-        await chat_structured(messages, schema),
+        await _generate_structured_argument(messages, schema),
     )
     if output.can_defeat != "YES" or output.Argument is None or output.Attack is None:
+        return None
+    if (
+        purpose == "defeat"
+        and getattr(state, "attack_attempt_count", 0) > 0
+        and not output.has_new_point
+    ):
         return None
     return ArgumentRecord(
         type="counter" if purpose == "counter" else "defeat",
@@ -247,10 +390,12 @@ async def generate_undercut(
     if _output_mode(state) == "schema" and not target.assumptions:
         return None
     messages = build_undercut_messages(state, attacker, target)
-    schema = UndercutOutputFree if _output_mode(state) == "no_schema" else UndercutOutput
+    schema = (
+        UndercutOutputFree if _output_mode(state) == "no_schema" else UndercutOutput
+    )
     output = cast(
         "UndercutOutputFree | UndercutOutput",
-        await chat_structured(messages, schema),
+        await _generate_structured_argument(messages, schema),
     )
     if output.can_undercut != "YES" or output.Argument is None:
         return None
@@ -290,7 +435,9 @@ async def ask_attack_extends(
     return output.attack_extends == "YES"
 
 
-async def generate_generalization(state: Any) -> GeneralizationOutput | GeneralizationOutputFree:
+async def generate_generalization(
+    state: Any,
+) -> GeneralizationOutput | GeneralizationOutputFree:
     """両エージェントの warrant を汎化し、再利用可能な基準を導出する."""
     template = (
         PromptTemplates.GENERALIZATION_SYSTEM_NO_SCHEMA
@@ -300,7 +447,9 @@ async def generate_generalization(state: Any) -> GeneralizationOutput | Generali
     system = synthesis_system("AG1", state.agent1_stance, template)
     user = generalization_instruction(state)
     schema = (
-        GeneralizationOutputFree if _output_mode(state) == "no_schema" else GeneralizationOutput
+        GeneralizationOutputFree
+        if _output_mode(state) == "no_schema"
+        else GeneralizationOutput
     )
     return await chat_structured(
         [SystemMessage(content=system), HumanMessage(content=user)], schema
@@ -316,7 +465,11 @@ async def generate_integration(state: Any) -> IntegrationOutput | IntegrationOut
     )
     system = synthesis_system("AG1", state.agent1_stance, template)
     user = integration_instruction(state)
-    schema = IntegrationOutputFree if _output_mode(state) == "no_schema" else IntegrationOutput
+    schema = (
+        IntegrationOutputFree
+        if _output_mode(state) == "no_schema"
+        else IntegrationOutput
+    )
     return await chat_structured(
         [SystemMessage(content=system), HumanMessage(content=user)], schema
     )
@@ -334,15 +487,17 @@ async def generate_final_answer(state: Any) -> str:
     dialogue_history = json.dumps(state.dialogue_history, ensure_ascii=False, indent=2)
 
     if state.consensus_reached is False:
-        integrated_rules = (
-            "\n".join(f"- {rule}" for rule in state.integrated_rules) or "(none)"
-        )
+        if state.integrated_rules:
+            rules_text = "\n".join(f"- {rule}" for rule in state.integrated_rules)
+            integrated_rules_block = f"\nThe following integrated rules were agreed as undeniable by both sides:\n{rules_text}\n"
+        else:
+            integrated_rules_block = ""
         system = PromptTemplates.FINAL_ANSWER_NO_CONSENSUS_SYSTEM
         user = PromptTemplates.FINAL_ANSWER_NO_CONSENSUS_USER.format(
             question=state.question,
             agent1_stance=state.agent1_stance,
             agent2_stance=state.agent2_stance,
-            integrated_rules=integrated_rules,
+            integrated_rules_block=integrated_rules_block,
             dialogue_history=dialogue_history,
             justified_argument=justified,
         ).strip()
@@ -356,7 +511,10 @@ async def generate_final_answer(state: Any) -> str:
             justified_argument=justified,
         ).strip()
 
+    # 最終回答は constraint_preservation（両スタンスの要件を取り込めているか）で
+    # 採点される。簡潔すぎると両者の制約を名指しできず不利になるため verbosity を上げる。
     return await chat_text(
         [SystemMessage(content=system), HumanMessage(content=user)],
         model=os.getenv("MODEL", "gpt-5.4-mini"),
+        verbosity="high",
     )

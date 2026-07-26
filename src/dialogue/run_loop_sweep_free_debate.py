@@ -3,7 +3,7 @@
 弁証法プロトコルを使わない自由討議ベースライン（docs/free_debate_protocol_plan.md）を、
 schema/no_schemaと同じ`max_turns`（1, 5, 10）でsweepする。
 
-main argument の再試行という概念が無いため、`max_main_argument_attempts`軸は存在しない。
+main argument の再試行という概念が無いため、`max_attack_attempts`軸は存在しない。
 ディレクトリ命名は`eval_sweep.py`の既存パターン（`turns(\\d+)_attempts\\d+`）と互換にするため、
 `turns{T:02d}_attempts01`に固定する。
 

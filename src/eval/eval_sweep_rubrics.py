@@ -1,9 +1,12 @@
-"""Batch-evaluate all logs under a sweep directory and summarize scores by turns setting.
+"""Constructiveness / Constraint Preservation の新ルーブリックで sweep ディレクトリを一括評価する.
+
+`eval_sweep.py`（既存4軸）と同じ CLI 構造だが、採点ロジックだけ
+`evaluation_rubrics.evaluate_rubrics`（軸ごとに別々の LLM 呼び出し）に差し替えている。
 
 Usage:
-    python src/eval/eval_sweep.py --sweep logs/sweep/artificial_intelligence_20260616_011149
-    python src/eval/eval_sweep.py --sweep logs/sweep/artificial_intelligence_20260616_011149 --model gpt-4o
-    python src/eval/eval_sweep.py --sweep logs/sweep/artificial_intelligence_20260616_011149 --out results.json
+    python src/eval/eval_sweep_rubrics.py --sweep logs/sweep_all_topics_schema_mini_fixed
+    python src/eval/eval_sweep_rubrics.py --sweep logs/sweep_all_topics_schema_mini_fixed --model gpt-5.4-mini
+    python src/eval/eval_sweep_rubrics.py --sweep logs/sweep_all_topics_schema_mini_fixed --out results_rubrics.json
 """
 
 # print による結果出力と、sys.path 追加後の import はこの評価スクリプトでは意図的。
@@ -29,14 +32,18 @@ from langchain_openai import ChatOpenAI
 
 load_dotenv(ROOT / ".env")
 
-from src.eval.evaluation import AXES, build_eval_input, efficiency_metrics, evaluate_with_llm
-from src.eval.run_eval import _build_metrics, resolve_evaluator_model
+from src.eval.evaluation_rubrics import AXES_V2, build_metrics_v2, efficiency_metrics, evaluate_rubrics
+from src.eval.run_eval import resolve_evaluator_model
 
 
 class _EvaluatorModel:
-    def __init__(self, model_name: str) -> None:
+    def __init__(self, model_name: str, reasoning_effort: str | None = None) -> None:
         self.model = model_name
-        self._client = ChatOpenAI(model=model_name)
+        kwargs: dict[str, Any] = {"model": model_name}
+        # GPT-5 系の評価器のみ reasoning_effort を渡す（例: nano を high で採点）。
+        if reasoning_effort and model_name.lower().startswith("gpt-5"):
+            kwargs["reasoning_effort"] = reasoning_effort
+        self._client = ChatOpenAI(**kwargs)
 
     def invoke(self, prompt: str) -> str:
         response = self._client.invoke(prompt)
@@ -70,22 +77,19 @@ def _normalize_method(method: str | None) -> str:
 def _collect_logs(sweep_dir: Path) -> list[tuple[str, Path]]:
     """sweepディレクトリ配下のJSONファイルを (フォルダ名, パス) のリストで返す.
 
-    sweep_dir 直下のファイル（eval_results.json 等の集計ファイル）は除外する。
+    sweep_dir 直下のファイル（eval_results*.json 等の集計ファイル）は除外する。
     """
     entries: list[tuple[str, Path]] = []
     for json_path in sorted(sweep_dir.rglob("*.json")):
         rel = json_path.relative_to(sweep_dir)
         if len(rel.parts) < 2:
-            # sweep_dir 直下のファイルはスキップ（eval_results.json 等）
             continue
         folder = rel.parts[0]
         entries.append((folder, json_path))
     return entries
 
 
-def _aggregate_by_group(
-    results: list[dict[str, Any]],
-) -> dict[str, dict[str, Any]]:
+def _aggregate_by_group(results: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
     """Results を turns x attempts ごとにグループ化して平均を計算する."""
     groups: dict[str, list[dict[str, Any]]] = {}
     for r in results:
@@ -96,18 +100,21 @@ def _aggregate_by_group(
 
     summary: dict[str, dict[str, Any]] = {}
     for group_key, group_results in sorted(groups.items()):
-        valid = [r for r in group_results if r.get("quality_average") is not None]
+        valid = [
+            r for r in group_results
+            if any(isinstance(r.get(a), (int, float)) for a in AXES_V2)
+        ]
         if not valid:
             summary[group_key] = {"n": len(group_results), "error": "all evaluations failed"}
             continue
 
         agg: dict[str, Any] = {"n": len(group_results), "n_valid": len(valid)}
-        for axis in AXES:
+        for axis in AXES_V2:
             nums = [float(r[axis]) for r in valid if isinstance(r.get(axis), (int, float))]
             agg[axis] = round(sum(nums) / len(nums), 2) if nums else None
 
-        axis_vals = [agg[a] for a in AXES if isinstance(agg.get(a), (int, float))]
-        agg["quality_average"] = round(sum(axis_vals) / len(axis_vals), 2) if axis_vals else None
+        axis_vals = [agg[a] for a in AXES_V2 if isinstance(agg.get(a), (int, float))]
+        agg["quality_average_v2"] = round(sum(axis_vals) / len(axis_vals), 2) if axis_vals else None
 
         for eff_key in ("elapsed_seconds", "total_cost_usd", "total_tokens"):
             nums = [float(r[eff_key]) for r in valid if isinstance(r.get(eff_key), (int, float))]
@@ -121,9 +128,9 @@ def _aggregate_by_group(
 def _print_summary(summary: dict[str, dict[str, Any]], all_results: list[dict[str, Any]]) -> None:
     print()
     print("=" * 60)
-    print("SWEEP EVALUATION SUMMARY")
+    print("SWEEP EVALUATION SUMMARY (Constructiveness / Constraint Preservation)")
     print("=" * 60)
-    print(f"{'Group':<14} {'Coh':>5} {'Ori':>5} {'Dia':>5} {'Val':>5} {'Avg':>5}  {'Time(s)':>8}  {'Cost($)':>8}  {'Tokens':>8}  n")
+    print(f"{'Group':<14} {'Constr':>7} {'ConstrPres':>11} {'Avg':>6}  {'Time(s)':>8}  {'Cost($)':>8}  {'Tokens':>8}  n")
     print("-" * 90)
 
     for group_key, agg in sorted(summary.items()):
@@ -136,11 +143,9 @@ def _print_summary(summary: dict[str, dict[str, Any]], all_results: list[dict[st
 
         print(
             f"{group_key:<14}"
-            f" {_f(agg.get('coherence')):>5}"
-            f" {_f(agg.get('originality')):>5}"
-            f" {_f(agg.get('dialecticality')):>5}"
-            f" {_f(agg.get('validity')):>5}"
-            f" {_f(agg.get('quality_average')):>5}"
+            f" {_f(agg.get('constructiveness')):>7}"
+            f" {_f(agg.get('constraint_preservation')):>11}"
+            f" {_f(agg.get('quality_average_v2')):>6}"
             f"  {_f(agg.get('elapsed_seconds'), '.1f'):>8}"
             f"  {_f(agg.get('total_cost_usd'), '.4f'):>8}"
             f"  {_f(agg.get('total_tokens'), '.0f'):>8}"
@@ -149,34 +154,33 @@ def _print_summary(summary: dict[str, dict[str, Any]], all_results: list[dict[st
 
     print()
     print("Per-run results:")
-    print(f"{'Folder':<30} {'Coh':>5} {'Ori':>5} {'Dia':>5} {'Val':>5} {'Avg':>5}")
-    print("-" * 60)
+    print(f"{'Folder':<30} {'Constr':>7} {'ConstrPres':>11}")
+    print("-" * 50)
     for r in all_results:
         def _f2(v: Any) -> str:
             return f"{v:.2f}" if isinstance(v, (int, float)) else " N/A"
         print(
             f"{r['folder']:<30}"
-            f" {_f2(r.get('coherence')):>5}"
-            f" {_f2(r.get('originality')):>5}"
-            f" {_f2(r.get('dialecticality')):>5}"
-            f" {_f2(r.get('validity')):>5}"
-            f" {_f2(r.get('quality_average')):>5}"
+            f" {_f2(r.get('constructiveness')):>7}"
+            f" {_f2(r.get('constraint_preservation')):>11}"
         )
     print()
 
 
 def _evaluate_entry(
-    entry: tuple[str, Path], model_name: str, sweep_dir: Path
+    entry: tuple[str, Path],
+    model_name: str,
+    sweep_dir: Path,
+    reasoning_effort: str | None = None,
 ) -> dict[str, Any]:
     """1ファイル分を評価する（呼び出し元がスレッドごとに独立した evaluator を渡す）."""
     folder, log_path = entry
     turns = _parse_turns(folder)
     log = json.loads(log_path.read_text(encoding="utf-8"))
     mode = _normalize_method(log.get("method") or log.get("mode"))
-    eval_input = build_eval_input(log)
-    evaluator = _EvaluatorModel(model_name)
-    scores = evaluate_with_llm(eval_input, evaluator)
-    metrics = _build_metrics(scores, efficiency_metrics(log))
+    evaluator = _EvaluatorModel(model_name, reasoning_effort)
+    scores = evaluate_rubrics(log, evaluator)
+    metrics = build_metrics_v2(scores, efficiency_metrics(log))
     return {
         "folder": folder,
         "log_file": str(log_path.relative_to(sweep_dir)),
@@ -194,16 +198,18 @@ def _run_group(
     sweep_dir: Path,
     progress_lock: threading.Lock,
     counter: list[int],
+    reasoning_effort: str | None = None,
 ) -> list[dict[str, Any]]:
     """1つのコンボディレクトリ（turnsXX_attemptsYY、複数トピック）を直列に評価する。グループ間は呼び出し元が並列化する."""
     results = []
     for entry in group_entries:
-        result = _evaluate_entry(entry, model_name, sweep_dir)
+        result = _evaluate_entry(entry, model_name, sweep_dir, reasoning_effort)
         with progress_lock:
             counter[0] += 1
             print(
                 f"[{counter[0]:03d}/{counter[1]}] ({combo_key}) {result['folder']} ... "
-                f"avg={result.get('quality_average')}",
+                f"constructiveness={result.get('constructiveness')} "
+                f"constraint_preservation={result.get('constraint_preservation')}",
                 flush=True,
             )
         results.append(result)
@@ -211,10 +217,18 @@ def _run_group(
 
 
 def main() -> None:
-    """Sweep ディレクトリ配下の全ログを評価し、結果をまとめて出力する."""
-    parser = argparse.ArgumentParser(description="Batch-evaluate all logs under a sweep directory.")
+    """Sweep ディレクトリ配下の全ログを新ルーブリックで評価し、結果をまとめて出力する."""
+    parser = argparse.ArgumentParser(
+        description="Batch-evaluate all logs under a sweep directory with the Constructiveness / "
+        "Constraint Preservation rubric."
+    )
     parser.add_argument("--sweep", required=True, help="Path to the sweep directory.")
     parser.add_argument("--model", default=None, help="Evaluator model name.")
+    parser.add_argument(
+        "--reasoning-effort",
+        default=None,
+        help="評価器の reasoning_effort（GPT-5系のみ有効。例: nano を high で採点）。",
+    )
     parser.add_argument("--out", default=None, help="Path to save full results JSON.")
     parser.add_argument(
         "--method",
@@ -253,12 +267,10 @@ def main() -> None:
         print(f"No JSON files found under {sweep_dir}", file=sys.stderr)
         sys.exit(1)
 
-    print(f"Evaluating {len(entries)} logs with {model_name} ...")
+    effort_note = f" effort={args.reasoning_effort}" if args.reasoning_effort else ""
+    print(f"Evaluating {len(entries)} logs with {model_name}{effort_note} (Constructiveness / Constraint Preservation) ...")
     print(f"Sweep: {sweep_dir}" + (f" (method={args.method})" if args.method else ""))
 
-    # コンボディレクトリ（turnsXX_attemptsYY）単位でグループ化する。
-    # schema/no_schema は attempts が可変軸、free_debate は turns が可変軸なので、
-    # どちらの軸が変化するスイープでも自然に並列化できるよう folder 単位でまとめる。
     groups: dict[str, list[tuple[str, Path]]] = {}
     for folder, log_path in entries:
         groups.setdefault(folder, []).append((folder, log_path))
@@ -274,13 +286,17 @@ def main() -> None:
     if workers == 1:
         for combo_key, group_entries in sorted(groups.items()):
             all_results.extend(
-                _run_group(combo_key, group_entries, model_name, sweep_dir, progress_lock, counter)
+                _run_group(
+                    combo_key, group_entries, model_name, sweep_dir,
+                    progress_lock, counter, args.reasoning_effort,
+                )
             )
     else:
         with ThreadPoolExecutor(max_workers=workers) as pool:
             futures = {
                 pool.submit(
-                    _run_group, combo_key, group_entries, model_name, sweep_dir, progress_lock, counter
+                    _run_group, combo_key, group_entries, model_name, sweep_dir,
+                    progress_lock, counter, args.reasoning_effort,
                 ): combo_key
                 for combo_key, group_entries in groups.items()
             }
@@ -300,7 +316,7 @@ def main() -> None:
         out_path.write_text(json.dumps(output, ensure_ascii=False, indent=2), encoding="utf-8")
         print(f"Results saved to {out_path}")
     else:
-        default_out = sweep_dir / "eval_results.json"
+        default_out = sweep_dir / "eval_results_rubrics.json"
         default_out.write_text(json.dumps(output, ensure_ascii=False, indent=2), encoding="utf-8")
         print(f"Results saved to {default_out}")
 

@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+import os
 import sys
 import time
 from datetime import datetime
@@ -23,15 +24,32 @@ if str(ROOT) not in sys.path:
 
 Method = Literal["schema", "no_schema", "free_debate", "mad"]
 
-_PRICE_INPUT_PER_M = 0.25
-_PRICE_CACHED_PER_M = 0.025
-_PRICE_OUTPUT_PER_M = 2.00
+# モデル別の実価格（1M トークンあたり: 入力 / キャッシュ入力 / 出力）。
+# OpenAI 公式の gpt-5.4 系料金。以前はモデル非依存の固定単価で計算しており、
+# nano/mini のどちらの実価格とも一致しない total_cost_usd を出していた。
+_MODEL_PRICING: dict[str, tuple[float, float, float]] = {
+    "gpt-5.4-nano": (0.20, 0.02, 1.25),
+    "gpt-5.4-mini": (0.75, 0.075, 4.50),
+}
+# 未知モデルは高い方（mini）で保守的に見積もる。
+_DEFAULT_PRICING: tuple[float, float, float] = _MODEL_PRICING["gpt-5.4-mini"]
+
+
+def _resolve_model() -> str:
+    """コスト計算に使うモデル名を返す（llm.py と同じ MODEL 環境変数の解決）."""
+    return os.getenv("MODEL") or "gpt-5.4-mini"
+
+
+def _prices_for(model: str) -> tuple[float, float, float]:
+    return _MODEL_PRICING.get(model, _DEFAULT_PRICING)
 
 
 class TokenUsageTracker(BaseCallbackHandler):
     """Track OpenAI token usage and estimate run cost."""
 
-    def __init__(self) -> None:
+    def __init__(self, model: str | None = None) -> None:
+        # 1 回の run は単一の MODEL で走るため、既定は環境変数から解決する。
+        self.model = model or _resolve_model()
         self.prompt_tokens = 0
         self.cached_tokens = 0
         self.completion_tokens = 0
@@ -46,13 +64,15 @@ class TokenUsageTracker(BaseCallbackHandler):
         self.cached_tokens += details.get("cached_tokens", 0)
 
     def usage(self) -> dict[str, Any]:
+        price_input, price_cached, price_output = _prices_for(self.model)
         non_cached = self.prompt_tokens - self.cached_tokens
         cost = (
-            non_cached * _PRICE_INPUT_PER_M
-            + self.cached_tokens * _PRICE_CACHED_PER_M
-            + self.completion_tokens * _PRICE_OUTPUT_PER_M
+            non_cached * price_input
+            + self.cached_tokens * price_cached
+            + self.completion_tokens * price_output
         ) / 1_000_000
         return {
+            "model": self.model,
             "prompt_tokens": self.prompt_tokens,
             "cached_tokens": self.cached_tokens,
             "completion_tokens": self.completion_tokens,
@@ -256,6 +276,14 @@ def category_topic_files(category: str | Path, datasets_dir: Path = DATASETS_DIR
     return sorted(p for p in category_dir.glob("*.json") if p.is_file())
 
 
+def all_topic_files(datasets_dir: Path = DATASETS_DIR) -> list[Path]:
+    """datasets/ 配下（全カテゴリ）の topic JSON を集めて返す.
+
+    datasets/ 直下のファイル（config.json 等の設定ファイル）はカテゴリではないので除外する。
+    """
+    return sorted(p for p in datasets_dir.glob("*/*.json") if p.is_file())
+
+
 def topic_identity(topic_path: Path) -> tuple[str, str]:
     return topic_path.parent.name, topic_path.stem
 
@@ -293,9 +321,28 @@ def base_log(
 
 
 def _speech_log(history: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """対話履歴から、各エージェントの発話（agent/argument）だけを抜き出す."""
+    """対話履歴から、評価・分析に必要なフィールドを抜き出す.
+
+    - attack / target_id / target_field / target_statement: 攻撃系の発話が
+      どの発話のどの文（結論/前提）を狙ったのか。評価用の自然文変換
+      （"I have a counter argument against the opinion {…}"）の代入元になる。
+    - status: main argument のスレッド決着（justified / overruled / defensible）。
+    Argument スキーマ（rules/Conc/Ass）自体は変更せず、その1つ上のレイヤーである
+    ログエントリにメタ情報を残す。
+    """
+    keys = (
+        "id",
+        "agent",
+        "type",
+        "argument",
+        "attack",
+        "target_id",
+        "target_field",
+        "target_statement",
+        "status",
+    )
     return [
-        {"agent": record.get("agent"), "argument": record.get("argument")}
+        {k: record.get(k) for k in keys if record.get(k) is not None}
         for record in history
     ]
 
@@ -305,7 +352,7 @@ async def _run_topic_once(
     topic_file: str | Path,
     *,
     max_turns: int = 3,
-    max_main_argument_attempts: int | None = None,
+    max_attack_attempts: int | None = None,
     output_root: Path = LOGS_DIR,
     run_index: int | None = None,
 ) -> Path:
@@ -327,8 +374,8 @@ async def _run_topic_once(
         "additional_context": cast(dict[str, Any], topic_data.get("additional_context", {})),
         "output_mode": method,
     }
-    if max_main_argument_attempts is not None:
-        state_kwargs["max_main_argument_attempts"] = max_main_argument_attempts
+    if max_attack_attempts is not None:
+        state_kwargs["max_attack_attempts"] = max_attack_attempts
     graph_input = State(**state_kwargs)
 
     start = time.perf_counter()
@@ -357,6 +404,7 @@ async def _run_topic_once(
     )
     log["dialogue_history"] = _speech_log(final_state.get("dialogue_history", []))
     log["final_answer"] = final_state.get("final_answer")
+    log["integrated_rules"] = final_state.get("integrated_rules", [])
     error = final_state.get("error")
     if error is not None:
         log["error"] = error
@@ -369,7 +417,7 @@ async def run_schema_topic_once(
     topic_file: str | Path,
     *,
     max_turns: int = 3,
-    max_main_argument_attempts: int | None = None,
+    max_attack_attempts: int | None = None,
     output_root: Path = LOGS_DIR,
     run_index: int | None = None,
 ) -> Path:
@@ -377,7 +425,7 @@ async def run_schema_topic_once(
         "schema",
         topic_file,
         max_turns=max_turns,
-        max_main_argument_attempts=max_main_argument_attempts,
+        max_attack_attempts=max_attack_attempts,
         output_root=output_root,
         run_index=run_index,
     )
@@ -387,7 +435,7 @@ async def run_no_schema_topic_once(
     topic_file: str | Path,
     *,
     max_turns: int = 3,
-    max_main_argument_attempts: int | None = None,
+    max_attack_attempts: int | None = None,
     output_root: Path = LOGS_DIR,
     run_index: int | None = None,
 ) -> Path:
@@ -395,7 +443,7 @@ async def run_no_schema_topic_once(
         "no_schema",
         topic_file,
         max_turns=max_turns,
-        max_main_argument_attempts=max_main_argument_attempts,
+        max_attack_attempts=max_attack_attempts,
         output_root=output_root,
         run_index=run_index,
     )
@@ -412,7 +460,7 @@ async def run_free_debate_topic_once(
 
     schema/no_schema と異なるグラフ・State（free_debate.FreeDebateState）を使うため、
     `_run_topic_once` を流用せず専用の実行ロジックを持つ。main argument 再試行という
-    概念が無いため `max_main_argument_attempts` は存在しない。
+    概念が無いため `max_attack_attempts` は存在しない。
     """
     from src.agent.free_debate import FreeDebateState, graph_free_debate
 
@@ -521,7 +569,7 @@ async def run_category(
     *,
     runs: int = 1,
     max_turns: int = 3,
-    max_main_argument_attempts: int | None = None,
+    max_attack_attempts: int | None = None,
     output_root: Path = LOGS_DIR,
     continue_on_error: bool = True,
 ) -> list[Path]:
@@ -538,7 +586,7 @@ async def run_category(
                         await run_schema_topic_once(
                             topic_file,
                             max_turns=max_turns,
-                            max_main_argument_attempts=max_main_argument_attempts,
+                            max_attack_attempts=max_attack_attempts,
                             output_root=output_root,
                             run_index=index if runs > 1 else None,
                         )
@@ -548,7 +596,7 @@ async def run_category(
                         await run_no_schema_topic_once(
                             topic_file,
                             max_turns=max_turns,
-                            max_main_argument_attempts=max_main_argument_attempts,
+                            max_attack_attempts=max_attack_attempts,
                             output_root=output_root,
                             run_index=index if runs > 1 else None,
                         )
@@ -565,7 +613,7 @@ def topic_parser(description: str) -> argparse.ArgumentParser:
     parser.add_argument("json_file", help="Path to a topic JSON file.")
     parser.add_argument("--runs", type=int, default=1, help="Number of runs for this topic.")
     parser.add_argument("--max-turns", type=int, default=3, help="Maximum debate rounds (used by both schema and no-schema).")
-    parser.add_argument("--max-main-argument-attempts", type=int, default=None, help="Per-round main argument retry cap (defaults to State's MAX_MAIN_ARGUMENT_ATTEMPTS env default).")
+    parser.add_argument("--max-attack-attempts", type=int, default=None, help="Per-round main argument retry cap (defaults to State's MAX_ATTACK_ATTEMPTS env default).")
     parser.add_argument("--output-root", type=Path, default=LOGS_DIR, help="Root directory for logs.")
     return parser
 
@@ -575,7 +623,7 @@ def category_parser(description: str) -> argparse.ArgumentParser:
     parser.add_argument("category", help="Category name under datasets/ or a category directory path.")
     parser.add_argument("--runs", type=int, default=1, help="Number of runs per topic.")
     parser.add_argument("--max-turns", type=int, default=3, help="Maximum debate rounds (used by both schema and no-schema).")
-    parser.add_argument("--max-main-argument-attempts", type=int, default=None, help="Per-round main argument retry cap (defaults to State's MAX_MAIN_ARGUMENT_ATTEMPTS env default).")
+    parser.add_argument("--max-attack-attempts", type=int, default=None, help="Per-round main argument retry cap (defaults to State's MAX_ATTACK_ATTEMPTS env default).")
     parser.add_argument("--output-root", type=Path, default=LOGS_DIR, help="Root directory for logs.")
     parser.add_argument("--fail-fast", action="store_true", help="Stop on the first topic failure.")
     return parser
@@ -589,7 +637,7 @@ async def run_topic_repeated(method: Method, args: argparse.Namespace) -> list[P
                 await run_schema_topic_once(
                     args.json_file,
                     max_turns=args.max_turns,
-                    max_main_argument_attempts=args.max_main_argument_attempts,
+                    max_attack_attempts=args.max_attack_attempts,
                     output_root=args.output_root,
                     run_index=index if args.runs > 1 else None,
                 )
@@ -599,7 +647,7 @@ async def run_topic_repeated(method: Method, args: argparse.Namespace) -> list[P
                 await run_no_schema_topic_once(
                     args.json_file,
                     max_turns=args.max_turns,
-                    max_main_argument_attempts=args.max_main_argument_attempts,
+                    max_attack_attempts=args.max_attack_attempts,
                     output_root=args.output_root,
                     run_index=index if args.runs > 1 else None,
                 )
@@ -620,7 +668,7 @@ def main_category(method: Method, description: str) -> None:
             args.category,
             runs=args.runs,
             max_turns=args.max_turns,
-            max_main_argument_attempts=args.max_main_argument_attempts,
+            max_attack_attempts=args.max_attack_attempts,
             output_root=args.output_root,
             continue_on_error=not args.fail_fast,
         )

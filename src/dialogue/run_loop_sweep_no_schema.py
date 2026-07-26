@@ -4,7 +4,7 @@
 
 - プロトコルのループ上限（debate round の上限 = State.max_turns）: 1, 5, 10
 - 主張のループ上限（1ラウンド・1 proponent あたりの main argument 試行回数の上限
-  = State.max_main_argument_attempts）: 1〜10
+  = State.max_attack_attempts）: 1〜10
 
 schema 版（run_loop_sweep.py）と同じプロトコルを使い、State.output_mode のみ
 "no_schema" にして自由記述形式の出力を生成する。
@@ -33,7 +33,7 @@ except ModuleNotFoundError:  # pragma: no cover - direct file execution.
 
 # プロトコルのループ上限（State.max_turns）の候補。
 PROTOCOL_MAX_TURNS = (1, 5, 10)
-# 主張のループ上限（State.max_main_argument_attempts）の候補。
+# 主張のループ上限（State.max_attack_attempts）の候補。
 MAIN_ARGUMENT_MAX_ATTEMPTS = range(1, 11)
 
 
@@ -103,7 +103,7 @@ async def run_combo(
     combo_dir = sweep_root / f"turns{max_turns:02d}_attempts{max_attempts:02d}"
     async with semaphore:
         print(
-            f"[{index}/{total}] start max_turns={max_turns} max_main_argument_attempts={max_attempts} "
+            f"[{index}/{total}] start max_turns={max_turns} max_attack_attempts={max_attempts} "
             f"-> {combo_dir}",
             flush=True,
         )
@@ -112,7 +112,7 @@ async def run_combo(
                 await run_no_schema_topic_once(
                     topic_file,
                     max_turns=max_turns,
-                    max_main_argument_attempts=max_attempts,
+                    max_attack_attempts=max_attempts,
                     output_root=combo_dir,
                     run_index=run_index if runs > 1 else None,
                 )
@@ -122,7 +122,7 @@ async def run_combo(
                     file=sys.stderr,
                     flush=True,
                 )
-        print(f"[{index}/{total}] done max_turns={max_turns} max_main_argument_attempts={max_attempts}", flush=True)
+        print(f"[{index}/{total}] done max_turns={max_turns} max_attack_attempts={max_attempts}", flush=True)
 
 
 async def main() -> None:

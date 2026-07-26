@@ -20,20 +20,26 @@ from .schema.types import AgentName
 
 # ---- 共有ブロック（複数テンプレートで再利用） ----
 
+# grounding は全トピック共通の単一ルール（トピック種別によるモード分離はしない）。
+# 2行目の「スタンス優先原則」により、スタンスが全論点を settle している正当性検証
+# シナリオ（camera/curry）では事実上厳密に、スタンスが支持材料について沈黙している
+# 一般トピックでは幅広い一般知識の利用を許す形で、単一の文言のまま両立させる。
 _GROUNDING = """\
 <grounding>
-- Your values and priorities come from your stance.
-- Your argument must be grounded in that stance.
-- You may use general knowledge only when it helps identify real-world options or reasons that satisfy your stance.
+- Your values, priorities, and the position you argue for come from your stance; never contradict your stance or adopt priorities it does not contain.
+- Where your stance, the target argument, the dialogue history, or the integrated rules already provide the facts or rules that settle a point, argue from those; do not override or replace them with outside knowledge.
+- Where they are silent, you may draw on general knowledge — facts, examples, analogies, mechanisms — to support your position or to challenge the other side's reasoning.
 </grounding>"""
 
+# "premises"/"assumptions"/"conclusion" のような名詞は、no_schema の出力にそのまま
+# 見出しラベル（"Premise 1:", "Conclusion:"）として echo されることが実測で確認された
+# ため、ラベル化されにくい言い回しを使う（要求内容は変えていない）。
 _ARGUMENTATION_RULES = """\
 <argumentation_rules>
-- State the premises and assumptions you rely on.
-- Do not introduce new factual claims as strong premises; each strong premise must be stated or directly derived from your stance, the target argument, prior dialogue history, or integrated rules.
-- The conclusion must follow directly from the stated reasoning, with no implicit logical leap.
-- The final conclusion must clearly express your opinion on the Issue in a concise and specific way.
-- Be concise; do not pad the reasoning with repetition.
+- Make clear what you are relying on to support your position.
+- Your final position must follow directly from what you have stated, with no implicit logical leap.
+- Your final position must clearly express your opinion on the Issue in a specific way.
+- Include the specific facts, distinctions, and reasoning your position actually depends on; do not pad with repetition or restate the same point in different words.
 </argumentation_rules>"""
 
 _SCHEMA_OVERLAY = """\
@@ -43,11 +49,13 @@ Represent Argument as a structured object consisting of rules, Conc, and Ass.
 - Each rule has an antecedent and a consequent.
 - Antecedents may contain strong premises and weak_negation assumptions.
 - Every rule must have at least one explicit strong or weak_negation antecedent; never derive a consequent from an empty antecedent.
-- Strong antecedents of r_i (i > 1) must be consequents of earlier rules.
-- Every non-final consequent must reappear as a strong antecedent of a later rule.
 - Conc contains the conclusions derived by the rules.
 - Ass contains the weak_negation assumptions used by the rules.
-- Use as few rules as possible; a single rule suffices when your stance directly supports the conclusion.
+- Use as many rules as your reasoning genuinely needs and no more: add a rule whenever it introduces a materially new fact, point, or inferential step that strengthens your case; do not add a rule that merely restates an earlier one.
+- Each rule's consequent must state a materially new claim — a new fact, a new point, or a new inferential step — not a paraphrase or near-synonym of an earlier rule's consequent (e.g. "the attack is insufficient" -> "the attack fails to show invalidity" -> "the attack does not defeat the conclusion" is the same claim restated three times, not three rules). If a later rule's consequent would just restate an earlier one in different words, merge them into a single rule instead.
+- Never reuse an earlier turn of yours verbatim (the same strong/weak_negation/consequent wording), even when starting a new main argument after an earlier thread failed to resolve in your favor; each new turn must add or revise reasoning that directly answers the specific objection most recently raised against you.
+- When attacking (defeat/counter), the FIRST rule's antecedent must already contain a strong premise that directly engages the specific content of the argument you are attacking — name a specific weakness in its stated reasoning, an assumption it depends on, or a gap between its premises and its consequent.
+- Do not satisfy the previous rule by appending a short final rule that merely quotes or paraphrases the target ("The target says X, but Y") while your earlier rules argue a generic, self-contained point from your own stance that never references the target. The engagement with the target's specific content must be load-bearing for your conclusion from the first rule onward, not a bolted-on afterthought.
 </schema_overlay>"""
 
 _ATTACK_TYPES = """\
@@ -70,8 +78,8 @@ A round proceeds as a dialectical thread:
 When neither side's main is justified, the shared warrants are generalized and merged into reusable
 "integrated rules" that BOTH sides accept. In the NEXT round the proponent must build a NEW main argument
 grounded in those integrated rules, different from every earlier main and not vulnerable to the same attacks.
-The debate ends when a main is justified, or when the round limit is reached (then a provisional, no-consensus
-answer is produced from the integrated rules).
+The debate ends when a main is justified, or when the round limit is reached (then the final answer is
+produced from the debate so far and the integrated rules).
 </protocol_flow>"""
 
 _HISTORY_FORMAT = """\
@@ -112,6 +120,7 @@ class PromptTemplates:
     ARGUMENT_SYSTEM = _system(
         ARGUMENT_SYSTEM_NO_SCHEMA,
         _SCHEMA_OVERLAY,
+        _HISTORY_FORMAT,
     )
 
     # Backward-compatible names. The phase-specific task now lives in HumanMessage.
@@ -192,49 +201,40 @@ class PromptTemplates:
     # justified側: AG1が常に客観的な統合役として最終回答を書く（justifiedされたのが
     # AG1/AG2どちらのstanceでも、勝った側の代弁者ではなく中立な報告者として書く）。
     FINAL_ANSWER_SYSTEM = _system(
-        "<role>\n"
-        "You are AG1 in this debate.\n"
-        "You now act as a neutral synthesizer reporting the debate's outcome, not as an "
-        "advocate for either stance.\n"
-        "</role>",
         "<task>\n"
-        "One side's argument was justified in the debate: it withstood the opponent's "
-        "strongest objections. Write the final answer to the original question.\n"
+        "Based on the debate so far and the argument that was justified, write the final "
+        "answer to the original question.\n"
         "</task>",
-        "<style>\n"
-        "- Write objectively, as a report of what the debate established — not as 'my "
-        "opinion' or 'your stance'.\n"
-        "- State the conclusion that was justified, the opponent's key objection(s) it had "
-        "to survive, and specifically why those objections did not overturn it.\n"
-        "- Ground the answer in the substance of the dialogue history below, not only the "
-        "bare justified conclusion — reflect what was actually argued and rebutted over the "
-        "course of the debate, not just the final move.\n"
-        "</style>",
     )
 
-    # 合意（justified な決着）に至らないままラウンド上限に達したときの暫定回答。
+    # 合意（justified な決着）に至らないままラウンド上限に達したときの最終回答。
     # こちらも同様にAG1が客観的な統合役として書く。
+    #
+    # 弁証法議論はあくまで内部の推論過程であり、ユーザーに見えるのはこの最終回答のみ。
+    # 「provisional / no consensus / 合意に至らなかった」等のプロトコル内部の経緯を
+    # 回答に漏らすとユーザーを困惑させるため、内部経緯には言及させず、議論から最も
+    # 支持される回答を1つ選んで通常の回答として書かせる。
     FINAL_ANSWER_NO_CONSENSUS_SYSTEM = _system(
-        "<role>\n"
-        "You are AG1 in this debate.\n"
-        "You now act as a neutral synthesizer reporting the debate's outcome, not as an "
-        "advocate for either stance.\n"
-        "</role>",
-        "<context>\n"
-        "The dialectical debate reached its round limit WITHOUT either side's argument "
-        "being justified, so no consensus was reached.\n"
-        "</context>",
-        "<task>\nProduce a provisional, best-effort answer grounded in the integrated rules "
-        "that neither side could deny.\n</task>",
+        "<task>\n"
+        "Based on the debate so far, write the final answer to the original question. "
+        "Weigh the strengths of both sides' reasoning and commit to the best-supported "
+        "answer, stating it directly with its supporting rationale. If integrated rules "
+        "are provided below, ground your answer in them.\n"
+        "</task>",
+        "<calibration>\n"
+        "Match your confidence to how decisively the debate actually resolved the question. "
+        "If the strongest objections against your answer were substantively answered, state "
+        "your conclusion with full confidence. If a serious objection was never adequately "
+        "answered, say so as part of the answer itself — name the specific unresolved point "
+        "and explain why you still lean one way despite it — rather than presenting the "
+        "conclusion as more settled than the reasoning actually supports. Do not manufacture "
+        "false certainty just to sound decisive.\n"
+        "</calibration>",
         "<style>\n"
-        "- Make it explicit that this is a provisional answer and that no agreement was "
-        "reached in the debate.\n"
-        "- Base your reasoning on the integrated rules and the provisional main argument "
-        "built on them.\n"
-        "- Ground the answer in the substance of the dialogue history below, not only the "
-        "bare integrated rules — reflect what both sides actually argued, not just the "
-        "final compromise.\n"
-        "- Be concise: state the provisional position and the shared rules it rests on.\n"
+        "The debate above is internal reasoning; the reader sees only your answer. "
+        "Do not mention the debate process, the agents, rounds, or whether agreement "
+        "was reached. Write the answer as a direct, self-contained response to the "
+        "question.\n"
         "</style>",
     )
 
@@ -257,14 +257,11 @@ Question: {question}
 
 AG1 Stance: {agent1_stance}
 AG2 Stance: {agent2_stance}
-
-No consensus was reached within the debate limit. The following integrated rules were agreed as undeniable by both sides:
-{integrated_rules}
-
+{integrated_rules_block}
 Dialogue history:
 {dialogue_history}
 
-Provisional main argument built on the integrated rules:
+Most developed argument from the debate:
 {justified_argument}
 """
 
@@ -305,9 +302,6 @@ Dialogue history:
     FREE_DEBATE_FINAL_ANSWER_USER = """
 Question: {question}
 
-Synthesis of both sides' reasoning:
-{integrated_summary}
-
 Dialogue history:
 {dialogue_history}
 """
@@ -322,7 +316,7 @@ Dialogue history:
     # 独立した judge（AG1/AG2 のいずれでもない）が対話全体から最終回答を作る。
     MAD_JUDGE_SYSTEM = _system(
         "<role>\nYou are an independent judge. You did not participate in this debate.\n</role>",
-        "<task>\nBased on the debate so far, write the final answer.\n</task>",
+        "<task>\nBased on the debate so far, select a single winner and formulate the final answer based on his opinion. however, there is no need to announce the winner within the text of the answer itself.\n</task>",
     )
 
     MAD_JUDGE_USER = """
@@ -331,7 +325,6 @@ Question: {question}
 Dialogue history:
 {dialogue_history}
 """
-
 
 
 # ---- 補助ビルダ（SYSTEM 合成・手番ごとの指示文） ----
@@ -443,15 +436,53 @@ def _target_block(target: Any) -> str:
     )
 
 
+def target_engagement_instruction(target: Any) -> str:
+    """攻撃の本体を作る前に、狙う弱点を先に一言で言語化させる指示文（schema条件専用）.
+
+    ArgumentBody を直接組み立てさせると、対象への言及（Attack.target）と実際の反論内容
+    （Argument.rules の strong premise）が別々に独立して生成され、後者が対象の中身に
+    触れないまま一般論で済まされることがある（実測で確認済み）。本体生成の前にこの
+    軽量な一段階を挟み、狙う弱点を先に言語化させてから本体生成の指示に埋め込むことで、
+    対象への言及を本体の推論に対する前提条件にする。
+    """
+    return "\n".join(
+        [
+            "<task>",
+            "Before constructing your attack, identify the single specific weakness you will attack.",
+            "</task>",
+            "",
+            _target_block(target),
+            "",
+            "<response_contract>",
+            "In 1-2 sentences: name the specific claim or assumption in the target you will attack, "
+            "and the specific reason it is vulnerable (a gap, an unsupported step, a fact it "
+            "conflicts with). Do not construct the full argument yet.",
+            "</response_contract>",
+        ]
+    )
+
+
 def attack_instruction(
     purpose: str,
     target: Any,
     state: Any | None = None,
     main_argument: Any | None = None,
+    engagement_point: str | None = None,
 ) -> str:
     """攻撃（defeat/counter）の手番に渡す指示文を組む."""
     debate_round = getattr(state, "debate_round", 1) if state is not None else 1
     issue = getattr(state, "question", "") if state is not None else ""
+    engagement_block = (
+        [
+            "",
+            "<target_engagement_point>",
+            engagement_point,
+            "Your first rule's antecedent must build directly from this point.",
+            "</target_engagement_point>",
+        ]
+        if engagement_point
+        else []
+    )
     if purpose == "counter":
         blocks = [
             "<task>",
@@ -473,6 +504,7 @@ def attack_instruction(
             ]
         blocks += [
             _target_block(target),
+            *engagement_block,
             "",
             "<attack_conditions>",
             "- Your counterargument must defeat the target attack.",
@@ -505,6 +537,7 @@ def attack_instruction(
             "</issue>",
             "",
             _target_block(target),
+            *engagement_block,
             "",
             "<attack_conditions>",
             "- You may use rebut or undercut.",
@@ -513,6 +546,12 @@ def attack_instruction(
             "- Do not attack a claim or assumption that is not present in the target argument.",
             "- Supporting a different option does not by itself count as negating the target.",
             "</attack_conditions>",
+            "",
+            "<non_repetition>",
+            "Do not derive the same conclusion from substantially the same reasoning as any of "
+            "your own earlier attacks against this same target in this thread.",
+            "If the only available attack would repeat an earlier attempt of yours, set can_defeat=NO.",
+            "</non_repetition>",
             "",
             "<response_contract>",
             "If a valid attack exists, set can_defeat=YES and include Argument and Attack.",
@@ -565,8 +604,9 @@ def attack_extends_instruction(
             "<your_attack>. The opponent has now produced a new counterargument, labeled "
             "<new_counter>, in response.",
             "Determine whether your attack still poses a live threat to the new "
-            "counterargument: if the claim your attack makes is true, does the new "
-            "counterargument's conclusion fail to hold?",
+            "counterargument: does <new_counter>, taken as a whole (every premise and "
+            "inferential step it relies on, not just its headline conclusion), actually "
+            "refute the specific premise or step your attack relies on?",
             "</task>",
             "",
             "<issue>",
@@ -588,13 +628,18 @@ def attack_extends_instruction(
             "</new_counter>",
             "",
             "<response_contract>",
-            "Set attack_extends=YES only if accepting your attack's claim as true would "
-            "force rejection of the new counterargument's conclusion.",
-            "Set attack_extends=NO if the new counterargument's conclusion already holds "
-            "even when granting your attack's claim — for example, if the new "
-            "counterargument concedes the point your attack makes and argues its "
-            "conclusion stands anyway. Merely sharing the same wording or topic as your "
-            "attack's target is not enough by itself to set YES.",
+            "Set attack_extends=YES if <new_counter> leaves any premise or inferential "
+            "step your attack relies on unaddressed, or merely asserts — without "
+            "substantively refuting it — that its own conclusion survives despite your "
+            "attack.",
+            "Set attack_extends=NO only if <new_counter> explicitly and substantively "
+            "refutes the specific premise or step your attack relies on, not merely "
+            "restates or reasserts its original conclusion.",
+            "Merely sharing the same wording or topic as your attack's target is not "
+            "enough by itself to set YES — but conversely, <new_counter> sounding "
+            "confident or well-argued is not enough by itself to set NO either.",
+            "When genuinely uncertain, prefer YES: the burden is on <new_counter> to "
+            "clearly defeat your attack, not on you to prove your attack still applies.",
             "</response_contract>",
         ]
     )

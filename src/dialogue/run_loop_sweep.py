@@ -4,7 +4,7 @@
 
 - プロトコルのループ上限（debate round の上限 = State.max_turns）: 1, 5, 10
 - 主張のループ上限（1ラウンド・1 proponent あたりの main argument 試行回数の上限
-  = State.max_main_argument_attempts）: 1〜10
+  = State.max_attack_attempts）: 1〜10
 
 ログは
   logs/sweep/<topic_stem>_<開始時刻>/turns{T:02d}_attempts{A:02d}/scenarios/<topic_stem>/schema_*.json
@@ -30,7 +30,7 @@ except ModuleNotFoundError:  # pragma: no cover - direct file execution.
 
 # プロトコルのループ上限（State.max_turns）の候補。
 PROTOCOL_MAX_TURNS = (1, 5, 10)
-# 主張のループ上限（State.max_main_argument_attempts）の候補。
+# 主張のループ上限（State.max_attack_attempts）の候補。
 MAIN_ARGUMENT_MAX_ATTEMPTS = range(1, 11)
 
 
@@ -99,7 +99,7 @@ async def main() -> None:
     for i, (max_turns, max_attempts) in enumerate(combos, start=1):
         combo_dir = sweep_root / f"turns{max_turns:02d}_attempts{max_attempts:02d}"
         print(
-            f"[{i}/{total}] max_turns={max_turns} max_main_argument_attempts={max_attempts} "
+            f"[{i}/{total}] max_turns={max_turns} max_attack_attempts={max_attempts} "
             f"-> {combo_dir}",
             flush=True,
         )
@@ -108,7 +108,7 @@ async def main() -> None:
                 await run_schema_topic_once(
                     topic_file,
                     max_turns=max_turns,
-                    max_main_argument_attempts=max_attempts,
+                    max_attack_attempts=max_attempts,
                     output_root=combo_dir,
                     run_index=run_index if args.runs > 1 else None,
                 )

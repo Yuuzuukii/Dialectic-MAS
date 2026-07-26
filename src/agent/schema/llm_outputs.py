@@ -39,6 +39,15 @@ class DefeatingArgumentOutput(BaseModel):
         default=None,
         description="Attack made by this argument against a specified item in the target argument, omitted when NO.",
     )
+    has_new_point: bool = Field(
+        default=True,
+        description=(
+            "True if this attack introduces a genuinely new angle or reasoning not already "
+            "tried in an earlier attack against this same target in this thread. False if "
+            "this attack is substantially the same claim or reasoning as an earlier attempt, "
+            "just reworded."
+        ),
+    )
 
 
 # LLM出力：defeat判定（rebutに対するundercut）（undercut可否 + Argumentのメイン出力）
@@ -119,6 +128,15 @@ class DefeatingArgumentOutputFree(BaseModel):
         default=None,
         description="Attack made by this argument against a specified part of the target argument, omitted when NO.",
     )
+    has_new_point: bool = Field(
+        default=True,
+        description=(
+            "True if this attack introduces a genuinely new angle or reasoning not already "
+            "tried in an earlier attack against this same target in this thread. False if "
+            "this attack is substantially the same claim or reasoning as an earlier attempt, "
+            "just reworded."
+        ),
+    )
 
 
 # LLM出力：undercut（no_schema）。can_undercut は構造化のまま、Argument は自由記述。
@@ -174,10 +192,7 @@ class ArgumentBody(BaseModel):
     rules: list[Rule] = Field(
         default_factory=list,
         description=(
-            "Finite sequence of rule instances forming an argument. "
-            "Each strong antecedent must be supported by an earlier consequent; "
-            "each non-final consequent must support a later rule; "
-            "no two rules may have the same consequent; "
+            "Finite sequence of rule instances forming an argument; "
             "the final rule is the warrant of the argument."
         ),
     )

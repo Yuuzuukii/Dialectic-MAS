@@ -163,7 +163,8 @@ async def can_generate_main(state: Any) -> dict[str, Any]:
             "active_agent": "AG2" if agent == "AG1" else "AG1",
             "current_argument": argument,
             "current_thread_status": None,
-            "main_attempt_count": state.main_attempt_count + 1,
+            "attack_attempt_count": 0,
+            "thread_needs_retry": False,
             "b_argument": None,
             "c_argument": None,
             "b_argument_id": None,
@@ -206,7 +207,8 @@ async def advance_to_ag2(state: Any) -> dict[str, Any]:
         "active_agent": "AG2",
         "current_argument": None,
         "current_thread_status": None,
-        "main_attempt_count": 0,
+        "attack_attempt_count": 0,
+        "thread_needs_retry": False,
         "b_argument": None,
         "c_argument": None,
         "b_argument_id": None,
@@ -220,9 +222,26 @@ async def advance_to_ag2(state: Any) -> dict[str, Any]:
 
 
 async def o_defeat_a(state: Any) -> dict[str, Any]:
-    """Opponent が Proponent の主張 A を攻撃する論証 (B) を生成する."""
+    """Opponent が Proponent の主張 A を攻撃する論証 (B) を生成する.
+
+    同一の main argument A に対して、これ以前の攻撃が defeat し切れずに終わった場合は
+    `attack_attempt_count` 回まで再度呼ばれる（毎回ここで +1 する）。生成指示
+    （`attack_instruction`）自体は attempt 回数によらず不変（`generate_attack` を参照）で、
+    別角度への誘導は行わない。2回目以降の呼び出しは、履歴（render_history）から自分の
+    過去の攻撃が見えている状態で通常どおり生成させ、`has_new_point` の自己申告で
+    実質的に新しい角度でない場合のみ事後的に足切りする。
+
+    `max_attack_attempts` の上限チェックは、Prakken & Sartor の理論には存在しない
+    実装上の拡張（リソース制約によるリトライ打ち切り）である。理論本体の defeat 判定
+    ロジックと混在させないよう、ここで「新しい攻撃を試みる前」に独立した関門として
+    行う。上限に達している場合は新しい B を生成せず、Opponent が反論を尽くせなかった
+    という理論的な手詰まり（justified）とは区別し、探索を予算内で打ち切った未決着
+    （defensible）として即座にスレッドを終了する。
+    """
     if state.current_argument is None:
         return {"error": "No current main argument to attack."}
+    if state.attack_attempt_count >= state.max_attack_attempts:
+        return complete_thread(state, "defensible")
     argument = await generate_attack(
         state,
         state.current_opponent,
@@ -240,6 +259,8 @@ async def o_defeat_a(state: Any) -> dict[str, Any]:
         "b_argument_id": argument.id,
         "last_generated_argument": argument,
         "last_can_defeat": None,
+        "attack_attempt_count": state.attack_attempt_count + 1,
+        "thread_needs_retry": False,
         "history": history,
         "argument_records": records,
         "dialogue_history": dialogue_history(records),
@@ -260,17 +281,29 @@ async def validate_b_defeats_a(state: Any) -> dict[str, Any]:
     )
     relations = [*state.defeat_relations, *result.relations]
     if not result.defeats:
-        update = complete_thread(
-            state,
-            "justified",
-            [result.blocker] if result.blocker is not None else None,
-        )
+        # B は A を defeat できなかった。リトライ回数の上限判定は o_defeat_a の
+        # 入り口で行うので、ここでは無条件で o_defeat_a に戻り、別の攻撃 B' を試させる。
+        # 上限に達していれば o_defeat_a 側が defensible として打ち切る。
+        # 阻止に使った undercut（blocker）は、スレッドが続くか終わるかに関わらず
+        # 履歴に残す。
+        update: dict[str, Any] = {
+            "defeat_relations": relations,
+            "last_can_defeat": False,
+            "b_defeats_a": False,
+            "thread_needs_retry": True,
+        }
         if result.blocker is not None:
+            records = [*_records(state), result.blocker]
             update["last_generated_argument"] = result.blocker
-        update["defeat_relations"] = relations
-        update["last_can_defeat"] = False
+            update["argument_records"] = records
+            update["dialogue_history"] = dialogue_history(records)
         return update
-    return {"defeat_relations": relations, "last_can_defeat": True, "b_defeats_a": True}
+    return {
+        "defeat_relations": relations,
+        "last_can_defeat": True,
+        "b_defeats_a": True,
+        "thread_needs_retry": False,
+    }
 
 
 async def p_counter_b(state: Any) -> dict[str, Any]:
@@ -331,12 +364,12 @@ async def validate_c_defeats_b(state: Any) -> dict[str, Any]:
 async def validate_b_defeats_c(state: Any) -> dict[str, Any]:
     """B（Opponentの元の攻撃）が C（Proponentの新しいカウンター）にも及ぶかを確認する.
 
-    B の作者である Opponent 自身に確認する。及ばないなら Proponent の主張は justified。
-    及ぶ場合のみ、従来通り defeat subgraph で B が C を破れるかを判定する
-    （破れなければ justified、破れれば defensible）。
-
-    新しい論証は生成しない（C へのさらなる反論を作らせると無限再帰になり、
-    ASPIC+ の A-B-C 一往復という設計にも合わなくなるため）。
+    B の作者である Opponent 自身に確認する。及ばない、または及んでも defeat できない場合、
+    無条件で o_defeat_a に戻り、別の攻撃 B' を試させる（Prakken & Sartor の dialogue tree
+    は、Pの手番ごとに Opponent が考えられる全ての defeater を試すことを要求しており、
+    Bを1本に固定して即座に判定するのは過度に Proponent に有利な簡略化だったため）。
+    リトライ回数の上限判定は o_defeat_a の入り口で行うので、ここでは行わない。
+    Bが defeat できれば defensible。
     """
     if state.b_argument is None or state.c_argument is None:
         return {"error": "Cannot validate B defeats C without B and C."}
@@ -348,10 +381,11 @@ async def validate_b_defeats_c(state: Any) -> dict[str, Any]:
         flush=True,
     )
     if not extends:
-        update = complete_thread(state, "justified")
-        update["b_defeats_c"] = False
-        update["c_strictly_defeats_b"] = True
-        return update
+        return {
+            "b_defeats_c": False,
+            "c_strictly_defeats_b": None,
+            "thread_needs_retry": True,
+        }
     result = await evaluate_attack(
         state,
         state.b_argument,
@@ -359,21 +393,22 @@ async def validate_b_defeats_c(state: Any) -> dict[str, Any]:
         state.current_proponent,
         relation_context="B defeats C",
         blocker_generator=generate_undercut,
+        # B は元々 A を狙った攻撃として記録済み（target_id=A.id）。ここは「B が C にも
+        # 及ぶか」という副次的な検証にすぎず、判定結果として B の本来の attack 宣言
+        # （target_id/target_field/target_statement）を C 向けに上書きしてはならない。
+        persist_metadata=False,
     )
     if not result.defeats:
-        update = complete_thread(
-            state,
-            "justified",
-            [result.blocker] if result.blocker is not None else None,
-        )
-        if result.blocker is not None:
-            update["last_generated_argument"] = result.blocker
-        update["b_defeats_c"] = False
-        update["c_strictly_defeats_b"] = True
-    else:
-        update = complete_thread(state, "defensible")
-        update["b_defeats_c"] = True
-        update["c_strictly_defeats_b"] = False
+        return {
+            "b_defeats_c": False,
+            "c_strictly_defeats_b": None,
+            "thread_needs_retry": True,
+            "defeat_relations": [*state.defeat_relations, *result.relations],
+        }
+    update = complete_thread(state, "defensible")
+    update["b_defeats_c"] = True
+    update["c_strictly_defeats_b"] = False
+    update["thread_needs_retry"] = False
     update["defeat_relations"] = [*state.defeat_relations, *result.relations]
     return update
 
@@ -383,9 +418,14 @@ async def extract_warrants(state: Any) -> dict[str, Any]:
 
     no_schema では Argument に rules/Conc/Ass の構造がないため、main argument の
     自由記述テキストそのものを warrant として渡す。
+
+    どちらか一方が新しい main argument を生成できなかった場合（次ラウンド用の
+    ルールを両者から統合する材料が揃わない場合）は、ここをエラーにはしない。
+    次ラウンドは行われない（route_after_extract_warrants が generalize/integrate を
+    スキップし、finalize_fallback へ進める）ので、この関数としては何もせず返す。
     """
     if state.ag1_main_argument is None or state.ag2_main_argument is None:
-        return {"error": "AG1またはAG2のmain argumentが見つかりません"}
+        return {}
     if state.output_mode == "no_schema":
         warrant_json = {
             "Argument1": {"agent": "AG1", "warrant": state.ag1_main_argument.argument},
@@ -456,21 +496,11 @@ async def integrate(state: Any) -> dict[str, Any]:
 
 
 def extract_integrated_rule(integration_result: str) -> str | None:
-    """統合結果ペイロードから統合ルール文字列を取り出す（プレースホルダは除外）."""
+    """統合結果ペイロードから統合ルール文字列を取り出す."""
     data = parse_serialized_payload(integration_result)
     argument = data.get("Argument", {})
     rule = argument.get("rule") if isinstance(argument, dict) else None
     if isinstance(rule, str) and rule.strip():
-        normalized = " ".join(rule.lower().split())
-        placeholder_phrases = (
-            "concrete integrated conditions",
-            "generalized conclusion",
-            "integrated condition",
-            "condition 1",
-            "condition 2",
-        )
-        if any(phrase in normalized for phrase in placeholder_phrases):
-            return None
         return rule.strip()
     return None
 
@@ -490,7 +520,8 @@ async def add_integrated_rule(state: Any) -> dict[str, Any]:
         "current_opponent": "AG2",
         "active_agent": "AG1",
         "debate_stage": "ag1_main_thread",
-        "main_attempt_count": 0,
+        "attack_attempt_count": 0,
+        "thread_needs_retry": False,
         "ag1_main_argument": None,
         "ag2_main_argument": None,
         "ag1_thread_status": None,
@@ -517,11 +548,19 @@ async def finalize_fallback(state: Any) -> dict[str, Any]:
     finalize ラウンドで新しい main argument が一つも生成されなかった場合（双方が
     "main_argument_available=False" と判定した場合）は、current_argument が無いため、
     代わりに直前までに積まれた integrated_rules の最後のルールを土台にする。
+    それも無ければ（統合ラウンドが一度も完了していない1ラウンド目などでは）、
+    片方のエージェントだけが今回 main argument を生成できていた可能性があるので、
+    ag1_main_argument / ag2_main_argument のうち存在する方を土台にする
+    （もう片方は新しい主張を生成できなかった、という結果自体を反映する）。
     """
     if state.current_argument is not None:
         justified_argument = state.current_argument.argument
     elif state.integrated_rules:
         justified_argument = state.integrated_rules[-1]
+    elif state.ag1_main_argument is not None:
+        justified_argument = state.ag1_main_argument.argument
+    elif state.ag2_main_argument is not None:
+        justified_argument = state.ag2_main_argument.argument
     else:
         return {
             "error": "No integrated main argument available for fallback finalization."

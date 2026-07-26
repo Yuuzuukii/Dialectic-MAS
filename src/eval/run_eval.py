@@ -147,9 +147,7 @@ def main() -> None:
         sys.exit(1)
 
     log = _load_log(log_path)
-    method = log.get("method") or log.get("mode")
-    mode = "no_schema" if method in {"no_schema", "no-schema"} else "schema"
-    eval_input = build_eval_input(log, mode=mode)
+    eval_input = build_eval_input(log)
     evaluator = _EvaluatorModel(model)
 
     print(f"Evaluating {log_path.name} with {model} ...")

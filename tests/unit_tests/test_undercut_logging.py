@@ -59,9 +59,13 @@ async def test_validate_b_exposes_generated_undercut_in_history_and_update(
 
     update = await nodes.validate_b_defeats_a(state)
 
+    # B は defeat できず、undercut で阻止された。上限判定は o_defeat_a の入り口に
+    # 移設されているため、ここではスレッドを終了せず、無条件でリトライを指示する。
+    # ただし阻止に使った undercut はリトライ有無に関わらず履歴に残る。
     assert update["last_generated_argument"] is undercut
     assert update["dialogue_history"][-1]["attack"] == "undercut"
-    assert update["current_thread_status"] == "justified"
+    assert update["thread_needs_retry"] is True
+    assert "current_thread_status" not in update
 
 
 async def test_cli_payload_labels_undercut_and_keeps_it_in_finish_history() -> None:
