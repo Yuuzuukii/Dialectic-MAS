@@ -69,7 +69,7 @@ async def test_validate_b_exposes_generated_undercut_in_history_and_update(
 
 
 async def test_cli_payload_labels_undercut_and_keeps_it_in_finish_history() -> None:
-    module_path = Path(__file__).parents[2] / "src" / "dialogue" / "common.py"
+    module_path = Path(__file__).parents[2] / "experiments" / "dialogue" / "common.py"
     spec = importlib.util.spec_from_file_location("dialogue_cli", module_path)
     assert spec is not None and spec.loader is not None
     cli = importlib.util.module_from_spec(spec)

@@ -25,7 +25,7 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from src.eval.evaluation import build_eval_input, efficiency_metrics
+from experiments.eval.scoring.evaluation import build_eval_input, efficiency_metrics
 
 AXES_V2 = ("constructiveness", "constraint_preservation")
 

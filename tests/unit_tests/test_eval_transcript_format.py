@@ -5,7 +5,7 @@ from __future__ import annotations
 import importlib.util
 from pathlib import Path
 
-MODULE_PATH = Path(__file__).parents[2] / "src" / "eval" / "evaluation.py"
+MODULE_PATH = Path(__file__).parents[2] / "experiments" / "eval" / "scoring" / "evaluation.py"
 spec = importlib.util.spec_from_file_location("eval_evaluation", MODULE_PATH)
 assert spec is not None and spec.loader is not None
 evaluation = importlib.util.module_from_spec(spec)

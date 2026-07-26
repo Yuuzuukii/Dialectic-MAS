@@ -18,7 +18,7 @@ import sys
 from pathlib import Path
 from typing import Any, cast
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -27,7 +27,7 @@ from langchain_openai import ChatOpenAI
 
 load_dotenv(ROOT / ".env")
 
-from src.eval.evaluation import (
+from experiments.eval.scoring.evaluation import (
     AXES,
     build_eval_input,
     efficiency_metrics,

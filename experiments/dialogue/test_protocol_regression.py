@@ -25,7 +25,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 try:
-    from src.dialogue.common import DATASETS_DIR, LOGS_DIR, run_schema_topic_once
+    from experiments.dialogue.common import DATASETS_DIR, LOGS_DIR, run_schema_topic_once
 except ModuleNotFoundError:  # pragma: no cover - direct file execution.
     from common import DATASETS_DIR, LOGS_DIR, run_schema_topic_once  # type: ignore
 

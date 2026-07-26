@@ -17,7 +17,7 @@ import json
 import random
 from typing import Any
 
-from src.eval.evaluation import build_eval_input
+from experiments.eval.scoring.evaluation import build_eval_input
 
 RANKING_INSTRUCTION = """
 You are an evaluator LLM. Below are {n} independent debates, all addressing the

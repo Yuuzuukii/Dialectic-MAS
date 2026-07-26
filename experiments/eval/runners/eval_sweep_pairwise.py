@@ -23,7 +23,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -32,9 +32,9 @@ from langchain_openai import ChatOpenAI
 
 load_dotenv(ROOT / ".env")
 
-from src.eval.evaluation_pairwise import evaluate_pairwise_constructiveness
-from src.eval.evaluation import efficiency_metrics
-from src.eval.run_eval import resolve_evaluator_model
+from experiments.eval.scoring.evaluation_pairwise import evaluate_pairwise_constructiveness
+from experiments.eval.scoring.evaluation import efficiency_metrics
+from experiments.eval.runners.run_eval import resolve_evaluator_model
 
 
 class _EvaluatorModel:

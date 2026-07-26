@@ -20,12 +20,12 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 try:
-    from src.dialogue.common import LOGS_DIR, run_mad_topic_once
+    from experiments.dialogue.common import LOGS_DIR, run_mad_topic_once
 except ModuleNotFoundError:  # pragma: no cover - direct file execution.
     from common import LOGS_DIR, run_mad_topic_once  # type: ignore
 

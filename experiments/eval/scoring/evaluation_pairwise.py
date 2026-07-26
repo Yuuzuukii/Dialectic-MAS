@@ -22,7 +22,7 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from src.eval.evaluation import _schema_utterance
+from experiments.eval.scoring.evaluation import _schema_utterance
 
 
 def _turn_body_text(turn: dict[str, Any]) -> str:
