@@ -74,25 +74,27 @@ You are an evaluator LLM. You will see ONE claim from a dialectical debate (the
 1 to 10, how CONSTRUCTIVE the Response is as a reply to the Target — judged in
 isolation, without seeing the rest of the debate.
 
-A constructive response:
-  - Engages a specific claim, premise, or assumption actually stated in the Target,
-    rather than a generic or vague rebuttal that could apply to almost any claim.
-  - Adds new reasoning, rather than merely restating a position.
-  - Is not a non-sequitur relative to what the Target actually said.
+A constructive Response:
+  - answers a specific claim, premise, or assumption actually stated in the Target; and
+  - uses a supporting reason that actually bears on that target and is load-bearing for
+    the Response's conclusion.
 
-A non-constructive response:
-  - Is a generic or templated rebuttal that does not name anything specific from
-    the Target.
-  - Talks past the Target's actual point.
-  - Merely reasserts a prior conclusion without new reasoning.
+A non-constructive Response:
+  - ignores, misrepresents, or talks past the Target;
+  - gives generic reasoning that could be used against almost any position on the topic; or
+  - merely quotes or names the Target before reasserting an unrelated position.
+
+Do NOT judge factual correctness, depth of evidence, rhetorical polish, grammar, verbosity,
+or structured formatting. Do NOT require novelty or elaborate reasoning when a simple,
+specific response is sufficient. Because no earlier history is shown, do not infer whether
+the Response repeats a still earlier turn.
 
 Scoring rubric:
-  9-10: Outstanding - precisely engages a specific point in the Target with new reasoning.
-  7-8:  Good - engages the Target's specific content, minor looseness.
-  5-6:  Adequate - engages the general topic but not a specific stated point.
-  1-4:  Weak - generic, talks past the Target, or merely repeats a prior claim.
-
-IMPORTANT: Rate strictly. Perfect scores are rare.
+  9-10: Directly and substantively answers a specific point in the Target.
+  7-8:  Answers a specific point, with a minor gap in how the reason bears on it.
+  5-6:  Addresses the Target's general issue but not a specific stated point.
+  3-4:  Mostly generic, misrepresents the Target, or largely talks past it.
+  1-2:  Has no meaningful responsive relation to the Target.
 
 Target:
 {target}
@@ -117,25 +119,27 @@ pair in this list influence your judgment of it.
 For each pair, rate how CONSTRUCTIVE the Response is as a reply to the Target,
 on a scale from 1 to 10.
 
-A constructive response:
-  - Engages a specific claim, premise, or assumption actually stated in the Target,
-    rather than a generic or vague rebuttal that could apply to almost any claim.
-  - Adds new reasoning, rather than merely restating a position.
-  - Is not a non-sequitur relative to what the Target actually said.
+A constructive Response:
+  - answers a specific claim, premise, or assumption actually stated in its Target; and
+  - uses a supporting reason that actually bears on that target and is load-bearing for
+    the Response's conclusion.
 
-A non-constructive response:
-  - Is a generic or templated rebuttal that does not name anything specific from
-    the Target.
-  - Talks past the Target's actual point.
-  - Merely reasserts a prior conclusion without new reasoning.
+A non-constructive Response:
+  - ignores, misrepresents, or talks past its Target;
+  - gives generic reasoning that could be used against almost any position on the topic; or
+  - merely quotes or names its Target before reasserting an unrelated position.
+
+Do NOT judge factual correctness, depth of evidence, rhetorical polish, grammar, verbosity,
+or structured formatting. Do NOT require novelty or elaborate reasoning when a simple,
+specific response is sufficient. Because no earlier history is shown, do not infer whether
+a Response repeats a still earlier turn.
 
 Scoring rubric:
-  9-10: Outstanding - precisely engages a specific point in the Target with new reasoning.
-  7-8:  Good - engages the Target's specific content, minor looseness.
-  5-6:  Adequate - engages the general topic but not a specific stated point.
-  1-4:  Weak - generic, talks past the Target, or merely repeats a prior claim.
-
-IMPORTANT: Rate strictly. Perfect scores are rare.
+  9-10: Directly and substantively answers a specific point in the Target.
+  7-8:  Answers a specific point, with a minor gap in how the reason bears on it.
+  5-6:  Addresses the Target's general issue but not a specific stated point.
+  3-4:  Mostly generic, misrepresents the Target, or largely talks past it.
+  1-2:  Has no meaningful responsive relation to the Target.
 
 {pairs_block}
 

@@ -32,32 +32,61 @@ AXES_V2 = ("constructiveness", "constraint_preservation")
 
 CONSTRUCTIVENESS_INSTRUCTION = """
 You are an evaluator LLM. Rate, on a scale from 1 to 10, how well the following debate
-transcript AVOIDS non-constructive exchanges of objections. A high score means the debate
-is (nearly) free of non-constructive objections; a low score means it is dominated by them.
+AVOIDS non-constructive responsive moves.
 
-An "objection" is any turn that responds to a previous turn (challenging its conclusion or
-one of its premises). Judge each objection ONLY against these failure modes:
-  - Repeats the objecting side's own prior claim essentially unchanged, without engaging
-    the specific point it targets.
-  - Is a generic or vague rebuttal that could apply to almost any claim, rather than
-    engaging the specific claim or assumption actually made by the target.
-  - Ignores or talks past the target's specific point (a non-sequitur relative to what
-    was actually said).
-  - Restates a point that was already raised and answered earlier in the transcript,
-    without adding anything.
+<evaluation_units>
+A "responsive move" is either:
+  1. an objection: a turn that challenges a conclusion, premise, or assumption from an
+     earlier turn; or
+  2. a revision: a new argument introduced after an earlier exchange has closed, where the
+     speaker has an opportunity to adapt to the unresolved objection(s).
 
-Do NOT reward novelty, rhetorical polish, or how "insightful" an objection is. An objection
-that plainly and specifically engages the point it targets — without falling into the
-failure modes above — is fully constructive, even if it is simple or obvious. You are
-measuring the ABSENCE of non-constructive moves, not the brilliance of the good ones.
+The first opening argument is context, not a responsive move. Narrator-style transition
+notes and shared/integrated rules are context only; never score them as agent moves.
 
-Scoring rubric (driven by the share and severity of non-constructive objections):
-  9–10: (Almost) none — essentially every objection engages a specific point, no failure modes.
-  7–8:  Mostly free of them, with one or two lapses.
-  5–6:  A mix of clean and non-constructive objections.
-  1–4:  Dominated by repetition, generic rebuttals, or turns that talk past each other.
+Infer response relations from semantic content and chronology even when a transcript does
+not explicitly say "responding to". Do not reward or penalize a debate merely because its
+format explicitly labels targets, premises, conclusions, or response links.
+</evaluation_units>
 
-IMPORTANT: Rate strictly. Perfect scores are rare.
+<failure_modes>
+Classify each responsive move as non-constructive if one or more of these applies:
+  - TARGET MISMATCH: it ignores, misrepresents, or talks past the specific point it answers.
+  - GENERIC RESPONSE: its reasoning could be used against almost any position on the topic
+    and does not depend on the target's actual claim, premise, or assumption.
+  - REPETITION: it substantially restates the speaker's own earlier position or reuses a
+    point already raised and answered, without adapting it to the latest response.
+  - NON-ADAPTIVE REVISION: after an exchange closes, the new argument repeats the failed
+    argument without addressing the unresolved objection that led to the revision.
+
+Merely quoting or naming a specific target is NOT enough. The move's supporting reason must
+actually bear on that target and be used in reaching the response's conclusion. Conversely,
+a move does not need to be novel, elaborate, or rhetorically impressive: a simple response
+is constructive when it makes the minimum substantive adaptation needed to answer the
+specific point.
+</failure_modes>
+
+<scope_boundaries>
+Judge interactional responsiveness and non-redundancy only.
+- Do NOT judge factual correctness, depth of evidence, rhetorical polish, grammar, verbosity,
+  or which side wins. Those are separate qualities.
+- Do NOT reward a structured format, explicit argument labels, or longer explanations.
+- Do NOT penalize a debate merely for having more responsive moves. Use the PROPORTION and
+  SEVERITY of non-constructive moves, not their raw count or transcript length.
+</scope_boundaries>
+
+<scoring>
+First identify all responsive moves, then estimate the proportion that are non-constructive.
+Use severity only to choose within the applicable band:
+  9–10: 0–10% non-constructive.
+  7–8:  More than 10% and up to 25% non-constructive.
+  5–6:  More than 25% and up to 50% non-constructive.
+  3–4:  More than 50% and up to 75% non-constructive.
+  1–2:  More than 75% non-constructive.
+
+If there are no responsive moves, assign 5 because there is insufficient interaction to
+evaluate. Do the classification and proportion calculation silently; return only the JSON.
+</scoring>
 
 Evaluate the following debate:
 
@@ -234,12 +263,17 @@ def evaluate_constraint_preservation(
 def evaluate_rubrics(log: dict[str, Any], evaluator_model: Any) -> dict[str, Any]:
     """1件のログを Constructiveness / Constraint Preservation（LLM）で採点する.
 
-    `build_eval_input` は1回だけ呼び、そこから transcript 用の入力と
-    stance/final_answer 用の入力の両方を切り出す（整形ロジックの二重実装を避ける）。
+    Constructiveness には議論ターンだけを渡し、統合フェーズの生成物を混ぜない。
+    Constraint Preservation には integrated_rules を含む入力を渡す。
     """
-    eval_input = build_eval_input(log)
-    constructiveness = evaluate_constructiveness(eval_input, evaluator_model)
-    constraint_preservation = evaluate_constraint_preservation(eval_input, evaluator_model)
+    constructiveness_input = build_eval_input(log, include_integrated_rules=False)
+    constraint_input = build_eval_input(log)
+    constructiveness = evaluate_constructiveness(
+        constructiveness_input, evaluator_model
+    )
+    constraint_preservation = evaluate_constraint_preservation(
+        constraint_input, evaluator_model
+    )
     return {
         "constructiveness": constructiveness.get("constructiveness"),
         "constraint_preservation": constraint_preservation.get("constraint_preservation"),

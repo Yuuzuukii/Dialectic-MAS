@@ -170,8 +170,11 @@ class IntegrationBodyFree(BaseModel):
 
     rule: str = Field(
         description=(
-            "A single integrated rule, expressed in natural language, that subsumes every "
-            "generalized criterion via OR and is applicable to future arguments."
+            "A single integrated decision rule, expressed in natural language, that preserves "
+            "every generalized criterion's condition-to-conclusion mapping and is applicable "
+            "to future arguments. Use OR only for conditions supporting the same outcome. When "
+            "opposing conditions may coexist, compare them symmetrically rather than giving "
+            "either side an automatic veto."
         )
     )
 
@@ -272,12 +275,22 @@ class GeneralizedCriterion(BaseModel):
 
 # 統合出力の要素
 class IntegrationBody(BaseModel):
-    """統合結果（汎化基準を OR 結合した単一の再利用可能ルール）."""
+    """統合結果（各基準の条件と帰結を保持する単一の再利用可能ルール）."""
 
-    consequent: str = Field(description="Integrated generalized conclusion.")
+    consequent: str = Field(
+        description=(
+            "The shared higher-order decision principle or explicit outcome mapping "
+            "that preserves the conclusions supported by the generalized criteria."
+        )
+    )
     rule: str = Field(
         description=(
-            "A single reusable rule formed by taking every 'strong' condition from all generalized criteria "
-            "and combining them with OR as alternative sufficient conditions leading to the consequent. "
+            "A single reusable decision rule preserving every generalized criterion's "
+            "condition-to-conclusion mapping. Use OR only for alternative conditions that "
+            "support the same outcome; when criteria support different outcomes, explicitly "
+            "map each condition to its corresponding outcome. When opposing conditions may "
+            "coexist, compare them using the same evidential threshold and do not give either "
+            "side an automatic veto. Do not invent a precautionary default, burden shift, or "
+            "tie-breaker absent from the generalized criteria."
         )
     )

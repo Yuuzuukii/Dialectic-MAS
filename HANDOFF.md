@@ -1,211 +1,357 @@
-# HANDOFF: 評価プロンプトの再定義（constructiveness / transcript整形）
+# HANDOFF: Schema / No Schema の生成・評価改善と再評価結果
 
-作成日: 2026-07-26。別のコーディングエージェントへの引き継ぎ用。
+更新日: 2026-07-27
+対象: Claude など、次のコーディングエージェント
 
-## ⚠️ 最初に：コミットしていない変更を絶対に破棄しないこと
+## 0. 最重要: 未コミット変更を破棄しない
 
-以下のコマンドは**絶対に実行しないこと**（未コミットの本セッションの成果が消える）:
-`git checkout -- .` / `git reset --hard` / `git clean -fd` / `git stash drop`
+この作業ツリーには、今回の評価改善に関する重要な変更が残っている。
+`git checkout -- .`、`git reset --hard`、`git clean -fd`、安易なstash操作は行わないこと。
 
-現状は `git status --short` で以下の6ファイルが変更あり（stagedとunstagedが混在=`MM`）:
-```
+直近の `git status --short` は次のとおり。先頭列が `M` / `A` の13ファイルは staged、
+折れ線グラフ生成スクリプトは untracked。さらに、この `HANDOFF.md` の上書きが unstaged として
+加わる。
+
+```text
+M  docs/eval_parse_method.md
 M  docs/eval_transcript_format_spec.md
-A  docs/implementation_overview.md
-MM experiments/eval/scoring/evaluation.py
- M experiments/eval/scoring/evaluation_ranking.py
-MM experiments/eval/scoring/evaluation_rubrics.py
- M tests/unit_tests/test_eval_transcript_format.py
-```
-まずやるべきことは `git add -A && git commit` でこの状態を確定させること（メッセージ案は末尾）。
-
----
-
-## 1. 最終的な目的
-
-Dialect-MAS（LangGraphベースのマルチエージェント議論システム）には4手法がある:
-`schema`（提案手法・構造化論証）/ `no_schema` / `mad` / `free_debate`。
-
-ユーザーの仮説: **schema は「反論の建設性」と「両者スタンスの取り込み（constraint_preservation）」で
-最も高くあるべき**。しかし実測では schema が LLM 評価で最下位になっていた。
-
-調査の結果、**評価プロンプト側の問題**であることが判明:
-1. schema の transcript レンダリングにバグ（重複・不自然な文体）があり、schema が不当に低く見えていた
-2. constructiveness の定義が「積極的に良いか（前進・新規性）」を測っており、これは自由記述の
-   no_schema/free_debate に有利な**散文の巧みさの交絡**を含んでいた
-3. transcript にプロトコル内部用語（`rebut`/`undercut`/`main argument`）が生で出ており、
-   評価器がプロトコルを理解できていない可能性があった
-
-**目的**: 評価プロンプトを「議論の内容だけで公平に判定できる」形に修正し、その上で
-4手法を再評価して schema の実力を正しく測る。
-
-## 2. 実装済みの内容
-
-### 2-1. transcript整形のバグ修正・改善（`build_eval_input` / `_schema_utterance`）
-
-schema の `Argument`(rules/Conc/Ass) を発話体英文へ変換するロジックを修正:
-
-- **重複バグ修正**: chain構造（非末尾consequentが次ruleのstrong前提に再出現）をそのまま
-  rule単位で描画すると同じ結論文が2回出て「So Therefore, X. ... Therefore, X.」のような
-  不自然な重複が生じていた → 連鎖のつなぎとみなして重複描画を除去
-- **反論の言い出しを自然な議論調に変更**:
-  - 旧: `I have a counter argument against the opinion/premise "X".`
-  - 新: rebut→ `I disagree with your conclusion that "X".` / undercut→ `Your premise that "X" does not hold.`
-  - 理由: 「手番の種類を機械的に宣言してから話す」のは実際の議論の話し方ではない、というユーザー指摘
-- **ターンラベルからプロトコル用語を除去**:
-  - 旧: `[Turn 2] AG2 (undercut — responds to [Turn 1])`
-  - 新: `[Turn 2] AG2 (responding to [Turn 1])`（main argumentは `(new argument)`）
-  - 理由: 評価器はrebut/undercutを知らない。用語なしで議論の流れが追えるようにする
-- **"So" 接続詞の後の不自然な大文字化を修正**:
-  - 旧: `So The target does not justify...`
-  - 新: `So the target does not justify...`（`_lowercase_first` ヘルパーを新設。"I"や全大文字の頭字語は保護）
-
-### 2-2. constructiveness ルーブリックの再定義（積極性ベース→抑制ベース）
-
-`CONSTRUCTIVENESS_INSTRUCTION`（`evaluation_rubrics.py`）を書き換え:
-
-- **旧定義**: 「各反論が具体点に**新しい論拠で踏み込み議論を前進させているか**」→ 高得点帯が
-  "new reasoning" "narrows or sharpens" を要求 = 積極的な質・新規性を評価していた
-- **新定義**: 「非建設的な反論（反復・一般論・すれ違い・蒸し返し）を**どれだけ避けられているか**」
-  という抑制ベースに変更。"Do NOT reward novelty, rhetorical polish..." を明記し、
-  単純でも具体的に噛み合っていれば満点、と明示
-- 理由: 旧定義は「散文の巧みさ・新規性」を暗に評価しており、自由記述の no_schema/free_debate が
-  有利になる交絡だった。ユーザーの「抑制されているほど高いのでは」という指摘を反映
-- `evaluation_ranking.py` にも同じ `(rebut/undercut/counter turn)` という用語が
-  プロンプト本文（指示文）に残っていたため、同様に除去（`An "objection" is any turn that
-  responds to a previous turn (challenging its conclusion or one of its premises).` に置換）
-
-### 2-3. constraint_preservation に integrated_rules を追加（前セッションで実施・コミット済み）
-
-両者が合意した warrant（integrated rule）を入力に追加し、これが最終回答に反映されているかを
-採点対象にした。この部分は既に `527ccec` でコミット済み、今回の変更範囲外。
-
-### 2-4. ドキュメント整備
-
-- `docs/implementation_overview.md` を新規作成。`src/agent`（本体）と `experiments/eval`（評価系）の
-  ファイル別役割・グラフの流れ（mermaid図）・評価軸の定義をまとめた実装解説
-- `docs/eval_transcript_format_spec.md` の正準テンプレート（§4/§5）を新しい文言に更新
-
-## 3. 変更したファイル（未コミット、本セッション分のみ）
-
-| ファイル | 内容 |
-|---|---|
-| `experiments/eval/scoring/evaluation.py` | `_schema_utterance`（重複除去・自然な言い出し・小文字化）、`_turn_label`（用語除去）、新ヘルパー `_lowercase_first` / `_strip_leading_connective` |
-| `experiments/eval/scoring/evaluation_rubrics.py` | `CONSTRUCTIVENESS_INSTRUCTION` を抑制ベースに全面改訂、`(rebut/undercut/counter turn)` を除去 |
-| `experiments/eval/scoring/evaluation_ranking.py` | 同種の用語除去（4手法ランキング評価用プロンプト） |
-| `tests/unit_tests/test_eval_transcript_format.py` | 上記変更に合わせてアサーションを更新（5件） |
-| `docs/eval_transcript_format_spec.md` | 正準テンプレートの文言を更新 |
-| `docs/implementation_overview.md` | 新規作成（実装解説ドキュメント） |
-
-**変更していないもの**: `src/agent/` 本体（生成側）は今回のセッションでは無変更。
-`constraint_preservation` のプロンプト自体も無変更（integrated_rules対応は前回コミット済み分）。
-
-## 4. 未完了の作業
-
-1. **再評価が未実施**。上記の transcript整形・プロンプト変更を反映した評価は**まだ1回も回していない**。
-   ユーザーから明確に「まだ再実行はしないでね」と指示されており、プロンプトの調整を優先していた。
-2. `logs/sweep_{schema,no_schema,mad,free_debate}_cost10_*/eval_results_rubrics_{nano_high,mini}.json`
-   に**過去の評価結果が残っているが、これは古いプロンプトでの評価**（下記「重要な注意」参照）。
-3. コミットしていない（ユーザーの明示的な合図を待っている状態）。
-4. グラフ（Artifact）の再更新も未実施。
-
-## 5. 重要な設計判断と理由
-
-- **`_lowercase_first` は "I" と全大文字語（頭字語）を保護**: 一人称や固有名詞的な大文字始まりの
-  単語まで小文字化すると別の不自然さを生むため。ヒューリスティックで対応（完全ではない）。
-- **rebut/undercut の区別はラベルから消したが、発話本体（`I disagree with your conclusion`
-  vs `Your premise that ... does not hold`）には残している**: 情報は落とさず、表現形式だけを
-  プロトコル用語から自然文へ移し替えた、という設計。
-- **抑制ベースへの再定義は「短い議論が有利になる非対称」を生む**（要注意点、未解決）:
-  失敗モードに触れる機会が少ない=ターン数が少ない議論ほど高得点に出やすい。対策候補は
-  (a) 同じ反論回数どうしでのみ比較する運用でカバー、(b) 反論数で重み付けする指標を別途作る、
-  のいずれも**まだ実施していない**。次エージェントが再評価後のデータで判断すること。
-- **constraint_preservation は今回変更していない**: ユーザーからの指摘は constructiveness と
-  transcript整形（言い出し・ラベル）に限定されていたため、スコープを絞った。
-
-## 6. 発生中の問題
-
-- **`eval_results_rubrics_*.json` は stale（古いプロンプトでの評価結果）**。
-  タイムスタンプは 2026-07-26 19:33〜19:44 で、これは「抑制ベースへの再定義」直後の評価だが、
-  **その後に行った「自然な言い出し」「ラベルの用語除去」「So の大文字化修正」は反映されていない**。
-  これらのJSONを見て「これが最新結果」と誤解しないこと。再評価するまでは参考値扱い。
-- 上記以外の技術的なブロッカーはなし（ruff/mypy/テストは全てクリーン、下記参照）。
-
-## 7. 実行したテストと結果
-
-```
-$ .venv/bin/python -m pytest tests/unit_tests -q
-32 passed, 3 failed in 6.24s
+M  docs/implementation_overview.md
+M  experiments/eval/scoring/evaluation.py
+M  experiments/eval/scoring/evaluation_pairwise.py
+M  experiments/eval/scoring/evaluation_ranking.py
+M  experiments/eval/scoring/evaluation_rubrics.py
+M  src/agent/arguments.py
+M  src/agent/prompts.py
+M  src/agent/schema/llm_outputs.py
+A  tests/unit_tests/test_constraint_preservation_prompt_contract.py
+A  tests/unit_tests/test_constructiveness_prompt_contract.py
+M  tests/unit_tests/test_eval_transcript_format.py
+?? experiments/eval/plots/plot_rubrics_lines.py
 ```
 
-失敗3件は**本セッションの変更と無関係の既存問題**（`tests/unit_tests/test_main_argument_availability.py`
-が旧State名 `main_attempt_count` を使っている。正しくは `attack_attempt_count`）。
-過去のセッションから存在する既知の失敗で、今回のスコープ外。
+コミットはまだ作っていない。ユーザーの指示なしに既存差分を取り消したり、まとめ直したりしないこと。
 
+## 1. 今回の目的と現在地
+
+Dialect-MASの4方式を以下の2軸で公平に評価する作業を行った。
+
+- `constructiveness`: 非建設的な応答（対象ずれ、一般論、反復、非適応的な再提案）を避けられているか
+- `constraint_preservation`: 両stanceの実質的な要件を最終回答まで保持できているか
+
+対象方式:
+
+- Schema（提案手法）
+- No Schema
+- MAD
+- Free Debate
+
+旧評価ではSchemaが最下位だったが、評価定義、Schema transcriptの見せ方、生成内容を修正し、
+Schema / No Schemaを再生成した。その後、4方式を同一の
+`gpt-5.4-nano`, `reasoning_effort=high` で各100件、合計400件再評価した。
+
+**再評価とグラフ作成は完了済み。バックグラウンド評価プロセスは残っていない。**
+
+## 2. 実装した変更
+
+### 2-1. Constructiveness評価プロンプト
+
+`experiments/eval/scoring/evaluation_rubrics.py`
+
+- 「良い反論の巧みさ・新規性」ではなく、「非建設的なresponsive moveの回避」を測る定義へ変更。
+- 評価単位を objection と revision に明示。
+- 失敗モードを次の4つに限定。
+  - target mismatch
+  - generic response
+  - repetition
+  - non-adaptive revision
+- 明示的なtargetラベルや構造化表示そのものを加点・減点しないよう指定。
+- transcript長や失敗の絶対数ではなく、非建設的moveの**割合と深刻度**で採点。
+- 採点帯:
+  - 9–10: 0–10%
+  - 7–8: >10–25%
+  - 5–6: >25–50%
+  - 3–4: >50–75%
+  - 1–2: >75%
+- Constructivenessには `include_integrated_rules=False` の入力を渡し、統合フェーズの生成物を
+  議論ターンの評価へ混ぜない。
+
+同じ考え方を `evaluation_pairwise.py` / `evaluation_ranking.py` にも反映している。
+
+### 2-2. Schema transcriptのパース・評価者への提示
+
+`experiments/eval/scoring/evaluation.py`
+
+以前はSchemaのrulesを疑似的な散文へ変換していたため、接続詞、重複、句読点、
+weak-negationの所属などに不自然さがあった。現在はruleごとの忠実な段階表示へ変更。
+
+```text
+Reasoning:
+Step 1:
+  Given:
+  - ...
+  Defeasible assumptions:
+  - ...
+  Supports: ...
+Step 2:
+  Uses: result from Step 1
+  Final conclusion: ...
 ```
-$ uv run ruff check .
-All checks passed!
 
-$ uv run mypy --strict src/ experiments/
-Success: no issues found in 42 source files
+- 先行consequentが後続strongに再利用される場合は `Uses: result from Step N` と表示。
+- 攻撃対象はSchema本文へ評価側が文章を捏造せず、全方式共通の
+  `declared target — conclusion/defeasible assumption` ラベルとして表示。
+- `justified` / `overruled` / `defensible` など、プロトコル内部の勝敗statusは評価者へ見せない。
+- 複数argument間は中立的な
+  `The preceding exchange has ended. A new argument follows.` で区切る。
+- MAD / Free Debateも2ターン目以降は時系列上の応答関係をラベル表示。
+
+詳細仕様は以下。
+
+- `docs/eval_parse_method.md`
+- `docs/eval_transcript_format_spec.md`
+
+### 2-3. Schema生成内容のConstructiveness改善
+
+`src/agent/prompts.py`, `src/agent/arguments.py`
+
+- Schemaの攻撃では、まず狙う具体的な弱点を短く生成し、その内容を最初のruleから
+  load-bearingに使わせる。
+- targetを末尾で引用するだけの「後付け反論」を禁止。
+- 各ruleのconsequentに新しい実質的内容を要求し、言い換えだけの重複ruleを禁止。
+- rule構造の形式条件を生成プロンプトへ過剰に詰め込まず、決定論的validatorで検査。
+  - consequentが空でない
+  - meaningfulなstrongまたはweak-negationがある
+  - consequent重複がない
+  - 非末尾consequentが後続ruleへ接続される
+- 違反時だけrepair promptで再生成。
+
+### 2-4. Constraint Preservationの生成改善
+
+`src/agent/prompts.py`, `src/agent/schema/llm_outputs.py`
+
+- main argument生成前にstance内の理由、要件、条件、対象集団、tradeoffを内部的に洗い出し、
+  すべてをload-bearingに扱う。
+- 汎化と統合へ元の両stanceを再度渡し、coverage checkとして使用。
+- 統合ruleは、各criterionのcondition-to-conclusion mappingを保持。
+- ORは同じoutcomeを支える条件だけに使用。
+- 対立outcomeが共存し得る場合は、magnitude / breadth / likelihood / reversibility /
+  mitigationを対称に比較。
+- 一方だけへ自動的な拒否権、precautionary default、burden shift、未提示のtie-breakerを
+  与えない。
+- 最終回答では両stanceの全material itemを明示的に満たす、限定する、またはoverride理由を説明。
+- 中間argumentやintegrated ruleで落ちたstance要件は最終回答で復元。
+- `AG1`, `AG2`, `integrated rule`, `decision rule` など内部語彙を最終回答へ出さない。
+
+## 3. 再生成したデータ
+
+10トピック:
+
+```text
+artificial_intelligence
+binge_watching
+cell_phones
+electric_vehicles
+internet
+net_neutrality
+pokemon_go
+ride_sharing
+social_media
+space_colonization
 ```
 
-pre-commit フック（`.husky/pre-commit`）は `ruff check .` と `mypy --strict src/ experiments/` を
-実行する。上記の通り両方通過済みなので、そのままコミット可能。
+### Schema
 
-## 8. 次に実行すべきコマンド
+元ディレクトリ:
 
-### 8-1. まずコミット（変更を確定）
+```text
+logs/sweep_all_topics_schema_20260726_220312
+```
+
+中断・再開の過程で100 unique topic/attemptを回収したが、物理JSONが103件になった。
+重複は以下。
+
+- attempts09 / ride_sharing
+- attempts10 / ride_sharing
+- attempts10 / cell_phones
+
+元ディレクトリは証跡として変更していない。評価には重複を除いたコピーを使用。
+
+```text
+logs/sweep_all_topics_schema_20260726_220312_dedup
+```
+
+古い重複3件はコピー側から `/tmp/dialect_schema_duplicate_logs` へ移動した。
+
+### No Schema
+
+```text
+logs/sweep_all_topics_no_schema_20260726_220317
+```
+
+100/100生成済み。
+
+### 比較対象の既存ベースライン
+
+```text
+logs/sweep_mad_cost10_002915
+logs/sweep_free_debate_cost10_002919
+```
+
+MAD / Free Debateは生成し直していない。評価プロンプトだけ最新状態で再実行した。
+
+旧Schema / No Schemaログは以下にあり、因果分解用に利用可能。
+
+```text
+logs/sweep_schema_cost10_233448
+logs/sweep_no_schema_cost10_002909
+```
+
+## 4. 最新の評価結果
+
+評価条件:
+
+```text
+model: gpt-5.4-nano
+reasoning_effort: high
+各方式: 100件（10トピック × setting 1..10）
+合計: 400件
+各ログにつきConstructivenessとConstraint Preservationを別々に評価
+```
+
+結果ファイル:
+
+```text
+logs/sweep_all_topics_schema_20260726_220312_dedup/eval_results_rubrics_nano_high_current.json
+logs/sweep_all_topics_no_schema_20260726_220317/eval_results_rubrics_nano_high_current.json
+logs/sweep_mad_cost10_002915/eval_results_rubrics_nano_high_current.json
+logs/sweep_free_debate_cost10_002919/eval_results_rubrics_nano_high_current.json
+```
+
+すべて `per_run=100`、各setting `n_valid=10/10` を確認済み。
+
+全10 settingの平均:
+
+| Method | Constructiveness | Constraint Preservation | Quality Average |
+|---|---:|---:|---:|
+| Schema | 8.31 | **8.19** | 8.250 |
+| No Schema | 8.54 | 8.17 | **8.355** |
+| MAD | **9.71** | 4.91 | 7.310 |
+| Free Debate | 9.56 | 6.99 | 8.275 |
+
+重要な解釈:
+
+- SchemaはConstructivenessでは4方式中最低だが、8.31まで改善し、No Schemaとの差は0.23。
+- SchemaはConstraint Preservationで首位（8.19）。
+- 総合ではMADを明確に上回り、最下位ではない。
+- MADのConstructiveness 9.71 / Preservation 4.91という分離から、評価器が全方式を
+  一律に高得点化しただけではない。
+
+## 5. グラフと集計
+
+新規スクリプト:
+
+```text
+experiments/eval/plots/plot_rubrics_lines.py
+```
+
+注意: 現在untrackedなので、コミット対象に含めるなら明示的にaddすること。
+
+生成済み成果物:
+
+```text
+logs/eval_comparison_nano_high_current/rubrics_summary.csv
+logs/eval_comparison_nano_high_current/constructiveness.png
+logs/eval_comparison_nano_high_current/constraint_preservation.png
+logs/eval_comparison_nano_high_current/quality_average_v2.png
+logs/eval_comparison_nano_high_current/rubrics_comparison.png
+```
+
+`logs/` はgit管理外。画像は目視確認済みで、凡例、軸、線、タイトルの崩れなし。
+
+横軸の意味は方式で異なる。
+
+- Schema / No Schema: attempts 1..10
+- MAD / Free Debate: turns 1..10
+
+グラフ再生成コマンド:
 
 ```bash
 cd /Users/yuzuki/Desktop/Dialect-MAS
-git add -A
-git commit -m "$(cat <<'EOF'
-[fix]評価プロンプトの再定義: constructiveness抑制ベース化・transcript自然文化
-
-- schemaのtranscript整形バグ修正（chain重複除去）と自然な言い出しへの変更
-  （I have a counter argument against... → I disagree with your conclusion that...）
-- ターンラベルからプロトコル用語(rebut/undercut/main)を除去し評価器に伝わる形に
-- constructivenessを「積極的前進」から「非建設的応酬の抑制」ベースへ再定義
-  （散文の巧みさ・新規性への交絡を除去）
-- evaluation_ranking.pyの同種プロンプトにも用語除去を適用
-- 実装解説ドキュメント docs/implementation_overview.md を新規作成
-EOF
-)"
+env MPLBACKEND=Agg \
+  MPLCONFIGDIR=/tmp/dialect-mpl-cache \
+  XDG_CACHE_HOME=/tmp/dialect-xdg-cache \
+  .venv/bin/python -m experiments.eval.plots.plot_rubrics_lines \
+  --schema logs/sweep_all_topics_schema_20260726_220312_dedup/eval_results_rubrics_nano_high_current.json \
+  --no-schema logs/sweep_all_topics_no_schema_20260726_220317/eval_results_rubrics_nano_high_current.json \
+  --mad logs/sweep_mad_cost10_002915/eval_results_rubrics_nano_high_current.json \
+  --free-debate logs/sweep_free_debate_cost10_002919/eval_results_rubrics_nano_high_current.json \
+  --out-dir logs/eval_comparison_nano_high_current
 ```
 
-### 8-2. 10トピックサンプルで再評価（両評価器）
+macOS sandbox環境では `MPLBACKEND=Agg` と書き込み可能なcache pathがないと
+Matplotlibがfont cache生成中にexit 134になることがある。
 
-既存の10トピックデータ（`logs/sweep_{schema,no_schema,mad,free_debate}_cost10_*/`）に対して
-新プロンプトで再評価する。生成は不要（ログを読むだけ、安価）。
+## 6. 検証
+
+今回の変更作業中に以下を確認済み。
+
+- `ruff check`: pass
+- `mypy --strict src/ experiments/`: pass
+- 評価transcript / prompt contract関連テスト: pass
+- 折れ線グラフスクリプト単体のruff: pass
+- 評価JSON: 各方式100件、各setting 10/10 valid
+- 集計CSV: 40行（4方式 × 10 setting）
+- グラフ: 目視確認済み
+
+全unit testには従来からの無関係な失敗がある。
+`tests/unit_tests/test_main_argument_availability.py` が旧State名
+`main_attempt_count` を参照しており、現行は `attack_attempt_count`。
+この既知問題を今回の変更由来と誤認しないこと。
+
+## 7. なぜ改善したと考えられるか
+
+現時点の仮説:
+
+1. **絶対スコアの上昇**
+   Constructivenessをraw failure countや「満点は稀」という曖昧な厳格採点から、
+   responsive moveに占める失敗割合ベースへ修正した影響が大きい。
+2. **Schema固有の改善**
+   raw構造や不自然な疑似散文ではなく、rule chain、assumption、targetを忠実に見せたため、
+   評価者が実質的な応答関係を追えるようになった。
+3. **内容そのものの改善**
+   target engagementを最初のruleからload-bearingにしたこと、stance coverageを
+   main/generalization/integration/final answerの全段階で保持したことが効いた。
+
+ただし、新ログと新評価プロンプトを同時に使っているため、現状の再評価だけでは
+「評価方法の改善」と「生成内容の改善」の寄与を厳密に分離できない。
+
+## 8. 次に行うなら: 因果分解
+
+ユーザーとの直前の話題は「なぜ良くなったのか」。
+次の有効な分析は、旧ログを**現在の評価器**で評価すること。
+
+最低限、次の比較を行う。
+
+| 生成ログ | 評価器 | 分かること |
+|---|---|---|
+| 旧Schema / 旧No Schema | 現在 | 評価定義・パース変更だけの効果 |
+| 新Schema / 新No Schema | 現在 | 今回の最終結果 |
+
+旧ログに現在のtarget保存情報がない場合、パース改善の一部を完全には再現できない点に注意。
+より厳密には「旧評価コード × 新ログ」も必要だが、旧コードを作業ツリーへcheckoutして
+現在の変更を壊してはいけない。必要なら別worktreeまたは一時的なスクリプトで行う。
+
+また、評価はnano/highの単回採点なので、微差（例: SchemaとNo SchemaのPreservation差0.02）を
+強い優位性として断定しないこと。複数seed相当の再評価やbootstrap CIが次の統計的確認候補。
+
+## 9. Claudeが最初に行う確認
 
 ```bash
 cd /Users/yuzuki/Desktop/Dialect-MAS
-for m in schema no_schema mad free_debate; do
-  d=$(ls -d logs/sweep_${m}_cost10_* | head -1)
-  # nano-high
-  .venv/bin/python -m experiments.eval.runners.eval_sweep_rubrics --sweep "$d" \
-    --model gpt-5.4-nano --reasoning-effort high --workers 5 \
-    --out "$d/eval_results_rubrics_nano_high.json"
-  # mini
-  .venv/bin/python -m experiments.eval.runners.eval_sweep_rubrics --sweep "$d" \
-    --model gpt-5.4-mini --workers 5 \
-    --out "$d/eval_results_rubrics_mini.json"
-done
+git status --short
+git diff --cached --stat
+git diff -- HANDOFF.md experiments/eval/plots/plot_rubrics_lines.py
 ```
 
-実行時間の目安: 前回同等の処理で各ジョブ数分〜十数分（並列実行推奨、`run_in_background`等）。
-
-### 8-3. 結果の確認・グラフ更新
-
-前回作成した比較用Artifact（URL: `https://claude.ai/code/artifact/dc4ec306-a6ae-498c-b80e-8d3c2a6dd904`）
-と同じ手順で、新しい `eval_results_rubrics_*.json` からデータを再抽出してグラフを更新する。
-特に注目すべき点:
-
-- **schema の constructiveness が上がったか**（前回の抑制ベース化だけで nano-high +0.88、
-  no_schemaとの差が0.54→0.08まで縮まっていた。今回の言い出し・ラベル変更でさらに縮まるか拡がるか）
-- 短ターン有利の非対称が結果にどう出るか（同じ反論回数どうしで比較すること）
-
-### 8-4. その後の判断ポイント（ユーザーと相談すべき事項）
-
-- n=99フルデータでの再検証をするか（追加コスト ≈$130、nano@high想定）
-- 短ターン有利の非対称への対策（別軸に分離 or 運用でカバー）をどうするか
+その後、ユーザーの次の依頼に応じる。現時点で再評価、コミット、旧ログのablationは
+依頼されていないため、勝手に外部APIを再実行したりコミットしたりしないこと。

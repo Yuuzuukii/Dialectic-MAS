@@ -160,6 +160,24 @@ async def test_can_generate_main_routes_to_generation_when_available(monkeypatch
     )
 
 
+async def test_main_instruction_warns_against_cross_role_repetition() -> None:
+    prior_defeat = ArgumentRecord(
+        type="defeat", argument=argument_payload("earlier defeat conclusion"), support=[], agent="AG1"
+    )
+    state = State(
+        question="What camera should we buy?",
+        agent1_stance="a is a camera.",
+        agent2_stance="",
+        history=[prior_defeat],
+        argument_records=[prior_defeat],
+    )
+
+    instruction = main_instruction(state)
+
+    assert "<no_repetition>" in instruction
+    assert "attack, or defense" in instruction
+
+
 async def test_can_generate_main_errors_when_yes_without_argument(monkeypatch) -> None:
     async def missing_argument(*args, **kwargs):
         return SimpleNamespace(

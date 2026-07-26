@@ -145,9 +145,14 @@ class PromptTemplates:
         "<stance>\n{stance}\n</stance>",
         "<generalization_principles>\n"
         "- Treat both sides' warrants as inputs to be preserved at the level of value or principle.\n"
+        "- Also use the source stances as a coverage check: preserve every distinct substantive "
+        "requirement or consideration from both stances at an appropriate level of abstraction, "
+        "even when a compressed final warrant did not repeat it.\n"
         "- Do not discard AG2's warrant merely because it conflicts with AG1's stance.\n"
         "- Do not simply restate AG1's own warrant as the synthesis result.\n"
         "- Abstract away from issue-specific entities, examples, and one-off facts.\n"
+        "- Abstraction may generalize a requirement, but must not erase what makes it substantively "
+        "different from the other requirements.\n"
         "- Preserve the condition under which each warrant is rationally compelling.\n"
         "- Preserve the conclusion type supported by each warrant.\n"
         "- Do not choose a winner between the two sides during generalization.\n"
@@ -175,10 +180,24 @@ class PromptTemplates:
         "</role>",
         "<stance>\n{stance}\n</stance>",
         "<integration_principles>\n"
-        "- The integrated rule must preserve every generalized criterion as an alternative sufficient condition.\n"
+        "- The integrated rule must preserve every generalized criterion's condition-to-conclusion mapping.\n"
         "- The integrated rule must be more abstract than any individual criterion.\n"
         "- The integrated rule must not merely list the criteria without unifying them.\n"
         "- The integrated rule must be usable by either side in the next round.\n"
+        "- When criteria support different outcomes, express one decision rule that says which "
+        "outcome follows under each condition; do not combine opposing conditions under one OR "
+        "and leave their outcomes ambiguous.\n"
+        "- If opposing conditions can both be true, adjudicate them symmetrically: compare their "
+        "relevant magnitude, breadth, likelihood, reversibility, and available mitigation. Do not "
+        "make one side's merely possible or plausible benefit/harm an automatic veto unless a "
+        "source criterion explicitly establishes a non-compensable threshold.\n"
+        "- Apply the same evidential threshold to both sides. Do not require demonstrated benefits "
+        "while accepting merely plausible harms, or vice versa.\n"
+        "- Do not invent a precautionary or caution presumption, default outcome, burden shift, "
+        "or tie-breaker that is absent from the source criteria. If the supplied criteria do not "
+        "determine the balance, preserve that unresolved comparison instead of favoring a side.\n"
+        "- Treat the source stances as a coverage check. The integrated rule may abstract their "
+        "requirements, but must not silently drop a distinct requirement from either side.\n"
         "- Do not discard AG2's generalized criterion merely because it conflicts with AG1's stance.\n"
         "- Do not simply restate AG1's own criterion as the integrated rule.\n"
         "- Do not produce a final answer to the original Issue.\n"
@@ -191,11 +210,42 @@ class PromptTemplates:
         _INTEGRATION_SYSTEM_BASE,
         "<schema_overlay>\n"
         "Represent the integrated rule as one structured reusable rule.\n"
-        "- The antecedent should cover each generalized criterion as an alternative sufficient condition.\n"
-        "- Use OR to combine alternative sufficient conditions.\n"
-        "- The consequent should state the shared generalized conclusion.\n"
+        "- Preserve the condition and supported outcome of every generalized criterion.\n"
+        "- Use OR only to combine alternative conditions that support the same outcome.\n"
+        "- If criteria support opposing outcomes, the rule must explicitly map each condition "
+        "to its corresponding outcome as a higher-order decision rule.\n"
+        "- When opposing conditions may coexist, the mapping must include a neutral comparison "
+        "that determines which consideration governs; neither side receives an automatic veto.\n"
+        "- The consequent should state the shared decision principle or outcome mapping.\n"
         "- The result must be one rule, not multiple unrelated rules.\n"
         "</schema_overlay>",
+    )
+
+    _FINAL_ANSWER_PRESERVATION = _system(
+        "<constraint_preservation>\n"
+        "- Before drafting, silently identify every distinct substantive constraint, requirement, "
+        "condition, and consideration stated in AG1 Stance and AG2 Stance.\n"
+        "- Account for every identified item in the answer: explicitly satisfy it, qualify it, "
+        "or explain why it is overridden by another consideration.\n"
+        "- Choosing one side's conclusion does not permit silently omitting the other side's "
+        "requirements.\n"
+        "- The dialogue, justified argument, and integrated rules may develop or resolve the "
+        "stances, but they do not replace them. Restore any stance requirement that those "
+        "intermediate representations omitted.\n"
+        "- Preserve specific thresholds, exceptions, preconditions, affected groups, and named "
+        "tradeoffs when they are material. Do not replace them with a generic 'both sides' summary.\n"
+        "</constraint_preservation>",
+        "<answer_style>\n"
+        "- Lead with a direct answer, then give only the rationale needed to show how the material "
+        "requirements from both stances were handled.\n"
+        "- Never output the labels 'AG1' or 'AG2'. Refer to the substantive benefit, risk, or "
+        "requirement instead of referring to a side or agent.\n"
+        "- Do not mention agents, turns, rounds, the debate process, or internal protocol terms.\n"
+        "- Apply any integrated rule silently in ordinary prose; do not quote it or describe it "
+        "as an 'integrated rule', 'decision rule', or internal evaluation procedure.\n"
+        "- Do not offer additional work or end with phrases such as 'If you want'.\n"
+        "- Avoid repeating the same conclusion or caveat in multiple sections.\n"
+        "</answer_style>",
     )
 
     # justified側: AG1が常に客観的な統合役として最終回答を書く（justifiedされたのが
@@ -205,6 +255,7 @@ class PromptTemplates:
         "Based on the debate so far and the argument that was justified, write the final "
         "answer to the original question.\n"
         "</task>",
+        _FINAL_ANSWER_PRESERVATION,
     )
 
     # 合意（justified な決着）に至らないままラウンド上限に達したときの最終回答。
@@ -236,6 +287,7 @@ class PromptTemplates:
         "was reached. Write the answer as a direct, self-contained response to the "
         "question.\n"
         "</style>",
+        _FINAL_ANSWER_PRESERVATION,
     )
 
     # ---- User: per-turn variable input ----
@@ -244,12 +296,17 @@ Question: {question}
 
 AG1 Stance: {agent1_stance}
 AG2 Stance: {agent2_stance}
+{integrated_rules_block}
 
 Dialogue history:
 {dialogue_history}
 
 The argument that was justified:
 {justified_argument}
+
+Final check before returning:
+- Do not output "AG1", "AG2", "integrated rule", or "decision rule".
+- Ensure every material item from both stances is explicitly handled.
 """
 
     FINAL_ANSWER_NO_CONSENSUS_USER = """
@@ -263,6 +320,10 @@ Dialogue history:
 
 Most developed argument from the debate:
 {justified_argument}
+
+Final check before returning:
+- Do not output "AG1", "AG2", "integrated rule", or "decision rule".
+- Ensure every material item from both stances is explicitly handled.
 """
 
     # ---- Free debate (弁証法プロトコルを使わない自由討議ベースライン) ----
@@ -382,6 +443,26 @@ def main_instruction(state: Any) -> str:
         "Your main argument must answer the Issue directly.",
         "Every rule consequent must either be an intermediate fact needed to support your direct answer or the direct answer itself.",
         "</issue_answer_scope>",
+        "",
+        "<stance_coverage>",
+        "Before constructing the argument, silently identify every distinct substantive reason, "
+        "requirement, condition, affected group, and tradeoff stated in your stance.",
+        "Your main argument must account for every identified item as a load-bearing part of its "
+        "reasoning. You may combine closely related items, but do not silently omit one, replace it "
+        "with a more generic claim, or preserve only the easiest subset.",
+        "Keep any material number, threshold, exception, or named affected group from the stance "
+        "when it is part of the support provided.",
+        "</stance_coverage>",
+        "",
+        "<no_repetition>",
+        "Before answering, compare your planned support against everything your side has already "
+        "said earlier in this debate, in any role (an earlier main argument, attack, or defense) — "
+        "not only earlier main arguments.",
+        "If the only support you can construct substantially restates content your side already "
+        "presented earlier — the same facts or reasoning, just reworded or repackaged into a new "
+        "argument — set can_generate=NO instead of resubmitting it. This applies even if you "
+        "yourself introduced that content in a different role (e.g. as an earlier attack).",
+        "</no_repetition>",
     ]
 
     revision_context = (
@@ -415,7 +496,8 @@ def main_instruction(state: Any) -> str:
     lines += [
         "",
         "<response_contract>",
-        "If you can construct a main argument, set can_generate=YES and include Argument.",
+        "If you can construct a main argument with a genuinely new point (see <no_repetition>), "
+        "set can_generate=YES and include Argument.",
         "Otherwise, set can_generate=NO and omit Argument.",
         "</response_contract>",
     ]
@@ -657,6 +739,15 @@ def generalization_instruction(state: Any) -> str:
             str(state.warrant_result or ""),
             "</warrants>",
             "",
+            "<source_stances>",
+            "<ag1_stance>",
+            str(state.agent1_stance),
+            "</ag1_stance>",
+            "<ag2_stance>",
+            str(state.agent2_stance),
+            "</ag2_stance>",
+            "</source_stances>",
+            "",
             "<response_contract>",
             "Return generalized criteria only.",
             "Do not return an integrated rule yet.",
@@ -681,6 +772,15 @@ def integration_instruction(state: Any) -> str:
             "<generalized_criteria>",
             str(state.generalization_result or ""),
             "</generalized_criteria>",
+            "",
+            "<source_stances>",
+            "<ag1_stance>",
+            str(state.agent1_stance),
+            "</ag1_stance>",
+            "<ag2_stance>",
+            str(state.agent2_stance),
+            "</ag2_stance>",
+            "</source_stances>",
             "",
             "<response_contract>",
             "Return exactly one integrated rule.",

@@ -24,30 +24,44 @@ You are an evaluator LLM. Below are {n} independent debates, all addressing the
 SAME question from the SAME two stances, produced by different (unlabeled)
 methods. Each is labeled with a letter (A, B, C, ...).
 
-Rank the {n} debates from MOST to LEAST constructive, judging the exchange of
-objections in each debate transcript in isolation (do not let one debate's
-labeling or position influence your judgment of another).
+Rank the {n} debates from MOST to LEAST constructive. Judge each transcript in
+isolation before comparing them.
 
-Constructiveness means each objection in a transcript avoids non-constructive
-exchange and instead advances the debate. An "objection" is any turn that responds to
-a previous turn (challenging its conclusion or one of its premises). Judge each
-objection against these failure modes:
-  - Repeats the objecting side's own prior claim essentially unchanged, without
-    engaging the specific point it targets.
-  - Is a generic or vague rebuttal that could apply to almost any claim, rather
-    than engaging the specific claim or assumption actually made by the target.
-  - Ignores or talks past the target's specific point (a non-sequitur relative
-    to what was actually said).
-  - Restates a point that was already raised and answered earlier in the
-    transcript, without adding new reasoning.
+<evaluation_units>
+A "responsive move" is either:
+  1. an objection that challenges an earlier conclusion, premise, or assumption; or
+  2. a new argument introduced after an earlier exchange has closed, where the speaker
+     has an opportunity to adapt to unresolved objections.
 
-A high-constructiveness debate is one where every objection engages a specific
-point with new reasoning, so the exchange visibly narrows or sharpens over
-time. A low-constructiveness debate is dominated by circular restatement,
-generic rebuttals, or turns that talk past each other.
+The first opening argument is context. Narrator-style transition notes and shared rules
+are context only. Infer response relations from content and chronology even if they are
+not explicitly labeled.
+</evaluation_units>
 
-IMPORTANT: You must produce a strict total ranking (no ties). Base the ranking
-only on constructiveness as defined above, not on which side "wins" the debate.
+<failure_modes>
+A responsive move is non-constructive when it:
+  - ignores, misrepresents, or talks past the specific point it answers;
+  - gives generic reasoning that does not depend on the target's actual content;
+  - substantially repeats the speaker's earlier position or a point already answered,
+    without adapting it to the latest response; or
+  - introduces a revised argument after an exchange closes but fails to address the
+    unresolved objection that made revision necessary.
+
+Merely quoting a target is not sufficient: the supporting reason must actually bear on
+that target and be used in reaching the response's conclusion. A response need not be
+novel or elaborate when a simple, specific adaptation is sufficient.
+</failure_modes>
+
+<comparison_rules>
+- Compare the PROPORTION and SEVERITY of non-constructive responsive moves, not their
+  raw count. Do not penalize a debate merely because it is longer.
+- Judge semantic interaction only. Do not reward explicit labels, structured formatting,
+  rhetorical polish, verbosity, factual sophistication, or which side wins.
+- If two debates have the same failure proportion, prefer the one with less severe
+  failures, then the one whose later moves adapt more directly to unresolved objections.
+</comparison_rules>
+
+IMPORTANT: Produce a strict total ranking with no ties.
 
 Question:
 {question}

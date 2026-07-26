@@ -241,15 +241,40 @@ def validate_argument_body(body: ArgumentBody) -> list[str]:
     連鎖制約を、生成プロンプトから外してここで決定論的に検証する（GPT-5 の推論予算を
     帳簿付けに費やさせないため）。
 
-    ここで強制するのは「連鎖として素直に望ましい」2条件のみ:
-      1. 2つ以上の rule が同じ consequent を持たない（重複禁止）。
-      2. 非末尾 consequent は、後続 rule の strong 先行詞として再利用される（連結性）。
+    ここで強制する形式条件:
+      1. 各ruleのconsequentは空でない。
+      2. 各ruleは意味のあるstrongまたはweak_negationを少なくとも1つ持つ。
+      3. 2つ以上のruleが同じconsequentを持たない（重複禁止）。
+      4. 非末尾consequentは、後続ruleのstrong先行詞として再利用される（連結性）。
     旧仕様の「r_i (i>1) の strong 先行詞はすべて先行 consequent でなければならない」は、
     後段で新しい前提事実を導入する妥当な論証まで弾くため、あえて強制しない。
     """
     rules = body.rules or []
     consequents = [(rule.consequent or "").strip() for rule in rules]
     violations: list[str] = []
+    placeholder_antecedents = {
+        "n/a",
+        "no additional premise needed",
+        "no additional rule needed",
+        "none",
+    }
+
+    for index, (rule, consequent) in enumerate(zip(rules, consequents, strict=True)):
+        if not consequent:
+            violations.append(f"rule {index + 1} has an empty consequent")
+        antecedents = [
+            *(rule.antecedent.strong or []),
+            *(rule.antecedent.weak_negation or []),
+        ]
+        meaningful = [
+            item.strip()
+            for item in antecedents
+            if item.strip().lower().rstrip(".") not in placeholder_antecedents
+        ]
+        if not meaningful:
+            violations.append(
+                f"rule {index + 1} has no meaningful strong or weak_negation antecedent"
+            )
 
     seen: set[str] = set()
     for consequent in consequents:
@@ -277,11 +302,13 @@ def _repair_instruction(violations: list[str]) -> str:
     bullet = "\n".join(f"- {violation}" for violation in violations)
     return (
         "<repair>\n"
-        "Your previous Argument's rules did not form a connected chain:\n"
+        "Your previous Argument violated the rule-structure contract:\n"
         f"{bullet}\n"
-        "Regenerate the Argument so that every non-final consequent is reused as a "
-        "strong antecedent of a later rule, and no two rules share the same "
-        "consequent. Keep the substance of your reasoning; only fix the structure.\n"
+        "Regenerate the Argument so every rule has a non-empty consequent and at least "
+        "one meaningful strong or weak_negation antecedent, every non-final consequent "
+        "is reused as a strong antecedent of a later rule, and no two rules share the "
+        "same consequent. Never add placeholder rules such as 'No additional rule "
+        "needed.' Keep the substance of your reasoning; only fix the structure.\n"
         "</repair>"
     )
 
@@ -485,13 +512,16 @@ async def generate_final_answer(state: Any) -> str:
     """
     justified = state.justified_argument
     dialogue_history = json.dumps(state.dialogue_history, ensure_ascii=False, indent=2)
+    if state.integrated_rules:
+        rules_text = "\n".join(f"- {rule}" for rule in state.integrated_rules)
+        integrated_rules_block = (
+            "\nShared integrated rules produced in earlier rounds:\n"
+            f"{rules_text}\n"
+        )
+    else:
+        integrated_rules_block = ""
 
     if state.consensus_reached is False:
-        if state.integrated_rules:
-            rules_text = "\n".join(f"- {rule}" for rule in state.integrated_rules)
-            integrated_rules_block = f"\nThe following integrated rules were agreed as undeniable by both sides:\n{rules_text}\n"
-        else:
-            integrated_rules_block = ""
         system = PromptTemplates.FINAL_ANSWER_NO_CONSENSUS_SYSTEM
         user = PromptTemplates.FINAL_ANSWER_NO_CONSENSUS_USER.format(
             question=state.question,
@@ -507,6 +537,7 @@ async def generate_final_answer(state: Any) -> str:
             question=state.question,
             agent1_stance=state.agent1_stance,
             agent2_stance=state.agent2_stance,
+            integrated_rules_block=integrated_rules_block,
             dialogue_history=dialogue_history,
             justified_argument=justified,
         ).strip()

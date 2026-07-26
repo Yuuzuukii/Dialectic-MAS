@@ -119,6 +119,24 @@ flowchart TD
 - **schema**: 論証本体を `ArgumentBody`（rules/Conc/Ass）の構造化出力で強制。生成後 `validate_argument_body` で連鎖の妥当性を検証（違反時1回だけ矯正再生成）。
 - **no_schema**: 論証本体は自由記述テキスト。ただし「生成可否（can_generate 等）」と「攻撃種別＋対象（rebut/undercut + target）」は弁証法遷移の機械判定に必要なので**両モードとも構造化出力のまま**。
 
+### 1-5. 両スタンスの要件を保持する仕組み
+
+`stance → main argument → generalized criteria → integrated rule → final answer` の各段階で、
+片側の要件や具体条件が中間表現から脱落しないよう、次のカバレッジ契約を置いている。
+
+- `main_instruction`: 自分のスタンスにある理由・要件・条件・対象集団・数値を先に列挙し、
+  全項目を主論証の推論に含める。
+- `generalization_instruction` / `integration_instruction`: warrantだけでなく両者の元スタンスも入力し、
+  warrantへの圧縮時に消えた要件を復元する。
+- integrated rule: 各基準の「条件→帰結」の対応を保持する。異なる帰結を支える条件を曖昧な
+  `OR`へまとめず、どの条件ならどの帰結になるかを一つの意思決定ルールとして表す。
+  両条件が同時に成立し得る場合は同じ証拠水準で比較し、元の基準にない慎重側デフォルトや
+  自動的な拒否権を追加しない。
+- `generate_final_answer`: justified/fallbackのどちらでも両スタンスと既存integrated rulesを渡す。
+  最終回答は各要件を満たす・限定する・理由付きで退ける、のいずれかで明示的に処理する。
+- `validate_argument_body`: 空の帰結や`No additional rule needed`のようなダミー先行詞を拒否し、
+  構造修復を要求する。
+
 ---
 
 ## 2. 評価系：`experiments/eval/`
@@ -146,9 +164,11 @@ experiments/eval/
 
 全手法を**同じ体裁**の transcript に揃える。ここが評価の公平性の要。
 
-- schema: `ArgumentBody`（rules/Conc/Ass）を `_schema_utterance` で発話体英文へ機械変換（rule 連鎖を保持、`Therefore,` 二重化や重複は除去）
+- schema: `ArgumentBody`（rules/Conc/Ass）を `_schema_utterance` でrule単位の中立表示へ機械変換（`Given` / `Defeasible assumptions` / `Supports` / `Final conclusion`、rule連鎖は`Uses: result from Step N`で保持）
 - no_schema / mad / free_debate: 元の自由記述テキストをそのまま使い、ラベル行だけ揃える
-- 攻撃ターンは対象を明示（`I have a counter argument against the opinion/premise "..."` またはラベル注記）
+- schema/no_schema の攻撃は実際の `target_id` を、mad/free_debate の2ターン目以降は直前ターンを応答先として明示する
+- schema/no_schema の攻撃対象はラベルへ`declared target`として表示し、参照先に実在する対象だとパーサー側では断定しない
+- 内部statusの勝敗は表示せず、次のmainがある場合だけ中立的なスレッド境界を挿入する
 
 ### 2-2. `runners/` — 実行CLI
 
@@ -177,7 +197,7 @@ experiments/eval/
 
 | 軸 | 定義（要旨） | 入力 |
 |---|---|---|
-| constructiveness | 各反論が具体点に新しい論拠で踏み込み議論を前進させているか（反復・一般論・すれ違い・既出蒸し返しを減点） | debate_transcript |
+| constructiveness | 反論と改訂主張のうち、対象不一致・一般論・反復・未解決反論に適応しない改訂が占める割合と深刻度。事実性・文章の巧さ・構造ラベル・長さ・勝敗は評価しない | debate_transcript（integrated_rules は除外） |
 | constraint_preservation | 最終回答が両スタンスの具体要件を保持しているか（片側丸呑み・一般的折衷を減点、integrated_rules の反映を加点） | stance＋final_answer＋integrated_rules（transcript は渡さない） |
 
 いずれも 1–10 の整数。評価器モデル（nano/mini）や `reasoning_effort` でスコアは変わりうるので、
