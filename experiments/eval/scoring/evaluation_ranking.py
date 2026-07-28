@@ -168,4 +168,129 @@ def rank_debates(
     }
 
 
-__all__ = ["RANKING_INSTRUCTION", "rank_debates"]
+CONSTRAINT_PRESERVATION_RANKING_INSTRUCTION = """
+You are an evaluator LLM. Below are {n} independent final answers to the SAME question,
+written for the SAME two stances, produced by different (unlabeled) methods. Each is
+labeled with a letter (A, B, C, ...). You are NOT shown the debate that produced them.
+
+Rank the {n} final answers from BEST to WORST at preserving the constraints and
+requirements presented in each side's stance.
+
+<criteria>
+Judge only whether each final answer, read against the two stances, respects the
+specific constraints, conditions, and requirements each side raised — either by
+explicitly satisfying/addressing them, or by taking a position that a reasonable
+reading of both stances would still endorse — rather than silently dropping one side's
+requirements in favor of a generic compromise or an unqualified endorsement of only one
+side.
+
+Penalize an answer that:
+  - ignores a specific, substantive requirement or condition named in one side's stance
+    (e.g. a named threshold, exception, or precondition) without acknowledging it;
+  - resolves the disagreement with a generic compromise that doesn't engage with the
+    specific substance either side raised;
+  - adopts one side's position wholesale while leaving the other side's stated
+    requirements completely unaddressed.
+
+Reward an answer that names the specific constraints/requirements from both stances and
+shows how it accounts for them (satisfies, qualifies, or explains why one is
+overridden), reaching a position that could not be reached without taking both sides'
+specific requirements into account.
+</criteria>
+
+IMPORTANT: Produce a strict total ranking with no ties.
+
+Question:
+{question}
+
+AG1 Stance:
+{agent1_stance}
+
+AG2 Stance:
+{agent2_stance}
+
+{answers_block}
+
+Respond ONLY with a JSON object:
+{{
+  "ranking": ["<letter of best>", "...", "<letter of worst>"],
+  "evaluator_model": "<model name>"
+}}
+""".strip()
+
+
+def _format_answers_block(labeled_answers: list[tuple[str, str]]) -> str:
+    blocks = []
+    for label, answer in labeled_answers:
+        blocks.append(f"Final Answer {label}:\n{answer}")
+    return "\n\n".join(blocks)
+
+
+def rank_final_answers_by_constraint_preservation(
+    logs_by_key: dict[str, dict[str, Any]],
+    evaluator_model: Any,
+    *,
+    rng: random.Random | None = None,
+) -> dict[str, Any]:
+    """同一トピックの複数候補の最終回答を、constraint_preservation の観点からランキングする.
+
+    複数候補は手法違い、または同一手法の設定違いのどちらでもよい。
+    `rank_debates` は debate_transcript（議論部分）を比較するのに対し、こちらは
+    final_answer だけを比較する（constraint_preservation の採点自体が transcript を
+    見ないのと同じ入力設計）。
+
+    `logs_by_key`: {key: log_dict, ...}（同一トピック・同一 question/stance が前提。
+    key はmethod名でも `attempts01`のような設定名でも良い）。
+    戻り値: {key: rank (1が最も要件を保持), ...} を含む dict。
+    """
+    rng = rng or random.Random()
+    keys = list(logs_by_key.keys())
+    rng.shuffle(keys)  # 提示順を毎回ランダム化し、位置バイアスを避ける
+    letters = [chr(ord("A") + i) for i in range(len(keys))]
+    label_to_key = dict(zip(letters, keys))
+
+    eval_inputs = {k: build_eval_input(logs_by_key[k]) for k in keys}
+    first = eval_inputs[keys[0]]
+
+    labeled_answers = [
+        (label, eval_inputs[label_to_key[label]]["final_answer"]) for label in letters
+    ]
+
+    prompt = CONSTRAINT_PRESERVATION_RANKING_INSTRUCTION.format(
+        n=len(keys),
+        question=first["question"],
+        agent1_stance=first["agent1_stance"],
+        agent2_stance=first["agent2_stance"],
+        answers_block=_format_answers_block(labeled_answers),
+    )
+
+    try:
+        raw = evaluator_model.invoke(prompt)
+        result = _parse_json_response(raw, evaluator_model)
+        ranking = result.get("ranking")
+        if not isinstance(ranking, list):
+            ranking = []
+    except Exception as e:  # noqa: BLE001
+        print(f"Constraint-preservation ranking evaluation failed: {e}")  # noqa: T201
+        ranking = []
+
+    key_rank: dict[str, int | None] = {k: None for k in keys}
+    for position, label in enumerate(ranking, start=1):
+        key = label_to_key.get(label)
+        if key is not None and key_rank.get(key) is None:
+            key_rank[key] = position
+
+    return {
+        "key_rank": key_rank,
+        "label_to_key": label_to_key,
+        "raw_ranking": ranking,
+        "evaluator_model": evaluator_model.model,
+    }
+
+
+__all__ = [
+    "RANKING_INSTRUCTION",
+    "CONSTRAINT_PRESERVATION_RANKING_INSTRUCTION",
+    "rank_debates",
+    "rank_final_answers_by_constraint_preservation",
+]

@@ -44,6 +44,18 @@ def _records(state: Any) -> list[ArgumentRecord]:
     ]
 
 
+def _dialogue_turn_budget_exceeded(state: Any) -> bool:
+    """全手法共通の絶対ターン数上限（`max_dialogue_turns`）に既に達しているか.
+
+    None（未設定）なら常に False（この上限機構自体を無効化し、既存の
+    max_turns/max_attack_attempts ベースの挙動だけで従来通り動く）。
+    """
+    limit = getattr(state, "max_dialogue_turns", None)
+    if limit is None:
+        return False
+    return len(_records(state)) >= int(limit)
+
+
 def _message_history(state: Any) -> list[BaseMessage]:
     """LLM 用 BaseMessage 履歴を返す."""
     return [
@@ -137,6 +149,14 @@ def complete_thread(
 
 async def can_generate_main(state: Any) -> dict[str, Any]:
     """Proponent が新しい主張 (A) を生成できるか判定し、可能なら生成して返す."""
+    if _dialogue_turn_budget_exceeded(state):
+        return {
+            "main_argument_available": False,
+            "main_argument_unavailable_reason": (
+                "Dialogue turn budget (max_dialogue_turns) reached."
+            ),
+            "justification_status": "no_new_main_argument",
+        }
     agent = state.current_proponent
     result = await arguments.generate_main(state, agent)
     update: dict[str, Any] = {
@@ -242,6 +262,8 @@ async def o_defeat_a(state: Any) -> dict[str, Any]:
         return {"error": "No current main argument to attack."}
     if state.attack_attempt_count >= state.max_attack_attempts:
         return complete_thread(state, "defensible")
+    if _dialogue_turn_budget_exceeded(state):
+        return complete_thread(state, "defensible")
     argument = await generate_attack(
         state,
         state.current_opponent,
@@ -277,7 +299,7 @@ async def validate_b_defeats_a(state: Any) -> dict[str, Any]:
         state.current_argument,
         state.current_proponent,
         relation_context="B defeats A",
-        blocker_generator=generate_undercut,
+        blocker_generator=None if _dialogue_turn_budget_exceeded(state) else generate_undercut,
     )
     relations = [*state.defeat_relations, *result.relations]
     if not result.defeats:
@@ -310,6 +332,10 @@ async def p_counter_b(state: Any) -> dict[str, Any]:
     """Proponent が Opponent の攻撃 B に対してカウンター論証 (C) を生成する."""
     if state.b_argument is None:
         return {"error": "No B argument to counter."}
+    if _dialogue_turn_budget_exceeded(state):
+        # 予算切れによる打ち切りは、Proponent が防御し切れなかった真の手詰まり
+        # （overruled）とは区別し、defensible として終了する。
+        return complete_thread(state, "defensible")
     argument = await generate_attack(
         state,
         state.current_proponent,
@@ -344,7 +370,7 @@ async def validate_c_defeats_b(state: Any) -> dict[str, Any]:
         state.b_argument,
         state.current_opponent,
         relation_context="C defeats B",
-        blocker_generator=generate_undercut,
+        blocker_generator=None if _dialogue_turn_budget_exceeded(state) else generate_undercut,
     )
     relations = [*state.defeat_relations, *result.relations]
     if not result.defeats:
@@ -392,7 +418,7 @@ async def validate_b_defeats_c(state: Any) -> dict[str, Any]:
         state.c_argument,
         state.current_proponent,
         relation_context="B defeats C",
-        blocker_generator=generate_undercut,
+        blocker_generator=None if _dialogue_turn_budget_exceeded(state) else generate_undercut,
         # B は元々 A を狙った攻撃として記録済み（target_id=A.id）。ここは「B が C にも
         # 及ぶか」という副次的な検証にすぎず、判定結果として B の本来の attack 宣言
         # （target_id/target_field/target_statement）を C 向けに上書きしてはならない。

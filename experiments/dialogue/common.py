@@ -353,6 +353,7 @@ async def _run_topic_once(
     *,
     max_turns: int = 3,
     max_attack_attempts: int | None = None,
+    max_dialogue_turns: int | None = None,
     output_root: Path = LOGS_DIR,
     run_index: int | None = None,
 ) -> Path:
@@ -361,6 +362,9 @@ async def _run_topic_once(
     両条件とも同じ LangGraph（討論プロトコル・プロンプト）を使い、
     `State.output_mode` だけを切り替える（no_schema は Argument 本体の rules/Conc/Ass
     スキーマを取り除き、自由記述の natural language として出力させる）。
+
+    `max_dialogue_turns` は、mad/free_debateと対話ターン数（＝主張・反論の機会の総数）を
+    揃えて比較するための、全手法共通の絶対上限（省略時は無効）。
     """
     from src.agent.workflow import State, graph
 
@@ -376,6 +380,8 @@ async def _run_topic_once(
     }
     if max_attack_attempts is not None:
         state_kwargs["max_attack_attempts"] = max_attack_attempts
+    if max_dialogue_turns is not None:
+        state_kwargs["max_dialogue_turns"] = max_dialogue_turns
     graph_input = State(**state_kwargs)
 
     start = time.perf_counter()
@@ -418,6 +424,7 @@ async def run_schema_topic_once(
     *,
     max_turns: int = 3,
     max_attack_attempts: int | None = None,
+    max_dialogue_turns: int | None = None,
     output_root: Path = LOGS_DIR,
     run_index: int | None = None,
 ) -> Path:
@@ -426,6 +433,7 @@ async def run_schema_topic_once(
         topic_file,
         max_turns=max_turns,
         max_attack_attempts=max_attack_attempts,
+        max_dialogue_turns=max_dialogue_turns,
         output_root=output_root,
         run_index=run_index,
     )
@@ -436,6 +444,7 @@ async def run_no_schema_topic_once(
     *,
     max_turns: int = 3,
     max_attack_attempts: int | None = None,
+    max_dialogue_turns: int | None = None,
     output_root: Path = LOGS_DIR,
     run_index: int | None = None,
 ) -> Path:
@@ -444,6 +453,7 @@ async def run_no_schema_topic_once(
         topic_file,
         max_turns=max_turns,
         max_attack_attempts=max_attack_attempts,
+        max_dialogue_turns=max_dialogue_turns,
         output_root=output_root,
         run_index=run_index,
     )
@@ -453,6 +463,7 @@ async def run_free_debate_topic_once(
     topic_file: str | Path,
     *,
     max_turns: int = 3,
+    max_dialogue_turns: int | None = None,
     output_root: Path = LOGS_DIR,
     run_index: int | None = None,
 ) -> Path:
@@ -461,17 +472,23 @@ async def run_free_debate_topic_once(
     schema/no_schema と異なるグラフ・State（free_debate.FreeDebateState）を使うため、
     `_run_topic_once` を流用せず専用の実行ロジックを持つ。main argument 再試行という
     概念が無いため `max_attack_attempts` は存在しない。
+
+    `max_dialogue_turns` は、schema/no_schemaと対話ターン数を揃えて比較するための、
+    全手法共通の絶対上限（省略時は無効。`max_turns`＝ラウンド数とは別軸）。
     """
     from src.agent.free_debate import FreeDebateState, graph_free_debate
 
     topic_path, topic_data = load_topic(topic_file)
     tracker = TokenUsageTracker()
-    graph_input = FreeDebateState(
-        question=topic_data["question"],
-        agent1_stance=topic_data["agent1_stance"],
-        agent2_stance=topic_data["agent2_stance"],
-        max_turns=max_turns,
-    )
+    fd_kwargs: dict[str, Any] = {
+        "question": topic_data["question"],
+        "agent1_stance": topic_data["agent1_stance"],
+        "agent2_stance": topic_data["agent2_stance"],
+        "max_turns": max_turns,
+    }
+    if max_dialogue_turns is not None:
+        fd_kwargs["max_dialogue_turns"] = max_dialogue_turns
+    graph_input = FreeDebateState(**fd_kwargs)
 
     start = time.perf_counter()
     result: dict[str, Any] = dict(graph_input.__dict__)
@@ -510,6 +527,7 @@ async def run_mad_topic_once(
     topic_file: str | Path,
     *,
     max_turns: int = 3,
+    max_dialogue_turns: int | None = None,
     output_root: Path = LOGS_DIR,
     run_index: int | None = None,
 ) -> Path:
@@ -518,17 +536,23 @@ async def run_mad_topic_once(
     free_debate と同じグラフ構造（schema/no_schema と異なる State）だが、各ターンで
     明示的な反論を要求し、ラウンド上限後は独立した judge が最終回答を作る点が異なる
     （`free_debate.graph_free_debate` ではなく `mad.graph_mad` を使う）。
+
+    `max_dialogue_turns` は、schema/no_schemaと対話ターン数を揃えて比較するための、
+    全手法共通の絶対上限（省略時は無効。`max_turns`＝ラウンド数とは別軸）。
     """
     from src.agent.mad import MADState, graph_mad
 
     topic_path, topic_data = load_topic(topic_file)
     tracker = TokenUsageTracker()
-    graph_input = MADState(
-        question=topic_data["question"],
-        agent1_stance=topic_data["agent1_stance"],
-        agent2_stance=topic_data["agent2_stance"],
-        max_turns=max_turns,
-    )
+    mad_kwargs: dict[str, Any] = {
+        "question": topic_data["question"],
+        "agent1_stance": topic_data["agent1_stance"],
+        "agent2_stance": topic_data["agent2_stance"],
+        "max_turns": max_turns,
+    }
+    if max_dialogue_turns is not None:
+        mad_kwargs["max_dialogue_turns"] = max_dialogue_turns
+    graph_input = MADState(**mad_kwargs)
 
     start = time.perf_counter()
     result: dict[str, Any] = dict(graph_input.__dict__)

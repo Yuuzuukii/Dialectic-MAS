@@ -12,6 +12,16 @@ def _int_env(name: str, default: int) -> int:
     return int(value) if value else default
 
 
+def _optional_int_env(name: str) -> int | None:
+    """環境変数を int として読む。未設定または空文字なら None を返す.
+
+    `max_dialogue_turns`（全手法共通の絶対ターン数上限）の既定値に使う。None のときは
+    無効（既存の round/attempts ベースの上限だけで従来通り動く）ことを示す。
+    """
+    value = os.getenv(name)
+    return int(value) if value else None
+
+
 def route_round_entry(state: Any) -> str:
     """各ラウンドの開始点（プロトコル周回数の判定）.
 

@@ -447,11 +447,15 @@ def main_instruction(state: Any) -> str:
         "<stance_coverage>",
         "Before constructing the argument, silently identify every distinct substantive reason, "
         "requirement, condition, affected group, and tradeoff stated in your stance.",
-        "Your main argument must account for every identified item as a load-bearing part of its "
-        "reasoning. You may combine closely related items, but do not silently omit one, replace it "
-        "with a more generic claim, or preserve only the easiest subset.",
+        "Do not front-load all of them into this single argument. Select the single reason that "
+        "most directly and decisively answers the Issue, and develop only that one with real "
+        "support (do not pad it out with your other reasons as filler).",
+        "Leave your stance's other distinct reasons available for later in the debate: if this "
+        "argument is defeated or the debate continues, a later argument can introduce one of them "
+        "as genuinely new content, rather than this turn restating everything at once and leaving "
+        "nothing new to say afterward.",
         "Keep any material number, threshold, exception, or named affected group from the stance "
-        "when it is part of the support provided.",
+        "intact when it is part of the reason you do use.",
         "</stance_coverage>",
         "",
         "<no_repetition>",

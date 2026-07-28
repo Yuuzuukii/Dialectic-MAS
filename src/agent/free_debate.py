@@ -17,7 +17,7 @@ from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, System
 from langgraph.graph import END, START, StateGraph
 from pydantic import BaseModel, Field
 
-from .edges import _int_env
+from .edges import _int_env, _optional_int_env
 from .llm import chat_structured, chat_text
 from .prompts import PromptTemplates, agent_system
 from .schema.types import AgentName
@@ -44,6 +44,11 @@ class FreeDebateState:
     agent1_stance: str
     agent2_stance: str
     max_turns: int = _int_env("MAX_TURNS", 5)
+    # schema/no_schemaと手法間でターン数（主張・反論の機会の総数）を揃えて比較する場合の、
+    # 絶対ターン数上限。None（既定）なら無効で、上記の max_turns（ラウンド数）だけで
+    # 従来通り動く。設定すると、AG1・AG2どちらのターンの後でも、この上限に達した時点で
+    # ラウンドの途中でも即座に最終回答生成へ進む（片方の発言だけを1ターンと数える）。
+    max_dialogue_turns: int | None = _optional_int_env("MAX_DIALOGUE_TURNS")
     round: int = 1
     # LLM 再送用の共有履歴。HumanMessage(指示) と AIMessage(発話, name=agent) の対で増えていく。
     history: list[BaseMessage] = field(default_factory=list)
@@ -150,14 +155,36 @@ async def ag2_turn(state: FreeDebateState) -> dict[str, Any]:
     }
 
 
+def _dialogue_turn_budget_exceeded(state: FreeDebateState) -> bool:
+    """絶対ターン数上限（`max_dialogue_turns`）に既に達しているか（未設定なら常に False）."""
+    if state.max_dialogue_turns is None:
+        return False
+    return len(state.dialogue_history) >= state.max_dialogue_turns
+
+
+def route_after_ag1_turn(state: FreeDebateState) -> str:
+    """AG1 の手番直後の遷移先を決める.
+
+    `max_dialogue_turns`（全手法共通の絶対ターン数上限）が設定されている場合だけ、
+    ラウンドの途中（AG2 の番の前）でもここで打ち切って最終回答生成へ進む。未設定なら
+    常に ag2_turn へ進み、既存の round ベースの挙動と完全に同じ。
+    """
+    if _dialogue_turn_budget_exceeded(state):
+        return "generate_final_answer"
+    return "ag2_turn"
+
+
 def route_after_ag2_turn(state: FreeDebateState) -> str:
     """次の分岐を決める.
 
+    - `max_dialogue_turns`（絶対ターン数上限）に達したら最終回答生成へ。
     - ラウンド上限 (max_turns) に達したら最終回答生成へ（ハード上限）。
     - 上限未満でも、その1ラウンドで両者とも新しい論点を出せなかった（収束した）場合は
       早期に最終回答生成へ進む。これにより max_turns は schema/no_schema の
       max_attack_attempts と同じ「上限」の意味になる。
     """
+    if _dialogue_turn_budget_exceeded(state):
+        return "generate_final_answer"
     completed_rounds = state.round - 1
     if completed_rounds >= state.max_turns:
         return "generate_final_answer"
@@ -188,7 +215,11 @@ graph_free_debate = (
     .add_node("ag2_turn", ag2_turn)
     .add_node("generate_final_answer", generate_final_answer)
     .add_edge(START, "ag1_turn")
-    .add_edge("ag1_turn", "ag2_turn")
+    .add_conditional_edges(
+        "ag1_turn",
+        route_after_ag1_turn,
+        {"ag2_turn": "ag2_turn", "generate_final_answer": "generate_final_answer"},
+    )
     .add_conditional_edges(
         "ag2_turn",
         route_after_ag2_turn,

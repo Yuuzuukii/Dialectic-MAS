@@ -10,6 +10,7 @@ from langgraph.graph import END, START, StateGraph
 
 from .edges import (
     _int_env,
+    _optional_int_env,
     route_after_can_generate_main,
     route_after_extract_warrants,
     route_after_o_defeat_a,
@@ -55,6 +56,13 @@ class State:
     # 1つの main argument に対して、Opponent が攻撃 (B) を再生成できる回数の上限（安全装置）。
     # 環境変数 MAX_ATTACK_ATTEMPTS で上書きできる。
     max_attack_attempts: int = _int_env("MAX_ATTACK_ATTEMPTS", 5)
+    # 全手法（schema/no_schema/mad/free_debate）で共通の、対話ターン数そのものの絶対上限。
+    # None（既定）なら無効で、上記の max_turns/max_attack_attempts だけで従来通り動く。
+    # 設定すると、mainやattackを新たに生成する直前でこの上限を優先チェックし、達していれば
+    # 通常の「もう新しい手番がない」経路（no_new_main_argument/defensible）に合流させる。
+    # mad/free_debateの`max_turns`（ラウンド数）とは異なり、片方の発言だけでも1ターンと
+    # 数える絶対値。手法間でターン数（＝主張・反論の機会の総数）を揃えて比較したい場合に使う。
+    max_dialogue_turns: int | None = _optional_int_env("MAX_DIALOGUE_TURNS")
     additional_context: dict[str, Any] = field(default_factory=dict)
     # "schema": Argument 本体（rules/Conc/Ass）も with_structured_output のスキーマで強制する。
     # "no_schema": 同一プロンプト・同一グラフだが、Argument 本体は自由記述の natural language。
