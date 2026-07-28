@@ -1,0 +1,104 @@
+You are an evaluator LLM. Rate, on a scale from 1 to 10, how well the following debate
+AVOIDS non-constructive responsive moves.
+
+<evaluation_units>
+A "responsive move" is either:
+  1. an objection: a turn that challenges a conclusion, premise, or assumption from an
+     earlier turn; or
+  2. a revision: a new argument introduced after an earlier exchange has closed, where the
+     speaker has an opportunity to adapt to the unresolved objection(s).
+
+The first opening argument is context, not a responsive move. Narrator-style transition
+notes and shared/integrated rules are context only; never score them as agent moves.
+
+Infer response relations from semantic content and chronology even when a transcript does
+not explicitly say "responding to". Do not reward or penalize a debate merely because its
+format explicitly labels targets, premises, conclusions, or response links.
+</evaluation_units>
+
+<failure_modes>
+Classify each responsive move as non-constructive if one or more of these applies:
+  - TARGET MISMATCH: it ignores, misrepresents, or talks past the specific point it answers.
+  - GENERIC RESPONSE: its reasoning could be used against almost any position on the topic
+    and does not depend on the target's actual claim, premise, or assumption.
+  - REPETITION: it substantially restates the speaker's own earlier position or reuses a
+    point already raised and answered, without adapting it to the latest response.
+  - NON-ADAPTIVE REVISION: after an exchange closes, the new argument repeats the failed
+    argument without addressing the unresolved objection that led to the revision.
+
+Merely quoting or naming a specific target is NOT enough. The move's supporting reason must
+actually bear on that target and be used in reaching the response's conclusion. Conversely,
+a move does not need to be novel, elaborate, or rhetorically impressive: a simple response
+is constructive when it makes the minimum substantive adaptation needed to answer the
+specific point.
+</failure_modes>
+
+<scope_boundaries>
+Judge interactional responsiveness and non-redundancy only.
+- Do NOT judge factual correctness, depth of evidence, rhetorical polish, grammar, verbosity,
+  or which side wins. Those are separate qualities.
+- Do NOT reward a structured format, explicit argument labels, or longer explanations.
+- Do NOT penalize a debate merely for having more responsive moves. Use the PROPORTION and
+  SEVERITY of non-constructive moves, not their raw count or transcript length.
+</scope_boundaries>
+
+<scoring>
+First identify all responsive moves, then estimate the proportion that are non-constructive.
+Use severity only to choose within the applicable band:
+  9–10: 0–10% non-constructive.
+  7–8:  More than 10% and up to 25% non-constructive.
+  5–6:  More than 25% and up to 50% non-constructive.
+  3–4:  More than 50% and up to 75% non-constructive.
+  1–2:  More than 75% non-constructive.
+
+If there are no responsive moves, assign 5 because there is insufficient interaction to
+evaluate. Do the classification and proportion calculation silently; return only the JSON.
+</scoring>
+
+Evaluate the following debate:
+
+Question:
+Has Pokémon GO Been Good for Society?
+
+AG1 Stance:
+Your stance:
+You support Pokémon GO.
+You believe the walking required to play the game provides exercise benefits, as one player reported being able to leave the house and walk outside for hours while enjoying it.
+You believe the game brings people together through shared exploration, fostering connections across different demographics and backgrounds.
+You believe Pokémon GO has provided an economic boost for local businesses, with some businesses reporting sales increases between 5-30 percent from the added customer engagement.
+
+AG2 Stance:
+Your stance:
+You oppose Pokémon GO.
+You believe players have sustained serious harm while gaming, as tracking data shows there were 25 deaths and 64 injuries among players, including accidents involving vehicles and falls.
+You believe players have captured Pokémon in solemn places including emergency rooms, the Auschwitz memorial, funerals, and active battlefields, demonstrating disrespect for sacred spaces.
+You believe the app contributes to digital addiction, with up to 9 percent of players meeting gaming disorder criteria, and that criminals have also exploited the game to lure and rob distracted players.
+
+Debate Transcript (chronological, each turn is one agent's argument):
+[Turn 1] AG1:
+Yes—Pokémon GO has been good for society in at least three concrete ways. 
+
+1) Exercise and outdoor time: players report that the game motivates them to leave the house and walk outside for hours, turning everyday movement into something enjoyable.
+
+2) Community building: by encouraging shared exploration of parks, neighborhoods, and landmarks, it brings people together across different ages, backgrounds, and demographics.
+
+3) Local economic boost: some local businesses have reported sales increases (roughly in the 5–30% range) due to the extra foot traffic and customer engagement the game creates.
+
+[Turn 2] AG2 (responding to [Turn 1])
+AG1 claims Pokémon GO is “good” because it gets people walking, builds community, and helps local businesses. I oppose that framing.
+
+1) The “exercise” benefit is outweighed by real-world harm. Tracking data cited in this debate shows serious injury and death among players—25 deaths and 64 injuries, including crashes involving vehicles and falls. A game that increases distracted movement isn’t simply “healthy” just because it encourages walking.
+
+2) “Community building” can’t erase disrespect. Players have reportedly captured Pokémon in solemn places—emergency rooms, the Auschwitz memorial, funerals, and active battlefields. That isn’t benign social bonding; it shows the app encourages people to treat sacred or sensitive spaces as game boards.
+
+3) Digital addiction is a societal cost, not a marketing claim. The debate’s premise notes that up to 9% of players meet gaming-disorder criteria. So even when the game begins as entertainment, it can become compulsive and socially damaging.
+
+4) Safety and security risks extend beyond accidents. Criminals have exploited distracted players to lure and rob them, turning “going out to hunt Pokémon” into a vulnerability.
+
+At best, Pokémon GO offers a short-term novelty of movement or tourism. But the evidence in this debate points to sustained physical harm, exploitation by criminals, and disrespect for sacred/publicly sensitive spaces—so it has not been good for society overall.
+
+Respond ONLY with a JSON object:
+{
+  "constructiveness": <int>,
+  "evaluator_model": "<model name>"
+}

@@ -355,3 +355,10 @@ git diff -- HANDOFF.md experiments/eval/plots/plot_rubrics_lines.py
 
 その後、ユーザーの次の依頼に応じる。現時点で再評価、コミット、旧ログのablationは
 依頼されていないため、勝手に外部APIを再実行したりコミットしたりしないこと。
+
+| Method | pokemon_go | artificial_intelligence |
+|---|---:|---:|
+| Schema | 8.80 | 8.00 |
+| No Schema | 7.30 | 9.00 |
+| MAD | 9.40 | 10.00 |
+| Free Debate | 9.50 | 9.90 |

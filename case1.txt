@@ -1,0 +1,105 @@
+You are an evaluator LLM. Rate, on a scale from 1 to 10, how well the following debate
+AVOIDS non-constructive responsive moves.
+
+<evaluation_units>
+A "responsive move" is either:
+  1. an objection: a turn that challenges a conclusion, premise, or assumption from an
+     earlier turn; or
+  2. a revision: a new argument introduced after an earlier exchange has closed, where the
+     speaker has an opportunity to adapt to the unresolved objection(s).
+
+The first opening argument is context, not a responsive move. Narrator-style transition
+notes and shared/integrated rules are context only; never score them as agent moves.
+
+Infer response relations from semantic content and chronology even when a transcript does
+not explicitly say "responding to". Do not reward or penalize a debate merely because its
+format explicitly labels targets, premises, conclusions, or response links.
+</evaluation_units>
+
+<failure_modes>
+Classify each responsive move as non-constructive if one or more of these applies:
+  - TARGET MISMATCH: it ignores, misrepresents, or talks past the specific point it answers.
+  - GENERIC RESPONSE: its reasoning could be used against almost any position on the topic
+    and does not depend on the target's actual claim, premise, or assumption.
+  - REPETITION: it substantially restates the speaker's own earlier position or reuses a
+    point already raised and answered, without adapting it to the latest response.
+  - NON-ADAPTIVE REVISION: after an exchange closes, the new argument repeats the failed
+    argument without addressing the unresolved objection that led to the revision.
+
+Merely quoting or naming a specific target is NOT enough. The move's supporting reason must
+actually bear on that target and be used in reaching the response's conclusion. Conversely,
+a move does not need to be novel, elaborate, or rhetorically impressive: a simple response
+is constructive when it makes the minimum substantive adaptation needed to answer the
+specific point.
+</failure_modes>
+
+<scope_boundaries>
+Judge interactional responsiveness and non-redundancy only.
+- Do NOT judge factual correctness, depth of evidence, rhetorical polish, grammar, verbosity,
+  or which side wins. Those are separate qualities.
+- Do NOT reward a structured format, explicit argument labels, or longer explanations.
+- Do NOT penalize a debate merely for having more responsive moves. Use the PROPORTION and
+  SEVERITY of non-constructive moves, not their raw count or transcript length.
+</scope_boundaries>
+
+<scoring>
+First identify all responsive moves, then estimate the proportion that are non-constructive.
+Use severity only to choose within the applicable band:
+  9–10: 0–10% non-constructive.
+  7–8:  More than 10% and up to 25% non-constructive.
+  5–6:  More than 25% and up to 50% non-constructive.
+  3–4:  More than 50% and up to 75% non-constructive.
+  1–2:  More than 75% non-constructive.
+
+If there are no responsive moves, assign 5 because there is insufficient interaction to
+evaluate. Do the classification and proportion calculation silently; return only the JSON.
+</scoring>
+
+Evaluate the following debate:
+
+Question:
+Has Pokémon GO Been Good for Society?
+
+AG1 Stance:
+Your stance:
+You support Pokémon GO.
+You believe the walking required to play the game provides exercise benefits, as one player reported being able to leave the house and walk outside for hours while enjoying it.
+You believe the game brings people together through shared exploration, fostering connections across different demographics and backgrounds.
+You believe Pokémon GO has provided an economic boost for local businesses, with some businesses reporting sales increases between 5-30 percent from the added customer engagement.
+
+AG2 Stance:
+Your stance:
+You oppose Pokémon GO.
+You believe players have sustained serious harm while gaming, as tracking data shows there were 25 deaths and 64 injuries among players, including accidents involving vehicles and falls.
+You believe players have captured Pokémon in solemn places including emergency rooms, the Auschwitz memorial, funerals, and active battlefields, demonstrating disrespect for sacred spaces.
+You believe the app contributes to digital addiction, with up to 9 percent of players meeting gaming disorder criteria, and that criminals have also exploited the game to lure and rob distracted players.
+
+Debate Transcript (chronological, each turn is one agent's argument):
+[Turn 1] AG1 (new argument)
+Pokémon GO motivates players to leave the house and walk outside for hours while enjoying the game (e.g., player-reported experiences). So pokémon GO can lead to sustained outdoor walking that provides exercise-related benefits to players. So pokémon GO’s exercise-related effects can improve the well-being of its player community. Pokémon GO promotes shared exploration in public spaces in ways that bring people together across different demographics and backgrounds. So pokémon GO can bring people together through shared exploration, fostering cross-demographic social connections. So pokémon GO can strengthen community ties, which is socially beneficial. Local businesses report Pokémon GO–driven customer engagement leading to sales increases between 5% and 30%. So pokémon GO can support local economic activity, contributing positively to society beyond the game itself. Society is better when residents gain improved health/well-being, stronger cross-demographic community ties, and increased local economic activity. Therefore, Pokémon GO has been good for society overall. (This relies on the assumption that These Pokémon GO sessions are not mostly sedentary/indoor for the relevant player community; The exercise-related effects meaningfully improve well-being rather than being negligible; These shared-exploration interactions do not remain confined to a single demographic group; Such connections strengthen community ties rather than staying merely fleeting; This economic engagement is net-positive for local businesses rather than offset by larger negative effects; Overall, the societal benefits described are not outweighed in typical cases by harms that negate them.)
+
+[Turn 2] AG2 (responding to [Turn 1])
+Your premise that "Overall, the societal benefits described are not outweighed in typical cases by harms that negate them" does not hold. The target’s final step concludes Pokémon GO is 'good for society overall' based on the assumption that 'Overall, the societal benefits described are not outweighed in typical cases by harms that negate them.'. The target argument does not provide any concrete comparative evidence inside its own reasoning showing that harms are rare/small enough to not overturn that balance. So the target’s 'not outweighed in typical cases' balancing assumption is unsupported within its own argument. Tracking data show 25 deaths and 64 injuries among Pokémon GO players, including accidents involving vehicles and falls. These outcomes are serious physical harms plausibly linked to gameplay-related distraction and street navigation. So because the harm side includes deaths and many injuries, it is implausible that benefits are not outweighed in typical cases. Up to 9% of players meet gaming-disorder criteria (digital addiction). Gaming disorder represents a serious mental/behavioral harm rather than a trivial inconvenience. So addiction-level risk meaningfully increases the net cost side, further undermining any claim of overall net-positive balance. Criminals have exploited Pokémon GO to lure and rob distracted players. Distracted attention during real-world pursuit/capture increases vulnerability to criminal exploitation. So safety and crime risks add additional negative societal impact not countered by the target’s exercise/social/economic benefits. Players have captured Pokémon in solemn places including emergency rooms, the Auschwitz memorial, funerals, and active battlefields. Treating solemn/sacred/grieving spaces as locations for gameplay generates social and cultural disrespect harms beyond individual fitness benefits. So disrespect toward solemn/sacred contexts is another cost omitted from the target’s benefit-only accounting. The target’s benefits are limited to exercise/walking-related effects, cross-demographic social connections, and local business engagement. The harm side includes documented physical deaths/injuries, addiction up to 9%, criminal luring/robbery, and disrespect for solemn spaces—so the cost side is materially larger than what the target acknowledges. Therefore, the target’s balancing assumption fails, and Pokémon GO has not been good for society overall. (This relies on the assumption that The target does not justify treating serious harms as atypical or negligible in typical cases; Physical-casualty harms are not negligible relative to any claimed exercise-related benefit; This addiction-level risk does not shrink to an irrelevant level for typical players; Criminal-risk harms are not merely hypothetical or fully prevented by the target’s stated benefits; These disrespect harms are not confined to harmless, purely isolated exceptions with no broader societal cost; These documented harms are not sufficiently rare or minor to be outweighed in typical cases.)
+
+[Turn 3] AG1 (responding to [Turn 2])
+I disagree with your conclusion that "Therefore, the target’s balancing assumption fails, and Pokémon GO has not been good for society overall". The target attack lists several harms (deaths/injuries, addiction, crime, and disrespect in solemn places) but repeatedly frames them as only “plausibly linked” and does not provide per-player, typical-case comparative evidence that these harms occur often enough and with enough magnitude to outweigh the benefits for the typical player. So the target attack fails to provide the missing comparative typical-case evidence needed to overturn the “benefits not outweighed” balance. Our main argument’s final step depends on the balancing assumption that, in typical cases, the societal benefits are not outweighed by harms that negate them. So the target attack does not defeat the key balancing assumption supporting the main argument’s “good for society overall” conclusion. Pokémon GO motivates players to leave the house and walk outside for hours while enjoying the game (e.g., player-reported experiences). So pokémon GO can generate sustained outdoor walking that yields exercise benefits. Pokémon GO’s shared exploration can bring people together across different demographics and backgrounds. Local businesses report Pokémon GO–driven customer engagement leading to sales increases between 5% and 30%. So typical participation plausibly yields substantial health/social/economic gains for the community. Therefore, Pokémon GO has been good for society overall. (This relies on the assumption that Those harm claims as presented do not by themselves establish that harms are outweighed by benefits in typical cases; The target provides sufficient comparative evidence that the balancing assumption is false in typical cases; These Pokémon GO sessions are not mostly sedentary/indoor for the relevant player community; These benefits are not negligible or confined to only a narrow group; The target shows that, in typical cases, harms outweigh those gains.)
+
+[Turn 4] AG2 (responding to [Turn 3])
+The target attack against AG1 cites concrete quantified harm evidence—25 deaths and 64 injuries (including vehicle/fall accidents) and “up to 9%” of players meeting gaming-disorder criteria—rather than only vague possibility claims. The target attack uses these figures to argue the “benefits not outweighed in typical cases” balancing claim is implausible. So the target attack provides comparative quantitative evidence relevant to typical-case harm/benefit balancing, not merely unsupported speculation. AG1’s defense relies on the premise that the target attack “fails to provide the missing comparative typical-case evidence needed to overturn the ‘benefits not outweighed’ balance.”. So aG1’s premise that the target attack lacks the required comparative typical-case evidence is undermined. AG1’s next step infers that, because that evidence is missing, the target attack does not defeat AG1’s key balancing assumption about typical-case net effects. So aG1’s inference that the target attack does not defeat the balancing assumption is unsupported. AG1’s final conclusion (“Therefore, Pokémon GO has been good for society overall.”) depends on that inference and on the earlier unproven comparative balance. Therefore, AG1’s defense argument against the target attack fails to defeat the claim that the overall balance is negative in typical cases. (This relies on the assumption that These quantified figures have no relevance to typical-case harm/benefit balancing (e.g., are purely irrelevant to what “typical cases” means); AG1’s “missing comparative typical-case evidence” premise remains correct despite the presence of the cited quantitative harm evidence; AG1’s inference still goes through even if the target attack actually does provide comparative typical-case evidence; AG1 can reach its overall “good for society” conclusion independently of its undermined comparative-evidence reasoning.)
+
+— The preceding exchange has ended. A new argument follows.
+
+[Turn 5] AG2 (new argument)
+Tracking data show 25 deaths and 64 injuries among Pokémon GO players, including accidents involving vehicles and falls. So pokémon GO imposes severe physical harms on players, including 25 deaths and 64 injuries (often from vehicle accidents and falls). Up to 9% of players meet gaming-disorder criteria (digital addiction). So pokémon GO drives a meaningful risk of digital addiction/gaming disorder in its player base (up to 9%). Criminals have exploited Pokémon GO to lure and rob distracted players. So pokémon GO increases exposure to luring/robbery crime by distracting players in real-world pursuit and capture. Players have captured Pokémon in solemn places including emergency rooms, the Auschwitz memorial, funerals, and active battlefields. So pokémon GO contributes to disrespect for sacred/solemn contexts by normalizing gameplay there. So given the documented harms to safety, mental/behavioral health, crime exposure, and respect for sacred spaces, Pokémon GO produces substantial net social harm rather than net social good. Therefore, Pokémon GO has not been good for society overall. (This relies on the assumption that These physical-casualty outcomes are not negligible or ignorable when assessing whether something is good for society; This level of addiction risk is not trivial or too small to matter for societal well-being; This crime risk is not fully prevented by ordinary user caution or by the mere existence of game safety features; This misuse is not confined to harmless isolated exceptions with no broader cultural/societal cost; Any claimed benefits (e.g., exercise, social interaction, commerce) do not cancel these documented, serious harms in the overall societal balance; There is not enough reason to treat these harms as outweighed in society overall.)
+
+[Turn 6] AG1 (responding to [Turn 5])
+Your premise that "Any claimed benefits (e.g., exercise, social interaction, commerce) do not cancel these documented, serious harms in the overall societal balance" does not hold. The target relies on the absolute cancellation assumption: “Any claimed benefits (e.g., exercise, social interaction, commerce) do not cancel these documented, serious harms in the overall societal balance.”. The target does not provide within its own reasoning any comparative typical-case evidence showing that the magnitude of benefits is incapable of offsetting harms in the overall societal balance. So the target’s “benefits do not cancel” cancellation assumption is unsupported within the target argument’s own evidential basis. Pokémon GO motivates at least some players to leave the house and walk outside for hours while enjoying the game (player-reported experiences). So pokémon GO can generate sustained outdoor walking that provides exercise-related benefits to players. Pokémon GO brings people together through shared exploration, fostering connections across different demographics and backgrounds. Pokémon GO has provided an economic boost for local businesses, with some businesses reporting sales increases between 5% and 30%. So pokémon GO can add substantial exercise, social-connection, and local-economic benefits to the overall societal balance. So the target’s assumption that benefits do not cancel documented harms is undercut. The target’s conclusion (“Pokémon GO has not been good for society overall”) depends on that cancellation assumption holding in typical cases. Therefore, The target argument does not establish that Pokémon GO has not been good for society overall; thus Pokémon GO has been good for society overall. (This relies on the assumption that This assumption is not justified merely by listing harms without establishing that cancellation is impossible in typical cases; These Pokémon GO sessions are not mostly sedentary/indoor for the relevant player community; These social and economic benefits are not confined to only a narrow group or erased entirely by the harms the target lists; Given these positive benefits can occur, it is not warranted to assume they cannot cancel the harms in typical overall balancing; The target provides no independent basis for the overall “not good for society” conclusion that survives without the cancellation assumption.)
+
+[Turn 7] AG2 (responding to [Turn 6])
+Your premise that "Given these positive benefits can occur, it is not warranted to assume they cannot cancel the harms in typical overall balancing" does not hold. AG1 defends Pokémon GO by claiming that because benefits (exercise/social/economic) can occur, it is 'not warranted' to assume they cannot cancel the harms in typical overall balancing. So aG1’s cancellation reasoning uses possibility of offset, not evidence that offset typically occurs. AG2’s harms are supported by concrete harms facts: 25 deaths and 64 injuries, up to 9% gaming-disorder risk, exploitation for luring/robbery, and gameplay in emergency rooms, the Auschwitz memorial, funerals, and active battlefields. So AG1 fails to supply the comparative typical-case basis needed to overturn AG2’s net-harm framing. AG2’s harms include severe physical outcomes (deaths/injuries) and clinically framed mental/behavioral risk (gaming disorder up to 9%), which are not plausibly treated as negligible. So given the severity (and not just presence) of harms, it remains reasonable to treat the harms as not outweighed in typical cases. AG1’s cited benefits (walking/exercise, social connection, local business sales) do not directly neutralize the cost dimensions of deaths/injuries, addiction-risk, crime exposure, and sacred/solemn-space disrespect. So aG1’s benefits do not neutralize the full set of harms that AG2 counts. AG1 only establishes that some benefits can occur, not that they typically outweigh AG2’s documented harms. Therefore, AG1’s counterargument does not defeat AG2, and Pokémon GO has not been good for society overall. (This relies on the assumption that AG1 does not provide comparative typical-case evidence that the magnitude and distribution of benefits actually outweigh AG2’s documented harms (deaths/injuries, addiction up to 9%, crime luring/robbery, and sacred/solemn-context disrespect); Without typical-case comparative evidence from AG1, AG1 cannot justify overturning AG2’s conclusion that harms are not outweighed overall; It is unreasonable to conclude 'net social good' from unspecified benefits when the cost side includes deaths, injuries, and addiction-risk in that order of magnitude; Benefits cannot be assumed to cancel the full cost profile without evidence; Therefore AG1’s final step to 'Pokémon GO has been good for society overall' does not follow from what it actually supports.)
+
+Respond ONLY with a JSON object:
+{
+  "constructiveness": <int>,
+  "evaluator_model": "<model name>"
+}

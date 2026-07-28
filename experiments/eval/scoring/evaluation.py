@@ -12,6 +12,21 @@ def _strip_period(text: str) -> str:
     return t[:-1] if t.endswith(".") else t
 
 
+def _lowercase_first(text: str) -> str:
+    """先頭1文字を小文字化する（"So The target..." のような不自然な大文字化を防ぐ）.
+
+    元の consequent/strong は文頭を想定した大文字始まりだが、ここでは "So" の後に
+    続く節として埋め込むため小文字始まりにする。先頭の単語が "I" や全て大文字
+    （頭字語）の場合はそのまま保つ。
+    """
+    if not text:
+        return text
+    first_word = text.split(" ", 1)[0].rstrip(".,;:")
+    if first_word == "I" or (len(first_word) > 1 and first_word.isupper()):
+        return text
+    return text[0].lower() + text[1:]
+
+
 def _strip_leading_connective(text: str) -> str:
     """文頭の接続語（Therefore, / Thus, / Hence,）を除く.
 
@@ -27,68 +42,74 @@ def _strip_leading_connective(text: str) -> str:
 
 
 def _schema_utterance(argument_body: dict[str, Any], turn: dict[str, Any]) -> str:
-    """Render a Schema Argument faithfully as a readable rule-by-rule view.
+    """スキーマの Argument (rules/Conc/Ass) をエージェントの発話体の英文へ変換する.
 
-    擬似的な一続きの散文へ直すと、接続詞・大小文字・句読点を描画側が補う過程で
-    原文にない不自然さが入り、weak_negation と rule の対応も失われる。ここでは各 rule の
-    strong / weak_negation / consequent をそのまま段階表示する。
+    複数 rule がある場合は中間 consequent も推論ステップとして残し、rule 連鎖を
+    そのまま辿れるようにする。旧実装は全 rule の strong をまとめて末尾 consequent だけを
+    結論にしており、「どの前提からどう推論したか」という schema の構造的な強みが
+    評価者から見えず、平坦な前提列＝generic な反論に見えて建設性で不当に減点されていた。
 
-    先行 rule の consequent が後続 rule の strong に再利用される場合だけ、同じ文を
-    再掲せず `Uses: result from Step N` と示す。攻撃対象はこの関数で発話本文へ捏造せず、
-    `_turn_label` の `declared target` として全形式に共通して表示する。
+    - 各 rule を `{grounds}. {So|Therefore,} {consequent}.` の推論ステップとして描画
+      （中間 rule は "So"、最終 rule は "Therefore,"）。
+    - weak_negation（未検証の前提）は末尾に付記。
+    - 攻撃ターンは、手番種別を機械的に宣言せず、自然な議論の言い出しで対象を示す:
+      rebut（Conc攻撃）→ `I disagree with your conclusion that "{target_statement}".`
+      undercut（Ass攻撃）→ `Your premise that "{target_statement}" does not hold.`
     """
-    del turn  # 攻撃メタ情報は本文ではなくラベル側だけで表示する。
     rules = argument_body.get("rules") or []
-    if not rules:
-        return "(no argument)"
+    parts: list[str] = []
+    if turn.get("attack") and turn.get("target_statement"):
+        target = _strip_period(str(turn["target_statement"]))
+        if turn.get("target_field") == "Conc":
+            # rebut: 相手の結論に反対する自然な言い出し（「私は〜と思わない」）
+            parts.append(f'I disagree with your conclusion that "{target}".')
+        else:
+            # undercut: 相手が依拠する前提を崩す（「そもそもあなたの〜という前提は成り立たない」）
+            parts.append(f'Your premise that "{target}" does not hold.')
 
+    # chain 構造では非末尾 consequent が次 rule の strong 前提に再出現する。そのまま
+    # rule 単位で描画すると同じ結論文が二重に出るため、consequent と一致する strong は
+    # 「連鎖のつなぎ」とみなして描画から省く（推論の流れは connector で表現される）。
     def _norm(s: str) -> str:
-        cleaned = _strip_leading_connective(_strip_period(str(s)))
-        return cleaned.strip().lower()
+        return _strip_period(str(s)).strip().lower()
 
-    lines = ["Reasoning:"]
-    prior_results: dict[str, int] = {}
-    for index, rule in enumerate(rules, start=1):
+    consequent_norms = {
+        _norm(rule.get("consequent", "")) for rule in rules if rule.get("consequent")
+    }
+
+    assumptions: list[str] = []
+    n = len(rules)
+    for i, rule in enumerate(rules):
         antecedent = rule.get("antecedent") or {}
-        explicit_strongs: list[str] = []
-        referenced_steps: list[int] = []
-        for value in antecedent.get("strong") or []:
-            text = str(value).strip()
-            if not text:
-                continue
-            prior_step = prior_results.get(_norm(text))
-            if prior_step is None:
-                explicit_strongs.append(text)
-            elif prior_step not in referenced_steps:
-                referenced_steps.append(prior_step)
-        assumptions = [
-            str(value).strip()
-            for value in antecedent.get("weak_negation") or []
-            if str(value).strip()
+        strongs = [
+            _strip_leading_connective(_strip_period(s))
+            for s in antecedent.get("strong") or []
+            if s and s.strip() and _norm(s) not in consequent_norms
         ]
-        consequent = _strip_leading_connective(
-            str(rule.get("consequent", "")).strip()
+        assumptions += [
+            _strip_period(a)
+            for a in antecedent.get("weak_negation") or []
+            if a and a.strip()
+        ]
+        consequent = _strip_leading_connective(_strip_period(str(rule.get("consequent", ""))))
+        grounds = ". ".join(strongs)
+        connector = "Therefore," if i == n - 1 else "So"
+        # "Therefore," は文頭の接続詞として自然（大文字始まりのまま）だが、
+        # "So" は同一文内の従属節として続けるので、後ろの節は小文字始まりにする。
+        connected_consequent = (
+            consequent if connector == "Therefore," else _lowercase_first(consequent)
         )
+        if grounds and connected_consequent:
+            parts.append(f"{grounds}. {connector} {connected_consequent}.")
+        elif connected_consequent:
+            parts.append(f"{connector} {connected_consequent}.")
+        elif grounds:
+            parts.append(f"{grounds}.")
 
-        lines.append(f"Step {index}:")
-        if referenced_steps:
-            refs = ", ".join(f"Step {step}" for step in referenced_steps)
-            lines.append(f"  Uses: result from {refs}")
-        if explicit_strongs:
-            lines.append("  Given:")
-            lines.extend(f"  - {value}" for value in explicit_strongs)
-        if assumptions:
-            lines.append("  Defeasible assumptions:")
-            lines.extend(f"  - {value}" for value in assumptions)
-        if not referenced_steps and not explicit_strongs and not assumptions:
-            lines.append("  Given: (no stated premise or assumption)")
-
-        result_label = "Final conclusion" if index == len(rules) else "Supports"
-        lines.append(f"  {result_label}: {consequent or '(no stated conclusion)'}")
-        if consequent:
-            prior_results[_norm(consequent)] = index
-
-    return "\n".join(lines)
+    if assumptions:
+        joined = "; ".join(assumptions)
+        parts.append(f"(This relies on the assumption that {joined}.)")
+    return " ".join(parts) if parts else "(no argument)"
 
 
 def _turn_label(index: int, turn: dict[str, Any], id_to_no: dict[str, int]) -> str:
@@ -98,9 +119,11 @@ def _turn_label(index: int, turn: dict[str, Any], id_to_no: dict[str, int]) -> s
     ラベルに出さず、平易な言葉（new argument / responding to [Turn X] /
     challenges its conclusion|premise）で議論の流れを説明する。
 
-    - schema / no_schema: `target_statement` は攻撃側が宣言した対象としてラベルに表示する。
-      実際に対象Argument内に存在するとは描画側で断定しない。
-    - mad / free_debate: 先頭は opening、2ターン目以降は直前ターンへの応答として示す。
+    - schema（発話体変換される）: 対象の中身は発話本体（「your conclusion that…」/
+      「Your premise that…」）に出るので、ラベルは参照のみ。
+    - no_schema（原文のまま）: 発話本体に対象が出ないとは限らないので、ラベル側に
+      何の結論／前提に反論しているかを補足する。
+    - main / mad / free_debate: 新しい主張として示す。
     """
     agent = turn.get("agent", "?")
     attack = turn.get("attack")
@@ -117,17 +140,17 @@ def _turn_label(index: int, turn: dict[str, Any], id_to_no: dict[str, int]) -> s
     else:
         ref = "responding to an earlier argument"
 
+    argument = turn.get("argument")
+    is_schema = isinstance(argument, dict)
+    if is_schema:
+        return f"[Turn {index}] {agent} ({ref})"
+
     target_statement = turn.get("target_statement")
     if target_statement:
-        noun = (
-            "conclusion"
-            if turn.get("target_field") == "Conc"
-            else "defeasible assumption"
-        )
-        quoted_target = json.dumps(str(target_statement).strip(), ensure_ascii=False)
+        noun = "conclusion" if turn.get("target_field") == "Conc" else "premise"
         return (
-            f"[Turn {index}] {agent} ({ref}; "
-            f"declared target — {noun}: {quoted_target})"
+            f"[Turn {index}] {agent} ({ref}, "
+            f'challenging its {noun}: "{_strip_period(str(target_statement))}")'
         )
     return f"[Turn {index}] {agent} ({ref})"
 

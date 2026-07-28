@@ -51,10 +51,10 @@ def test_schema_main_argument_rendered_as_utterance() -> None:
     transcript = evaluation.build_eval_input(log)["debate_transcript"]
 
     assert "[Turn 1] AG1 (new argument)" in transcript
-    assert "Reasoning:\nStep 1:" in transcript
-    assert "  - 'a' is in stock." in transcript
-    assert "  - If something is in stock, we can buy it." in transcript
-    assert "  Final conclusion: We should buy 'a'." in transcript
+    assert (
+        "'a' is in stock. If something is in stock, we can buy it. "
+        "Therefore, We should buy 'a'." in transcript
+    )
     # 生JSONやフィールド名は描画されない
     assert '"rules"' not in transcript
     assert "Conc" not in transcript
@@ -90,17 +90,12 @@ def test_schema_attack_turn_names_target_statement() -> None:
     }
     transcript = evaluation.build_eval_input(log)["debate_transcript"]
 
+    assert "[Turn 2] AG2 (responding to [Turn 1])" in transcript
     assert (
-        "[Turn 2] AG2 (responding to [Turn 1]; "
-        'declared target — conclusion: "We should buy \'a\'.")'
-        in transcript
+        'I disagree with your conclusion that "We should buy \'a\'". '
+        "'a' is out of stock. If something is out of stock, we don't buy it. "
+        "Therefore, We should not buy 'a'." in transcript
     )
-    assert (
-        "  - 'a' is out of stock.\n"
-        "  - If something is out of stock, we don't buy it.\n"
-        "  Final conclusion: We should not buy 'a'." in transcript
-    )
-    assert "I disagree with your conclusion" not in transcript
 
 
 def test_schema_undercut_uses_premise_wording_and_assumptions_are_rendered() -> None:
@@ -133,15 +128,9 @@ def test_schema_undercut_uses_premise_wording_and_assumptions_are_rendered() -> 
     transcript = evaluation.build_eval_input(log)["debate_transcript"]
 
     assert (
-        "[Turn 2] AG2 (responding to [Turn 1]; "
-        'declared target — defeasible assumption: "stock levels are reliable")'
-        in transcript
+        'Your premise that "stock levels are reliable" does not hold.' in transcript
     )
-    assert (
-        "  Defeasible assumptions:\n  - stock levels are reliable"
-        in transcript
-    )
-    assert "Your premise that" not in transcript
+    assert "(This relies on the assumption that stock levels are reliable.)" in transcript
 
 
 def test_no_schema_keeps_raw_text_with_attack_label() -> None:
@@ -175,8 +164,7 @@ def test_no_schema_keeps_raw_text_with_attack_label() -> None:
     assert "Actually a is expensive, so the reasoning fails." in transcript
     # ラベル側に攻撃対象を明示する
     assert (
-        "[Turn 2] AG2 (responding to [Turn 1]; "
-        'declared target — defeasible assumption: "a is cheap")'
+        '[Turn 2] AG2 (responding to [Turn 1], challenging its premise: "a is cheap")'
         in transcript
     )
 
@@ -249,13 +237,15 @@ def test_schema_multistep_chain_preserves_structure_without_repeated_link() -> N
 
     transcript = evaluation.build_eval_input(log)["debate_transcript"]
 
-    assert "Step 1:" in transcript
-    assert "  Supports: Pokémon GO can increase physical activity." in transcript
-    assert "Step 2:\n  Uses: result from Step 1" in transcript
-    assert transcript.count("Pokémon GO can increase physical activity.") == 1
-    assert "  - Physical activity can improve health." in transcript
-    assert "  Final conclusion: Pokémon GO can benefit society." in transcript
-    assert "So pokémon GO" not in transcript
+    # 先行 rule の consequent が後続 rule の strong に再出現しても、同じ文を二重に
+    # 描画しない（連鎖のつなぎとして省かれ、connector だけで推論の流れを示す）。
+    assert transcript.lower().count("pokémon go can increase physical activity") == 1
+    assert "So pokémon GO can increase physical activity." in transcript
+    assert "Physical activity can improve health" in transcript
+    assert "Therefore, Pokémon GO can benefit society." in transcript
+    assert "(This relies on the assumption that" in transcript
+    assert "Players can use it safely" in transcript
+    assert "The benefit is not outweighed by injuries" in transcript
 
 
 def test_transition_note_is_neutral_and_omitted_at_end_without_shared_rule() -> None:
