@@ -70,6 +70,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--fail-fast", action="store_true", help="Stop on the first failure."
     )
+    parser.add_argument(
+        "--max-dialogue-turns",
+        type=int,
+        default=None,
+        help=(
+            "対話フェーズの総発話数の絶対上限。schema/no_schemaと発話数を揃えて"
+            "比較する場合に指定する（未指定なら無効）。"
+        ),
+    )
     return parser.parse_args()
 
 
@@ -86,6 +95,7 @@ async def run_unit(
     runs: int,
     semaphore: asyncio.Semaphore,
     fail_fast: bool,
+    max_dialogue_turns: int | None,
 ) -> None:
     async with semaphore:
         for run_index in range(1, runs + 1):
@@ -93,6 +103,7 @@ async def run_unit(
                 await run_mad_topic_once(
                     topic_file,
                     max_turns=max_turns,
+                    max_dialogue_turns=max_dialogue_turns,
                     output_root=combo_dir,
                     run_index=run_index if runs > 1 else None,
                 )
@@ -131,7 +142,17 @@ async def main() -> None:
     for max_turns in combos:
         combo_dir = sweep_root / f"turns{max_turns:02d}_attempts01"
         for topic_file in files:
-            tasks.append(run_unit(topic_file, combo_dir, max_turns, args.runs, semaphore, args.fail_fast))
+            tasks.append(
+                run_unit(
+                    topic_file,
+                    combo_dir,
+                    max_turns,
+                    args.runs,
+                    semaphore,
+                    args.fail_fast,
+                    args.max_dialogue_turns,
+                )
+            )
     await asyncio.gather(*tasks)
 
     print(f"=== done. logs under {sweep_root} ===", flush=True)

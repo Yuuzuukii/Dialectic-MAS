@@ -366,15 +366,8 @@ Question: {question}
 Dialogue history:
 {dialogue_history}
 """
-
-    # ---- MAD (Multi-Agent Debate; Du et al. 流の相互反論ベースライン) ----
-    # free_debate と異なり、各ターンで相手の直前の主張へ反論することだけを簡潔に要求する
-    # （rebut の手順を細かく規定しない。具体的な反論の仕方は指示文(_round_instruction)側で
-    # 「argue against」と一言伝えるのみ）。
-    # ラウンド上限後は AG1/AG2 のいずれでもない、独立した judge が対話全体から最終回答を作る。
     MAD_TURN_SYSTEM = _system(_GROUNDING)
 
-    # 独立した judge（AG1/AG2 のいずれでもない）が対話全体から最終回答を作る。
     MAD_JUDGE_SYSTEM = _system(
         "<role>\nYou are an independent judge. You did not participate in this debate.\n</role>",
         "<task>\nBased on the debate so far, select a single winner and formulate the final answer based on his opinion. however, there is no need to announce the winner within the text of the answer itself.\n</task>",

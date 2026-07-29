@@ -80,6 +80,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--fail-fast", action="store_true", help="Stop on the first failure."
     )
+    parser.add_argument(
+        "--max-dialogue-turns",
+        type=int,
+        default=None,
+        help=(
+            "対話フェーズ（main/defeat/counter/blocker）の総発話数の絶対上限。"
+            "mad/free_debateと発話数を揃えて比較する場合に指定する（未指定なら無効）。"
+            "AG1/AG2でこの値を折半して使う。"
+        ),
+    )
     return parser.parse_args()
 
 
@@ -104,6 +114,7 @@ async def run_unit(
     runs: int,
     semaphore: asyncio.Semaphore,
     fail_fast: bool,
+    max_dialogue_turns: int | None,
 ) -> None:
     async with semaphore:
         for run_index in range(1, runs + 1):
@@ -112,6 +123,7 @@ async def run_unit(
                     topic_file,
                     max_turns=max_turns,
                     max_attack_attempts=max_attempts,
+                    max_dialogue_turns=max_dialogue_turns,
                     output_root=combo_dir,
                     run_index=run_index if runs > 1 else None,
                 )
@@ -166,6 +178,7 @@ async def main() -> None:
                     args.runs,
                     semaphore,
                     args.fail_fast,
+                    args.max_dialogue_turns,
                 )
             )
     await asyncio.gather(*tasks)
