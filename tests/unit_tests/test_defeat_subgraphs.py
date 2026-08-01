@@ -163,7 +163,11 @@ async def test_generate_attack_infers_rebut_and_target_metadata(monkeypatch) -> 
             ),
         )
 
+    async def engagement_point(*args, **kwargs):
+        return "a's cost is the weak point of the target argument."
+
     monkeypatch.setattr(arguments, "chat_structured", available_rebut)
+    monkeypatch.setattr(arguments, "chat_text", engagement_point)
     target = argument("AG1", ["We should buy a"])
     state = SimpleNamespace(
         current_proponent="AG1",
@@ -201,7 +205,11 @@ async def test_generate_attack_trusts_declared_attack_target(monkeypatch) -> Non
             ),
         )
 
+    async def engagement_point(*args, **kwargs):
+        return "the assumption that a is available looks shaky."
+
     monkeypatch.setattr(arguments, "chat_structured", invalid_target)
+    monkeypatch.setattr(arguments, "chat_text", engagement_point)
     target = argument("AG1", ["We should buy a"], ["a is available"])
     state = SimpleNamespace(
         current_proponent="AG1",
