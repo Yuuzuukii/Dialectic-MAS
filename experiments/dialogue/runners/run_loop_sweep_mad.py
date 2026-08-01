@@ -68,6 +68,15 @@ def parse_args() -> argparse.Namespace:
         default=1,
         help="同時に実行するcombo数の上限。1なら従来通り直列実行。",
     )
+    parser.add_argument(
+        "--use-synthesis",
+        action="store_true",
+        help=(
+            "ラウンド上限後、勝者を決めるjudgeの代わりに、schema/no_schemaと共通の"
+            "統合プロンプトで止揚による統合を行ってから最終回答を作る"
+            "（議論過程の重要性検証用。ログの method は mad_synthesis になる）。"
+        ),
+    )
     return parser.parse_args()
 
 
@@ -86,6 +95,7 @@ async def run_combo(
     index: int,
     total: int,
     semaphore: asyncio.Semaphore,
+    use_synthesis: bool,
 ) -> None:
     combo_dir = sweep_root / f"turns{max_turns:02d}_attempts01"
     async with semaphore:
@@ -95,6 +105,7 @@ async def run_combo(
                 await run_mad_topic_once(
                     topic_file,
                     max_turns=max_turns,
+                    use_synthesis=use_synthesis,
                     output_root=combo_dir,
                     run_index=run_index if runs > 1 else None,
                 )
@@ -122,7 +133,16 @@ async def main() -> None:
     semaphore = asyncio.Semaphore(max(1, args.concurrency))
     await asyncio.gather(
         *(
-            run_combo(topic_file, sweep_root, max_turns, args.runs, i, total, semaphore)
+            run_combo(
+                topic_file,
+                sweep_root,
+                max_turns,
+                args.runs,
+                i,
+                total,
+                semaphore,
+                args.use_synthesis,
+            )
             for i, max_turns in enumerate(combos, start=1)
         )
     )

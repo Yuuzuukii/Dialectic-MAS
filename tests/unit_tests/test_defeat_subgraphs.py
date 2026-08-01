@@ -13,7 +13,7 @@ from agent.schema.llm_outputs import (
     ArgumentBody,
     AttackMetadata,
     DefeatingArgumentOutput,
-    GeneralizedCriterion,
+    IntegrationBody,
     Rule,
     TargetReference,
 )
@@ -136,7 +136,7 @@ async def test_llm_argument_body_only_requests_rules() -> None:
 
 async def test_llm_schema_does_not_request_generated_identifiers() -> None:
     assert "id" not in Rule.model_fields
-    assert "id" not in GeneralizedCriterion.model_fields
+    assert "id" not in IntegrationBody.model_fields
 
 
 async def test_defeating_output_requests_declared_attack_target() -> None:

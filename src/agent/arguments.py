@@ -1,6 +1,6 @@
 """LLM 生成呼び出しの単一集約点.
 
-各手番（main / attack[defeat,counter] / undercut）と合成（generalize / integrate）、
+各手番（main / attack[defeat,counter] / undercut）と合成（integrate: 汎化+統合を1ステップで行う）、
 最終回答（final_answer）の生成を、メッセージ組み立て→LLM 呼び出し→結果整形まで一括で行う。
 ノード（nodes.py）はこれらの generate_* を呼ぶだけで、状態の整形に専念する。
 
@@ -26,7 +26,6 @@ from .prompts import (
     agent_system,
     attack_extends_instruction,
     attack_instruction,
-    generalization_instruction,
     integration_instruction,
     main_instruction,
     synthesis_system,
@@ -38,8 +37,6 @@ from .schema.llm_outputs import (
     AttackExtendsOutput,
     DefeatingArgumentOutput,
     DefeatingArgumentOutputFree,
-    GeneralizationOutput,
-    GeneralizationOutputFree,
     IntegrationOutput,
     IntegrationOutputFree,
     MainArgumentAvailabilityOutput,
@@ -462,29 +459,8 @@ async def ask_attack_extends(
     return output.attack_extends == "YES"
 
 
-async def generate_generalization(
-    state: Any,
-) -> GeneralizationOutput | GeneralizationOutputFree:
-    """両エージェントの warrant を汎化し、再利用可能な基準を導出する."""
-    template = (
-        PromptTemplates.GENERALIZATION_SYSTEM_NO_SCHEMA
-        if _output_mode(state) == "no_schema"
-        else PromptTemplates.GENERALIZATION_SYSTEM
-    )
-    system = synthesis_system("AG1", state.agent1_stance, template)
-    user = generalization_instruction(state)
-    schema = (
-        GeneralizationOutputFree
-        if _output_mode(state) == "no_schema"
-        else GeneralizationOutput
-    )
-    return await chat_structured(
-        [SystemMessage(content=system), HumanMessage(content=user)], schema
-    )
-
-
 async def generate_integration(state: Any) -> IntegrationOutput | IntegrationOutputFree:
-    """汎化された基準を一つの統合ルールにまとめる."""
+    """両エージェントの warrant を汎化した上で、一つの統合ルールにまとめる（1ステップ）."""
     template = (
         PromptTemplates.INTEGRATION_SYSTEM_NO_SCHEMA
         if _output_mode(state) == "no_schema"

@@ -1,7 +1,8 @@
 """弁証法プロトコルを使わない自由討議ベースライン.
 
 AG1・AG2 が同一ラウンド内で交互に発言する（AG2 は AG1 のそのラウンドの発言を見た上で
-発言する）固定ラウンド数の討議。ラウンド上限に達したら対話履歴から最終回答を生成する。
+発言する）固定ラウンド数の討議。ラウンド上限に達したら、schema/no_schemaと共通の統合
+プロンプトで止揚による統合を行い、その統合ルールを踏まえて最終回答を生成する。
 
 既存の弁証法グラフ（workflow.py）とは独立した、rebut/undercut/justified 等の概念を
 一切持たない最小限のグラフ。詳細は docs/free_debate_protocol_plan.md を参照。
@@ -11,14 +12,18 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
+from types import SimpleNamespace
 from typing import Any
 
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
 from langgraph.graph import END, START, StateGraph
 from pydantic import BaseModel, Field
 
+from .arguments import generate_final_answer as _generate_final_answer
+from .arguments import generate_integration as _generate_integration
 from .edges import _int_env, _optional_int_env
-from .llm import chat_structured, chat_text
+from .llm import chat_structured
+from .nodes import extract_integrated_rule
 from .prompts import PromptTemplates, agent_system
 from .schema.types import AgentName
 
@@ -59,6 +64,8 @@ class FreeDebateState:
     # 1ラウンドで両者とも False（＝新しい点なし＝収束）なら max_turns 未満でも終了する。
     ag1_has_new: bool | None = None
     ag2_has_new: bool | None = None
+    integration_result: str | None = None
+    integrated_rule: str | None = None
 
 
 def _stance(state: FreeDebateState, agent: AgentName) -> str:
@@ -166,46 +173,81 @@ def route_after_ag1_turn(state: FreeDebateState) -> str:
     """AG1 の手番直後の遷移先を決める.
 
     `max_dialogue_turns`（全手法共通の絶対ターン数上限）が設定されている場合だけ、
-    ラウンドの途中（AG2 の番の前）でもここで打ち切って最終回答生成へ進む。未設定なら
+    ラウンドの途中（AG2 の番の前）でもここで打ち切って統合ステップへ進む。未設定なら
     常に ag2_turn へ進み、既存の round ベースの挙動と完全に同じ。
     """
     if _dialogue_turn_budget_exceeded(state):
-        return "generate_final_answer"
+        return "integrate"
     return "ag2_turn"
 
 
 def route_after_ag2_turn(state: FreeDebateState) -> str:
     """次の分岐を決める.
 
-    - `max_dialogue_turns`（絶対ターン数上限）に達したら最終回答生成へ。
-    - ラウンド上限 (max_turns) に達したら最終回答生成へ（ハード上限）。
+    - `max_dialogue_turns`（絶対ターン数上限）に達したら統合ステップへ。
+    - ラウンド上限 (max_turns) に達したら統合ステップへ（ハード上限）。
     - 上限未満でも、その1ラウンドで両者とも新しい論点を出せなかった（収束した）場合は
-      早期に最終回答生成へ進む。これにより max_turns は schema/no_schema の
+      早期に統合ステップへ進む。これにより max_turns は schema/no_schema の
       max_attack_attempts と同じ「上限」の意味になる。
     """
     if _dialogue_turn_budget_exceeded(state):
-        return "generate_final_answer"
+        return "integrate"
     completed_rounds = state.round - 1
     if completed_rounds >= state.max_turns:
-        return "generate_final_answer"
+        return "integrate"
     if state.ag1_has_new is False and state.ag2_has_new is False:
-        return "generate_final_answer"
+        return "integrate"
     return "ag1_turn"
 
 
-async def generate_final_answer(state: FreeDebateState) -> dict[str, Any]:
-    """対話履歴全体から最終回答を生成する."""
-    system = PromptTemplates.FREE_DEBATE_FINAL_ANSWER_SYSTEM
-    user = PromptTemplates.FREE_DEBATE_FINAL_ANSWER_USER.format(
-        question=state.question,
-        dialogue_history=json.dumps(
-            state.dialogue_history, ensure_ascii=False, indent=2
-        ),
-    ).strip()
-    answer = await chat_text(
-        [SystemMessage(content=system), HumanMessage(content=user)],
-        verbosity="high",
+def _last_argument_by(state: FreeDebateState, agent: AgentName) -> str:
+    for turn in reversed(state.dialogue_history):
+        if turn.get("agent") == agent:
+            return str(turn.get("argument", ""))
+    return ""
+
+
+async def integrate(state: FreeDebateState) -> dict[str, Any]:
+    """止揚による統合.
+
+    schema/no_schemaと共通の統合プロンプトで、両サイド最新の主張を汎化した上で
+    1つの再利用可能ルールにまとめる。弁証法プロトコルのような形式的な warrant
+    抽出は無いため、各サイドの最新の主張を warrant の代わりとして渡す。
+    """
+    warrant_result = json.dumps(
+        {
+            "Argument1": {"agent": "AG1", "warrant": _last_argument_by(state, "AG1")},
+            "Argument2": {"agent": "AG2", "warrant": _last_argument_by(state, "AG2")},
+        },
+        ensure_ascii=False,
     )
+    synthesis_state = SimpleNamespace(
+        warrant_result=warrant_result,
+        agent1_stance=state.agent1_stance,
+        agent2_stance=state.agent2_stance,
+        output_mode="no_schema",
+    )
+    output = await _generate_integration(synthesis_state)
+    response = json.dumps(
+        output.model_dump(exclude_none=True), ensure_ascii=False, indent=2
+    )
+    rule = extract_integrated_rule(response)
+    return {"integration_result": response, "integrated_rule": rule}
+
+
+async def generate_final_answer(state: FreeDebateState) -> dict[str, Any]:
+    """統合ルールを踏まえて最終回答を生成する（schema/no_schemaの合意なし時と共通のプロンプト）."""
+    last_argument = state.dialogue_history[-1]["argument"] if state.dialogue_history else None
+    synthesis_state = SimpleNamespace(
+        justified_argument=last_argument,
+        dialogue_history=state.dialogue_history,
+        integrated_rules=[state.integrated_rule] if state.integrated_rule else [],
+        consensus_reached=False,
+        question=state.question,
+        agent1_stance=state.agent1_stance,
+        agent2_stance=state.agent2_stance,
+    )
+    answer = await _generate_final_answer(synthesis_state)
     return {"final_answer": answer.strip()}
 
 
@@ -213,18 +255,20 @@ graph_free_debate = (
     StateGraph(FreeDebateState)
     .add_node("ag1_turn", ag1_turn)
     .add_node("ag2_turn", ag2_turn)
+    .add_node("integrate", integrate)
     .add_node("generate_final_answer", generate_final_answer)
     .add_edge(START, "ag1_turn")
     .add_conditional_edges(
         "ag1_turn",
         route_after_ag1_turn,
-        {"ag2_turn": "ag2_turn", "generate_final_answer": "generate_final_answer"},
+        {"ag2_turn": "ag2_turn", "integrate": "integrate"},
     )
     .add_conditional_edges(
         "ag2_turn",
         route_after_ag2_turn,
-        {"ag1_turn": "ag1_turn", "generate_final_answer": "generate_final_answer"},
+        {"ag1_turn": "ag1_turn", "integrate": "integrate"},
     )
+    .add_edge("integrate", "generate_final_answer")
     .add_edge("generate_final_answer", END)
     .compile(name="Free Debate")
 )

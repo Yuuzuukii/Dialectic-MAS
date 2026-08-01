@@ -146,7 +146,7 @@ def route_after_extract_warrants(state: Any) -> str:
     AG1・AG2 のどちらかが今ラウンドで新しい main argument を生成できなかった場合、
     次ラウンド用のルールを両者から統合する材料が揃わない（統合しても使われない：
     片方が主張を尽くした時点で次ラウンドは行われない）。この場合は
-    generalize/integrate をスキップし、finalize_fallback で決着させる。
+    integrate（汎化+統合）をスキップし、finalize_fallback で決着させる。
     """
     if state.error:
         return "finish_with_error"
