@@ -30,7 +30,6 @@ from .nodes import (
     finalize_fallback,
     finish,
     finish_with_error,
-    generalize,
     generate_final_answer,
     integrate,
     o_defeat_a,
@@ -128,7 +127,6 @@ class State:
     final_rebuttal: str | None = None
 
     warrant_result: str | None = None
-    generalization_result: str | None = None
     integration_result: str | None = None
     integrated_rule: str | None = None
 
@@ -149,7 +147,6 @@ graph = (
     .add_node("validate_b_defeats_c", validate_b_defeats_c)
     .add_node("route_after_thread", route_after_thread_node)
     .add_node("extract_warrants", extract_warrants)
-    .add_node("generalize", generalize)
     .add_node("integrate", integrate)
     .add_node("add_integrated_rule", add_integrated_rule)
     .add_node("generate_final_answer", generate_final_answer)
@@ -239,15 +236,10 @@ graph = (
         "extract_warrants",
         route_after_extract_warrants,
         {
-            "next": "generalize",
+            "next": "integrate",
             "finalize_fallback": "finalize_fallback",
             "finish_with_error": "finish_with_error",
         },
-    )
-    .add_conditional_edges(
-        "generalize",
-        route_after_synthesis_step,
-        {"next": "integrate", "finish_with_error": "finish_with_error"},
     )
     .add_conditional_edges(
         "integrate",

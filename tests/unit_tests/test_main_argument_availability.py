@@ -202,27 +202,6 @@ async def test_can_generate_main_errors_when_yes_without_argument(monkeypatch) -
     )
 
 
-async def test_can_generate_main_increments_main_attempt_count(monkeypatch) -> None:
-    async def has_new_argument(*args, **kwargs):
-        return SimpleNamespace(
-            can_generate="YES",
-            reason="A distinct main argument is available.",
-            Argument=ArgumentBody(rules=[]),
-        )
-
-    monkeypatch.setattr("agent.arguments.chat_structured", has_new_argument)
-
-    state = State(
-        question="What camera should we buy?",
-        agent1_stance="a is a camera.",
-        agent2_stance="",
-        main_attempt_count=1,
-    )
-    update = await can_generate_main(state)
-
-    assert update["main_attempt_count"] == 2
-
-
 async def test_route_after_can_generate_main_ag1_unavailable_advances_to_ag2() -> None:
     state = SimpleNamespace(
         error=None,
@@ -245,37 +224,21 @@ async def test_route_after_can_generate_main_ag2_unavailable_extracts_warrants()
     assert route_after_can_generate_main(state) == "extract_warrants"
 
 
-async def test_route_after_thread_retries_same_proponent_when_under_attempt_cap() -> None:
-    state = SimpleNamespace(
-        error=None,
-        current_thread_status="overruled",
-        current_proponent="AG1",
-        main_attempt_count=1,
-        max_main_argument_attempts=2,
-    )
-
-    assert route_after_thread(state) == "can_generate_main"
-
-
-async def test_route_after_thread_advances_to_ag2_when_ag1_attempt_cap_reached() -> None:
+async def test_route_after_thread_advances_to_ag2_when_defensible() -> None:
     state = SimpleNamespace(
         error=None,
         current_thread_status="defensible",
         current_proponent="AG1",
-        main_attempt_count=2,
-        max_main_argument_attempts=2,
     )
 
     assert route_after_thread(state) == "advance_to_ag2"
 
 
-async def test_route_after_thread_extracts_warrants_when_ag2_attempt_cap_reached() -> None:
+async def test_route_after_thread_extracts_warrants_when_ag2_overruled() -> None:
     state = SimpleNamespace(
         error=None,
         current_thread_status="overruled",
         current_proponent="AG2",
-        main_attempt_count=2,
-        max_main_argument_attempts=2,
     )
 
     assert route_after_thread(state) == "extract_warrants"
@@ -286,7 +249,6 @@ async def test_advance_to_ag2_resets_state_for_ag2_turn() -> None:
         question="What camera should we buy?",
         agent1_stance="a is a camera.",
         agent2_stance="b is a camera.",
-        main_attempt_count=2,
     )
 
     update = await advance_to_ag2(state)
@@ -295,7 +257,6 @@ async def test_advance_to_ag2_resets_state_for_ag2_turn() -> None:
     assert update["current_opponent"] == "AG1"
     assert update["active_agent"] == "AG2"
     assert update["current_argument"] is None
-    assert update["main_attempt_count"] == 0
     assert update["debate_stage"] == "ag2_main_thread"
 
 

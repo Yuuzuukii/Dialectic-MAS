@@ -45,39 +45,21 @@ def _records(state: Any) -> list[ArgumentRecord]:
 
 
 def _dialogue_turn_budget_exceeded(state: Any) -> bool:
-    """`max_dialogue_turns` 予算を現在の proponent の持ち分で使い切っているか判定する.
+    """絶対ターン数上限（`max_dialogue_turns`）に既に達しているか（未設定なら常に False）.
 
-    None（未設定）なら常に False（この上限機構自体を無効化し、既存の
-    max_turns/max_attack_attempts ベースの挙動だけで従来通り動く）。
+    MAD/Free Debateと同じく、AG1/AG2で予算を折半するような調整はせず、対話フェーズ
+    （main/defeat/counter/undercut blocker）で生成された発話の総数をそのまま
+    max_dialogue_turns と比較する。
 
-    MAD/Free Debate は1発話ずつ厳密に交互なので、累積カウントを総予算と
-    比較するだけで自然にほぼ半々になる。しかし schema/no_schema は1スレッドが
-    main/defeat/counter/undercut blocker と複数発話を消費するため、単純な
-    累積カウントだと先手（AG1）がスレッド内で予算の大半・全部を使い切り、
-    後手（AG2）が主張すら出せずに終わる、という偏りが起こり得る。
-    そこで総予算を AG1/AG2 で折半し、各 proponent は自分が主張者だった
-    スレッド（main から次の main の直前まで）で生成された発話数を自分の
-    持ち分（総予算 // 2）とだけ比較する。早期に自然終了（justified/overruled/
-    defensible）して持ち分を余らせても、その余りはもう一方には持ち越さない
-    （早期収束そのものが評価対象であり、繰り越すと先手有利の偏りが再発するため）。
-
-    `max_dialogue_turns` は対話フェーズ（main/defeat/counter/blocker）の発話数
-    だけを対象とする。統合（generalize/integrate）や最終回答生成はここでは数えない
-    — 統合ステップの回数は手法ごとに構造的に異なり（schemaは持つがMAD/Free Debateは
-    持たない）、これを共通予算に含めると手法間の対話量そのものの比較が歪むため。
+    `max_dialogue_turns` は対話フェーズの発話数だけを対象とする。統合（integrate）や
+    最終回答生成はここでは数えない — 統合ステップの回数は手法ごとに構造的に異なり
+    （schemaは持つがMAD/Free Debateは持たない）、これを共通予算に含めると手法間の
+    対話量そのものの比較が歪むため。
     """
     limit = getattr(state, "max_dialogue_turns", None)
     if limit is None:
         return False
-    half = int(limit) // 2
-    owner: str | None = None
-    used = 0
-    for record in _records(state):
-        if record.type == "main":
-            owner = record.agent
-        if owner == state.current_proponent:
-            used += 1
-    return used >= half
+    return len(_records(state)) >= int(limit)
 
 
 def _message_history(state: Any) -> list[BaseMessage]:
@@ -520,21 +502,10 @@ async def extract_warrants(state: Any) -> dict[str, Any]:
         return {"error": f"Warrant抽出中にエラーが発生しました: {exc}"}
 
 
-async def generalize(state: Any) -> dict[str, Any]:
-    """両エージェントの warrant を汎化し、再利用可能な基準を導出する."""
-    if state.warrant_result is None:
-        return {"error": "Cannot generalize without warrants."}
-    output = await arguments.generate_generalization(state)
-    response = json.dumps(
-        output.model_dump(exclude_none=True), ensure_ascii=False, indent=2
-    )
-    return {"generalization_result": response}
-
-
 async def integrate(state: Any) -> dict[str, Any]:
-    """汎化された基準を一つの統合ルールにまとめ、次ラウンドで再利用できる形にする."""
-    if state.warrant_result is None or state.generalization_result is None:
-        return {"error": "Cannot integrate without warrants and generalization."}
+    """両エージェントの warrant を汎化した上で一つの統合ルールにまとめ、次ラウンドで再利用できる形にする."""
+    if state.warrant_result is None:
+        return {"error": "Cannot integrate without warrants."}
     output = await arguments.generate_integration(state)
     response = json.dumps(
         output.model_dump(exclude_none=True), ensure_ascii=False, indent=2
@@ -585,7 +556,6 @@ async def add_integrated_rule(state: Any) -> dict[str, Any]:
         "b_defeats_c": None,
         "c_strictly_defeats_b": None,
         "warrant_result": None,
-        "generalization_result": None,
         "integration_result": None,
         "integrated_rule": None,
     }

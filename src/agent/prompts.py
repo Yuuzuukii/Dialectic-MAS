@@ -136,71 +136,33 @@ class PromptTemplates:
     # 自分の攻撃(B)が相手の新しいカウンター(C)にも及ぶかを尋ねる手番用（schema/no_schema共通）。
     ATTACK_EXTENDS_SYSTEM = _system(_GROUNDING)
 
-    _GENERALIZATION_SYSTEM_BASE = _system(
-        "<role>\n"
-        "You are AG1 in this debate.\n"
-        "You now act as the synthesis operator for the debate.\n"
-        "Your task is to generalize each side's warrant into a reusable criterion for future arguments.\n"
-        "</role>",
-        "<stance>\n{stance}\n</stance>",
-        "<generalization_principles>\n"
-        "- Treat both sides' warrants as inputs to be preserved at the level of value or principle.\n"
-        "- Also use the source stances as a coverage check: preserve every distinct substantive "
-        "requirement or consideration from both stances at an appropriate level of abstraction, "
-        "even when a compressed final warrant did not repeat it.\n"
-        "- Do not discard AG2's warrant merely because it conflicts with AG1's stance.\n"
-        "- Do not simply restate AG1's own warrant as the synthesis result.\n"
-        "- Abstract away from issue-specific entities, examples, and one-off facts.\n"
-        "- Abstraction may generalize a requirement, but must not erase what makes it substantively "
-        "different from the other requirements.\n"
-        "- Preserve the condition under which each warrant is rationally compelling.\n"
-        "- Preserve the conclusion type supported by each warrant.\n"
-        "- Do not choose a winner between the two sides during generalization.\n"
-        "- Do not produce a final answer to the original Issue.\n"
-        "</generalization_principles>",
-    )
-
-    GENERALIZATION_SYSTEM_NO_SCHEMA = _GENERALIZATION_SYSTEM_BASE
-
-    GENERALIZATION_SYSTEM = _system(
-        _GENERALIZATION_SYSTEM_BASE,
-        "<schema_overlay>\n"
-        "Represent each generalized criterion as a structured object.\n"
-        "- strong: generalized condition(s) under which the criterion applies.\n"
-        "- consequent: the generalized conclusion supported by those conditions.\n"
-        "- principle: a short name or phrase for the underlying value or principle.\n"
-        "</schema_overlay>",
-    )
-
+    # 汎化(generalize)と統合(integrate)は別々の往復にせず、1回のLLM呼び出しで
+    # 「両者のwarrantを汎化した上で1つの再利用可能ルールにまとめる」ところまで行う。
     _INTEGRATION_SYSTEM_BASE = _system(
         "<role>\n"
         "You are AG1 in this debate.\n"
         "You now act as the synthesis operator for the debate.\n"
-        "Your task is to integrate generalized criteria into one reusable rule for the next debate round.\n"
+        "Your task is to generalize each side's warrant into a reusable condition-to-conclusion "
+        "criterion, then integrate both sides' criteria into one reusable rule for the next round.\n"
         "</role>",
         "<stance>\n{stance}\n</stance>",
         "<integration_principles>\n"
-        "- The integrated rule must preserve every generalized criterion's condition-to-conclusion mapping.\n"
-        "- The integrated rule must be more abstract than any individual criterion.\n"
-        "- The integrated rule must not merely list the criteria without unifying them.\n"
-        "- The integrated rule must be usable by either side in the next round.\n"
-        "- When criteria support different outcomes, express one decision rule that says which "
+        "- Abstract each side's warrant away from issue-specific entities, then unify them into "
+        "one rule usable by either side in the next round; do not merely list the warrants.\n"
+        "- Use the source stances as a coverage check: the rule must not silently drop a distinct "
+        "substantive requirement from either side, even one a compressed warrant did not repeat.\n"
+        "- When the sides support different outcomes, express one decision rule that says which "
         "outcome follows under each condition; do not combine opposing conditions under one OR "
         "and leave their outcomes ambiguous.\n"
-        "- If opposing conditions can both be true, adjudicate them symmetrically: compare their "
-        "relevant magnitude, breadth, likelihood, reversibility, and available mitigation. Do not "
-        "make one side's merely possible or plausible benefit/harm an automatic veto unless a "
-        "source criterion explicitly establishes a non-compensable threshold.\n"
-        "- Apply the same evidential threshold to both sides. Do not require demonstrated benefits "
-        "while accepting merely plausible harms, or vice versa.\n"
-        "- Do not invent a precautionary or caution presumption, default outcome, burden shift, "
-        "or tie-breaker that is absent from the source criteria. If the supplied criteria do not "
-        "determine the balance, preserve that unresolved comparison instead of favoring a side.\n"
-        "- Treat the source stances as a coverage check. The integrated rule may abstract their "
-        "requirements, but must not silently drop a distinct requirement from either side.\n"
-        "- Do not discard AG2's generalized criterion merely because it conflicts with AG1's stance.\n"
-        "- Do not simply restate AG1's own criterion as the integrated rule.\n"
-        "- Do not produce a final answer to the original Issue.\n"
+        "- If opposing conditions can both be true, adjudicate them symmetrically using the same "
+        "evidential threshold for both sides (magnitude, likelihood, reversibility, mitigation); "
+        "do not give either side an automatic veto. Do not invent a precautionary presumption, "
+        "burden shift, or tie-breaker absent from the warrants; if they do not determine the "
+        "balance, preserve that as unresolved.\n"
+        "- Do not discard AG2's warrant merely because it conflicts with AG1's stance, and do not "
+        "simply restate AG1's own warrant as the result.\n"
+        "- Do not choose a winner between the two sides, and do not produce a final answer to the "
+        "original Issue.\n"
         "</integration_principles>",
     )
 
@@ -209,15 +171,10 @@ class PromptTemplates:
     INTEGRATION_SYSTEM = _system(
         _INTEGRATION_SYSTEM_BASE,
         "<schema_overlay>\n"
-        "Represent the integrated rule as one structured reusable rule.\n"
-        "- Preserve the condition and supported outcome of every generalized criterion.\n"
-        "- Use OR only to combine alternative conditions that support the same outcome.\n"
-        "- If criteria support opposing outcomes, the rule must explicitly map each condition "
-        "to its corresponding outcome as a higher-order decision rule.\n"
-        "- When opposing conditions may coexist, the mapping must include a neutral comparison "
-        "that determines which consideration governs; neither side receives an automatic veto.\n"
-        "- The consequent should state the shared decision principle or outcome mapping.\n"
-        "- The result must be one rule, not multiple unrelated rules.\n"
+        "Represent the result as one structured rule:\n"
+        "- consequent: the shared decision principle or outcome mapping.\n"
+        "- rule: a single reusable rule preserving each side's condition-to-outcome mapping. "
+        "Use OR only for conditions that support the same outcome.\n"
         "</schema_overlay>",
     )
 
@@ -329,45 +286,15 @@ Final check before returning:
     # ---- Free debate (弁証法プロトコルを使わない自由討議ベースライン) ----
     # rebut/undercut/justified 等の概念を持ち込まない、自由記述の主張のみ。
     # 原論文(Du et al.)に倣い、簡潔さ・構造化禁止といった独自の style 指示は付与しない。
+    # ラウンド上限到達後の統合・最終回答生成は、schema/no_schemaと共通の
+    # INTEGRATION_SYSTEM* / FINAL_ANSWER_NO_CONSENSUS_SYSTEM を使う（free_debate.py 参照）。
     FREE_DEBATE_TURN_SYSTEM = _system(_GROUNDING)
 
-    # ラウンド上限到達後、AG1 が両者の発言を踏まえて短い統合サマリーを作る。
-    # warrant/generalization/integrated rule 等の ASPIC+ 概念は持ち込まない。
-    FREE_DEBATE_INTEGRATION_SYSTEM = _system(
-        "<role>\n"
-        "You are AG1 in this debate.\n"
-        "You now act as a neutral synthesizer of the free debate above.\n"
-        "Your task is to summarize the key reasoning each side relied on into a short shared synthesis.\n"
-        "</role>",
-        "<stance>\n{stance}\n</stance>",
-        "<integration_principles>\n"
-        "- Capture the core reasoning each side relied on, not just their final positions.\n"
-        "- Do not discard AG2's reasoning merely because it conflicts with AG1's stance.\n"
-        "- Do not simply restate AG1's own argument as the synthesis.\n"
-        "- Do not produce a final answer to the original question.\n"
-        "- Be concise: a short paragraph, not a full restatement of the transcript.\n"
-        "</integration_principles>",
-    )
-
-    FREE_DEBATE_INTEGRATION_USER = """
-Question: {question}
-
-Dialogue history:
-{dialogue_history}
-"""
-
-    FREE_DEBATE_FINAL_ANSWER_SYSTEM = _system(
-        "<task>\nBased on the debate so far, write the final answer.\n</task>",
-    )
-
-    FREE_DEBATE_FINAL_ANSWER_USER = """
-Question: {question}
-
-Dialogue history:
-{dialogue_history}
-"""
     MAD_TURN_SYSTEM = _system(_GROUNDING)
 
+    # 純粋なMAD（use_synthesis=False）でのみ使う、勝者を決めるjudge。use_synthesis=True の
+    # 場合は代わりに schema/no_schemaと共通の INTEGRATION_SYSTEM* / FINAL_ANSWER_NO_CONSENSUS_SYSTEM
+    # を使う（mad.py 参照）。
     MAD_JUDGE_SYSTEM = _system(
         "<role>\nYou are an independent judge. You did not participate in this debate.\n</role>",
         "<task>\nBased on the debate so far, select a single winner and formulate the final answer based on his opinion. however, there is no need to announce the winner within the text of the answer itself.\n</task>",
@@ -724,51 +651,17 @@ def attack_extends_instruction(
     )
 
 
-def generalization_instruction(state: Any) -> str:
-    """汎化フェーズの HumanMessage を組み立てる."""
-    return "\n".join(
-        [
-            "<task>",
-            "Generalize the warrants into reusable criteria.",
-            "</task>",
-            "",
-            "<warrants>",
-            str(state.warrant_result or ""),
-            "</warrants>",
-            "",
-            "<source_stances>",
-            "<ag1_stance>",
-            str(state.agent1_stance),
-            "</ag1_stance>",
-            "<ag2_stance>",
-            str(state.agent2_stance),
-            "</ag2_stance>",
-            "</source_stances>",
-            "",
-            "<response_contract>",
-            "Return generalized criteria only.",
-            "Do not return an integrated rule yet.",
-            "Do not answer the original Issue.",
-            "</response_contract>",
-        ]
-    )
-
-
 def integration_instruction(state: Any) -> str:
-    """統合フェーズの HumanMessage を組み立てる."""
+    """汎化+統合フェーズの HumanMessage を組み立てる."""
     return "\n".join(
         [
             "<task>",
-            "Integrate the generalized criteria into one reusable rule.",
+            "Generalize the warrants into reusable criteria, then integrate them into one rule.",
             "</task>",
             "",
             "<warrants>",
             str(state.warrant_result or ""),
             "</warrants>",
-            "",
-            "<generalized_criteria>",
-            str(state.generalization_result or ""),
-            "</generalized_criteria>",
             "",
             "<source_stances>",
             "<ag1_stance>",

@@ -22,7 +22,7 @@ LOGS_DIR = ROOT / "logs"
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-Method = Literal["schema", "no_schema", "free_debate", "mad"]
+Method = Literal["schema", "no_schema", "free_debate", "mad", "mad_synthesis"]
 
 # モデル別の実価格（1M トークンあたり: 入力 / キャッシュ入力 / 出力）。
 # OpenAI 公式の gpt-5.4 系料金。以前はモデル非依存の固定単価で計算しており、
@@ -518,6 +518,8 @@ async def run_free_debate_topic_once(
     )
     log["dialogue_history"] = result.get("dialogue_history", [])
     log["final_answer"] = result.get("final_answer")
+    integrated_rule = result.get("integrated_rule")
+    log["integrated_rules"] = [integrated_rule] if integrated_rule else []
     path = save_log(log, output_path("free_debate", topic_path, output_root, run_index))
     print(f"[system] log saved -> {path}", flush=True)
     return path
@@ -528,17 +530,25 @@ async def run_mad_topic_once(
     *,
     max_turns: int = 3,
     max_dialogue_turns: int | None = None,
+    use_synthesis: bool = False,
     output_root: Path = LOGS_DIR,
     run_index: int | None = None,
 ) -> Path:
     """MAD（相互反論型マルチエージェントディベート）ベースラインを1トピック実行する.
 
     free_debate と同じグラフ構造（schema/no_schema と異なる State）だが、各ターンで
-    明示的な反論を要求し、ラウンド上限後は独立した judge が最終回答を作る点が異なる
-    （`free_debate.graph_free_debate` ではなく `mad.graph_mad` を使う）。
+    明示的な反論を要求する点が異なる（`free_debate.graph_free_debate` ではなく
+    `mad.graph_mad` を使う）。
 
     `max_dialogue_turns` は、schema/no_schemaと対話ターン数を揃えて比較するための、
     全手法共通の絶対上限（省略時は無効。`max_turns`＝ラウンド数とは別軸）。
+
+    `use_synthesis`:
+    - False（既定）: ラウンド上限後、独立した judge が勝者を決めて最終回答を作る
+      純粋なMAD（「統合プロセスの重要性検証」のベースライン）。ログの method は "mad"。
+    - True: judge の代わりに、schema/no_schemaと共通の統合プロンプトで止揚による統合を
+      行い、その統合ルールを踏まえて最終回答を作る（「議論過程の重要性検証」で
+      free_debate/no_schema/schema と揃えて使う）。ログの method は "mad_synthesis"。
     """
     from src.agent.mad import MADState, graph_mad
 
@@ -549,6 +559,7 @@ async def run_mad_topic_once(
         "agent1_stance": topic_data["agent1_stance"],
         "agent2_stance": topic_data["agent2_stance"],
         "max_turns": max_turns,
+        "use_synthesis": use_synthesis,
     }
     if max_dialogue_turns is not None:
         mad_kwargs["max_dialogue_turns"] = max_dialogue_turns
@@ -574,15 +585,19 @@ async def run_mad_topic_once(
             result.update(update)
     elapsed = time.perf_counter() - start
 
+    method: Method = "mad_synthesis" if use_synthesis else "mad"
     log = base_log(
-        method="mad",
+        method=method,
         topic_data=topic_data,
         elapsed=elapsed,
         usage=tracker.usage(),
     )
     log["dialogue_history"] = result.get("dialogue_history", [])
     log["final_answer"] = result.get("final_answer")
-    path = save_log(log, output_path("mad", topic_path, output_root, run_index))
+    if use_synthesis:
+        integrated_rule = result.get("integrated_rule")
+        log["integrated_rules"] = [integrated_rule] if integrated_rule else []
+    path = save_log(log, output_path(method, topic_path, output_root, run_index))
     print(f"[system] log saved -> {path}", flush=True)
     return path
 

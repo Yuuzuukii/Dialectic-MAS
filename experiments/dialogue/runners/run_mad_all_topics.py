@@ -79,6 +79,15 @@ def parse_args() -> argparse.Namespace:
             "比較する場合に指定する（未指定なら無効）。"
         ),
     )
+    parser.add_argument(
+        "--use-synthesis",
+        action="store_true",
+        help=(
+            "ラウンド上限後、勝者を決めるjudgeの代わりに、schema/no_schemaと共通の"
+            "統合プロンプトで止揚による統合を行ってから最終回答を作る"
+            "（議論過程の重要性検証用。ログの method は mad_synthesis になる）。"
+        ),
+    )
     return parser.parse_args()
 
 
@@ -96,6 +105,7 @@ async def run_unit(
     semaphore: asyncio.Semaphore,
     fail_fast: bool,
     max_dialogue_turns: int | None,
+    use_synthesis: bool,
 ) -> None:
     async with semaphore:
         for run_index in range(1, runs + 1):
@@ -104,6 +114,7 @@ async def run_unit(
                     topic_file,
                     max_turns=max_turns,
                     max_dialogue_turns=max_dialogue_turns,
+                    use_synthesis=use_synthesis,
                     output_root=combo_dir,
                     run_index=run_index if runs > 1 else None,
                 )
@@ -151,6 +162,7 @@ async def main() -> None:
                     semaphore,
                     args.fail_fast,
                     args.max_dialogue_turns,
+                    args.use_synthesis,
                 )
             )
     await asyncio.gather(*tasks)

@@ -78,17 +78,7 @@ class AttackExtendsOutput(BaseModel):
     )
 
 
-# LLM出力：汎化
-class GeneralizationOutput(BaseModel):
-    """汎化出力（対立する warrant から抽出した再利用可能な基準のリスト）."""
-
-    Argument: list[GeneralizedCriterion] = Field(
-        default_factory=list,
-        description="Reusable criteria extracted from conflicting warrants.",
-    )
-
-
-# LLM出力：統合
+# LLM出力：統合（汎化+統合を1ステップで行い、統合済みルールのみを返す）
 class IntegrationOutput(BaseModel):
     """統合出力（汎化基準を統合した単一ルール）."""
 
@@ -151,30 +141,17 @@ class UndercutOutputFree(BaseModel):
     )
 
 
-# LLM出力：汎化（no_schema）。各基準を自由記述の文として列挙する。
-class GeneralizationOutputFree(BaseModel):
-    """汎化出力（no_schema; 自由記述の基準のリスト）."""
-
-    Argument: list[str] = Field(
-        default_factory=list,
-        description=(
-            "Reusable criteria extracted from conflicting warrants, each as a short "
-            "natural-language statement of condition(s) -> conclusion, naming the underlying principle."
-        ),
-    )
-
-
-# LLM出力：統合（no_schema）。統合ルールを自由記述の文として返す。
+# LLM出力：統合（no_schema）。汎化+統合を1ステップで行い、統合ルールを自由記述の文として返す。
 class IntegrationBodyFree(BaseModel):
     """統合結果（no_schema; 自由記述の単一ルール）."""
 
     rule: str = Field(
         description=(
-            "A single integrated decision rule, expressed in natural language, that preserves "
-            "every generalized criterion's condition-to-conclusion mapping and is applicable "
-            "to future arguments. Use OR only for conditions supporting the same outcome. When "
-            "opposing conditions may coexist, compare them symmetrically rather than giving "
-            "either side an automatic veto."
+            "A single integrated decision rule, expressed in natural language, generalized from "
+            "both sides' warrants and preserving each side's condition-to-conclusion mapping, "
+            "applicable to future arguments. Use OR only for conditions supporting the same "
+            "outcome. When opposing conditions may coexist, compare them symmetrically rather "
+            "than giving either side an automatic veto."
         )
     )
 
@@ -257,40 +234,24 @@ class TargetReference(BaseModel):
     )
 
 
-# 汎化出力の要素
-class GeneralizedCriterion(BaseModel):
-    """汎化された 1 基準（条件・帰結・背後の原理）."""
-
-    strong: list[str] = Field(
-        default_factory=list,
-        description="Generalized conditions derived from warrants.",
-    )
-    consequent: str = Field(
-        description="Generalized conclusion derived from the conditions."
-    )
-    principle: str = Field(
-        description="The underlying value or principle that makes this criterion rationally compelling (e.g. 'portability', 'practical performance')."
-    )
-
-
-# 統合出力の要素
+# 統合出力の要素（汎化+統合を1ステップで行い、統合済みルールのみを保持する）
 class IntegrationBody(BaseModel):
-    """統合結果（各基準の条件と帰結を保持する単一の再利用可能ルール）."""
+    """統合結果（両サイドの warrant を汎化した上でまとめた単一の再利用可能ルール）."""
 
     consequent: str = Field(
         description=(
             "The shared higher-order decision principle or explicit outcome mapping "
-            "that preserves the conclusions supported by the generalized criteria."
+            "that preserves the conclusions supported by both sides' warrants."
         )
     )
     rule: str = Field(
         description=(
-            "A single reusable decision rule preserving every generalized criterion's "
-            "condition-to-conclusion mapping. Use OR only for alternative conditions that "
-            "support the same outcome; when criteria support different outcomes, explicitly "
-            "map each condition to its corresponding outcome. When opposing conditions may "
-            "coexist, compare them using the same evidential threshold and do not give either "
-            "side an automatic veto. Do not invent a precautionary default, burden shift, or "
-            "tie-breaker absent from the generalized criteria."
+            "A single reusable decision rule, generalized from both sides' warrants, "
+            "preserving each side's condition-to-conclusion mapping. Use OR only for "
+            "alternative conditions that support the same outcome; when conditions support "
+            "different outcomes, explicitly map each condition to its corresponding outcome. "
+            "When opposing conditions may coexist, compare them using the same evidential "
+            "threshold and do not give either side an automatic veto. Do not invent a "
+            "precautionary default, burden shift, or tie-breaker absent from the warrants."
         )
     )

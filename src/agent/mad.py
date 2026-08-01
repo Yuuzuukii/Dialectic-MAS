@@ -15,14 +15,18 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
+from types import SimpleNamespace
 from typing import Any
 
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
 from langgraph.graph import END, START, StateGraph
 from pydantic import BaseModel, Field
 
+from .arguments import generate_final_answer as _generate_final_answer
+from .arguments import generate_integration as _generate_integration
 from .edges import _int_env, _optional_int_env
 from .llm import chat_structured, chat_text
+from .nodes import extract_integrated_rule
 from .prompts import PromptTemplates, agent_system
 from .schema.types import AgentName
 
@@ -63,6 +67,12 @@ class MADState:
     # 1ラウンドで両者とも False（＝新しい反論なし＝収束）なら max_turns 未満でも終了する。
     ag1_has_new: bool | None = None
     ag2_has_new: bool | None = None
+    # False（既定）: 純粋なMAD（勝者を決めるjudgeによる最終回答）。統合プロセスの重要性検証で
+    # ベースラインとして使う。True: judgeの代わりに、schema/no_schemaと共通の統合プロンプト
+    # （止揚による統合）で最終回答を作る。議論過程の重要性検証で他手法と揃えて使う。
+    use_synthesis: bool = False
+    integration_result: str | None = None
+    integrated_rule: str | None = None
 
 
 def _stance(state: MADState, agent: AgentName) -> str:
@@ -144,35 +154,40 @@ def _dialogue_turn_budget_exceeded(state: MADState) -> bool:
     return len(state.dialogue_history) >= state.max_dialogue_turns
 
 
+def _after_debate(state: MADState) -> str:
+    """討議終了後の遷移先: use_synthesis に応じて judge か integrate かを選ぶ."""
+    return "integrate" if state.use_synthesis else "judge"
+
+
 def route_after_ag1_turn(state: MADState) -> str:
     """AG1 の手番直後の遷移先を決める.
 
     `max_dialogue_turns`（全手法共通の絶対ターン数上限）が設定されている場合だけ、
-    ラウンドの途中（AG2 の番の前）でもここで打ち切って judge へ進む。schema/no_schema と
-    ターン数（＝主張・反論の機会の総数）を揃えて比較したいときに使う。未設定なら常に
-    ag2_turn へ進み、既存の round ベースの挙動と完全に同じ。
+    ラウンドの途中（AG2 の番の前）でもここで打ち切って judge/integrate へ進む。
+    schema/no_schema とターン数（＝主張・反論の機会の総数）を揃えて比較したいときに使う。
+    未設定なら常に ag2_turn へ進み、既存の round ベースの挙動と完全に同じ。
     """
     if _dialogue_turn_budget_exceeded(state):
-        return "judge"
+        return _after_debate(state)
     return "ag2_turn"
 
 
 def route_after_ag2_turn(state: MADState) -> str:
     """次の分岐を決める.
 
-    - `max_dialogue_turns`（絶対ターン数上限）に達したら judge へ。
-    - ラウンド上限 (max_turns) に達したら judge へ（ハード上限）。
+    - `max_dialogue_turns`（絶対ターン数上限）に達したら judge/integrate へ。
+    - ラウンド上限 (max_turns) に達したら judge/integrate へ（ハード上限）。
     - 上限未満でも、その1ラウンドで両者とも新しい反論を出せなかった（収束した）場合は
-      早期に judge へ進む。これにより max_turns は schema/no_schema の
+      早期に judge/integrate へ進む。これにより max_turns は schema/no_schema の
       max_attack_attempts と同じ「上限」の意味になる。
     """
     if _dialogue_turn_budget_exceeded(state):
-        return "judge"
+        return _after_debate(state)
     completed_rounds = state.round - 1
     if completed_rounds >= state.max_turns:
-        return "judge"
+        return _after_debate(state)
     if state.ag1_has_new is False and state.ag2_has_new is False:
-        return "judge"
+        return _after_debate(state)
     return "ag1_turn"
 
 
@@ -189,22 +204,77 @@ async def judge(state: MADState) -> dict[str, Any]:
     return {"final_answer": answer.strip()}
 
 
+def _last_argument_by(state: MADState, agent: AgentName) -> str:
+    for turn in reversed(state.dialogue_history):
+        if turn.get("agent") == agent:
+            return str(turn.get("argument", ""))
+    return ""
+
+
+async def integrate(state: MADState) -> dict[str, Any]:
+    """止揚による統合（judgeで勝者を決めない代替パス）.
+
+    schema/no_schemaと共通の統合プロンプトで、両サイド最新の主張を汎化した上で
+    1つの再利用可能ルールにまとめる。弁証法プロトコルのような形式的な warrant
+    抽出は無いため、各サイドの最新の主張を warrant の代わりとして渡す。
+    """
+    warrant_result = json.dumps(
+        {
+            "Argument1": {"agent": "AG1", "warrant": _last_argument_by(state, "AG1")},
+            "Argument2": {"agent": "AG2", "warrant": _last_argument_by(state, "AG2")},
+        },
+        ensure_ascii=False,
+    )
+    synthesis_state = SimpleNamespace(
+        warrant_result=warrant_result,
+        agent1_stance=state.agent1_stance,
+        agent2_stance=state.agent2_stance,
+        output_mode="no_schema",
+    )
+    output = await _generate_integration(synthesis_state)
+    response = json.dumps(
+        output.model_dump(exclude_none=True), ensure_ascii=False, indent=2
+    )
+    rule = extract_integrated_rule(response)
+    return {"integration_result": response, "integrated_rule": rule}
+
+
+async def generate_final_answer(state: MADState) -> dict[str, Any]:
+    """統合ルールを踏まえて最終回答を生成する（schema/no_schemaの合意なし時と共通のプロンプト）."""
+    last_argument = state.dialogue_history[-1]["argument"] if state.dialogue_history else None
+    synthesis_state = SimpleNamespace(
+        justified_argument=last_argument,
+        dialogue_history=state.dialogue_history,
+        integrated_rules=[state.integrated_rule] if state.integrated_rule else [],
+        consensus_reached=False,
+        question=state.question,
+        agent1_stance=state.agent1_stance,
+        agent2_stance=state.agent2_stance,
+    )
+    answer = await _generate_final_answer(synthesis_state)
+    return {"final_answer": answer.strip()}
+
+
 graph_mad = (
     StateGraph(MADState)
     .add_node("ag1_turn", ag1_turn)
     .add_node("ag2_turn", ag2_turn)
     .add_node("judge", judge)
+    .add_node("integrate", integrate)
+    .add_node("generate_final_answer", generate_final_answer)
     .add_edge(START, "ag1_turn")
     .add_conditional_edges(
         "ag1_turn",
         route_after_ag1_turn,
-        {"ag2_turn": "ag2_turn", "judge": "judge"},
+        {"ag2_turn": "ag2_turn", "judge": "judge", "integrate": "integrate"},
     )
     .add_conditional_edges(
         "ag2_turn",
         route_after_ag2_turn,
-        {"ag1_turn": "ag1_turn", "judge": "judge"},
+        {"ag1_turn": "ag1_turn", "judge": "judge", "integrate": "integrate"},
     )
     .add_edge("judge", END)
+    .add_edge("integrate", "generate_final_answer")
+    .add_edge("generate_final_answer", END)
     .compile(name="MAD")
 )

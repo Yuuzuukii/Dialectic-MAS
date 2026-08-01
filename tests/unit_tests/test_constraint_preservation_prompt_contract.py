@@ -9,7 +9,6 @@ from agent import arguments
 from agent.arguments import validate_argument_body
 from agent.prompts import (
     PromptTemplates,
-    generalization_instruction,
     integration_instruction,
     main_instruction,
 )
@@ -34,7 +33,6 @@ def _state() -> SimpleNamespace:
         current_proponent="AG1",
         ag1_revision_context=None,
         warrant_result='{"Argument1": {}, "Argument2": {}}',
-        generalization_result='{"Argument": []}',
     )
 
 
@@ -55,29 +53,25 @@ def test_main_argument_selects_one_reason_and_saves_the_rest_for_later() -> None
     assert "number, threshold, exception, or named affected group" in instruction
 
 
-def test_generalization_and_integration_receive_both_source_stances() -> None:
+def test_integration_receives_both_source_stances() -> None:
     state = _state()
 
-    for instruction in (
-        generalization_instruction(state),
-        integration_instruction(state),
-    ):
-        assert "<source_stances>" in instruction
-        assert state.agent1_stance in instruction
-        assert state.agent2_stance in instruction
+    instruction = integration_instruction(state)
+    assert "<source_stances>" in instruction
+    assert state.agent1_stance in instruction
+    assert state.agent2_stance in instruction
 
 
 def test_integration_preserves_opposing_condition_to_outcome_mappings() -> None:
     system = PromptTemplates.INTEGRATION_SYSTEM
 
-    assert "condition-to-conclusion mapping" in system
     assert "Use OR only" in system
-    assert "criteria support opposing outcomes" in system
+    assert "different outcomes" in system
     assert "outcomes ambiguous" in system
     assert "adjudicate them symmetrically" in system
     assert "same evidential threshold" in system
     assert "automatic veto" in system
-    assert "Do not invent a precautionary or caution presumption" in system
+    assert "Do not invent a precautionary presumption" in system
 
     structured_rule_description = str(
         IntegrationBody.model_fields["rule"].description

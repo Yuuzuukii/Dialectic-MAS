@@ -171,7 +171,7 @@ def test_free_debate_route_after_ag1_turn_cuts_off_mid_round_when_budget_set() -
         max_dialogue_turns=1,
         dialogue_history=[{"agent": "AG1", "round": 1, "argument": "x", "has_new_point": True}],
     )
-    assert fd_route_after_ag1_turn(state) == "generate_final_answer"
+    assert fd_route_after_ag1_turn(state) == "integrate"
 
 
 def test_free_debate_route_after_ag2_turn_respects_budget_over_max_turns() -> None:
@@ -189,7 +189,25 @@ def test_free_debate_route_after_ag2_turn_respects_budget_over_max_turns() -> No
         ag1_has_new=True,
         ag2_has_new=True,
     )
-    assert fd_route_after_ag2_turn(state) == "generate_final_answer"
+    assert fd_route_after_ag2_turn(state) == "integrate"
+
+
+def test_mad_route_after_ag2_turn_uses_integrate_when_synthesis_enabled() -> None:
+    state = MADState(
+        question="Q?",
+        agent1_stance="s1",
+        agent2_stance="s2",
+        max_turns=1,
+        round=2,
+        use_synthesis=True,
+        dialogue_history=[
+            {"agent": "AG1", "round": 1, "argument": "x", "has_new_point": True},
+            {"agent": "AG2", "round": 1, "argument": "y", "has_new_point": True},
+        ],
+        ag1_has_new=True,
+        ag2_has_new=True,
+    )
+    assert mad_route_after_ag2_turn(state) == "integrate"
 
 
 async def test_validate_b_defeats_a_disables_blocker_generation_once_budget_exceeded(
