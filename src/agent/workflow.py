@@ -179,7 +179,6 @@ graph = (
         route_after_o_defeat_a,
         {
             "validate_b_defeats_a": "validate_b_defeats_a",
-            "generate_final_answer": "generate_final_answer",
             "route_after_thread": "route_after_thread",
             "finish": "finish",
             "finish_with_error": "finish_with_error",
@@ -191,7 +190,6 @@ graph = (
         {
             "p_counter_b": "p_counter_b",
             "o_defeat_a": "o_defeat_a",
-            "generate_final_answer": "generate_final_answer",
             "finish_with_error": "finish_with_error",
         },
     )
@@ -228,7 +226,6 @@ graph = (
         {
             "advance_to_ag2": "advance_to_ag2",
             "extract_warrants": "extract_warrants",
-            "generate_final_answer": "generate_final_answer",
             "finish_with_error": "finish_with_error",
         },
     )

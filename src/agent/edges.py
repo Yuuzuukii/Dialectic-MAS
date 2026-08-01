@@ -55,14 +55,14 @@ def route_after_o_defeat_a(state: Any) -> str:
 
     `o_defeat_a` はリトライ回数の上限に達した場合、新しい攻撃を生成せずに
     `current_thread_status="defensible"` で即座に返ってくる（予算切れによる打ち切り
-    は、真の手詰まりである justified とは区別する）。この場合は他の overruled /
-    defensible と同様 route_after_thread に合流させる。
+    は、真の手詰まりである justified とは区別する）。justified（Opponent が
+    そもそも攻撃を生成できなかった＝手詰まり）も含め、いずれの終了ステータスでも
+    ここでは対話を打ち切らず、他の overruled と同様 route_after_thread に合流させて
+    次の main argument の生成を試みさせる（最終回答生成は主張が尽きたときのみ）。
     """
     if state.error:
         return "finish_with_error"
-    if state.current_thread_status == "justified":
-        return "generate_final_answer"
-    if state.current_thread_status == "defensible":
+    if state.current_thread_status in {"justified", "defensible"}:
         return "route_after_thread"
     if state.b_argument is None:
         return "finish"
@@ -73,8 +73,6 @@ def route_after_validate_b_defeats_a(state: Any) -> str:
     """B が A を破る関係の検証後の遷移先を決める."""
     if state.error:
         return "finish_with_error"
-    if state.current_thread_status == "justified":
-        return "generate_final_answer"
     if state.thread_needs_retry:
         return "o_defeat_a"
     if state.b_defeats_a is True:
@@ -118,16 +116,17 @@ def route_after_validate_b_defeats_c(state: Any) -> str:
 def route_after_thread(state: Any) -> str:
     """1スレッド分の議論終了後、次の遷移先を決める.
 
-    justified なら最終回答へ。overruled / defensible（= Opponent の攻撃が最後まで
-    通った、または攻撃のリトライ予算が尽きて未決着に終わった）なら、Proponent の
-    main argument はこの1本で確定とし、同じ main argument へのリトライはしない
-    （Opponentの攻撃リトライ回数の上限判定は o_defeat_a の入り口で既に行われている）。
+    justified / overruled / defensible のいずれで終わっても、この main argument
+    の決着として扱う（同じ main argument へのリトライはしない。Opponent の
+    攻撃リトライ回数の上限判定は o_defeat_a の入り口で既に行われている）。
+    justified になっただけでは対話を打ち切らない（この状態は
+    argument_records/dialogue_history に記録済みで、後から追跡できる）。
     次の proponent（AG2）に手番を渡すか、両者が出し切っていれば統合フェーズへ進む。
+    最終回答は、両者が新しい主張を出せなくなった時点（route_after_extract_warrants）
+    かラウンド上限到達時（finalize_fallback）に初めて生成される。
     """
     if state.error:
         return "finish_with_error"
-    if state.current_thread_status == "justified":
-        return "generate_final_answer"
     if state.current_proponent == "AG1":
         return "advance_to_ag2"
     return "extract_warrants"
