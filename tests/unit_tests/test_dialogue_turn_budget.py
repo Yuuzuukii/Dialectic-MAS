@@ -17,8 +17,13 @@ from agent.free_debate import route_after_ag2_turn as fd_route_after_ag2_turn
 from agent.mad import MADState
 from agent.mad import route_after_ag1_turn as mad_route_after_ag1_turn
 from agent.mad import route_after_ag2_turn as mad_route_after_ag2_turn
-from agent.nodes import can_generate_main, o_defeat_a, p_counter_b, validate_b_defeats_a
-from agent.schema.state import ArgumentRecord
+from agent.nodes import (
+    can_generate_main,
+    opponent_move,
+    proponent_move,
+    validate_opponent_move,
+)
+from agent.schema.state import ArgumentRecord, DialogueNode
 from agent.workflow import State
 
 pytestmark = pytest.mark.anyio
@@ -79,8 +84,16 @@ async def test_can_generate_main_ignores_budget_when_unset(monkeypatch) -> None:
     assert update["main_argument_available"] is True
 
 
-async def test_o_defeat_a_treats_budget_as_defensible_not_justified() -> None:
+def _find(nodes: list[DialogueNode], node_id: str) -> DialogueNode:
+    return next(node for node in nodes if node.id == node_id)
+
+
+async def test_opponent_move_treats_dialogue_budget_as_won_by_p_with_budget_flag() -> None:
+    """絶対ターン数上限（max_dialogue_turns）に達した場合、O が真に手を出せなく
+    なったのではないので closed_by_budget=True を立てる（justified/overruled の
+    確定は resolve_tree_status 側の責務）。"""
     main = _main_record("AG1")
+    root = DialogueNode(argument_id=main.id)
     state = State(
         question="Q?",
         agent1_stance="s1",
@@ -90,13 +103,40 @@ async def test_o_defeat_a_treats_budget_as_defensible_not_justified() -> None:
         current_proponent="AG1",
         current_opponent="AG2",
         argument_records=[main],
+        dialogue_nodes=[root],
+        node_stack=[root.id],
     )
-    update = await o_defeat_a(state)
+    update = await opponent_move(state)
 
-    assert update["current_thread_status"] == "defensible"
+    updated = _find(update["dialogue_nodes"], root.id)
+    assert updated.outcome == "won_by_p"
+    assert updated.closed_by_budget is True
+    assert update["pending_attacker_argument"] is None
 
 
-async def test_p_counter_b_treats_budget_as_defensible_not_overruled() -> None:
+async def test_opponent_move_treats_attack_attempt_budget_as_won_by_p_with_budget_flag() -> None:
+    main = _main_record("AG1")
+    root = DialogueNode(argument_id=main.id, attack_attempts=5)
+    state = State(
+        question="Q?",
+        agent1_stance="s1",
+        agent2_stance="s2",
+        max_attack_attempts=5,
+        current_argument=main,
+        current_proponent="AG1",
+        current_opponent="AG2",
+        argument_records=[main],
+        dialogue_nodes=[root],
+        node_stack=[root.id],
+    )
+    update = await opponent_move(state)
+
+    updated = _find(update["dialogue_nodes"], root.id)
+    assert updated.outcome == "won_by_p"
+    assert updated.closed_by_budget is True
+
+
+async def test_proponent_move_treats_budget_as_lost_by_p_with_budget_flag() -> None:
     main = _main_record("AG1")
     b_argument = ArgumentRecord(
         type="defeat",
@@ -107,6 +147,7 @@ async def test_p_counter_b_treats_budget_as_defensible_not_overruled() -> None:
         target_id=main.id,
         target_field="Conc",
     )
+    root = DialogueNode(argument_id=main.id, current_attacker_id=b_argument.id)
     state = State(
         question="Q?",
         agent1_stance="s1",
@@ -115,12 +156,16 @@ async def test_p_counter_b_treats_budget_as_defensible_not_overruled() -> None:
         current_argument=main,
         current_proponent="AG1",
         current_opponent="AG2",
-        b_argument=b_argument,
         argument_records=[main, b_argument],
+        dialogue_nodes=[root],
+        node_stack=[root.id],
     )
-    update = await p_counter_b(state)
+    update = await proponent_move(state)
 
-    assert update["current_thread_status"] == "defensible"
+    updated = _find(update["dialogue_nodes"], root.id)
+    assert updated.outcome == "lost_by_p"
+    assert updated.closed_by_budget is True
+    assert update["pending_counter_argument"] is None
 
 
 def test_mad_route_after_ag1_turn_cuts_off_mid_round_when_budget_set() -> None:
@@ -210,10 +255,10 @@ def test_mad_route_after_ag2_turn_uses_integrate_when_synthesis_enabled() -> Non
     assert mad_route_after_ag2_turn(state) == "integrate"
 
 
-async def test_validate_b_defeats_a_disables_blocker_generation_once_budget_exceeded(
+async def test_validate_opponent_move_disables_blocker_generation_once_budget_exceeded(
     monkeypatch,
 ) -> None:
-    """undercut の"blocker"生成は`evaluate_attack`内部から呼ばれ、o_defeat_a等の
+    """undercut の"blocker"生成は`evaluate_attack`内部から呼ばれ、opponent_move等の
     ガードを経由しない。ここで別途止めないと、budget超過後も追加でturnが増えてしまう
     （実測で確認済み: max_dialogue_turns=6のはずが7ターンまで生成される事例があった）。
     """
@@ -237,6 +282,7 @@ async def test_validate_b_defeats_a_disables_blocker_generation_once_budget_exce
         target_id=main.id,
         target_field="Conc",
     )
+    root = DialogueNode(argument_id=main.id)
     state = State(
         question="Q?",
         agent1_stance="s1",
@@ -244,9 +290,11 @@ async def test_validate_b_defeats_a_disables_blocker_generation_once_budget_exce
         max_dialogue_turns=2,
         current_argument=main,
         current_proponent="AG1",
-        b_argument=b_argument,
+        pending_attacker_argument=b_argument,
         argument_records=[main, b_argument],
+        dialogue_nodes=[root],
+        node_stack=[root.id],
     )
-    await validate_b_defeats_a(state)
+    await validate_opponent_move(state)
 
     assert captured["blocker_generator"] is None

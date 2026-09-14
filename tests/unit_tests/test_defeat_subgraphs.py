@@ -7,7 +7,7 @@ import pytest
 
 from agent import arguments
 from agent.argumentation_model import evaluate_attack
-from agent.arguments import argument_body_json
+from agent.arguments import argument_body_json, validate_argument_body
 from agent.schema.llm_outputs import (
     Antecedent,
     ArgumentBody,
@@ -246,6 +246,52 @@ async def test_declared_rebut_keeps_method_and_defeats() -> None:
 
     assert result.defeats is True
     assert result.attack == "rebut"
+
+
+async def test_validate_argument_body_rejects_meta_conclusion_verdicts() -> None:
+    """consequent が「defeatの成否」を述べているだけの勝敗宣言は違反として検出される."""
+    body = ArgumentBody(
+        rules=[
+            Rule(
+                antecedent=Antecedent(strong=["the opponent raised a privacy concern"]),
+                consequent="The privacy-based attack fails to defeat the claim that AI is good.",
+            )
+        ]
+    )
+
+    violations = validate_argument_body(body)
+
+    assert any("verdict about the dialectical game" in v for v in violations)
+
+
+async def test_validate_argument_body_accepts_substantive_conclusion() -> None:
+    body = ArgumentBody(
+        rules=[
+            Rule(
+                antecedent=Antecedent(strong=["accessibility tools reduce communication barriers"]),
+                consequent="AI improves quality of life for people with disabilities.",
+            )
+        ]
+    )
+
+    violations = validate_argument_body(body)
+
+    assert violations == []
+
+
+async def test_attack_instruction_task_does_not_frame_goal_as_defeating_the_target() -> None:
+    from agent.prompts import attack_instruction
+
+    target = argument("AG1", ["We should buy a"])
+
+    defeat_text = attack_instruction("defeat", target)
+    counter_text = attack_instruction("counter", target)
+
+    for text in (defeat_text, counter_text):
+        task_block = text.split("</task>")[0]
+        assert "construct a defeating argument" not in task_block.lower()
+        assert "defeats the target attack" not in task_block.lower()
+        assert "<content_requirement>" in text
 
 
 async def test_serialized_argument_payload_derives_conc_and_ass_from_rules() -> None:

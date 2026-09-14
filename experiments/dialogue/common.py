@@ -211,7 +211,7 @@ def _print_stream_update(
     node_name: str, update: dict[str, Any], seen_ids: set[str]
 ) -> None:
     """LangGraph の node update から発話を拾って端末へ出す."""
-    if node_name in {"can_generate_main", "o_defeat_a", "p_counter_b"}:
+    if node_name in {"can_generate_main", "opponent_move", "proponent_move"}:
         record = update.get("current_argument") or update.get("last_generated_argument")
         _print_argument_turn(record, seen_ids)
         return
@@ -223,7 +223,7 @@ def _node_payload(node_name: str, update: dict[str, Any]) -> Any:
     """Return compact public payloads for streamed schema graph updates."""
     if not update:
         return None
-    if node_name in {"can_generate_main", "o_defeat_a", "p_counter_b"}:
+    if node_name in {"can_generate_main", "opponent_move", "proponent_move"}:
         record = update.get("current_argument") or update.get("last_generated_argument")
         payload = _record_argument_payload(record)
         if payload is None:
@@ -233,17 +233,17 @@ def _node_payload(node_name: str, update: dict[str, Any]) -> Any:
         if metadata:
             result["metadata"] = metadata
         return result
+    if node_name == "resolve_tree_status":
+        return {"thread_status": update.get("ag1_thread_status") or update.get("ag2_thread_status")}
     if node_name.startswith("validate_"):
         record = update.get("last_generated_argument")
         payload = _record_argument_payload(record)
         if payload is None:
-            return {"thread_status": update.get("current_thread_status")}
+            return None
         result = {"argument": payload}
         metadata = _record_metadata(record)
         if metadata:
             result["metadata"] = metadata
-        if update.get("current_thread_status"):
-            result["thread_status"] = update["current_thread_status"]
         return result
     if node_name in {"finish", "finish_with_error"}:
         return _jsonable(update)
@@ -307,6 +307,7 @@ def base_log(
     topic_data: dict[str, Any],
     elapsed: float,
     usage: dict[str, Any],
+    extra_metrics: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     return {
         "method": method,
@@ -316,7 +317,52 @@ def base_log(
         "metrics": {
             "elapsed_seconds": round(elapsed, 3),
             **usage,
+            **(extra_metrics or {}),
         },
+    }
+
+
+def _dialogue_tree_metrics(final_state: dict[str, Any]) -> dict[str, Any]:
+    """dialogue tree の探索規模と、勝敗宣言のみの反論の割合を集計する.
+
+    スキーマ導入の主張（(a) 建設的な深い議論を可能にする, (b) 無駄な議論の膨張を防ぐ）
+    を評価するための指標。docs/argumentation_model_rebuild_plan.md §8 参照。
+    メタ結論の判定語彙は agent.arguments._META_CONCLUSION_PATTERNS と同じものを使う。
+    """
+    from src.agent.arguments import _META_CONCLUSION_PATTERNS
+
+    dialogue_history = final_state.get("dialogue_history") or []
+    dialogue_nodes = final_state.get("dialogue_nodes") or []
+
+    total_turns = len(dialogue_history)
+    meta_conclusion_count = 0
+    attack_turn_count = 0
+    for turn in dialogue_history:
+        if turn.get("type") not in {"defeat", "counter"}:
+            continue
+        attack_turn_count += 1
+        argument_json = turn.get("argument") or ""
+        try:
+            payload = json.loads(argument_json) if isinstance(argument_json, str) else argument_json
+        except json.JSONDecodeError:
+            payload = {}
+        rules = (payload or {}).get("Argument", {}).get("rules", []) if isinstance(payload, dict) else []
+        consequents = " ".join(
+            (rule.get("consequent") or "") for rule in rules if isinstance(rule, dict)
+        ).lower()
+        if any(pattern in consequents for pattern in _META_CONCLUSION_PATTERNS):
+            meta_conclusion_count += 1
+
+    depths = [node.get("depth", 0) for node in dialogue_nodes if isinstance(node, dict)]
+    return {
+        "total_dialogue_turns": total_turns,
+        "attack_turn_count": attack_turn_count,
+        "meta_conclusion_count": meta_conclusion_count,
+        "meta_conclusion_rate": (
+            round(meta_conclusion_count / attack_turn_count, 3) if attack_turn_count else None
+        ),
+        "dialogue_tree_node_count": len(dialogue_nodes),
+        "dialogue_tree_max_depth": max(depths) if depths else 0,
     }
 
 
@@ -407,6 +453,7 @@ async def _run_topic_once(
         topic_data=topic_data,
         elapsed=elapsed,
         usage=tracker.usage(),
+        extra_metrics=_dialogue_tree_metrics(final_state),
     )
     log["dialogue_history"] = _speech_log(final_state.get("dialogue_history", []))
     log["final_answer"] = final_state.get("final_answer")

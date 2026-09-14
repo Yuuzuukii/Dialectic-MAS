@@ -184,6 +184,39 @@ class ArgumentRecord(BaseModel):
         }
 
 
+class DialogueNode(BaseModel):
+    """dialogue tree (Prakken & Sartor, Definition 4.5/4.6) の1フレーム.
+
+    「P が argument_id を防御している」という文脈を表す。O がこの argument への
+    新しい攻撃を出せなくなる（won_by_p）か、途中の攻撃を P が最後まで振り切れない
+    （lost_by_p）まで、この1フレーム内で `opponent_move`/`proponent_move` を
+    繰り返す。P が攻撃を strictly defeat すると、その反論を argument_id とする
+    子フレームを push して探索を1段深くする（再帰）。
+    """
+
+    id: str = Field(default_factory=lambda: f"node-{uuid4().hex[:10]}")
+    parent_id: str | None = Field(
+        default=None, description="この frame を生んだ親 frame の id。根は None。"
+    )
+    argument_id: str = Field(description="この frame で P が防御している ArgumentRecord.id")
+    depth: int = Field(default=0, description="根を 0 とする深さ。")
+
+    # 現在このフレームで O が攻撃中の相手（B）。attack_attempts 回まで別候補に差し替え可。
+    current_attacker_id: str | None = Field(default=None)
+    attack_attempts: int = Field(
+        default=0, description="このフレームで O が試した攻撃 (B) の本数。"
+    )
+    # current_attacker_id に対して P が試した反論 (C) の本数。B が変わるたびリセット。
+    counter_attempts: int = Field(default=0)
+
+    outcome: Literal["open", "won_by_p", "lost_by_p", "undetermined"] = Field(
+        default="open"
+    )
+    # True: 予算切れ（max_attack_attempts/max_counter_attempts/max_tree_depth）による確定。
+    # False: 相手が本当に手を出せなくなった/出せた、という理論的な確定。
+    closed_by_budget: bool = Field(default=False)
+
+
 class DefeatRelation(BaseModel):
     """攻撃者と対象の間で検証された defeat 関係の記録."""
 

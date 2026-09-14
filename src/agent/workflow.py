@@ -13,13 +13,14 @@ from .edges import (
     _optional_int_env,
     route_after_can_generate_main,
     route_after_extract_warrants,
-    route_after_o_defeat_a,
-    route_after_p_counter_b,
+    route_after_init_dialogue_tree,
+    route_after_opponent_move,
+    route_after_pop_and_propagate,
+    route_after_proponent_move,
+    route_after_resolve_tree_status,
     route_after_synthesis_step,
-    route_after_thread,
-    route_after_validate_b_defeats_a,
-    route_after_validate_b_defeats_c,
-    route_after_validate_c_defeats_b,
+    route_after_validate_opponent_move,
+    route_after_validate_proponent_move,
     route_round_entry,
 )
 from .nodes import (
@@ -31,15 +32,16 @@ from .nodes import (
     finish,
     finish_with_error,
     generate_final_answer,
+    init_dialogue_tree,
     integrate,
-    o_defeat_a,
-    p_counter_b,
-    route_after_thread_node,
-    validate_b_defeats_a,
-    validate_b_defeats_c,
-    validate_c_defeats_b,
+    opponent_move,
+    pop_and_propagate,
+    proponent_move,
+    resolve_tree_status,
+    validate_opponent_move,
+    validate_proponent_move,
 )
-from .schema.state import ArgumentRecord, DefeatRelation
+from .schema.state import ArgumentRecord, DefeatRelation, DialogueNode
 from .schema.types import AgentName, DebateStage
 
 
@@ -52,9 +54,17 @@ class State:
     agent2_stance: str
     # 議論ラウンド（debate_round）の上限。環境変数 MAX_TURNS で上書きできる。
     max_turns: int = _int_env("MAX_TURNS", 5)
-    # 1つの main argument に対して、Opponent が攻撃 (B) を再生成できる回数の上限（安全装置）。
+    # dialogue tree の1フレームで、Opponent が攻撃 (B) を再生成できる回数の上限（安全装置）。
     # 環境変数 MAX_ATTACK_ATTEMPTS で上書きできる。
     max_attack_attempts: int = _int_env("MAX_ATTACK_ATTEMPTS", 5)
+    # dialogue tree の1フレームで、Proponent が同じ B に対して反論 (C) を
+    # 再生成できる回数の上限（安全装置）。Prakken & Sartor の理論には存在しない
+    # 実装上の拡張で、「strictly defeat する C が存在するか」を有限回で打ち切る。
+    max_counter_attempts: int = _int_env("MAX_COUNTER_ATTEMPTS", 3)
+    # dialogue tree の最大深さ（根を 0 とする）。原論文は有限のルール集合を前提に
+    # 探索が必ず停止することを保証するが（Section 8）、LLM は都度論証を生成するため
+    # 停止保証がない。深さの安全装置として導入する。
+    max_tree_depth: int = _int_env("MAX_TREE_DEPTH", 6)
     # 全手法（schema/no_schema/mad/free_debate）で共通の、対話ターン数そのものの絶対上限。
     # None（既定）なら無効で、上記の max_turns/max_attack_attempts だけで従来通り動く。
     # 設定すると、mainやattackを新たに生成する直前でこの上限を優先チェックし、達していれば
@@ -81,11 +91,27 @@ class State:
     current_opponent: AgentName = "AG2"
     debate_stage: DebateStage = "ag1_main_thread"
     turn_count: int = 0
-    # 同一 main argument に対して、Opponent が攻撃 (B) を生成し直した回数（安全装置）。
-    attack_attempt_count: int = 0
-    # validate_b_defeats_a / validate_b_defeats_c が「もう一度 o_defeat_a で
-    # 別の攻撃を試させる」と判断したことを示すフラグ（ルーティング用）。
-    thread_needs_retry: bool = False
+
+    # dialogue tree（Prakken & Sartor, Definition 4.5/4.6）の explicit stack。
+    # 各要素は DialogueNode.id。末尾が現在探索中のフレーム。LangGraph に再帰呼び出しは
+    # ないため、木構造の探索状態をここに持たせ、opponent_move/proponent_move を
+    # ループさせることで DFS を実現する（詳細: docs/argumentation_model_rebuild_plan.md）。
+    dialogue_nodes: list[DialogueNode] = field(default_factory=list)
+    node_stack: list[str] = field(default_factory=list)
+    root_node_id: str | None = None
+    # 根フレームが閉じた結果（"justified"/"overruled"/"defensible"）。
+    # スタックが空になった時点で確定する。
+    tree_root_status: str | None = None
+    tree_root_closed_by_budget: bool = False
+
+    # opponent_move/proponent_move が生成した「検証待ち」の論証。
+    # validate_opponent_move/validate_proponent_move が読み、検証後に None へ戻す。
+    pending_attacker_argument: ArgumentRecord | None = None
+    pending_counter_argument: ArgumentRecord | None = None
+    # 直前の検証結果（ルーティング専用の一時フラグ）。
+    last_attack_defeated: bool | None = None
+    last_counter_strictly_defeated: bool | None = None
+    last_propagation_action: Literal["retry_attack", "cascade", "resolved"] | None = None
 
     # LLM に再送する通常の対話履歴。各ターンは HumanMessage(question/instruction)
     # と AIMessage(Argument only, name=agent) のペアとして保存する。
@@ -106,16 +132,6 @@ class State:
     main_argument_unavailable_reason: str | None = None
     ag1_thread_status: str | None = None
     ag2_thread_status: str | None = None
-    current_thread_status: str | None = None
-
-    b_argument: ArgumentRecord | None = None
-    c_argument: ArgumentRecord | None = None
-    b_argument_id: str | None = None
-    c_argument_id: str | None = None
-    b_defeats_a: bool | None = None
-    c_defeats_b: bool | None = None
-    b_defeats_c: bool | None = None
-    c_strictly_defeats_b: bool | None = None
 
     # Compatibility fields used by def.py and existing result consumers.
     ag1_rejection_rebuttal: str | None = None
@@ -140,12 +156,13 @@ graph = (
     StateGraph(State)
     .add_node("can_generate_main", can_generate_main)
     .add_node("finalize_fallback", finalize_fallback)
-    .add_node("o_defeat_a", o_defeat_a)
-    .add_node("validate_b_defeats_a", validate_b_defeats_a)
-    .add_node("p_counter_b", p_counter_b)
-    .add_node("validate_c_defeats_b", validate_c_defeats_b)
-    .add_node("validate_b_defeats_c", validate_b_defeats_c)
-    .add_node("route_after_thread", route_after_thread_node)
+    .add_node("init_dialogue_tree", init_dialogue_tree)
+    .add_node("opponent_move", opponent_move)
+    .add_node("validate_opponent_move", validate_opponent_move)
+    .add_node("proponent_move", proponent_move)
+    .add_node("validate_proponent_move", validate_proponent_move)
+    .add_node("pop_and_propagate", pop_and_propagate)
+    .add_node("resolve_tree_status", resolve_tree_status)
     .add_node("extract_warrants", extract_warrants)
     .add_node("integrate", integrate)
     .add_node("add_integrated_rule", add_integrated_rule)
@@ -166,7 +183,7 @@ graph = (
         "can_generate_main",
         route_after_can_generate_main,
         {
-            "o_defeat_a": "o_defeat_a",
+            "init_dialogue_tree": "init_dialogue_tree",
             "advance_to_ag2": "advance_to_ag2",
             "extract_warrants": "extract_warrants",
             "finish_with_error": "finish_with_error",
@@ -175,56 +192,62 @@ graph = (
     .add_edge("advance_to_ag2", "can_generate_main")
     .add_edge("finalize_fallback", "generate_final_answer")
     .add_conditional_edges(
-        "o_defeat_a",
-        route_after_o_defeat_a,
+        "init_dialogue_tree",
+        route_after_init_dialogue_tree,
         {
-            "validate_b_defeats_a": "validate_b_defeats_a",
-            "generate_final_answer": "generate_final_answer",
-            "route_after_thread": "route_after_thread",
-            "finish": "finish",
+            "opponent_move": "opponent_move",
             "finish_with_error": "finish_with_error",
         },
     )
     .add_conditional_edges(
-        "validate_b_defeats_a",
-        route_after_validate_b_defeats_a,
+        "opponent_move",
+        route_after_opponent_move,
         {
-            "p_counter_b": "p_counter_b",
-            "o_defeat_a": "o_defeat_a",
-            "generate_final_answer": "generate_final_answer",
+            "validate_opponent_move": "validate_opponent_move",
+            "pop_and_propagate": "pop_and_propagate",
             "finish_with_error": "finish_with_error",
         },
     )
     .add_conditional_edges(
-        "p_counter_b",
-        route_after_p_counter_b,
+        "validate_opponent_move",
+        route_after_validate_opponent_move,
         {
-            "validate_c_defeats_b": "validate_c_defeats_b",
-            "route_after_thread": "route_after_thread",
+            "proponent_move": "proponent_move",
+            "opponent_move": "opponent_move",
             "finish_with_error": "finish_with_error",
         },
     )
     .add_conditional_edges(
-        "validate_c_defeats_b",
-        route_after_validate_c_defeats_b,
+        "proponent_move",
+        route_after_proponent_move,
         {
-            "validate_b_defeats_c": "validate_b_defeats_c",
-            "route_after_thread": "route_after_thread",
+            "validate_proponent_move": "validate_proponent_move",
+            "pop_and_propagate": "pop_and_propagate",
             "finish_with_error": "finish_with_error",
         },
     )
     .add_conditional_edges(
-        "validate_b_defeats_c",
-        route_after_validate_b_defeats_c,
+        "validate_proponent_move",
+        route_after_validate_proponent_move,
         {
-            "route_after_thread": "route_after_thread",
-            "o_defeat_a": "o_defeat_a",
+            "opponent_move": "opponent_move",
+            "proponent_move": "proponent_move",
             "finish_with_error": "finish_with_error",
         },
     )
     .add_conditional_edges(
-        "route_after_thread",
-        route_after_thread,
+        "pop_and_propagate",
+        route_after_pop_and_propagate,
+        {
+            "resolve_tree_status": "resolve_tree_status",
+            "opponent_move": "opponent_move",
+            "pop_and_propagate": "pop_and_propagate",
+            "finish_with_error": "finish_with_error",
+        },
+    )
+    .add_conditional_edges(
+        "resolve_tree_status",
+        route_after_resolve_tree_status,
         {
             "advance_to_ag2": "advance_to_ag2",
             "extract_warrants": "extract_warrants",

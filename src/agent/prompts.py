@@ -48,6 +48,7 @@ Represent Argument as a structured object consisting of rules, Conc, and Ass.
 - rules is a finite sequence of rules r_1, ..., r_n.
 - Each rule has an antecedent and a consequent.
 - Antecedents may contain strong premises and weak_negation assumptions.
+- A weak_negation entry must be phrasable as "X is not the case" — a defeasible assumption held only because nothing on record contradicts it (e.g. "no evidence that Y fails here", "Z does not occur in this case"). It must be a specific claim that could in principle be proven false by evidence that X actually holds. Do not put scope stipulations, definitions, or framing choices ("we are evaluating only Y") in weak_negation — those are not defeasible assumptions and cannot be coherently undercut; state them as strong premises or fold them into the reasoning directly instead.
 - Every rule must have at least one explicit strong or weak_negation antecedent; never derive a consequent from an empty antecedent.
 - Conc contains the conclusions derived by the rules.
 - Ass contains the weak_negation assumptions used by the rules.
@@ -468,6 +469,21 @@ def target_engagement_instruction(target: Any) -> str:
     )
 
 
+_CONTENT_REQUIREMENT_BLOCK = "\n".join(
+    [
+        "<content_requirement>",
+        "Your Argument's rules must state a substantive position about the issue itself "
+        "(facts, causal claims, values, tradeoffs) — never a verdict about the dialectical "
+        "game (e.g. \"the target attack fails\", \"X does not defeat Y\", \"X's conclusion "
+        "does not follow from its premises\"). Whether your argument defeats the target is "
+        "determined separately from the Attack field and the defeat-checking logic, not from "
+        "how you phrase your conclusion. Write as if you were making your own case to a "
+        "reader who has not seen the target argument.",
+        "</content_requirement>",
+    ]
+)
+
+
 def attack_instruction(
     purpose: str,
     target: Any,
@@ -492,7 +508,10 @@ def attack_instruction(
     if purpose == "counter":
         blocks = [
             "<task>",
-            f"Round {debate_round}. Construct a counterargument that defends your prior main argument against the target attack.",
+            f"Round {debate_round}. The opponent's attack below challenges your position on the issue. "
+            "State what you hold to be true about the issue that directly answers this specific "
+            "challenge — a substantive claim about the issue, not a verdict about whether the attack "
+            "succeeds.",
             "</task>",
             "",
             "<issue>",
@@ -512,11 +531,16 @@ def attack_instruction(
             _target_block(target),
             *engagement_block,
             "",
+            _CONTENT_REQUIREMENT_BLOCK,
+            "",
             "<attack_conditions>",
             "- Your counterargument must defeat the target attack.",
             "- You may use rebut or undercut.",
             "- rebut: your argument must directly negate the target's stated conclusion.",
-            "- undercut: your argument must directly negate an assumption the target relies on.",
+            "- undercut: identify a weak_negation assumption (of the form 'X is not the case') that the "
+            "target's argument relies on, and construct your argument to prove that X actually holds. "
+            "Merely asserting the opposite of the target's conclusion, or arguing that the target's "
+            "framing/scope is inappropriate, does not qualify — your reasoning must establish X.",
             "- Do not attack a claim or assumption that is not present in the target argument.",
             "</attack_conditions>",
             "",
@@ -535,7 +559,9 @@ def attack_instruction(
     return "\n".join(
         [
             "<task>",
-            f"Round {debate_round}. Construct a defeating argument against the target argument.",
+            f"Round {debate_round}. State what you hold to be true about the issue that challenges "
+            "the target argument's specific claim below — a substantive claim about the issue, not a "
+            "verdict about whether the target argument is defeated.",
             "</task>",
             "",
             "<issue>",
@@ -545,10 +571,15 @@ def attack_instruction(
             _target_block(target),
             *engagement_block,
             "",
+            _CONTENT_REQUIREMENT_BLOCK,
+            "",
             "<attack_conditions>",
             "- You may use rebut or undercut.",
             "- rebut: your argument must directly negate the target's stated conclusion.",
-            "- undercut: your argument must directly negate an assumption the target relies on.",
+            "- undercut: identify a weak_negation assumption (of the form 'X is not the case') that the "
+            "target's argument relies on, and construct your argument to prove that X actually holds. "
+            "Merely asserting the opposite of the target's conclusion, or arguing that the target's "
+            "framing/scope is inappropriate, does not qualify — your reasoning must establish X.",
             "- Do not attack a claim or assumption that is not present in the target argument.",
             "- Supporting a different option does not by itself count as negating the target.",
             "</attack_conditions>",
@@ -583,9 +614,12 @@ def undercut_instruction(target: Any, state: Any | None = None) -> str:
             "",
             _target_block(target),
             "",
+            _CONTENT_REQUIREMENT_BLOCK,
+            "",
             "<response_contract>",
-            "If your argument can explicitly negate an assumption the target relies on, set can_undercut=YES and include Argument.",
-            "Otherwise, set can_undercut=NO and omit Argument.",
+            "Identify a weak_negation assumption (of the form 'X is not the case') the target relies on. "
+            "If you can construct an argument that proves X actually holds, set can_undercut=YES and "
+            "include Argument. Otherwise, set can_undercut=NO and omit Argument.",
             "</response_contract>",
         ]
     )

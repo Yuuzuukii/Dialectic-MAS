@@ -47,86 +47,94 @@ def route_after_can_generate_main(state: Any) -> str:
         if state.current_proponent == "AG1":
             return "advance_to_ag2"
         return "extract_warrants"
-    return "o_defeat_a"
+    return "init_dialogue_tree"
 
 
-def route_after_o_defeat_a(state: Any) -> str:
-    """相手の主張 A に対する自己反論ステップ後の遷移先を決める.
+# ----------------------------------------------------------------------------
+# dialogue tree（Definition 4.5/4.6）の探索ルーティング
+#
+# opponent_move ⇄ validate_opponent_move: 現フレームの argument への攻撃 (B) を
+#   Opponent が生成し、defeat 判定を行う。defeat できなければ同じフレームで
+#   opponent_move に戻り別の B' を試す。
+# proponent_move ⇄ validate_proponent_move: B に対する反論 (C) を Proponent が
+#   生成し、strictly defeat かどうかを判定する。strictly defeat しなければ同じ
+#   フレームで proponent_move に戻り別の C' を試す。strictly defeat すれば C を
+#   argument_id とする子フレームを push し、opponent_move へ戻って1段深く探索する。
+# pop_and_propagate: フレームが閉じた（won_by_p/lost_by_p/undetermined）ときに
+#   呼ばれ、親フレームへ結果を伝播する。根が閉じれば resolve_tree_status へ。
+# ----------------------------------------------------------------------------
 
-    `o_defeat_a` はリトライ回数の上限に達した場合、新しい攻撃を生成せずに
-    `current_thread_status="defensible"` で即座に返ってくる（予算切れによる打ち切り
-    は、真の手詰まりである justified とは区別する）。この場合は他の overruled /
-    defensible と同様 route_after_thread に合流させる。
+
+def route_after_init_dialogue_tree(state: Any) -> str:
+    """Dialogue tree 初期化後の遷移先を決める."""
+    if state.error:
+        return "finish_with_error"
+    return "opponent_move"
+
+
+def route_after_opponent_move(state: Any) -> str:
+    """Opponent の攻撃生成後の遷移先を決める.
+
+    フレームが閉じた場合（新しい攻撃を生成できなかった / 予算切れ）は
+    `pending_attacker_argument` が None のまま返るので、それをフレーム終了の
+    シグナルとして使う。
     """
     if state.error:
         return "finish_with_error"
-    if state.current_thread_status == "justified":
-        return "generate_final_answer"
-    if state.current_thread_status == "defensible":
-        return "route_after_thread"
-    if state.b_argument is None:
-        return "finish"
-    return "validate_b_defeats_a"
+    if state.pending_attacker_argument is None:
+        return "pop_and_propagate"
+    return "validate_opponent_move"
 
 
-def route_after_validate_b_defeats_a(state: Any) -> str:
-    """B が A を破る関係の検証後の遷移先を決める."""
+def route_after_validate_opponent_move(state: Any) -> str:
+    """B が対象を defeat するかの検証後の遷移先を決める."""
     if state.error:
         return "finish_with_error"
-    if state.current_thread_status == "justified":
-        return "generate_final_answer"
-    if state.thread_needs_retry:
-        return "o_defeat_a"
-    if state.b_defeats_a is True:
-        return "p_counter_b"
-    return "finish_with_error"
+    if state.last_attack_defeated is True:
+        return "proponent_move"
+    return "opponent_move"
 
 
-def route_after_p_counter_b(state: Any) -> str:
-    """B への反論 C の生成ステップ後の遷移先を決める."""
+def route_after_proponent_move(state: Any) -> str:
+    """Proponent の反論生成後の遷移先を決める（フレームが閉じたかどうかで分岐）."""
     if state.error:
         return "finish_with_error"
-    if state.current_thread_status == "overruled":
-        return "route_after_thread"
-    if state.c_argument is None:
-        return "route_after_thread"
-    return "validate_c_defeats_b"
+    if state.pending_counter_argument is None:
+        return "pop_and_propagate"
+    return "validate_proponent_move"
 
 
-def route_after_validate_c_defeats_b(state: Any) -> str:
-    """C が B を破る関係の検証後の遷移先を決める."""
+def route_after_validate_proponent_move(state: Any) -> str:
+    """C が B を strictly defeat するかの検証後の遷移先を決める."""
     if state.error:
         return "finish_with_error"
-    if state.current_thread_status == "overruled":
-        return "route_after_thread"
-    if state.c_defeats_b is True:
-        return "validate_b_defeats_c"
-    return "finish_with_error"
+    if state.last_counter_strictly_defeated is True:
+        return "opponent_move"
+    return "proponent_move"
 
 
-def route_after_validate_b_defeats_c(state: Any) -> str:
-    """B が C を破り返す関係の検証後の遷移先を決める."""
+def route_after_pop_and_propagate(state: Any) -> str:
+    """フレームの pop・伝播後の遷移先を決める（根まで伝播しきったかどうかで分岐）."""
     if state.error:
         return "finish_with_error"
-    if state.thread_needs_retry:
-        return "o_defeat_a"
-    if state.current_thread_status in {"justified", "defensible"}:
-        return "route_after_thread"
-    return "finish_with_error"
+    if state.last_propagation_action == "resolved":
+        return "resolve_tree_status"
+    if state.last_propagation_action == "retry_attack":
+        return "opponent_move"
+    return "pop_and_propagate"
 
 
-def route_after_thread(state: Any) -> str:
-    """1スレッド分の議論終了後、次の遷移先を決める.
+def route_after_resolve_tree_status(state: Any) -> str:
+    """1つの main argument の dialogue tree が確定した後の遷移先を決める.
 
-    justified なら最終回答へ。overruled / defensible（= Opponent の攻撃が最後まで
-    通った、または攻撃のリトライ予算が尽きて未決着に終わった）なら、Proponent の
-    main argument はこの1本で確定とし、同じ main argument へのリトライはしない
-    （Opponentの攻撃リトライ回数の上限判定は o_defeat_a の入り口で既に行われている）。
+    justified なら最終回答へ（Prakken & Sartor に忠実: justified な論証が
+    そのまま対話の結論になる。両者の意見の取り込みは統合フェーズが別途担う）。
+    overruled / defensible なら、Proponent の main argument はこの1本で確定とし、
     次の proponent（AG2）に手番を渡すか、両者が出し切っていれば統合フェーズへ進む。
     """
     if state.error:
         return "finish_with_error"
-    if state.current_thread_status == "justified":
+    if state.tree_root_status == "justified":
         return "generate_final_answer"
     if state.current_proponent == "AG1":
         return "advance_to_ag2"
@@ -153,5 +161,3 @@ def route_after_extract_warrants(state: Any) -> str:
     if state.ag1_main_argument is None or state.ag2_main_argument is None:
         return "finalize_fallback"
     return "next"
-
-

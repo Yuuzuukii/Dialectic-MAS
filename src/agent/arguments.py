@@ -231,6 +231,39 @@ def _serialize_argument(state: Any, output_argument: ArgumentBody | str) -> str:
     return argument_body_json(cast(ArgumentBody, output_argument))
 
 
+# Argument の consequent が「勝敗の確定・対話ゲームの状態」を述べているだけで、
+# トピックについての実質的な主張になっていない場合に検出する語彙。誤検出があれば
+# ここを調整する（docs/argumentation_model_rebuild_plan.md §9 要確認事項 #5）。
+_META_CONCLUSION_PATTERNS = (
+    "fails to defeat",
+    "does not defeat",
+    "fail to defeat",
+    "fails to undercut",
+    "does not undercut",
+    "fails to rebut",
+    "does not rebut",
+    "does not follow from its premises",
+    "does not follow from the premises",
+    "the target attack",
+    "the target argument",
+    "is not defeated",
+    "is defeated",
+)
+
+
+def _meta_conclusion_violation(index: int, consequent: str) -> str | None:
+    """Consequent が defeat 判定そのものを述べる勝敗宣言になっていないか検査する."""
+    lowered = consequent.lower()
+    for pattern in _META_CONCLUSION_PATTERNS:
+        if pattern in lowered:
+            return (
+                f"rule {index + 1}'s consequent (\"{consequent}\") states a verdict about "
+                f'the dialectical game ("{pattern}") instead of a substantive claim about '
+                "the issue"
+            )
+    return None
+
+
 def validate_argument_body(body: ArgumentBody) -> list[str]:
     """各 rule の形式的不変条件を機械的に検証し、違反メッセージのリストを返す（空=適合）.
 
@@ -243,6 +276,9 @@ def validate_argument_body(body: ArgumentBody) -> list[str]:
       2. 各ruleは意味のあるstrongまたはweak_negationを少なくとも1つ持つ。
       3. 2つ以上のruleが同じconsequentを持たない（重複禁止）。
       4. 非末尾consequentは、後続ruleのstrong先行詞として再利用される（連結性）。
+      5. consequentが「defeatの成否」自体を述べる勝敗宣言になっていない
+         （実質的な主張ではなく対話ゲームの状態を書いてしまう問題への対処。
+         docs/argumentation_model_rebuild_plan.md §4.7 参照）。
     旧仕様の「r_i (i>1) の strong 先行詞はすべて先行 consequent でなければならない」は、
     後段で新しい前提事実を導入する妥当な論証まで弾くため、あえて強制しない。
     """
@@ -259,6 +295,10 @@ def validate_argument_body(body: ArgumentBody) -> list[str]:
     for index, (rule, consequent) in enumerate(zip(rules, consequents, strict=True)):
         if not consequent:
             violations.append(f"rule {index + 1} has an empty consequent")
+        else:
+            meta_violation = _meta_conclusion_violation(index, consequent)
+            if meta_violation is not None:
+                violations.append(meta_violation)
         antecedents = [
             *(rule.antecedent.strong or []),
             *(rule.antecedent.weak_negation or []),
@@ -363,16 +403,18 @@ async def generate_attack(
     target: ArgumentRecord,
     *,
     purpose: str,
+    attempt_count: int = 0,
 ) -> ArgumentRecord | None:
     """攻撃（defeat/counter）主張を LLM 生成し、ArgumentRecord 化する.
 
-    purpose="defeat" のリトライ（o_defeat_a が同一 target に対して別候補 B' を試す2回目
-    以降）では、生成された攻撃自身に has_new_point（このスレッド内の既存の試みと比べて
-    実質的に新しい角度か）を自己申告させる。生成の指示（attack_instruction）は変更せず、
+    purpose="defeat" のリトライ（opponent_move が同一フレームで別候補 B' を試す
+    2回目以降。`attempt_count` はそのフレームの `DialogueNode.attack_attempts`）では、
+    生成された攻撃自身に has_new_point（このフレーム内の既存の試みと比べて実質的に
+    新しい角度か）を自己申告させる。生成の指示（attack_instruction）は変更せず、
     通常どおり生成させた上で事後的に判定するだけなので、生成内容そのものを歪めない
     （過去に試した「別の対象を攻撃しろ」「内容を変えろ」という生成時介入とは異なる）。
     False なら can_defeat=NO と同様に None を返し、新しい攻撃が尽きたとみなして
-    スレッドを終える（mad/free_debate の has_new_point 早期停止と同じ発想）。
+    フレームを終える（mad/free_debate の has_new_point 早期停止と同じ発想）。
     """
     messages = await build_attack_messages(state, attacker, target, purpose=purpose)
     schema = (
@@ -386,11 +428,7 @@ async def generate_attack(
     )
     if output.can_defeat != "YES" or output.Argument is None or output.Attack is None:
         return None
-    if (
-        purpose == "defeat"
-        and getattr(state, "attack_attempt_count", 0) > 0
-        and not output.has_new_point
-    ):
+    if purpose == "defeat" and attempt_count > 0 and not output.has_new_point:
         return None
     return ArgumentRecord(
         type="counter" if purpose == "counter" else "defeat",

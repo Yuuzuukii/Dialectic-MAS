@@ -275,50 +275,60 @@ defeat 判定ロジックは維持したまま、**LLM への指示のゴール�
 
 各フェーズは単体で `pytest` が通る状態を保つ。
 
-### Phase 0: 準備（振る舞いを変えない）
+> **実装状況（2026-09-14 時点）**: Phase 0/2/3/4 はコード実装・単体テストとも完了。
+> Phase 1 は「記録だけ」の中間ステップを経ず、Phase 2/3 と合わせて直接実装した
+> （最終形は計画どおり）。Phase 5 は実際の LLM 呼び出しを伴う実測が必要なため、
+> このセッションでは未実施（コード上は `no_schema` も同じグラフを通るため動作するはず）。
+> ブランチ: `feature/argumentation-model-rebuild`。
 
-- [ ] `feature/justifiy-end-skip` の `4e334f8` から、プロンプト改善分のみを取り込む
+### Phase 0: 準備（振る舞いを変えない） ✅ 完了
+
+- [x] `feature/justifiy-end-skip` の `4e334f8` から、プロンプト改善分のみを取り込む
       （`prompts.py` の weak_negation / undercut 定義、`schema/llm_outputs.py` の description）。
       ※ 同コミットの `edges.py` / `workflow.py`（justified → 最終回答の遷移削除）は**取り込まない**。
-- [ ] 既存テストが緑であることを確認（`tests/unit_tests/test_defeat_subgraphs.py` 等）。
+- [x] 既存テストが緑であることを確認（`tests/unit_tests/test_defeat_subgraphs.py` 等）。
 
-### Phase 1: データ構造の導入（振る舞いを変えない）
+### Phase 1〜3: データ構造の導入・status 判定の木ベース化・再帰探索 ✅ 完了
 
-- [ ] `DialogueNode` を `src/agent/schema/state.py` に追加。
-- [ ] `State` に `dialogue_nodes` / `node_stack` / `current_node_id` / `root_node_id` /
-      `max_tree_depth` / `max_counter_attempts` を追加。
-- [ ] 既存の A/B/C フロー上で、木ノードを**記録だけ**する（判定には使わない）。
-      → この時点で対話ログに木構造が出るので、目視で構造を確認できる。
+Phase 1（記録だけ）を経由せず、最終形（Phase 3 相当）を直接実装した。
 
-### Phase 2: status 判定を木ベースへ差し替え
+- [x] `DialogueNode` を `src/agent/schema/state.py` に追加。
+- [x] `State` に `dialogue_nodes` / `node_stack` / `root_node_id` / `max_tree_depth` /
+      `max_counter_attempts` 他、探索用の一時フィールドを追加
+      （`current_node_id` は使わず `node_stack[-1]` を都度参照する設計にした）。
+- [x] `opponent_move` / `validate_opponent_move` / `proponent_move` /
+      `validate_proponent_move` / `pop_and_propagate` / `resolve_tree_status` を実装
+      （`o_defeat_a` 等の固定 A/B/C ノードは廃止）。
+- [x] `workflow.py` のグラフを新ノード構成へ再配線。
+- [x] `max_tree_depth` / `max_counter_attempts` の予算チェックを実装。
+- [x] `edges.py` の `justified → generate_final_answer` 遷移は維持（要確認 #1 の Default どおり）。
+- [x] 深さ4（A→B→C→D→E）の再帰探索をモック LLM で確認
+      （`tests/unit_tests/test_dialogue_tree.py::test_depth_four_recursion_reaches_justified`）。
+- [x] reinstatement（C strictly defeats B → justified）が正しく反映されることを確認
+      （同ファイル `test_reinstatement_after_strict_defeat_is_justified`。旧実装が
+      `defensible` を返していたケース）。
 
-- [ ] `close_node`（AND/OR 伝播）と `resolve_tree_status` を実装。
-- [ ] 深さ 2（A→B→C）のまま、status の決定だけを木の解決結果から行うように差し替える。
-      - `C strictly defeats B` → 根 `won_by_p` → **justified**（現行はここで `defensible` になっていた）
-      - `C が B を defeat できない` → 根 `lost_by_p` → **overruled**
-- [ ] `edges.py` の `justified → generate_final_answer` 遷移は `main` のまま維持する。
-- [ ] この時点で「reinstatement が status に反映される」という**原論文との最大のズレが解消**される。
+### Phase 4: 非反復規則とプロンプト改修 △ 一部完了
 
-### Phase 3: 木を深くする（再帰探索の本体）
+- [ ] ブランチ内祖先のみを見る非反復判定への変更（[4.6](#46-非反復規則definition-45-条件-2)）は
+      **未着手**。現状は旧実装のまま、O は同一フレーム内の自分の過去の試みとのみ比較する
+      （`has_new_point` 自己申告、`generate_attack` の `attempt_count` 引数）。祖先パス全体を
+      横断した比較はしていないため、深い木では理論上わずかに緩い可能性がある。
+- [x] `attack_instruction` の `<task>` 書き換え（[4.7](#47-プロンプト改修内容の薄さへの対処)-1）。
+      勝敗確定ではなく実質的な主張を書かせるよう変更し、`<content_requirement>` ブロックを追加。
+- [x] `validate_argument_body` にメタ結論拒否を追加（[4.7](#47-プロンプト改修内容の薄さへの対処)-2）。
+      キーワード検出方式（要確認 #5 の Default）。
+- [ ] メタ結論が実際に減ったかを、少数トピックの実走ログで確認する **（要・実際の LLM 呼び出し。未実施）**。
 
-- [ ] `opponent_move` / `proponent_move` を、固定の A/B/C ではなく
-      `current_node_id` に対して働く汎用ノードへ書き換える。
-- [ ] `workflow.py` のグラフを [4.3](#43-新しいグラフ構造) の形へ再配線する。
-- [ ] `max_tree_depth` / `max_counter_attempts` の予算チェックを入れる。
-- [ ] 深さ 3 以上（A→B→C→D→E...）の探索が動くことを、モック LLM で確認する。
+### Phase 5: no_schema 条件への反映と評価準備 △ 一部完了
 
-### Phase 4: 非反復規則とプロンプト改修
-
-- [ ] ブランチ内祖先のみを見る非反復判定に変更（[4.6](#46-非反復規則definition-45-条件-2)）。
-- [ ] `attack_instruction` の `<task>` 書き換え（[4.7](#47-プロンプト改修内容の薄さへの対処)-1）。
-- [ ] `validate_argument_body` にメタ結論拒否を追加（[4.7](#47-プロンプト改修内容の薄さへの対処)-2）。
-- [ ] メタ結論が実際に減ったかを、少数トピックの実走ログで確認する。
-
-### Phase 5: no_schema 条件への反映と評価準備
-
-- [ ] `output_mode="no_schema"` でも同じ木探索プロトコルが動くことを確認（要確認 #4）。
-- [ ] 対話ターン数・木の深さ・ノード数をメトリクスとして出力に追加（[8](#8-評価計画)）。
-- [ ] 少数トピック（3〜5 件）でコストと所要時間を実測し、全件走行の見積りを取る。
+- [ ] `output_mode="no_schema"` でも同じ木探索プロトコルが動くことの実走確認（要確認 #4）
+      **（コード上は同じグラフ・同じノードを通るため動作するはずだが、実際の LLM 呼び出しでの
+      確認は未実施）**。
+- [x] 対話ターン数・木の深さ・ノード数・メタ結論率をメトリクスとして出力に追加
+      （`experiments/dialogue/common.py` の `_dialogue_tree_metrics()`、[8](#8-評価計画)）。
+- [ ] 少数トピック（3〜5 件）でコストと所要時間を実測し、全件走行の見積りを取る
+      **（要・実際の LLM 呼び出し。未実施 — 次のアクション）**。
 
 ---
 
@@ -344,26 +354,36 @@ defeat 判定ロジックは維持したまま、**LLM への指示のゴール�
 
 ### 7.1 単体テスト（LLM をモックし、木の解決ロジックだけを検証）
 
-- [ ] O が攻撃を 1 つも出せない → 根 justified（深さ 0 の木）
-- [ ] B が A を defeat、C が B を strictly defeat、C への攻撃なし → 根 justified（**現行実装が落ちるケース**）
-- [ ] B が A を defeat、C が B を defeat できない → 根 overruled
-- [ ] B が A を defeat、C が B を defeat するが B も C を defeat する → 根 defensible
-- [ ] A への攻撃が B1, B2 の 2 本。B1 は退けたが B2 を退けられない → 根 **not justified**（AND 条件）
-- [ ] 深さ 4（A→B→C→D→E）で E に攻撃が尽きる → 根 justified（再帰の伝播）
-- [ ] `max_tree_depth` 到達 → `undetermined` 経由で defensible
-- [ ] `max_attack_attempts` 切れかつ全 B を退けた → `closed_by_budget=True` の justified（要確認 #2）
-- [ ] 非反復: P が同一ブランチ祖先と同じ論証を出そうとすると弾かれる
-- [ ] 非反復: O は別ブランチで同じ論証を出せる
+`tests/unit_tests/test_dialogue_tree.py` に実装済み。
 
-### 7.2 契約テスト
+- [x] O が攻撃を 1 つも出せない → 根 justified（深さ 0 の木）
+- [x] B が A を defeat、C が B を strictly defeat、C への攻撃なし → 根 justified（**旧実装が落ちるケース**）
+- [x] B が A を defeat、C が B を defeat できない → 根 overruled
+- [x] B が A を defeat、C が B を defeat するが B も C を defeat する → 根 defensible
+- [x] 深さ 4（A→B→C→D→E）で E に攻撃が尽きる → 根 justified（再帰の伝播）
+- [x] `max_attack_attempts` / `max_counter_attempts` 切れ → `closed_by_budget=True` を記録
+      （`tests/unit_tests/test_dialogue_turn_budget.py`）
+- [ ] A への攻撃が B1, B2 の 2 本で、B1 は退けたが B2 を退けられない → 根 not justified（AND 条件）
+      — 個別テストとしては未追加（`_run_tree` ヘルパは単一の攻撃系列のみを想定した作りのため、
+      複数並行攻撃のシナリオを流すには拡張が要る）。
+- [ ] `max_tree_depth` 到達 → `undetermined` 経由で defensible — 個別テスト未追加。
+- [ ] 非反復: P が同一ブランチ祖先と同じ論証を出そうとすると弾かれる／O は別ブランチで同じ
+      論証を出せる — Phase 4 の非反復範囲変更が未着手のため、これに対応するテストも未実装。
 
-- [ ] `validate_argument_body` がメタ結論（`"... fails to defeat ..."`）を違反として検出する
-- [ ] `attack_instruction` の出力に「勝敗を目的とする」文言が含まれない
+### 7.2 契約テスト ✅ 完了
+
+- [x] `validate_argument_body` がメタ結論（`"... fails to defeat ..."`）を違反として検出する
+      （`tests/unit_tests/test_defeat_subgraphs.py::test_validate_argument_body_rejects_meta_conclusion_verdicts`）
+- [x] `attack_instruction` の `<task>` に「勝敗を目的とする」文言が含まれない
+      （同ファイル `test_attack_instruction_task_does_not_frame_goal_as_defeating_the_target`）
 
 ### 7.3 統合テスト
 
-- [ ] `tests/integration_tests/test_graph.py` をモック LLM で木探索が完走するよう更新
-- [ ] `experiments/dialogue/test_protocol_regression.py` の期待値を新プロトコルへ更新
+- [x] `tests/integration_tests/test_graph.py` を新ノード構成の存在確認へ更新
+      （実際に木探索をモック LLM で完走させる統合テストではなく、グラフ構造の静的確認に留まる）
+- [ ] `experiments/dialogue/test_protocol_regression.py` は手動実行スクリプト（実 LLM 呼び出し）
+      のため、このセッションでは実行していない。公開 API（`run_schema_topic_once` 等）のシグネチャは
+      変えていないため動くはずだが、実走確認は次のアクション。
 
 ---
 

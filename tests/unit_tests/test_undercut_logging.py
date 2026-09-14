@@ -10,7 +10,7 @@ import pytest
 from agent import arguments, nodes
 from agent.argumentation_model import AttackEvaluation
 from agent.schema.llm_outputs import Antecedent, ArgumentBody, Rule, UndercutOutput
-from agent.schema.state import ArgumentRecord
+from agent.schema.state import ArgumentRecord, DialogueNode
 
 pytestmark = pytest.mark.anyio
 
@@ -46,26 +46,34 @@ async def test_validate_b_exposes_generated_undercut_in_history_and_update(
         )
 
     monkeypatch.setattr(nodes, "evaluate_attack", blocked_rebut)
+    root = DialogueNode(argument_id=main.id)
     state = SimpleNamespace(
         current_argument=main,
-        b_argument=rebut,
+        pending_attacker_argument=rebut,
         current_proponent="AG1",
         current_opponent="AG2",
         history=[main, rebut],
+        argument_records=[main, rebut],
         learned_findings=[],
         ag2_thread_status=None,
         defeat_relations=[],
+        dialogue_nodes=[root],
+        node_stack=[root.id],
+        max_dialogue_turns=None,
     )
 
-    update = await nodes.validate_b_defeats_a(state)
+    update = await nodes.validate_opponent_move(state)
 
-    # B は defeat できず、undercut で阻止された。上限判定は o_defeat_a の入り口に
-    # 移設されているため、ここではスレッドを終了せず、無条件でリトライを指示する。
-    # ただし阻止に使った undercut はリトライ有無に関わらず履歴に残る。
+    # B は defeat できず、undercut で阻止された。上限判定は opponent_move の入り口に
+    # あるため、ここではフレームを閉じず、無条件でリトライを指示する（同じフレームで
+    # 別の B' を試す）。ただし阻止に使った undercut はリトライ有無に関わらず履歴に残る。
     assert update["last_generated_argument"] is undercut
     assert update["dialogue_history"][-1]["attack"] == "undercut"
-    assert update["thread_needs_retry"] is True
-    assert "current_thread_status" not in update
+    assert update["last_attack_defeated"] is False
+    assert update["pending_attacker_argument"] is None
+    updated_root = next(n for n in update["dialogue_nodes"] if n.id == root.id)
+    assert updated_root.outcome == "open"
+    assert updated_root.attack_attempts == 1
 
 
 async def test_cli_payload_labels_undercut_and_keeps_it_in_finish_history() -> None:
@@ -78,16 +86,16 @@ async def test_cli_payload_labels_undercut_and_keeps_it_in_finish_history() -> N
     history = [undercut.to_dialogue_dict()]
 
     validation_payload = cli._node_payload(
-        "validate_b_defeats_a",
-        {
-            "last_generated_argument": undercut,
-            "current_thread_status": "justified",
-        },
+        "validate_opponent_move",
+        {"last_generated_argument": undercut},
+    )
+    status_payload = cli._node_payload(
+        "resolve_tree_status", {"ag1_thread_status": "justified"}
     )
     finish_payload = cli._node_payload("finish", {"dialogue_history": history})
 
     assert validation_payload["metadata"]["attack"] == "undercut"
-    assert validation_payload["thread_status"] == "justified"
+    assert status_payload["thread_status"] == "justified"
     assert finish_payload["dialogue_history"][-1]["attack"] == "undercut"
 
 

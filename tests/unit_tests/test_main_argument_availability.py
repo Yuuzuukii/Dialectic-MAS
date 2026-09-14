@@ -7,7 +7,7 @@ import pytest
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
 from agent.arguments import build_main_argument_messages
-from agent.edges import route_after_can_generate_main, route_after_thread
+from agent.edges import route_after_can_generate_main, route_after_resolve_tree_status
 from agent.nodes import advance_to_ag2, can_generate_main
 from agent.prompts import main_instruction
 from agent.schema.llm_outputs import ArgumentBody
@@ -156,7 +156,7 @@ async def test_can_generate_main_routes_to_generation_when_available(monkeypatch
     assert update["argument_records"][-1] is update["current_argument"]
     assert (
         route_after_can_generate_main(SimpleNamespace(error=None, finalize_mode=False, **update))
-        == "o_defeat_a"
+        == "init_dialogue_tree"
     )
 
 
@@ -224,24 +224,24 @@ async def test_route_after_can_generate_main_ag2_unavailable_extracts_warrants()
     assert route_after_can_generate_main(state) == "extract_warrants"
 
 
-async def test_route_after_thread_advances_to_ag2_when_defensible() -> None:
+async def test_route_after_resolve_tree_status_advances_to_ag2_when_defensible() -> None:
     state = SimpleNamespace(
         error=None,
-        current_thread_status="defensible",
+        tree_root_status="defensible",
         current_proponent="AG1",
     )
 
-    assert route_after_thread(state) == "advance_to_ag2"
+    assert route_after_resolve_tree_status(state) == "advance_to_ag2"
 
 
-async def test_route_after_thread_extracts_warrants_when_ag2_overruled() -> None:
+async def test_route_after_resolve_tree_status_extracts_warrants_when_ag2_overruled() -> None:
     state = SimpleNamespace(
         error=None,
-        current_thread_status="overruled",
+        tree_root_status="overruled",
         current_proponent="AG2",
     )
 
-    assert route_after_thread(state) == "extract_warrants"
+    assert route_after_resolve_tree_status(state) == "extract_warrants"
 
 
 async def test_advance_to_ag2_resets_state_for_ag2_turn() -> None:
