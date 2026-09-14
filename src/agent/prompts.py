@@ -48,6 +48,7 @@ Represent Argument as a structured object consisting of rules, Conc, and Ass.
 - rules is a finite sequence of rules r_1, ..., r_n.
 - Each rule has an antecedent and a consequent.
 - Antecedents may contain strong premises and weak_negation assumptions.
+- A weak_negation entry must be phrasable as "X is not the case" — a defeasible assumption held only because nothing on record contradicts it (e.g. "no evidence that Y fails here", "Z does not occur in this case"). It must be a specific claim that could in principle be proven false by evidence that X actually holds. Do not put scope stipulations, definitions, or framing choices ("we are evaluating only Y") in weak_negation — those are not defeasible assumptions and cannot be coherently undercut; state them as strong premises or fold them into the reasoning directly instead.
 - Every rule must have at least one explicit strong or weak_negation antecedent; never derive a consequent from an empty antecedent.
 - Conc contains the conclusions derived by the rules.
 - Ass contains the weak_negation assumptions used by the rules.
@@ -516,7 +517,10 @@ def attack_instruction(
             "- Your counterargument must defeat the target attack.",
             "- You may use rebut or undercut.",
             "- rebut: your argument must directly negate the target's stated conclusion.",
-            "- undercut: your argument must directly negate an assumption the target relies on.",
+            "- undercut: identify a weak_negation assumption (of the form 'X is not the case') that the "
+            "target's argument relies on, and construct your argument to prove that X actually holds. "
+            "Merely asserting the opposite of the target's conclusion, or arguing that the target's "
+            "framing/scope is inappropriate, does not qualify — your reasoning must establish X.",
             "- Do not attack a claim or assumption that is not present in the target argument.",
             "</attack_conditions>",
             "",
@@ -548,7 +552,10 @@ def attack_instruction(
             "<attack_conditions>",
             "- You may use rebut or undercut.",
             "- rebut: your argument must directly negate the target's stated conclusion.",
-            "- undercut: your argument must directly negate an assumption the target relies on.",
+            "- undercut: identify a weak_negation assumption (of the form 'X is not the case') that the "
+            "target's argument relies on, and construct your argument to prove that X actually holds. "
+            "Merely asserting the opposite of the target's conclusion, or arguing that the target's "
+            "framing/scope is inappropriate, does not qualify — your reasoning must establish X.",
             "- Do not attack a claim or assumption that is not present in the target argument.",
             "- Supporting a different option does not by itself count as negating the target.",
             "</attack_conditions>",
@@ -584,8 +591,9 @@ def undercut_instruction(target: Any, state: Any | None = None) -> str:
             _target_block(target),
             "",
             "<response_contract>",
-            "If your argument can explicitly negate an assumption the target relies on, set can_undercut=YES and include Argument.",
-            "Otherwise, set can_undercut=NO and omit Argument.",
+            "Identify a weak_negation assumption (of the form 'X is not the case') the target relies on. "
+            "If you can construct an argument that proves X actually holds, set can_undercut=YES and "
+            "include Argument. Otherwise, set can_undercut=NO and omit Argument.",
             "</response_contract>",
         ]
     )

@@ -200,7 +200,11 @@ class Antecedent(BaseModel):
     )
     weak_negation: list[str] = Field(
         default_factory=list,
-        description="Assumptions necessary to lead to a conclusion",
+        description=(
+            "Defeasible assumptions of the form 'X is not the case', held only in the "
+            "absence of evidence to the contrary. An undercutting attack defeats one of "
+            "these by proving that X actually holds."
+        ),
     )
 
 

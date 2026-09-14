@@ -561,6 +561,30 @@ async def add_integrated_rule(state: Any) -> dict[str, Any]:
     }
 
 
+def _leftover_main_rule_text(state: Any, agent: str, main: ArgumentRecord) -> str:
+    """統合されずに終わったラウンドの main argument を、integrated_rules に混ぜられる散文にする.
+
+    schema: 最後の rule の antecedent/consequent を “If ... then ...” 形式の文にする
+    （extract_warrants が warrant 抽出に使うのと同じ「最後の rule」を使う）。
+    no_schema: 自由記述テキストをそのまま使う。
+    どちらも、両者で汎化・統合された他のルールと混同されないよう、
+    「一方の側のみの、未統合の主張」であることを明示する接頭辞を付ける。
+    """
+    prefix = f"[Unintegrated, one-sided position from {agent}'s final round]"
+    if state.output_mode == "no_schema":
+        return f"{prefix} {main.argument.strip()}"
+    try:
+        last_rule = main.body.get("rules", [])[-1]
+        strong = last_rule["antecedent"].get("strong", [])
+        weak = last_rule["antecedent"].get("weak_negation", [])
+        consequent = last_rule["consequent"]
+    except (AttributeError, KeyError, IndexError, TypeError):
+        return f"{prefix} {main.argument.strip()}"
+    condition = "; ".join(strong) if strong else "no explicit condition stated"
+    exception = f" (unless: {'; '.join(weak)})" if weak else ""
+    return f"{prefix} If {condition}{exception}, then {consequent}"
+
+
 async def finalize_fallback(state: Any) -> dict[str, Any]:
     """ラウンド上限到達時、integration rule で作った main arg を暫定回答の土台に据える.
 
@@ -572,7 +596,18 @@ async def finalize_fallback(state: Any) -> dict[str, Any]:
     片方のエージェントだけが今回 main argument を生成できていた可能性があるので、
     ag1_main_argument / ag2_main_argument のうち存在する方を土台にする
     （もう片方は新しい主張を生成できなかった、という結果自体を反映する）。
+
+    このラウンドで片方だけが main argument を生成できていた場合、その主張は
+    （両者揃わないと発火しない）統合ステップを一度も通らないため、integrated_rules
+    には反映されない。dialogue_history には残るが、最終回答生成が読む
+    integrated_rules_block には現れず見落とされやすいので、ここで単独主張として
+    integrated_rules に追記し、他の（両者統合済みの）ルールと区別できる接頭辞を付ける。
     """
+    rules = list(state.integrated_rules)
+    for agent, main in (("AG1", state.ag1_main_argument), ("AG2", state.ag2_main_argument)):
+        if main is not None:
+            rules.append(_leftover_main_rule_text(state, agent, main))
+
     if state.current_argument is not None:
         justified_argument = state.current_argument.argument
     elif state.integrated_rules:
@@ -589,6 +624,7 @@ async def finalize_fallback(state: Any) -> dict[str, Any]:
         "justified_argument": justified_argument,
         "justification_status": "fallback_no_consensus",
         "consensus_reached": False,
+        "integrated_rules": rules,
     }
 
 
