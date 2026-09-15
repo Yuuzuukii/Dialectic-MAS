@@ -10,9 +10,10 @@
 - 「要確認」と付いた箇所は**実装者（ユーザー）の判断が必要な設計判断**である。
   一覧は [9. 要確認事項](#9-要確認事項) に集約した。実装は要確認事項の**推奨案（Default）で一旦最後まで作り切り**、
   後から差し替えられるよう設定値・分岐として外出ししておく。
-- 既存の `docs/one_chain_protocol_revision_plan.md` は、本計画で**意図的に巻き戻す**対象である
-  （後述 [2.3](#23-巻き戻す過去の設計判断)）。破棄ではなく、そこで確立した良い設計（攻撃関係を
-  argument payload ではなく `DefeatRelation` に分離する方針）は引き継ぐ。
+- 旧 `docs/one_chain_protocol_revision_plan.md`（本計画で**意図的に巻き戻した**対象。
+  後述 [2.3](#23-巻き戻す過去の設計判断)）は、内容を本計画に取り込んだ上で削除済み。
+  そこで確立した良い設計（攻撃関係を argument payload ではなく `DefeatRelation` に
+  分離する方針）は引き継いでいる。
 
 ---
 
@@ -76,8 +77,9 @@ language〜defeat の4要素はおおむね実装されている。**status の�
 
 ### 2.3 巻き戻す過去の設計判断
 
-`docs/one_chain_protocol_revision_plan.md` は、`A ← B ← C ← D` の木展開をやめ、
-`C strictly defeats B` を「C defeats B かつ not (B defeats C)」の相互判定で近似する方針を定めた。
+旧 `docs/one_chain_protocol_revision_plan.md`（内容を本計画に取り込んだ上で削除済み）は、
+`A ← B ← C ← D` の木展開をやめ、`C strictly defeats B` を「C defeats B かつ not (B defeats C)」
+の相互判定で近似する方針を定めていた。
 
 この近似自体は Definition 2.16 として**正しい**。巻き戻すのはそこではなく、
 **「D を生成しない ＝ 木を展開しない」という帰結**の方である。
@@ -431,16 +433,23 @@ Phase 1（記録だけ）を経由せず、最終形（Phase 3 相当）を直�
 
 ---
 
-### #2 予算切れで閉じた justified を、justified と呼んでよいか
+### #2 予算切れで閉じた justified を、justified と呼んでよいか ✅ 対応済み(2026-09-14)
 
 `max_attack_attempts` を使い切るまで O が有効な攻撃を出せなかった場合、
 原論文の「O が手を出せない」と同じ扱いにするか。厳密には「予算内で見つからなかった」に過ぎない。
 
-- **Default**: `justified` とするが `closed_by_budget=True` を記録し、評価時に
-  「provably justified」と「justified within budget」を分けて集計できるようにする。
-- 代替案: 予算切れは一律 `defensible` にする（現行挙動。ただし justified がほぼ出なくなる）
-
-**確認したいこと**: 論文に書くときに「justified」と言い切れる水準をどこに置くか。
+- **採用**: `max_attack_attempts`（フレーム固有の安全弁）が尽きた場合は `justified` とし、
+  `closed_by_budget=True` を記録する。
+- **ただし発覚した問題**: 実際にパイロット実行（`logs/pilot_gpt54nano_turns10`）したところ、
+  `max_dialogue_turns`（対話**全体**の絶対予算）が尽きた場合も同じ `won_by_p`（→justified）
+  経路に入ってしまっており、「この論証が守り切れたか」とは無関係な理由で justified になる
+  ケースが実際に観測された。これは正当化の水準として強すぎると判断し、
+  `max_dialogue_turns` 到達時は `max_tree_depth` 到達と同じ `undetermined`（→defensible）に
+  修正した（`opponent_move`/`proponent_move` 双方）。回帰テスト:
+  `tests/unit_tests/test_dialogue_tree.py::test_global_dialogue_turn_budget_is_defensible_not_justified`。
+- `closed_by_budget` は `ArgumentRecord`（対話ログの main レコード）にも保存されるようになり、
+  `experiments/dialogue/common.py` の `_dialogue_tree_metrics()` で
+  `justified_proven_count` / `justified_by_budget_count` として集計できる。
 
 ---
 
@@ -507,6 +516,62 @@ Default だと差は「論証本体の構造化の有無」のみ、代替案だ
 
 ---
 
+### #8 `max_dialogue_turns` の AG1/AG2 折半 ✅ 対応済み(2026-09-15)
+
+パイロット実行の考察から発覚した問題: schema は dialogue tree の探索構造上、
+片方の main argument を巡る攻防（反論のブロック・やり直し等）が長引くと、
+グローバルな `max_dialogue_turns` を独りで使い切ってしまい、もう片方
+（通常は AG2）が今ラウンド一度も main argument を生成できないまま
+`finalize_fallback` に落ちることがある。これは稀なケースではなく、AG1側の
+攻防がどれだけ粘るか次第で普通に起こり得る（`_dialogue_turn_budget_exceeded`
+は一度 True になったら発言総数が減らない限り True のままなので、AG1 の
+探索中に上限へ達した瞬間、AG2 は入口で即座に弾かれる）。
+
+- **採用**: `max_dialogue_turns` を `current_proponent` ごとに折半して管理する
+  （`nodes.py` の `_per_proponent_dialogue_turn_budget`）。奇数の端数は先手
+  （AG1）に寄せる。ラウンドをまたいでも累積する絶対予算（ラウンドごとにリセット
+  しない）。カウント対象は発言者（`ArgumentRecord.agent`）ではなく「どちらの
+  main argument を巡る攻防だったか」（新設した `ArgumentRecord.proponent`）。
+- **MAD/Free Debate は変更しない**: 厳密な交互発言（1ラウンドに両者1回ずつ）
+  なので、共有の絶対値のままでも自然に均等に割れる。この非対称リスクは
+  schema の木構造探索に固有の問題。
+- テスト: `tests/unit_tests/test_dialogue_turn_budget.py` の
+  `test_dialogue_turn_budget_splits_evenly_between_proponents` /
+  `test_dialogue_turn_budget_odd_remainder_goes_to_ag1`。
+
+---
+
+### #9 B-C間の逆defeat判定が、Bの元の攻撃メタデータを使い回していた ✅ 対応済み(2026-09-15)
+
+パイロットログの検証中に発覚: `validate_proponent_move`で「BがCにも反撃できるか」
+（strictly defeatの逆方向チェック）を判定する際、Bが**元の対象（A）に対して**
+宣言した`.attack`/`target_statement`をそのまま`evaluate_attack`に渡していた。
+Prakken & Sartorのattack/defeat（Definition 2.8/2.16）は論証単体の性質ではなく
+「特定の2論証の組」に対して定義される関係であり、BがAに対してundercutだった
+からといってCに対してもundercutとして無条件に勝てるとは限らない
+（`evaluate_attack`はundercutを無条件defeatとして扱うため、この使い回しは
+「元がundercutの反論は原理的にstrictly defeatされ得ない」という致命的な
+バイアスを生んでいた）。
+
+加えて、判定ロジック（`attack_from_metadata`）はattacker側の自己申告のみを
+信頼し、宣言されたtarget_statementが実際のtarget（C）の中に存在するかを
+一切検証していなかった（フォワード方向・逆方向とも）。
+
+- **採用**: `ask_attack_extends`（旧: YES/NO のみ返す）を拡張し、「及ぶ」場合は
+  Cの中身を見た上でB→Cの攻撃関係（method・対象フィールド・対象文）を**改めて
+  宣言**させるようにした（`AttackExtendsOutput.Attack: AttackMetadata | None`）。
+  `validate_proponent_move`は、この新しく判定された関係だけを使って
+  `b_for_reverse = b_argument.model_copy(update={...})`という一時コピーを作り、
+  それを逆方向の`evaluate_attack`に渡す（Bの本来の（A向けの）宣言は変更しない）。
+- ターゲットの整合性検証そのもの（`attack_from_metadata`がtargetの中身を見ない
+  問題）は未着手。今回はB-C間の再判定を追加することで実害のあった経路を塞いだが、
+  根本的な「宣言を検証しない」設計は残っている。
+- テスト: `tests/unit_tests/test_defeat_subgraphs.py`の
+  `test_ask_attack_extends_returns_none_when_no` /
+  `test_ask_attack_extends_does_not_reuse_bs_original_attack_metadata`。
+
+---
+
 ## 10. 参照
 
 - Prakken, H. & Sartor, G. (1997). *Argument-based extended logic programming with defeasible priorities.*
@@ -519,5 +584,4 @@ Default だと差は「論証本体の構造化の有無」のみ、代替案だ
   JSAI 2008, LNAI 5447, 228-241.
   - Section 5（Argumentation Model = Prakken & Sartor の簡略版を借用）
   - Definition 1, 6, 7（collaboration / concession / compromise ＝ 統合フェーズの根拠）
-- `docs/one_chain_protocol_revision_plan.md`（本計画で巻き戻す対象。[2.3](#23-巻き戻す過去の設計判断) 参照）
 - `docs/schema_nano_underperformance_report.md`（評価で負けている件の既存分析）

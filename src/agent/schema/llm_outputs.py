@@ -64,17 +64,30 @@ class UndercutOutput(BaseModel):
 
 # LLM出力：B（自分の攻撃）がC（相手の新しいカウンター）にも及ぶかの自己判定
 class AttackExtendsOutput(BaseModel):
-    """自分の攻撃の対象（statement）が、相手の新しい論証にも依然として存在するかの判定.
+    """自分の攻撃が、相手の新しい論証 C に対しても有効な攻撃として成り立つかの判定.
 
-    自分の攻撃が依然としてそれを否定しているかどうかの YES/NO 判定.
+    B は元々別の論証（A）を狙って宣言されたものなので、その `.attack`/`target` を
+    C に対してそのまま使い回してはならない（Prakken & Sartor の attack/defeat は
+    論証単体の性質ではなく、常に「特定の2論証の組」に対して定義される関係のため）。
+    YES の場合は、C の中身を実際に見た上で、B が C に対してどう攻撃するか
+    （method・対象フィールド・対象文）を改めて宣言させる。
     """
 
     attack_extends: Literal["YES", "NO"] = Field(
         description=(
-            "YES only if the new counterargument still relies on or still asserts the exact "
-            "statement your attack negated. NO if the new counterargument abandoned or "
-            "replaced that statement, so your attack no longer applies to it."
+            "YES only if your original argument, taken as a standalone claim, still poses a "
+            "genuine rebut or undercut against this new counterargument specifically. NO if "
+            "the new counterargument has moved past what your original argument addresses, "
+            "so it no longer applies."
         )
+    )
+    Attack: AttackMetadata | None = Field(
+        default=None,
+        description=(
+            "Required when attack_extends=YES: a fresh declaration of how your original "
+            "argument attacks the NEW counterargument specifically (not a copy of the "
+            "attack you declared against the original target). Omit when NO."
+        ),
     )
 
 

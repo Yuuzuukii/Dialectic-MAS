@@ -17,6 +17,11 @@ def _optional_int_env(name: str) -> int | None:
 
     `max_dialogue_turns`（全手法共通の絶対ターン数上限）の既定値に使う。None のときは
     無効（既存の round/attempts ベースの上限だけで従来通り動く）ことを示す。
+
+    schema では、片方の main argument を巡る攻防が長引くともう片方が今ラウンド
+    一度も発言できなくなる問題があるため、この値を AG1/AG2 で折半して使う
+    （`nodes.py` の `_per_proponent_dialogue_turn_budget` 参照）。MAD/Free Debate は
+    厳密な交互発言で自然に均等になるため、折半せず共有の絶対値のまま使う。
     """
     value = os.getenv(name)
     return int(value) if value else None

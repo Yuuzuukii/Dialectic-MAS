@@ -66,8 +66,10 @@ async def test_validate_b_exposes_generated_undercut_in_history_and_update(
 
     # B は defeat できず、undercut で阻止された。上限判定は opponent_move の入り口に
     # あるため、ここではフレームを閉じず、無条件でリトライを指示する（同じフレームで
-    # 別の B' を試す）。ただし阻止に使った undercut はリトライ有無に関わらず履歴に残る。
-    assert update["last_generated_argument"] is undercut
+    # 別の B' を試す）。ただし阻止に使った undercut はリトライ有無に関わらず履歴に残る
+    # （proponent タグが付け足されるので同一オブジェクトではなくコピーになる）。
+    assert update["last_generated_argument"].id == undercut.id
+    assert update["last_generated_argument"].proponent == "AG1"
     assert update["dialogue_history"][-1]["attack"] == "undercut"
     assert update["last_attack_defeated"] is False
     assert update["pending_attacker_argument"] is None

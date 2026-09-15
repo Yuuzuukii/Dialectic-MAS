@@ -20,6 +20,7 @@ from typing import Any, cast
 
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
 
+from .argumentation_model import AttackMatch
 from .llm import chat_structured, chat_text
 from .prompts import (
     PromptTemplates,
@@ -478,10 +479,14 @@ async def ask_attack_extends(
     attacker: AgentName,
     b_argument: ArgumentRecord,
     c_argument: ArgumentRecord,
-) -> bool:
-    """B（attackerが既に行った攻撃）が、相手の新しいカウンターCにも及ぶかを問う.
+) -> AttackMatch | None:
+    """B（attackerが既に行った攻撃）が、相手の新しいカウンターCにも及ぶかを問い、及ぶ場合はBからCへの攻撃関係（method・対象）を改めて宣言させる.
 
-    B の作者である attacker 自身に YES/NO で尋ねる（新しい論証は生成しない）.
+    B の作者である attacker 自身に尋ねる（新しい論証は生成しない）。attack/defeat は
+    論証単体の性質ではなく「特定の2論証の組」に対して定義される関係（Prakken &
+    Sartor）なので、B が元の対象に対して宣言した `.attack`/`target_statement` を
+    そのまま C に流用してはならない。戻り値はこの B-C 間で改めて判定された
+    攻撃関係（Noneなら及ばない、または C に対して有効な攻撃が成立しない）。
     """
     system = agent_system(
         _stance(state, attacker), attacker, PromptTemplates.ATTACK_EXTENDS_SYSTEM
@@ -494,7 +499,13 @@ async def ask_attack_extends(
         ),
     ]
     output = await chat_structured(messages, AttackExtendsOutput)
-    return output.attack_extends == "YES"
+    if output.attack_extends != "YES" or output.Attack is None:
+        return None
+    return AttackMatch(
+        method=output.Attack.method,
+        field=output.Attack.target.field,
+        statement=output.Attack.target.statement,
+    )
 
 
 async def generate_integration(state: Any) -> IntegrationOutput | IntegrationOutputFree:

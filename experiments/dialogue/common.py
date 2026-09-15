@@ -30,6 +30,9 @@ Method = Literal["schema", "no_schema", "free_debate", "mad", "mad_synthesis"]
 _MODEL_PRICING: dict[str, tuple[float, float, float]] = {
     "gpt-5.4-nano": (0.20, 0.02, 1.25),
     "gpt-5.4-mini": (0.75, 0.075, 4.50),
+    "gpt-5-nano": (0.05, 0.005, 0.40),
+    "gpt-5-mini": (0.25, 0.025, 2.00),
+    "gpt-5": (1.25, 0.125, 10.00),
 }
 # 未知モデルは高い方（mini）で保守的に見積もる。
 _DEFAULT_PRICING: tuple[float, float, float] = _MODEL_PRICING["gpt-5.4-mini"]
@@ -322,6 +325,54 @@ def base_log(
     }
 
 
+def _reconstruct_depths(dialogue_history: list[dict[str, Any]]) -> dict[str, int]:
+    """dialogue_history（type + target_id）だけから、各発話の dialogue tree 上の深さを
+    再構築する（root=main は depth 0）。
+
+    `State.dialogue_nodes` は main argument のスレッドが変わるたびリセットされる
+    （nodes.py の _TREE_RESET_FIELDS）ので、実行終了時点の値は debate 全体の木構造を
+    表さない。一方 dialogue_history は debate 全体を通じて一度も消えない永続データ
+    なので、ここから深さを再計算する方が頑丈。
+
+    再帰的な定義（Definition 4.6: Pの手番の子は、その論証に対するOの defeater 全て）:
+    - main: depth 0（新しいフレームの根）。
+    - counter が defeat を標的にする: 同じフレーム内の応答なので depth は変わらない。
+    - defeat が main を標的にする: フレームの根を攻撃しているので depth は変わらない。
+    - defeat が counter を標的にする: その counter は strictly defeat に成功して
+      新しいフレームになった、ということなので depth+1（新しいフレームへの最初の攻撃）。
+    - defeat が defeat を標的にする: rebut を防ぐ undercut ブロッカー
+      （`generate_undercut`。type は常に "defeat" になる）なので、ブロック対象と
+      同じフレーム＝depth は変わらない。
+    """
+    by_id = {t["id"]: t for t in dialogue_history if isinstance(t.get("id"), str)}
+    memo: dict[str, int] = {}
+
+    def depth_of(record_id: str) -> int:
+        if record_id in memo:
+            return memo[record_id]
+        record = by_id.get(record_id)
+        if record is None:
+            return 0
+        memo[record_id] = 0  # 循環防止の仮置き
+        if record.get("type") == "main":
+            result = 0
+        else:
+            target_id = record.get("target_id")
+            target = by_id.get(target_id) if isinstance(target_id, str) else None
+            if target is None or not isinstance(target_id, str):
+                result = 0
+            else:
+                target_depth = depth_of(target_id)
+                if record.get("type") == "counter" or target.get("type") in ("main", "defeat"):
+                    result = target_depth
+                else:  # defeat が counter を標的 = 新フレームへの最初の攻撃
+                    result = target_depth + 1
+        memo[record_id] = result
+        return result
+
+    return {record_id: depth_of(record_id) for record_id in by_id}
+
+
 def _dialogue_tree_metrics(final_state: dict[str, Any]) -> dict[str, Any]:
     """dialogue tree の探索規模と、勝敗宣言のみの反論の割合を集計する.
 
@@ -332,7 +383,6 @@ def _dialogue_tree_metrics(final_state: dict[str, Any]) -> dict[str, Any]:
     from src.agent.arguments import _META_CONCLUSION_PATTERNS
 
     dialogue_history = final_state.get("dialogue_history") or []
-    dialogue_nodes = final_state.get("dialogue_nodes") or []
 
     total_turns = len(dialogue_history)
     meta_conclusion_count = 0
@@ -353,7 +403,35 @@ def _dialogue_tree_metrics(final_state: dict[str, Any]) -> dict[str, Any]:
         if any(pattern in consequents for pattern in _META_CONCLUSION_PATTERNS):
             meta_conclusion_count += 1
 
-    depths = [node.get("depth", 0) for node in dialogue_nodes if isinstance(node, dict)]
+    depth_by_id = _reconstruct_depths(dialogue_history)
+    depths = list(depth_by_id.values())
+    # フレーム数 = main の本数 + strictly defeat に成功して新フレームになった counter の本数
+    # （後続の defeat がそれを標的にしている counter を数える）。
+    type_by_id = {t["id"]: t.get("type") for t in dialogue_history if isinstance(t.get("id"), str)}
+    promoted_counter_ids = {
+        t["target_id"]
+        for t in dialogue_history
+        if t.get("type") == "defeat"
+        and isinstance(t.get("target_id"), str)
+        and type_by_id.get(t["target_id"]) == "counter"
+    }
+    frame_count = sum(1 for t in dialogue_history if t.get("type") == "main") + len(
+        promoted_counter_ids
+    )
+
+    # main argument ごとの決着内訳。status="justified" かつ closed_by_budget=True は
+    # 「予算切れによる justified」であり、opponent が本当に手を尽くした結果の
+    # 「証明された justified」とは区別する（docs/argumentation_model_rebuild_plan.md §9 #2）。
+    main_turns = [t for t in dialogue_history if t.get("type") == "main" and t.get("status")]
+    justified_proven = sum(
+        1 for t in main_turns if t.get("status") == "justified" and not t.get("closed_by_budget")
+    )
+    justified_by_budget = sum(
+        1 for t in main_turns if t.get("status") == "justified" and t.get("closed_by_budget")
+    )
+    overruled_count = sum(1 for t in main_turns if t.get("status") == "overruled")
+    defensible_count = sum(1 for t in main_turns if t.get("status") == "defensible")
+
     return {
         "total_dialogue_turns": total_turns,
         "attack_turn_count": attack_turn_count,
@@ -361,8 +439,13 @@ def _dialogue_tree_metrics(final_state: dict[str, Any]) -> dict[str, Any]:
         "meta_conclusion_rate": (
             round(meta_conclusion_count / attack_turn_count, 3) if attack_turn_count else None
         ),
-        "dialogue_tree_node_count": len(dialogue_nodes),
+        "dialogue_tree_node_count": frame_count,
         "dialogue_tree_max_depth": max(depths) if depths else 0,
+        "main_argument_count": len(main_turns),
+        "justified_proven_count": justified_proven,
+        "justified_by_budget_count": justified_by_budget,
+        "overruled_count": overruled_count,
+        "defensible_count": defensible_count,
     }
 
 
@@ -373,12 +456,17 @@ def _speech_log(history: list[dict[str, Any]]) -> list[dict[str, Any]]:
       どの発話のどの文（結論/前提）を狙ったのか。評価用の自然文変換
       （"I have a counter argument against the opinion {…}"）の代入元になる。
     - status: main argument のスレッド決着（justified / overruled / defensible）。
+    - closed_by_budget: その status が、相手が本当に手を尽くした結果（True相当）ではなく、
+      探索予算（max_attack_attempts等）の枯渇による打ち切りだったか。特に
+      status="justified" のとき、これが True なら「予算切れによるjustified」であり
+      「証明されたjustified」ではないことを示す（詳細: docs/argumentation_model_rebuild_plan.md §9 #2）。
     Argument スキーマ（rules/Conc/Ass）自体は変更せず、その1つ上のレイヤーである
     ログエントリにメタ情報を残す。
     """
     keys = (
         "id",
         "agent",
+        "proponent",
         "type",
         "argument",
         "attack",
@@ -386,6 +474,7 @@ def _speech_log(history: list[dict[str, Any]]) -> list[dict[str, Any]]:
         "target_field",
         "target_statement",
         "status",
+        "closed_by_budget",
     )
     return [
         {k: record.get(k) for k in keys if record.get(k) is not None}
@@ -458,6 +547,12 @@ async def _run_topic_once(
     log["dialogue_history"] = _speech_log(final_state.get("dialogue_history", []))
     log["final_answer"] = final_state.get("final_answer")
     log["integrated_rules"] = final_state.get("integrated_rules", [])
+    # consensus_reached=True かつ justification_status が "{ag}_main_justified" なら
+    # 本当に justified で決着した。False/"fallback_no_consensus" なら、ラウンド上限や
+    # ターン予算切れで統合ルール（またはどちらかの main）を土台にした暫定回答であり、
+    # justified はしていない（docs/argumentation_model_rebuild_plan.md §9 #2/#8 参照）。
+    log["consensus_reached"] = final_state.get("consensus_reached")
+    log["justification_status"] = final_state.get("justification_status")
     error = final_state.get("error")
     if error is not None:
         log["error"] = error

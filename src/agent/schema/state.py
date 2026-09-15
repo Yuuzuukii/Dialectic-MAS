@@ -52,6 +52,14 @@ class ArgumentRecord(BaseModel):
         default_factory=list, description="Optional supporting facts or references."
     )
     agent: AgentName = Field(description="Agent that produced this argument.")
+    proponent: AgentName | None = Field(
+        default=None,
+        description=(
+            "このレコードが生成された時点で state.current_proponent だった agent。"
+            "main/counter は本人と一致するが、defeat（相手からの攻撃）はここが "
+            "author（agent）と異なる。dialogue turn 予算を proponent 別に按分する際に使う。"
+        ),
+    )
     target_id: str | None = Field(
         default=None, description="Argument id targeted by this defeating argument."
     )
@@ -68,6 +76,15 @@ class ArgumentRecord(BaseModel):
     )
     status: ArgumentStatus | None = Field(
         default=None, description="Dialectical status of the argument."
+    )
+    closed_by_budget: bool | None = Field(
+        default=None,
+        description=(
+            "main argument の status が確定した理由が、真の手詰まり（相手が本当に "
+            "反論/防御を尽くした）ではなく、探索予算（max_attack_attempts / "
+            "max_counter_attempts / max_tree_depth / max_dialogue_turns）の枯渇による "
+            "打ち切りだったかどうか。status が None の場合は無意味（None のまま）。"
+        ),
     )
     round: int = Field(
         default=1, description="Debate round in which this argument was produced."
@@ -176,11 +193,13 @@ class ArgumentRecord(BaseModel):
             "argument": self.argument,
             "support": self.support,
             "agent": self.agent,
+            "proponent": self.proponent,
             "target_id": self.target_id,
             "attack": self.attack,
             "target_field": self.target_field,
             "target_statement": self.target_statement,
             "status": self.status,
+            "closed_by_budget": self.closed_by_budget,
         }
 
 

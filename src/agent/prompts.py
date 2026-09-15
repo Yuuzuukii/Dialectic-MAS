@@ -628,13 +628,19 @@ def undercut_instruction(target: Any, state: Any | None = None) -> str:
 def attack_extends_instruction(
     b_argument: Any, c_argument: Any, state: Any | None = None
 ) -> str:
-    """自分の攻撃(B)が相手の新しいカウンター(C)にも及ぶかを尋ねる手番の指示文を組む.
+    """自分の攻撃(B)が相手の新しいカウンター(C)にも及ぶかを尋ね、及ぶ場合はBからCへの攻撃関係（method・対象）を改めて宣言させる指示文を組む.
 
     判定基準は字面の一致（同じ statement が残っているか）ではなく、
     「自分の攻撃の主張を真だと認めた場合、相手の新しい結論が成り立たなくなるか」
     という実質的な脅威性。相手が自分の攻撃内容を前提として受け入れた上で、それでも
     自分の結論は揺るがないと論じている（譲歩した上で結論を守っている）場合は、
     もはやその攻撃は新しい結論を脅かしていないので NO とする。
+
+    YES の場合、method/target は <your_attack> が元の対象に対して宣言したものを
+    流用せず、C の中身（rules/Conc/Ass）を見た上で改めて宣言させる。attack/defeat は
+    Prakken & Sartor では論証単体の性質ではなく「特定の2論証の組」に対して定義される
+    関係であり、B が A に対して undercut だったからといって C に対しても undercut に
+    なるとは限らない（rebut になることもあれば、成り立たないこともある）。
     """
     issue = getattr(state, "question", "") if state is not None else ""
     return "\n".join(
@@ -655,8 +661,8 @@ def attack_extends_instruction(
             "",
             "<your_attack>",
             f"id: {b_argument.id}",
-            f"attack method: {b_argument.attack}",
-            f"statement you negated: {b_argument.target_statement}",
+            f"attack method against the ORIGINAL target: {b_argument.attack}",
+            f"statement you negated in the ORIGINAL target: {b_argument.target_statement}",
             "your argument:",
             b_argument.argument,
             "</your_attack>",
@@ -680,6 +686,18 @@ def attack_extends_instruction(
             "confident or well-argued is not enough by itself to set NO either.",
             "When genuinely uncertain, prefer YES: the burden is on <new_counter> to "
             "clearly defeat your attack, not on you to prove your attack still applies.",
+            "",
+            "If attack_extends=YES, you must ALSO declare how your argument attacks "
+            "<new_counter> SPECIFICALLY — do not copy the method/target you used against "
+            "the original target above; re-derive it from <new_counter>'s actual content:",
+            "- rebut: your argument's conclusion must directly negate a stated conclusion "
+            "(Conc) of <new_counter>.",
+            "- undercut: identify a weak_negation assumption (of the form 'X is not the "
+            "case') in <new_counter>'s Ass that your argument proves X actually holds for.",
+            "- Only declare a method that is actually true of <new_counter>'s own content; "
+            "if your argument does not genuinely negate any of <new_counter>'s stated "
+            "conclusions or assumptions, set attack_extends=NO instead, even if you "
+            "initially leaned YES above.",
             "</response_contract>",
         ]
     )

@@ -50,22 +50,41 @@ def _records(state: Any) -> list[ArgumentRecord]:
     ]
 
 
-def _dialogue_turn_budget_exceeded(state: Any) -> bool:
-    """絶対ターン数上限（`max_dialogue_turns`）に既に達しているか（未設定なら常に False）.
+def _per_proponent_dialogue_turn_budget(state: Any) -> int | None:
+    """`max_dialogue_turns` を現在の proponent（AG1/AG2）用に按分した予算を返す.
 
-    MAD/Free Debateと同じく、AG1/AG2で予算を折半するような調整はせず、対話フェーズ
-    （main/defeat/counter/undercut blocker）で生成された発話の総数をそのまま
-    max_dialogue_turns と比較する。
-
-    `max_dialogue_turns` は対話フェーズの発話数だけを対象とする。統合（integrate）や
-    最終回答生成はここでは数えない — 統合ステップの回数は手法ごとに構造的に異なり
-    （schemaは持つがMAD/Free Debateは持たない）、これを共通予算に含めると手法間の
-    対話量そのものの比較が歪むため。
+    schema は dialogue tree の探索構造上、片方の main argument を巡る攻防が
+    長引くと、もう片方が今ラウンド一度も発言できないまま予算が尽くことがある
+    （MAD/Free Debate は厳密な交互発言なので共有予算のままでも自然に均等に割れるが、
+    schema は木の深掘り次第で偏るため、明示的に折半する）。奇数の端数は先手（AG1）に
+    寄せる。ラウンドをまたいでも累積する絶対予算であり、ラウンドごとにはリセットしない。
     """
     limit = getattr(state, "max_dialogue_turns", None)
     if limit is None:
+        return None
+    limit = int(limit)
+    half, remainder = divmod(limit, 2)
+    return half + remainder if state.current_proponent == "AG1" else half
+
+
+def _dialogue_turn_budget_exceeded(state: Any) -> bool:
+    """現在の proponent 用の絶対ターン数上限に既に達しているか（未設定なら常に False）.
+
+    `max_dialogue_turns` の対象は対話フェーズの発話数（main/defeat/counter/undercut
+    blocker）だけ。統合（integrate）や最終回答生成はここでは数えない — 統合ステップの
+    回数は手法ごとに構造的に異なり（schemaは持つがMAD/Free Debateは持たない）、これを
+    共通予算に含めると手法間の対話量そのものの比較が歪むため。
+
+    カウント対象は「誰が発言したか」（`ArgumentRecord.agent`）ではなく「どちらの
+    main argument を巡る攻防だったか」（`ArgumentRecord.proponent`）。Opponent が
+    攻撃した発言も、Proponent の主張を守る攻防の一部として Proponent 側の予算を消費する。
+    """
+    limit = _per_proponent_dialogue_turn_budget(state)
+    if limit is None:
         return False
-    return len(_records(state)) >= int(limit)
+    proponent = getattr(state, "current_proponent", "AG1")
+    used = sum(1 for record in _records(state) if record.proponent == proponent)
+    return used >= limit
 
 
 def _message_history(state: Any) -> list[BaseMessage]:
@@ -153,13 +172,17 @@ def thread_finding(state: Any, status: str) -> str | None:
 
 
 def _annotate_main_status(
-    history: list[ArgumentRecord], main_id: str | None, status: str
+    history: list[ArgumentRecord],
+    main_id: str | None,
+    status: str,
+    closed_by_budget: bool = False,
 ) -> list[ArgumentRecord]:
-    """スレッド完了時、対象 main レコードの status を後追いで埋める（不変＝コピーで差し替え）."""
+    """スレッド完了時、対象 main レコードの status/closed_by_budget を後追いで埋める（不変＝コピーで差し替え）."""
     if main_id is None:
         return history
+    update = {"status": status, "closed_by_budget": closed_by_budget}
     return [
-        record.model_copy(update={"status": status}) if record.id == main_id else record
+        record.model_copy(update=update) if record.id == main_id else record
         for record in history
     ]
 
@@ -209,7 +232,7 @@ async def can_generate_main(state: Any) -> dict[str, Any]:
             "main_argument_unavailable_reason": result.reason,
         }
 
-    argument = result.argument
+    argument = result.argument.model_copy(update={"proponent": agent})
     instruction = main_instruction(state)
     history = _append_turn(state, instruction, argument)
     records = [*_records(state), argument]
@@ -281,7 +304,14 @@ async def opponent_move(state: Any) -> dict[str, Any]:
     である。理論本体の defeat 判定ロジックと混在させないよう、ここで「新しい攻撃を
     試みる前」に独立した関門として行う。予算切れの場合は真の手詰まり
     （won_by_p, closed_by_budget=False）とは区別し、closed_by_budget=True で
-    won_by_p として閉じる（このBの相手はもう探索しないという打ち切りの意）。
+    won_by_p として閉じる（この対象への攻撃はもう探索しないという打ち切りの意。
+    5回試して見つからなかった、というこのフレーム限定の情報として justified 側に
+    倒すのは許容する）。
+
+    一方 `max_dialogue_turns`（対話全体の絶対予算）が尽きた場合は全く別に扱う。
+    これは「この論証が守り切れたか」とは無関係な、実験全体のリソース都合の打ち切り
+    なので、won_by_p（→justified）にするのは正当化の水準として強すぎる。
+    `max_tree_depth` 到達と同じ「undetermined」（→defensible）として閉じる。
     """
     frame = _top_frame(state)
     target = _find_argument(state, frame.argument_id)
@@ -295,9 +325,7 @@ async def opponent_move(state: Any) -> dict[str, Any]:
         nodes_ = _replace_node(state.dialogue_nodes, frame.id, outcome="undetermined")
         return {"dialogue_nodes": nodes_, "pending_attacker_argument": None}
     if _dialogue_turn_budget_exceeded(state):
-        nodes_ = _replace_node(
-            state.dialogue_nodes, frame.id, outcome="won_by_p", closed_by_budget=True
-        )
+        nodes_ = _replace_node(state.dialogue_nodes, frame.id, outcome="undetermined")
         return {"dialogue_nodes": nodes_, "pending_attacker_argument": None}
 
     argument = await generate_attack(
@@ -313,6 +341,7 @@ async def opponent_move(state: Any) -> dict[str, Any]:
         nodes_ = _replace_node(state.dialogue_nodes, frame.id, outcome="won_by_p")
         return {"dialogue_nodes": nodes_, "pending_attacker_argument": None}
 
+    argument = argument.model_copy(update={"proponent": state.current_proponent})
     instruction = attack_instruction("defeat", target, state=state)
     history = _append_turn(state, instruction, argument)
     records = [*_records(state), argument]
@@ -340,7 +369,9 @@ async def validate_opponent_move(state: Any) -> dict[str, Any]:
         target,
         state.current_proponent,
         relation_context=f"{attacker.id} defeats {target.id}",
-        blocker_generator=None if _dialogue_turn_budget_exceeded(state) else generate_undercut,
+        blocker_generator=None
+        if _dialogue_turn_budget_exceeded(state)
+        else generate_undercut,
     )
     relations = [*state.defeat_relations, *result.relations]
     if not result.defeats:
@@ -356,8 +387,11 @@ async def validate_opponent_move(state: Any) -> dict[str, Any]:
             "last_attack_defeated": False,
         }
         if result.blocker is not None:
-            records = [*_records(state), result.blocker]
-            update["last_generated_argument"] = result.blocker
+            blocker = result.blocker.model_copy(
+                update={"proponent": state.current_proponent}
+            )
+            records = [*_records(state), blocker]
+            update["last_generated_argument"] = blocker
             update["argument_records"] = records
             update["dialogue_history"] = dialogue_history(records)
         return update
@@ -382,7 +416,11 @@ async def proponent_move(state: Any) -> dict[str, Any]:
     `max_counter_attempts`（同じ B に対して P が試せる反論の回数）も
     Prakken & Sartor の理論には存在しない実装上の拡張である。理論上は
     「B を strictly defeat する C が存在するか」を無限に探索してよいが、
-    LLM が都度生成する以上、有限回で打ち切る安全装置が要る。
+    LLM が都度生成する以上、有限回で打ち切る安全装置が要る。予算切れは
+    「見つからなかった」という弱い意味の lost_by_p（closed_by_budget=True）とする。
+
+    `max_dialogue_turns`（対話全体の絶対予算）が尽きた場合はこのフレーム固有の
+    話ではないので、opponent_move と同様 undetermined（→defensible）として扱う。
     """
     frame = _top_frame(state)
     if frame.current_attacker_id is None:
@@ -396,9 +434,7 @@ async def proponent_move(state: Any) -> dict[str, Any]:
         )
         return {"dialogue_nodes": nodes_, "pending_counter_argument": None}
     if _dialogue_turn_budget_exceeded(state):
-        nodes_ = _replace_node(
-            state.dialogue_nodes, frame.id, outcome="lost_by_p", closed_by_budget=True
-        )
+        nodes_ = _replace_node(state.dialogue_nodes, frame.id, outcome="undetermined")
         return {"dialogue_nodes": nodes_, "pending_counter_argument": None}
 
     argument = await generate_attack(
@@ -409,6 +445,7 @@ async def proponent_move(state: Any) -> dict[str, Any]:
         nodes_ = _replace_node(state.dialogue_nodes, frame.id, outcome="lost_by_p")
         return {"dialogue_nodes": nodes_, "pending_counter_argument": None}
 
+    argument = argument.model_copy(update={"proponent": state.current_proponent})
     instruction = attack_instruction(
         "counter", attacker, state=state, main_argument=main_argument
     )
@@ -445,7 +482,9 @@ async def validate_proponent_move(state: Any) -> dict[str, Any]:
         b_argument,
         state.current_opponent,
         relation_context=f"{c_argument.id} defeats {b_argument.id}",
-        blocker_generator=None if _dialogue_turn_budget_exceeded(state) else generate_undercut,
+        blocker_generator=None
+        if _dialogue_turn_budget_exceeded(state)
+        else generate_undercut,
     )
     relations = [*state.defeat_relations, *result.relations]
     if not result.defeats:
@@ -459,20 +498,34 @@ async def validate_proponent_move(state: Any) -> dict[str, Any]:
             "last_counter_strictly_defeated": False,
         }
 
-    extends = await ask_attack_extends(
+    # B はもともと別の対象（A、またはこのフレームの argument）を狙って宣言された
+    # 攻撃なので、その .attack/target_statement を C にそのまま使い回さない
+    # （Prakken & Sartor の attack/defeat は論証単体の性質ではなく「特定の2論証の組」
+    # に対して定義される関係。B が A に対して undercut だったからといって、C に
+    # 対しても undercut として無条件に勝てるとは限らない）。ask_attack_extends が
+    # B-C 間の攻撃関係を C の中身を見た上で改めて宣言し、それだけを判定に使う。
+    reverse_match = await ask_attack_extends(
         state, state.current_opponent, b_argument, c_argument
     )
-    if extends:
+    if reverse_match is not None:
+        b_for_reverse = b_argument.model_copy(
+            update={
+                "attack": reverse_match.method,
+                "target_field": reverse_match.field,
+                "target_statement": reverse_match.statement,
+            }
+        )
         reverse = await evaluate_attack(
             state,
-            b_argument,
+            b_for_reverse,
             c_argument,
             state.current_proponent,
             relation_context=f"{b_argument.id} defeats {c_argument.id}",
-            blocker_generator=None if _dialogue_turn_budget_exceeded(state) else generate_undercut,
-            # B は元々 A（またはこのフレームの argument）を狙った攻撃として記録
-            # 済み。ここは「B が C にも及ぶか」という副次的な検証にすぎず、判定
-            # 結果として B の本来の attack 宣言を C 向けに上書きしてはならない。
+            blocker_generator=None
+            if _dialogue_turn_budget_exceeded(state)
+            else generate_undercut,
+            # b_for_reverse は B-C 間専用に作った一時コピー。判定結果として B の
+            # 本来（A向け）の attack 宣言を上書きしてはならない。
             persist_metadata=False,
         )
         relations = [*relations, *reverse.relations]
@@ -570,7 +623,9 @@ async def resolve_tree_status(state: Any) -> dict[str, Any]:
     status = state.tree_root_status
     key = "ag1" if state.current_proponent == "AG1" else "ag2"
     main_id = state.current_argument.id if state.current_argument else None
-    records = _annotate_main_status(_records(state), main_id, status)
+    records = _annotate_main_status(
+        _records(state), main_id, status, state.tree_root_closed_by_budget
+    )
     update: dict[str, Any] = {
         "argument_records": records,
         "dialogue_history": dialogue_history(records),
@@ -634,7 +689,7 @@ async def extract_warrants(state: Any) -> dict[str, Any]:
                         ),
                     },
                     "consequent": ag1_last_rule["consequent"],
-                }
+                },
             },
             "Argument2": {
                 "agent": "AG2",
@@ -646,7 +701,7 @@ async def extract_warrants(state: Any) -> dict[str, Any]:
                         ),
                     },
                     "consequent": ag2_last_rule["consequent"],
-                }
+                },
             },
         }
         return {

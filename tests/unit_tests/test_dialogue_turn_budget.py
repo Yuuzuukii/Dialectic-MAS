@@ -18,6 +18,7 @@ from agent.mad import MADState
 from agent.mad import route_after_ag1_turn as mad_route_after_ag1_turn
 from agent.mad import route_after_ag2_turn as mad_route_after_ag2_turn
 from agent.nodes import (
+    _dialogue_turn_budget_exceeded,
     can_generate_main,
     opponent_move,
     proponent_move,
@@ -35,6 +36,7 @@ def _main_record(agent: str = "AG1") -> ArgumentRecord:
         argument='{"Argument": {"rules": [], "Conc": ["c"], "Ass": []}}',
         support=[],
         agent=agent,  # type: ignore[arg-type]
+        proponent=agent,  # type: ignore[arg-type]
     )
 
 
@@ -88,10 +90,12 @@ def _find(nodes: list[DialogueNode], node_id: str) -> DialogueNode:
     return next(node for node in nodes if node.id == node_id)
 
 
-async def test_opponent_move_treats_dialogue_budget_as_won_by_p_with_budget_flag() -> None:
-    """絶対ターン数上限（max_dialogue_turns）に達した場合、O が真に手を出せなく
-    なったのではないので closed_by_budget=True を立てる（justified/overruled の
-    確定は resolve_tree_status 側の責務）。"""
+async def test_opponent_move_treats_dialogue_budget_as_undetermined() -> None:
+    """絶対ターン数上限（max_dialogue_turns）は「この論証が守り切れたか」とは無関係な
+    実験全体のリソース都合の打ち切りなので、justified に倒す won_by_p ではなく、
+    max_tree_depth 到達と同じ undetermined（→ resolve_tree_status で defensible）にする。
+    won_by_p にしてよいのはフレーム固有の max_attack_attempts 到達だけ
+    （test_opponent_move_treats_attack_attempt_budget_as_won_by_p_with_budget_flag）。"""
     main = _main_record("AG1")
     root = DialogueNode(argument_id=main.id)
     state = State(
@@ -109,8 +113,7 @@ async def test_opponent_move_treats_dialogue_budget_as_won_by_p_with_budget_flag
     update = await opponent_move(state)
 
     updated = _find(update["dialogue_nodes"], root.id)
-    assert updated.outcome == "won_by_p"
-    assert updated.closed_by_budget is True
+    assert updated.outcome == "undetermined"
     assert update["pending_attacker_argument"] is None
 
 
@@ -136,13 +139,17 @@ async def test_opponent_move_treats_attack_attempt_budget_as_won_by_p_with_budge
     assert updated.closed_by_budget is True
 
 
-async def test_proponent_move_treats_budget_as_lost_by_p_with_budget_flag() -> None:
+async def test_proponent_move_treats_dialogue_budget_as_undetermined() -> None:
+    """max_dialogue_turns 到達は opponent_move 側と同様 undetermined として扱う
+    （lost_by_p ではない。どちらも resolve_tree_status では defensible に落ちるが、
+    outcome の意味としては「負けた」ではなく「わからない」が正しい）。"""
     main = _main_record("AG1")
     b_argument = ArgumentRecord(
         type="defeat",
         argument='{"Argument": {"rules": [], "Conc": ["not c"], "Ass": []}}',
         support=[],
         agent="AG2",  # type: ignore[arg-type]
+        proponent="AG1",  # type: ignore[arg-type]
         attack="rebut",  # type: ignore[arg-type]
         target_id=main.id,
         target_field="Conc",
@@ -163,8 +170,7 @@ async def test_proponent_move_treats_budget_as_lost_by_p_with_budget_flag() -> N
     update = await proponent_move(state)
 
     updated = _find(update["dialogue_nodes"], root.id)
-    assert updated.outcome == "lost_by_p"
-    assert updated.closed_by_budget is True
+    assert updated.outcome == "undetermined"
     assert update["pending_counter_argument"] is None
 
 
@@ -278,6 +284,7 @@ async def test_validate_opponent_move_disables_blocker_generation_once_budget_ex
         argument='{"Argument": {"rules": [], "Conc": ["not c"], "Ass": []}}',
         support=[],
         agent="AG2",  # type: ignore[arg-type]
+        proponent="AG1",  # type: ignore[arg-type]
         attack="rebut",  # type: ignore[arg-type]
         target_id=main.id,
         target_field="Conc",
@@ -298,3 +305,85 @@ async def test_validate_opponent_move_disables_blocker_generation_once_budget_ex
     await validate_opponent_move(state)
 
     assert captured["blocker_generator"] is None
+
+
+def _defeat_record(agent: str, proponent: str) -> ArgumentRecord:
+    return ArgumentRecord(
+        type="defeat",
+        argument='{"Argument": {"rules": [], "Conc": ["x"], "Ass": []}}',
+        support=[],
+        agent=agent,  # type: ignore[arg-type]
+        proponent=proponent,  # type: ignore[arg-type]
+    )
+
+
+async def test_dialogue_turn_budget_splits_evenly_between_proponents() -> None:
+    """max_dialogue_turns=10 は AG1/AG2 それぞれ5ずつに折半される。
+
+    AG1 側の攻防がどれだけ長引いて自分の割り当て(5)を使い切っても、AG2 側の
+    残り予算には影響しない。ユーザーが指摘した「AG1が長引くとAG2が今ラウンド
+    一度も発言できない」問題への対処（schema のみ。MAD/Free Debate は厳密な
+    交互発言で自然に均等になるため対象外）。
+    """
+    main = _main_record("AG1")
+    ag1_records = [main] + [_defeat_record("AG2", "AG1") for _ in range(3)]
+
+    state_ag1_used_4 = State(
+        question="Q?",
+        agent1_stance="s1",
+        agent2_stance="s2",
+        max_dialogue_turns=10,
+        current_proponent="AG1",
+        argument_records=ag1_records,  # main + 3 = AG1 が4消費
+    )
+    assert _dialogue_turn_budget_exceeded(state_ag1_used_4) is False  # 4 < 5
+
+    state_ag1_used_5 = State(
+        question="Q?",
+        agent1_stance="s1",
+        agent2_stance="s2",
+        max_dialogue_turns=10,
+        current_proponent="AG1",
+        argument_records=[*ag1_records, _defeat_record("AG1", "AG1")],  # 5消費
+    )
+    assert _dialogue_turn_budget_exceeded(state_ag1_used_5) is True  # 5 >= 5
+
+    # AG1 が自分の割り当て(5)を使い切っていても、AG2 はまだ0消費なので自分の
+    # 割り当て分は丸ごと使える。
+    state_ag2_fresh = State(
+        question="Q?",
+        agent1_stance="s1",
+        agent2_stance="s2",
+        max_dialogue_turns=10,
+        current_proponent="AG2",
+        argument_records=[*ag1_records, _defeat_record("AG1", "AG1")],
+    )
+    assert _dialogue_turn_budget_exceeded(state_ag2_fresh) is False
+
+
+async def test_dialogue_turn_budget_odd_remainder_goes_to_ag1() -> None:
+    """max_dialogue_turns=11 は AG1=6 / AG2=5 に割れる（端数は先手のAG1へ）."""
+    main = _main_record("AG1")
+
+    state_ag1_used_5 = State(
+        question="Q?",
+        agent1_stance="s1",
+        agent2_stance="s2",
+        max_dialogue_turns=11,
+        current_proponent="AG1",
+        argument_records=[main, *[_defeat_record("AG2", "AG1") for _ in range(4)]],
+    )
+    assert _dialogue_turn_budget_exceeded(state_ag1_used_5) is False  # 5 < 6
+
+    state_ag2_used_5 = State(
+        question="Q?",
+        agent1_stance="s1",
+        agent2_stance="s2",
+        max_dialogue_turns=11,
+        current_proponent="AG2",
+        argument_records=[
+            main,
+            *[_defeat_record("AG1", "AG2") for _ in range(5)],
+        ],  # main は proponent=AG1 なので AG2 の消費には数えない
+    )
+    assert _dialogue_turn_budget_exceeded(state_ag2_used_5) is True  # 5 >= 5

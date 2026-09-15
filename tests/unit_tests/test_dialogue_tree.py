@@ -15,7 +15,7 @@ from typing import Any
 
 import pytest
 
-from agent.argumentation_model import AttackEvaluation
+from agent.argumentation_model import AttackEvaluation, AttackMatch
 from agent.schema.state import ArgumentRecord
 from agent.workflow import State
 
@@ -30,6 +30,10 @@ def _record(agent: str, conc: str) -> ArgumentRecord:
 
 
 def _fresh_state(main: ArgumentRecord) -> State:
+    # can_generate_main を経由しない直接構築なので、ここで proponent を明示的に
+    # 付ける（_dialogue_turn_budget_exceeded は ArgumentRecord.proponent で
+    # カウントするため）。
+    main = main.model_copy(update={"proponent": "AG1"})
     return State(
         question="Q?",
         agent1_stance="s1",
@@ -72,7 +76,9 @@ async def _run_tree(
         return next(counters_iter, None)
 
     async def fake_ask_attack_extends(*_args, **_kwargs):
-        return True
+        # B-C 間で改めて宣言された攻撃関係（常に「及ぶ」ものとして rebut/Conc を返す。
+        # 実際に defeat するかどうかは stage_aware_evaluate_attack 側の reverse_defeats で制御）。
+        return AttackMatch(method="rebut", field="Conc", statement="c's conclusion")
 
     async def stage_aware_evaluate_attack(_state, attacker, target, _defender, **kwargs):
         # proponent_move 経由の「B defeats C」逆検証だけ persist_metadata=False で
@@ -157,6 +163,26 @@ async def test_no_attack_available_is_justified() -> None:
 
     assert result.tree_root_status == "justified"
     assert result.tree_root_closed_by_budget is False
+
+
+async def test_global_dialogue_turn_budget_is_defensible_not_justified() -> None:
+    """max_dialogue_turns（対話全体の予算）が尽きて opponent_move が打ち切られた場合、
+    won_by_p（→justified）にはせず undetermined（→defensible）にする。
+
+    パイロット実行（logs/pilot_gpt54nano_turns10）で実際に観測された「ちょうど
+    max_dialogue_turns に達した直後に justified になる」という、対象論証が本当に
+    守り切れたかとは無関係な理由で justified 扱いになっていた問題の回帰テスト。
+    """
+    main = _record("AG1", "we should choose a")
+    state = _fresh_state(main)
+    state = replace(state, max_dialogue_turns=1)  # 根(main)だけで既に上限到達
+
+    result = await _run_tree(
+        state, attacks=[], counters=[], defeats=[], reverse_defeats=[]
+    )
+
+    assert result.tree_root_status == "defensible"
+    assert result.tree_root_closed_by_budget is True
 
 
 async def test_reinstatement_after_strict_defeat_is_justified() -> None:
