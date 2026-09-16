@@ -47,6 +47,7 @@ async def test_rebut_defeats_when_target_side_cannot_undercut() -> None:
         return None
 
     attacker = argument("AG2", ["We should not buy a"], attack="rebut")
+    attacker.target_statement = "We should buy a"
     target = argument("AG1", ["We should buy a"])
 
     result = await evaluate_attack(
@@ -72,6 +73,7 @@ async def test_rebut_does_not_defeat_when_target_side_undercuts() -> None:
     attacker = argument(
         "AG2", ["We should not buy a"], ["no evidence of stock"], attack="rebut"
     )
+    attacker.target_statement = "We should buy a"
     target = argument("AG1", ["We should buy a"])
 
     result = await evaluate_attack(
@@ -90,6 +92,7 @@ async def test_rebut_does_not_defeat_when_target_side_undercuts() -> None:
 
 async def test_undercut_defeats_when_valid() -> None:
     attacker = argument("AG2", ["a is not available"], attack="undercut")
+    attacker.target_statement = "a is available"
     target = argument("AG1", ["We should buy a"], ["a is available"])
 
     result = await evaluate_attack(
@@ -108,6 +111,7 @@ async def test_declared_undercut_is_trusted_without_reverifying_assumption() -> 
     # 現実装は LLM が宣言した攻撃メタデータを信用し、対象仮定との矛盾は再検証しない。
     # そのため、結論が対象仮定を否定していなくても undercut 宣言なら defeat が成立する。
     attacker = argument("AG2", ["b is expensive"], attack="undercut")
+    attacker.target_statement = "a is available"
     target = argument("AG1", ["We should buy a"], ["a is available"])
 
     result = await evaluate_attack(
@@ -234,7 +238,7 @@ async def test_declared_rebut_keeps_method_and_defeats() -> None:
     # rebut は undercut に再分類されず、宣言どおり rebut として defeat が成立する。
     attacker = argument("AG2", ["a is not available"], attack="rebut")
     attacker.target_field = "Ass"
-    attacker.target_statement = "a is available"
+    attacker.target_statement = "We should buy a"
     target = argument("AG1", ["We should buy a"], ["a is available"])
 
     result = await evaluate_attack(

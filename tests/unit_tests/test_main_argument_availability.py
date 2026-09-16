@@ -49,7 +49,7 @@ async def test_initial_main_messages_have_system_identity_and_round_instruction(
     assert isinstance(messages[-1], HumanMessage)
     system = str(messages[0].content)
     assert "You are AG1" in system
-    assert "<protocol_flow>" not in system
+    assert "<protocol_flow>" in system
     assert "<task>" not in system
     assert "<schema_overlay>" in system
 

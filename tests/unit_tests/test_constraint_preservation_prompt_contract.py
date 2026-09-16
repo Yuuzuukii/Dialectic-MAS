@@ -36,20 +36,19 @@ def _state() -> SimpleNamespace:
     )
 
 
-def test_main_argument_selects_one_reason_and_saves_the_rest_for_later() -> None:
-    """main argumentは1論点に絞り、残りは後続ラウンドのために温存する（詰め込み防止）.
+def test_main_argument_may_chain_multiple_stance_reasons() -> None:
+    """main argumentは、正当にchainできる範囲でstanceの複数の理由を使ってよい（詰め込み実験）.
 
-    stance全体の網羅は最終回答（_FINAL_ANSWER_PRESERVATION）側の責務であり、
-    main argument側で全部を出し切らせると、後続ラウンドで新しい実質論点が
-    尽きて反復（constructivenessの減点対象）に陥りやすいため分離した。
+    以前は1論点に絞らせていたが、free_debate/madとの比較実験でこの制約が
+    coverageの差の主因ではないと分かったため撤回し、chainとして繋がる限り
+    複数の理由を使わせる（無関係な理由を無理にchainへ押し込むことは禁止する）。
     """
     instruction = main_instruction(_state())
 
     assert "<stance_coverage>" in instruction
     assert "every distinct substantive reason" in instruction
-    assert "Do not front-load all of them into this single argument" in instruction
-    assert "Select the single reason that most directly and decisively" in instruction
-    assert "Leave your stance's other distinct reasons available for later" in instruction
+    assert "Use as many of them as you can genuinely chain" in instruction
+    assert "do not artificially force unrelated reasons into a single chain" in instruction
     assert "number, threshold, exception, or named affected group" in instruction
 
 

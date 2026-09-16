@@ -1,4 +1,4 @@
-"""Argumentation Model: 攻撃の成否判定（rebut/undermine/undercut）と defeat 関係を計算する."""
+"""Argumentation Model: 攻撃の成否判定（rebut/undercut）と defeat 関係を計算する."""
 
 from __future__ import annotations
 
@@ -38,12 +38,33 @@ class AttackMatch:
     statement: str | None
 
 
+def _normalize(text: str) -> str:
+    return text.strip().rstrip(".").strip().lower()
+
+
 def attack_from_metadata(attacker: ArgumentRecord) -> AttackMatch | None:
     """LLM が宣言した攻撃メタデータから AttackMatch を生成する."""
     if attacker.attack is None:
         return None
     field: TargetField = "Conc" if attacker.attack == "rebut" else "Ass"
     return AttackMatch(attacker.attack, field, attacker.target_statement)
+
+
+def target_statement_exists(match: AttackMatch, target: ArgumentRecord) -> bool:
+    """LLM が宣言した target_statement が、対象の実際の Conc/Ass に存在するか検証する.
+
+    Definition 2.8 の attack は論証の実際の内容から客観的に決まる関係であり、
+    攻撃側が自己申告する target_statement をそのまま信用してよい理由にはならない。
+    no_schema（target.body が空）では Conc/Ass が構造化されていないため検証できず、
+    常に True とする。
+    """
+    if not target.body:
+        return True
+    candidates = target.conclusions if match.field == "Conc" else target.assumptions
+    if match.statement is None:
+        return False
+    wanted = _normalize(match.statement)
+    return any(_normalize(c) == wanted for c in candidates)
 
 
 def relation(
@@ -96,6 +117,22 @@ async def evaluate_attack(
         )
 
     _log(f'  attack: {match.method} on {match.field} — "{match.statement}"')
+
+    if not target_statement_exists(match, target):
+        _log("  → declared target_statement not found in target's Conc/Ass: not defeated")
+        return AttackEvaluation(
+            defeats=False,
+            attack=match.method,
+            relations=[
+                relation(
+                    attacker,
+                    target,
+                    match,
+                    False,
+                    f"{relation_context}: declared target_statement not present in target",
+                )
+            ],
+        )
 
     if persist_metadata:
         attacker.target_id = target.id

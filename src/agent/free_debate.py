@@ -79,7 +79,6 @@ _NOVELTY_HINT = (
     " set has_new_point=false."
 )
 
-
 def _round_instruction(state: FreeDebateState, agent: AgentName) -> str:
     if state.round == 1:
         if agent == "AG1":
@@ -187,8 +186,7 @@ def route_after_ag2_turn(state: FreeDebateState) -> str:
     - `max_dialogue_turns`（絶対ターン数上限）に達したら統合ステップへ。
     - ラウンド上限 (max_turns) に達したら統合ステップへ（ハード上限）。
     - 上限未満でも、その1ラウンドで両者とも新しい論点を出せなかった（収束した）場合は
-      早期に統合ステップへ進む。これにより max_turns は schema/no_schema の
-      max_attack_attempts と同じ「上限」の意味になる。
+      早期に統合ステップへ進む。
     """
     if _dialogue_turn_budget_exceeded(state):
         return "integrate"

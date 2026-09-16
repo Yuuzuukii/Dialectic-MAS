@@ -54,9 +54,8 @@ class State:
     agent2_stance: str
     # 議論ラウンド（debate_round）の上限。環境変数 MAX_TURNS で上書きできる。
     max_turns: int = _int_env("MAX_TURNS", 5)
-    # dialogue tree の1フレームで、Opponent が攻撃 (B) を再生成できる回数の上限（安全装置）。
-    # 環境変数 MAX_ATTACK_ATTEMPTS で上書きできる。
-    max_attack_attempts: int = _int_env("MAX_ATTACK_ATTEMPTS", 5)
+    # dialogue tree の1フレームで、Opponent が攻撃 (B) を再生成できる回数に個別の
+    # 上限は設けない。リソース制約は max_dialogue_turns（対話全体の絶対予算）だけで課す。
     # dialogue tree の1フレームで、Proponent が同じ B に対して反論 (C) を
     # 再生成できる回数の上限（安全装置）。Prakken & Sartor の理論には存在しない
     # 実装上の拡張で、「strictly defeat する C が存在するか」を有限回で打ち切る。
@@ -66,7 +65,7 @@ class State:
     # 停止保証がない。深さの安全装置として導入する。
     max_tree_depth: int = _int_env("MAX_TREE_DEPTH", 6)
     # 全手法（schema/no_schema/mad/free_debate）で共通の、対話ターン数そのものの絶対上限。
-    # None（既定）なら無効で、上記の max_turns/max_attack_attempts だけで従来通り動く。
+    # None（既定）なら無効で、上記の max_turns だけで従来通り動く。
     # 設定すると、mainやattackを新たに生成する直前でこの上限を優先チェックし、達していれば
     # 通常の「もう新しい手番がない」経路（no_new_main_argument/defensible）に合流させる。
     # mad/free_debateの`max_turns`（ラウンド数）とは異なり、片方の発言だけでも1ターンと

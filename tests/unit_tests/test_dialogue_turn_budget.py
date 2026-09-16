@@ -93,9 +93,7 @@ def _find(nodes: list[DialogueNode], node_id: str) -> DialogueNode:
 async def test_opponent_move_treats_dialogue_budget_as_undetermined() -> None:
     """絶対ターン数上限（max_dialogue_turns）は「この論証が守り切れたか」とは無関係な
     実験全体のリソース都合の打ち切りなので、justified に倒す won_by_p ではなく、
-    max_tree_depth 到達と同じ undetermined（→ resolve_tree_status で defensible）にする。
-    won_by_p にしてよいのはフレーム固有の max_attack_attempts 到達だけ
-    （test_opponent_move_treats_attack_attempt_budget_as_won_by_p_with_budget_flag）。"""
+    max_tree_depth 到達と同じ undetermined（→ resolve_tree_status で defensible）にする。"""
     main = _main_record("AG1")
     root = DialogueNode(argument_id=main.id)
     state = State(
@@ -117,26 +115,6 @@ async def test_opponent_move_treats_dialogue_budget_as_undetermined() -> None:
     assert update["pending_attacker_argument"] is None
 
 
-async def test_opponent_move_treats_attack_attempt_budget_as_won_by_p_with_budget_flag() -> None:
-    main = _main_record("AG1")
-    root = DialogueNode(argument_id=main.id, attack_attempts=5)
-    state = State(
-        question="Q?",
-        agent1_stance="s1",
-        agent2_stance="s2",
-        max_attack_attempts=5,
-        current_argument=main,
-        current_proponent="AG1",
-        current_opponent="AG2",
-        argument_records=[main],
-        dialogue_nodes=[root],
-        node_stack=[root.id],
-    )
-    update = await opponent_move(state)
-
-    updated = _find(update["dialogue_nodes"], root.id)
-    assert updated.outcome == "won_by_p"
-    assert updated.closed_by_budget is True
 
 
 async def test_proponent_move_treats_dialogue_budget_as_undetermined() -> None:

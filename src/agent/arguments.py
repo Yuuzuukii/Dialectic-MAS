@@ -30,7 +30,6 @@ from .prompts import (
     integration_instruction,
     main_instruction,
     synthesis_system,
-    target_engagement_instruction,
     undercut_instruction,
 )
 from .schema.llm_outputs import (
@@ -45,7 +44,7 @@ from .schema.llm_outputs import (
     UndercutOutput,
     UndercutOutputFree,
 )
-from .schema.state import ArgumentRecord
+from .schema.state import ArgumentRecord, parse_serialized_payload
 from .schema.types import AgentName
 
 
@@ -127,27 +126,6 @@ def build_main_argument_messages(state: Any, agent: AgentName) -> list[BaseMessa
     ]
 
 
-async def _target_engagement_point(
-    state: Any, attacker: AgentName, target: ArgumentRecord, template: str
-) -> str:
-    """本体の Argument を組み立てる前に、狙う弱点を一言で言語化させる（schema条件専用）.
-
-    Attack.target と Argument.rules を1回の生成で同時に埋めさせると、両者が独立に
-    生成されて反論の中身が対象の具体的な内容に触れないまま一般論で済まされることが
-    実測で確認された。ここで軽量な自由記述の一段階を先に挟み、その結果を本体生成の
-    指示（attack_instruction の target_engagement_point）に埋め込むことで、対象への
-    言及を本体の推論の前提条件にする。
-    """
-    messages = [
-        SystemMessage(
-            content=agent_system(_stance(state, attacker), attacker, template)
-        ),
-        HumanMessage(content=target_engagement_instruction(target)),
-    ]
-    text = await chat_text(messages)
-    return text.strip()
-
-
 async def build_attack_messages(
     state: Any, attacker: AgentName, target: ArgumentRecord, *, purpose: str
 ) -> list[BaseMessage]:
@@ -158,11 +136,6 @@ async def build_attack_messages(
         else PromptTemplates.ARGUMENT_SYSTEM
     )
     main_argument = getattr(state, "current_argument", None)
-    engagement_point = (
-        await _target_engagement_point(state, attacker, target, template)
-        if _output_mode(state) != "no_schema"
-        else None
-    )
     return [
         SystemMessage(
             content=agent_system(_stance(state, attacker), attacker, template)
@@ -174,7 +147,6 @@ async def build_attack_messages(
                 target,
                 state=state,
                 main_argument=main_argument,
-                engagement_point=engagement_point,
             )
         ),
     ]
@@ -404,18 +376,14 @@ async def generate_attack(
     target: ArgumentRecord,
     *,
     purpose: str,
-    attempt_count: int = 0,
 ) -> ArgumentRecord | None:
     """攻撃（defeat/counter）主張を LLM 生成し、ArgumentRecord 化する.
 
-    purpose="defeat" のリトライ（opponent_move が同一フレームで別候補 B' を試す
-    2回目以降。`attempt_count` はそのフレームの `DialogueNode.attack_attempts`）では、
-    生成された攻撃自身に has_new_point（このフレーム内の既存の試みと比べて実質的に
-    新しい角度か）を自己申告させる。生成の指示（attack_instruction）は変更せず、
-    通常どおり生成させた上で事後的に判定するだけなので、生成内容そのものを歪めない
-    （過去に試した「別の対象を攻撃しろ」「内容を変えろ」という生成時介入とは異なる）。
-    False なら can_defeat=NO と同様に None を返し、新しい攻撃が尽きたとみなして
-    フレームを終える（mad/free_debate の has_new_point 早期停止と同じ発想）。
+    非反復（同じ target への実質的に同じ内容の繰り返しを避ける）は counter 側
+    （proponent）の attack_instruction の指示文だけで扱う。Prakken & Sartor の
+    dialogue game（Definition 4.5 条件2）では非反復は proponent の手だけに課される
+    制約であり、opponent（defeat 側）には対応する制約がない（同定義の Example 4.4
+    は opponent に非反復を課すと正当化判定が理論より緩くなることを示す）。
     """
     messages = await build_attack_messages(state, attacker, target, purpose=purpose)
     schema = (
@@ -428,8 +396,6 @@ async def generate_attack(
         await _generate_structured_argument(messages, schema),
     )
     if output.can_defeat != "YES" or output.Argument is None or output.Attack is None:
-        return None
-    if purpose == "defeat" and attempt_count > 0 and not output.has_new_point:
         return None
     return ArgumentRecord(
         type="counter" if purpose == "counter" else "defeat",
@@ -527,6 +493,28 @@ async def generate_integration(state: Any) -> IntegrationOutput | IntegrationOut
     )
 
 
+def _dialogue_history_json(state: Any) -> str:
+    """最終回答向けに dialogue_history を JSON テキスト化する.
+
+    各レコードの "argument" は schema 条件では既に JSON 文字列として格納されている
+    （ArgumentRecord.argument）。これをそのまま外側の dict と一緒に json.dumps すると、
+    内側の JSON 文字列がエスケープされた1行の文字列になり（二重エンコード）、
+    読み手のモデルにとって rules/Conc/Ass の構造がひどく読みにくくなる。ここで
+    "argument" を一旦パースしてからネストした JSON オブジェクトとして埋め込み直す
+    （パースできない場合は no_schema の自由記述とみなしそのまま文字列で残す）。
+    """
+    history = []
+    for record in state.dialogue_history:
+        record = dict(record)
+        argument = record.get("argument")
+        if isinstance(argument, str):
+            parsed = parse_serialized_payload(argument)
+            if parsed:
+                record["argument"] = parsed
+        history.append(record)
+    return json.dumps(history, ensure_ascii=False, indent=2)
+
+
 async def generate_final_answer(state: Any) -> str:
     """対話履歴を踏まえて自然文回答を生成する.
 
@@ -536,7 +524,8 @@ async def generate_final_answer(state: Any) -> str:
     客観的に書く（generalize/integrate と同じ「AG1=synthesis operator」の役割分担）。
     """
     justified = state.justified_argument
-    dialogue_history = json.dumps(state.dialogue_history, ensure_ascii=False, indent=2)
+    dialogue_history = _dialogue_history_json(state)
+    is_schema = _output_mode(state) != "no_schema"
     if state.integrated_rules:
         rules_text = "\n".join(f"- {rule}" for rule in state.integrated_rules)
         integrated_rules_block = (
@@ -547,7 +536,11 @@ async def generate_final_answer(state: Any) -> str:
         integrated_rules_block = ""
 
     if state.consensus_reached is False:
-        system = PromptTemplates.FINAL_ANSWER_NO_CONSENSUS_SYSTEM
+        system = (
+            PromptTemplates.FINAL_ANSWER_NO_CONSENSUS_SYSTEM
+            if is_schema
+            else PromptTemplates.FINAL_ANSWER_NO_CONSENSUS_SYSTEM_NO_SCHEMA
+        )
         user = PromptTemplates.FINAL_ANSWER_NO_CONSENSUS_USER.format(
             question=state.question,
             agent1_stance=state.agent1_stance,
@@ -557,7 +550,11 @@ async def generate_final_answer(state: Any) -> str:
             justified_argument=justified,
         ).strip()
     else:
-        system = PromptTemplates.FINAL_ANSWER_SYSTEM
+        system = (
+            PromptTemplates.FINAL_ANSWER_SYSTEM
+            if is_schema
+            else PromptTemplates.FINAL_ANSWER_SYSTEM_NO_SCHEMA
+        )
         user = PromptTemplates.FINAL_ANSWER_USER.format(
             question=state.question,
             agent1_stance=state.agent1_stance,

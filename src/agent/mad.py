@@ -178,8 +178,7 @@ def route_after_ag2_turn(state: MADState) -> str:
     - `max_dialogue_turns`（絶対ターン数上限）に達したら judge/integrate へ。
     - ラウンド上限 (max_turns) に達したら judge/integrate へ（ハード上限）。
     - 上限未満でも、その1ラウンドで両者とも新しい反論を出せなかった（収束した）場合は
-      早期に judge/integrate へ進む。これにより max_turns は schema/no_schema の
-      max_attack_attempts と同じ「上限」の意味になる。
+      早期に judge/integrate へ進む。
     """
     if _dialogue_turn_budget_exceeded(state):
         return _after_debate(state)

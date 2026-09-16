@@ -299,28 +299,15 @@ async def init_dialogue_tree(state: Any) -> dict[str, Any]:
 async def opponent_move(state: Any) -> dict[str, Any]:
     """現フレームで防御中の argument に対し、Opponent が新しい攻撃 (B) を試みる.
 
-    `max_attack_attempts`（このフレームでOpponentが試せる攻撃の回数）は Prakken &
-    Sartor の理論には存在しない実装上の拡張（リソース制約によるリトライ打ち切り）
-    である。理論本体の defeat 判定ロジックと混在させないよう、ここで「新しい攻撃を
-    試みる前」に独立した関門として行う。予算切れの場合は真の手詰まり
-    （won_by_p, closed_by_budget=False）とは区別し、closed_by_budget=True で
-    won_by_p として閉じる（この対象への攻撃はもう探索しないという打ち切りの意。
-    5回試して見つからなかった、というこのフレーム限定の情報として justified 側に
-    倒すのは許容する）。
-
-    一方 `max_dialogue_turns`（対話全体の絶対予算）が尽きた場合は全く別に扱う。
-    これは「この論証が守り切れたか」とは無関係な、実験全体のリソース都合の打ち切り
-    なので、won_by_p（→justified）にするのは正当化の水準として強すぎる。
-    `max_tree_depth` 到達と同じ「undetermined」（→defensible）として閉じる。
+    このフレームで O が試せる攻撃の回数に個別の上限は設けない。リソース制約は
+    `max_dialogue_turns`（対話全体の絶対予算）だけで課す。これが尽きた場合は
+    「この論証が守り切れたか」とは無関係な、実験全体のリソース都合の打ち切りなので、
+    won_by_p（→justified）にするのは正当化の水準として強すぎる。`max_tree_depth`
+    到達と同じ「undetermined」（→defensible）として閉じる。
     """
     frame = _top_frame(state)
     target = _find_argument(state, frame.argument_id)
 
-    if frame.attack_attempts >= state.max_attack_attempts:
-        nodes_ = _replace_node(
-            state.dialogue_nodes, frame.id, outcome="won_by_p", closed_by_budget=True
-        )
-        return {"dialogue_nodes": nodes_, "pending_attacker_argument": None}
     if frame.depth >= state.max_tree_depth:
         nodes_ = _replace_node(state.dialogue_nodes, frame.id, outcome="undetermined")
         return {"dialogue_nodes": nodes_, "pending_attacker_argument": None}
@@ -333,7 +320,6 @@ async def opponent_move(state: Any) -> dict[str, Any]:
         state.current_opponent,
         target,
         purpose="defeat",
-        attempt_count=frame.attack_attempts,
     )
     if argument is None:
         # Opponent がこの argument への新しい攻撃を1つも思いつけなかった

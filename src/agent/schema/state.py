@@ -81,8 +81,8 @@ class ArgumentRecord(BaseModel):
         default=None,
         description=(
             "main argument の status が確定した理由が、真の手詰まり（相手が本当に "
-            "反論/防御を尽くした）ではなく、探索予算（max_attack_attempts / "
-            "max_counter_attempts / max_tree_depth / max_dialogue_turns）の枯渇による "
+            "反論/防御を尽くした）ではなく、探索予算（max_counter_attempts / "
+            "max_tree_depth / max_dialogue_turns）の枯渇による "
             "打ち切りだったかどうか。status が None の場合は無意味（None のまま）。"
         ),
     )
@@ -231,7 +231,7 @@ class DialogueNode(BaseModel):
     outcome: Literal["open", "won_by_p", "lost_by_p", "undetermined"] = Field(
         default="open"
     )
-    # True: 予算切れ（max_attack_attempts/max_counter_attempts/max_tree_depth）による確定。
+    # True: 予算切れ（max_counter_attempts/max_tree_depth）による確定。
     # False: 相手が本当に手を出せなくなった/出せた、という理論的な確定。
     closed_by_budget: bool = Field(default=False)
 

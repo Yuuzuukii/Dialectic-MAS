@@ -39,15 +39,6 @@ class DefeatingArgumentOutput(BaseModel):
         default=None,
         description="Attack made by this argument against a specified item in the target argument, omitted when NO.",
     )
-    has_new_point: bool = Field(
-        default=True,
-        description=(
-            "True if this attack introduces a genuinely new angle or reasoning not already "
-            "tried in an earlier attack against this same target in this thread. False if "
-            "this attack is substantially the same claim or reasoning as an earlier attempt, "
-            "just reworded."
-        ),
-    )
 
 
 # LLM出力：defeat判定（rebutに対するundercut）（undercut可否 + Argumentのメイン出力）
@@ -130,15 +121,6 @@ class DefeatingArgumentOutputFree(BaseModel):
     Attack: AttackMetadata | None = Field(
         default=None,
         description="Attack made by this argument against a specified part of the target argument, omitted when NO.",
-    )
-    has_new_point: bool = Field(
-        default=True,
-        description=(
-            "True if this attack introduces a genuinely new angle or reasoning not already "
-            "tried in an earlier attack against this same target in this thread. False if "
-            "this attack is substantially the same claim or reasoning as an earlier attempt, "
-            "just reworded."
-        ),
     )
 
 
