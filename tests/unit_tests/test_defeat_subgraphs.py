@@ -7,10 +7,11 @@ import pytest
 
 from agent import arguments
 from agent.argumentation_model import evaluate_attack
-from agent.arguments import argument_body_json
+from agent.arguments import argument_body_json, validate_argument_body
 from agent.schema.llm_outputs import (
     Antecedent,
     ArgumentBody,
+    AttackExtendsOutput,
     AttackMetadata,
     DefeatingArgumentOutput,
     IntegrationBody,
@@ -46,6 +47,7 @@ async def test_rebut_defeats_when_target_side_cannot_undercut() -> None:
         return None
 
     attacker = argument("AG2", ["We should not buy a"], attack="rebut")
+    attacker.target_statement = "We should buy a"
     target = argument("AG1", ["We should buy a"])
 
     result = await evaluate_attack(
@@ -71,6 +73,7 @@ async def test_rebut_does_not_defeat_when_target_side_undercuts() -> None:
     attacker = argument(
         "AG2", ["We should not buy a"], ["no evidence of stock"], attack="rebut"
     )
+    attacker.target_statement = "We should buy a"
     target = argument("AG1", ["We should buy a"])
 
     result = await evaluate_attack(
@@ -89,6 +92,7 @@ async def test_rebut_does_not_defeat_when_target_side_undercuts() -> None:
 
 async def test_undercut_defeats_when_valid() -> None:
     attacker = argument("AG2", ["a is not available"], attack="undercut")
+    attacker.target_statement = "a is available"
     target = argument("AG1", ["We should buy a"], ["a is available"])
 
     result = await evaluate_attack(
@@ -107,6 +111,7 @@ async def test_declared_undercut_is_trusted_without_reverifying_assumption() -> 
     # 現実装は LLM が宣言した攻撃メタデータを信用し、対象仮定との矛盾は再検証しない。
     # そのため、結論が対象仮定を否定していなくても undercut 宣言なら defeat が成立する。
     attacker = argument("AG2", ["b is expensive"], attack="undercut")
+    attacker.target_statement = "a is available"
     target = argument("AG1", ["We should buy a"], ["a is available"])
 
     result = await evaluate_attack(
@@ -233,7 +238,7 @@ async def test_declared_rebut_keeps_method_and_defeats() -> None:
     # rebut は undercut に再分類されず、宣言どおり rebut として defeat が成立する。
     attacker = argument("AG2", ["a is not available"], attack="rebut")
     attacker.target_field = "Ass"
-    attacker.target_statement = "a is available"
+    attacker.target_statement = "We should buy a"
     target = argument("AG1", ["We should buy a"], ["a is available"])
 
     result = await evaluate_attack(
@@ -246,6 +251,52 @@ async def test_declared_rebut_keeps_method_and_defeats() -> None:
 
     assert result.defeats is True
     assert result.attack == "rebut"
+
+
+async def test_validate_argument_body_rejects_meta_conclusion_verdicts() -> None:
+    """consequent が「defeatの成否」を述べているだけの勝敗宣言は違反として検出される."""
+    body = ArgumentBody(
+        rules=[
+            Rule(
+                antecedent=Antecedent(strong=["the opponent raised a privacy concern"]),
+                consequent="The privacy-based attack fails to defeat the claim that AI is good.",
+            )
+        ]
+    )
+
+    violations = validate_argument_body(body)
+
+    assert any("verdict about the dialectical game" in v for v in violations)
+
+
+async def test_validate_argument_body_accepts_substantive_conclusion() -> None:
+    body = ArgumentBody(
+        rules=[
+            Rule(
+                antecedent=Antecedent(strong=["accessibility tools reduce communication barriers"]),
+                consequent="AI improves quality of life for people with disabilities.",
+            )
+        ]
+    )
+
+    violations = validate_argument_body(body)
+
+    assert violations == []
+
+
+async def test_attack_instruction_task_does_not_frame_goal_as_defeating_the_target() -> None:
+    from agent.prompts import attack_instruction
+
+    target = argument("AG1", ["We should buy a"])
+
+    defeat_text = attack_instruction("defeat", target)
+    counter_text = attack_instruction("counter", target)
+
+    for text in (defeat_text, counter_text):
+        task_block = text.split("</task>")[0]
+        assert "construct a defeating argument" not in task_block.lower()
+        assert "defeats the target attack" not in task_block.lower()
+        assert "<content_requirement>" in text
 
 
 async def test_serialized_argument_payload_derives_conc_and_ass_from_rules() -> None:
@@ -267,3 +318,59 @@ async def test_serialized_argument_payload_derives_conc_and_ass_from_rules() -> 
 
     assert payload["Argument"]["Conc"] == ["we should buy a"]
     assert payload["Argument"]["Ass"] == ["not unavailable(a)"]
+
+
+async def test_ask_attack_extends_returns_none_when_no(monkeypatch) -> None:
+    """attack_extends=NO なら、B-C 間の攻撃関係は無し（None）として扱う."""
+
+    async def no_extend(*args, **kwargs):
+        return AttackExtendsOutput(attack_extends="NO")
+
+    monkeypatch.setattr(arguments, "chat_structured", no_extend)
+    b_argument = argument("AG2", ["b's old conclusion"], attack="undercut")
+    c_argument = argument("AG1", ["c's conclusion"])
+    state = SimpleNamespace(
+        current_proponent="AG2", history=[], agent1_stance="", agent2_stance="", question="Q?"
+    )
+
+    result = await arguments.ask_attack_extends(state, "AG2", b_argument, c_argument)
+
+    assert result is None
+
+
+async def test_ask_attack_extends_does_not_reuse_bs_original_attack_metadata(
+    monkeypatch,
+) -> None:
+    """B が元々 undercut で A を攻撃していても、C に対する攻撃関係は C の中身を見て
+    改めて判定され、B の古い .attack/target_statement をそのまま使い回さない
+    （Prakken & Sartor の attack/defeat は論証単体ではなく2論証の組に対する関係）。
+    """
+
+    async def extends_as_rebut(*args, **kwargs):
+        return AttackExtendsOutput(
+            attack_extends="YES",
+            Attack=AttackMetadata(
+                method="rebut",
+                target=TargetReference(field="Conc", statement="c's actual conclusion"),
+            ),
+        )
+
+    monkeypatch.setattr(arguments, "chat_structured", extends_as_rebut)
+    b_argument = argument("AG2", ["b's old conclusion"], attack="undercut")
+    b_argument.target_statement = "a's old assumption"
+    c_argument = argument("AG1", ["c's actual conclusion"])
+    state = SimpleNamespace(
+        current_proponent="AG2", history=[], agent1_stance="", agent2_stance="", question="Q?"
+    )
+
+    result = await arguments.ask_attack_extends(state, "AG2", b_argument, c_argument)
+
+    assert result is not None
+    # B は元々 undercut だったが、C に対しては改めて rebut と判定されている
+    # （古い method/statement をそのまま引き継いでいない）。
+    assert result.method == "rebut"
+    assert result.field == "Conc"
+    assert result.statement == "c's actual conclusion"
+    # B 自身の元の（A向けの）宣言は変更されない。
+    assert b_argument.attack == "undercut"
+    assert b_argument.target_statement == "a's old assumption"

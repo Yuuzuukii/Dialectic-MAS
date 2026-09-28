@@ -219,6 +219,54 @@ Respond ONLY with a JSON object:
 """.strip()
 
 
+COVERAGE_RANKING_INSTRUCTION = """
+You are an evaluator LLM. Below are {n} independent final answers to the SAME question,
+written for the SAME two stances, produced by different (unlabeled) methods. Each is
+labeled with a letter (A, B, C, ...). You are NOT shown the debate that produced them.
+
+Rank the {n} final answers from BEST to WORST at COVERING the distinct substantive
+points raised in each side's stance.
+
+<criteria>
+First, silently enumerate every distinct substantive reason, requirement, condition,
+affected group, and tradeoff stated in AG1 Stance and AG2 Stance. Then, for each final
+answer, judge how many of those distinct points it engages with by name or clear
+paraphrase — addressing a point does not require agreeing with it, only naming it and
+saying something substantive about it (satisfies it, qualifies it, rebuts it, or
+explains why it is overridden).
+
+Judge breadth of coverage only, not the correctness of the final conclusion, its
+length, or its rhetorical quality:
+  - An answer that touches more of the distinct points from both stances ranks above
+    one that omits some, even if the shorter answer is otherwise well argued.
+  - Do not reward restating the same point in different words as if it were two
+    points, and do not reward padding with material absent from either stance.
+  - A generic answer that could be given to almost any question in this topic area
+    without naming the stances' specific points ranks at the bottom regardless of
+    length.
+</criteria>
+
+IMPORTANT: Produce a strict total ranking with no ties.
+
+Question:
+{question}
+
+AG1 Stance:
+{agent1_stance}
+
+AG2 Stance:
+{agent2_stance}
+
+{answers_block}
+
+Respond ONLY with a JSON object:
+{{
+  "ranking": ["<letter of broadest coverage>", "...", "<letter of narrowest coverage>"],
+  "evaluator_model": "<model name>"
+}}
+""".strip()
+
+
 def _format_answers_block(labeled_answers: list[tuple[str, str]]) -> str:
     blocks = []
     for label, answer in labeled_answers:
@@ -288,9 +336,69 @@ def rank_final_answers_by_constraint_preservation(
     }
 
 
+def rank_final_answers_by_coverage(
+    logs_by_key: dict[str, dict[str, Any]],
+    evaluator_model: Any,
+    *,
+    rng: random.Random | None = None,
+) -> dict[str, Any]:
+    """同一トピックの複数候補の最終回答を、stance網羅性（coverage）の観点からランキングする.
+
+    evaluation_coverage.py の独立二値判定（項目ごとに触れているか）とは異なり、
+    こちらは同一トピックの複数候補を1回のプロンプトで並べて相対比較させる
+    （constraint_preservationのランキングと同じ設計）。debate_transcriptは見せず
+    final_answerだけを比較する。
+    """
+    rng = rng or random.Random()
+    keys = list(logs_by_key.keys())
+    rng.shuffle(keys)  # 提示順を毎回ランダム化し、位置バイアスを避ける
+    letters = [chr(ord("A") + i) for i in range(len(keys))]
+    label_to_key = dict(zip(letters, keys))
+
+    eval_inputs = {k: build_eval_input(logs_by_key[k]) for k in keys}
+    first = eval_inputs[keys[0]]
+
+    labeled_answers = [
+        (label, eval_inputs[label_to_key[label]]["final_answer"]) for label in letters
+    ]
+
+    prompt = COVERAGE_RANKING_INSTRUCTION.format(
+        n=len(keys),
+        question=first["question"],
+        agent1_stance=first["agent1_stance"],
+        agent2_stance=first["agent2_stance"],
+        answers_block=_format_answers_block(labeled_answers),
+    )
+
+    try:
+        raw = evaluator_model.invoke(prompt)
+        result = _parse_json_response(raw, evaluator_model)
+        ranking = result.get("ranking")
+        if not isinstance(ranking, list):
+            ranking = []
+    except Exception as e:  # noqa: BLE001
+        print(f"Coverage ranking evaluation failed: {e}")  # noqa: T201
+        ranking = []
+
+    key_rank: dict[str, int | None] = {k: None for k in keys}
+    for position, label in enumerate(ranking, start=1):
+        key = label_to_key.get(label)
+        if key is not None and key_rank.get(key) is None:
+            key_rank[key] = position
+
+    return {
+        "key_rank": key_rank,
+        "label_to_key": label_to_key,
+        "raw_ranking": ranking,
+        "evaluator_model": evaluator_model.model,
+    }
+
+
 __all__ = [
     "RANKING_INSTRUCTION",
     "CONSTRAINT_PRESERVATION_RANKING_INSTRUCTION",
+    "COVERAGE_RANKING_INSTRUCTION",
     "rank_debates",
     "rank_final_answers_by_constraint_preservation",
+    "rank_final_answers_by_coverage",
 ]

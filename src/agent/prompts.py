@@ -48,12 +48,12 @@ Represent Argument as a structured object consisting of rules, Conc, and Ass.
 - rules is a finite sequence of rules r_1, ..., r_n.
 - Each rule has an antecedent and a consequent.
 - Antecedents may contain strong premises and weak_negation assumptions.
+- A weak_negation entry must be phrasable as "X is not the case" — a defeasible assumption held only because nothing on record contradicts it (e.g. "no evidence that Y fails here", "Z does not occur in this case"). It must be a specific claim that could in principle be proven false by evidence that X actually holds. Do not put scope stipulations, definitions, or framing choices ("we are evaluating only Y") in weak_negation — those are not defeasible assumptions and cannot be coherently undercut; state them as strong premises or fold them into the reasoning directly instead.
 - Every rule must have at least one explicit strong or weak_negation antecedent; never derive a consequent from an empty antecedent.
 - Conc contains the conclusions derived by the rules.
 - Ass contains the weak_negation assumptions used by the rules.
 - Use as many rules as your reasoning genuinely needs and no more: add a rule whenever it introduces a materially new fact, point, or inferential step that strengthens your case; do not add a rule that merely restates an earlier one.
 - Each rule's consequent must state a materially new claim — a new fact, a new point, or a new inferential step — not a paraphrase or near-synonym of an earlier rule's consequent (e.g. "the attack is insufficient" -> "the attack fails to show invalidity" -> "the attack does not defeat the conclusion" is the same claim restated three times, not three rules). If a later rule's consequent would just restate an earlier one in different words, merge them into a single rule instead.
-- Never reuse an earlier turn of yours verbatim (the same strong/weak_negation/consequent wording), even when starting a new main argument after an earlier thread failed to resolve in your favor; each new turn must add or revise reasoning that directly answers the specific objection most recently raised against you.
 - When attacking (defeat/counter), the FIRST rule's antecedent must already contain a strong premise that directly engages the specific content of the argument you are attacking — name a specific weakness in its stated reasoning, an assumption it depends on, or a gap between its premises and its consequent.
 - Do not satisfy the previous rule by appending a short final rule that merely quotes or paraphrases the target ("The target says X, but Y") while your earlier rules argue a generic, self-contained point from your own stance that never references the target. The engagement with the target's specific content must be load-bearing for your conclusion from the first rule onward, not a bolted-on afterthought.
 </schema_overlay>"""
@@ -86,20 +86,49 @@ _HISTORY_FORMAT = """\
 <history_format>
 Prior turns of this debate are provided as preceding messages. Each message's content is a JSON object:
   {"id", "round", "phase", "agent", ["status"], ["attack","target_id","target_statement"], "Argument": {"rules","Conc","Ass"}}
-- "phase" is one of main / defeat / counter; "status" (on a main, when known) is its thread outcome above.
+- "phase" is one of main / defeat / counter. "status" (justified/overruled/defensible) appears only on a
+  main turn, once its thread has closed; a defeat/counter turn carries no outcome field of its own.
 - "attack"/"target_id"/"target_statement" (on defeat/counter) show exactly what was attacked.
 - A message whose "agent"/name equals YOUR identity is your own past turn; the other agent's are your opponent's.
-Use this history to avoid repeating defeated moves and to stay consistent with the current round and integrated rules.
+Use this history to stay consistent with the current round and integrated rules.
+</history_format>"""
+
+# 最終回答（generate_final_answer）専用の history_format。ARGUMENT_SYSTEM 用の
+# _HISTORY_FORMAT は読者が AG1/AG2 本人であることを前提にした一人称の文言
+# （"YOUR identity" 等）だが、最終回答は AG1/AG2 どちらの stance も代弁しない
+# 中立な統合役として書くため、三人称の文言に言い換える。
+_FINAL_ANSWER_HISTORY_FORMAT = """\
+<history_format>
+The dialogue history below is a JSON array of turns. Each turn is an object:
+  {"id", "round", "phase", "agent", ["status"], ["attack","target_id","target_statement"], "Argument": {"rules","Conc","Ass"}}
+- "agent" is which side (AG1 or AG2) produced that turn.
+- "phase" is one of main / defeat / counter. "status" (justified/overruled/defensible) appears only on a
+  main turn, once its thread has closed; a defeat/counter turn carries no outcome field of its own.
+- "attack"/"target_id"/"target_statement" (on defeat/counter) show exactly what was attacked.
+- Each "Argument" is a chain of rules: each rule's "consequent" follows from its antecedent's "strong" (and,
+  if present, "weak_negation") premises, and one rule's consequent may feed the next rule's premises. "Conc"
+  lists the chain's conclusions; "Ass" lists its weak_negation assumptions.
+</history_format>"""
+
+_FINAL_ANSWER_HISTORY_FORMAT_FREE = """\
+<history_format>
+The dialogue history below is a JSON array of turns. Each turn is an object:
+  {"id", "round", "phase", "agent", ["status"], ["attack","target_id","target_statement"], "Argument": "<free-text argument>"}
+- "agent" is which side (AG1 or AG2) produced that turn.
+- "phase" is one of main / defeat / counter. "status" (justified/overruled/defensible) appears only on a
+  main turn, once its thread has closed; a defeat/counter turn carries no outcome field of its own.
+- "attack"/"target_id"/"target_statement" (on defeat/counter) show exactly what was attacked.
 </history_format>"""
 
 _HISTORY_FORMAT_FREE = """\
 <history_format>
 Prior turns of this debate are provided as preceding messages. Each message's content is a JSON object:
   {"id", "round", "phase", "agent", ["status"], ["attack","target_id","target_statement"], "Argument": "<free-text argument>"}
-- "phase" is one of main / defeat / counter; "status" (on a main, when known) is its thread outcome above.
+- "phase" is one of main / defeat / counter. "status" (justified/overruled/defensible) appears only on a
+  main turn, once its thread has closed; a defeat/counter turn carries no outcome field of its own.
 - "attack"/"target_id"/"target_statement" (on defeat/counter) show exactly what was attacked.
 - A message whose "agent"/name equals YOUR identity is your own past turn; the other agent's are your opponent's.
-Use this history to avoid repeating defeated moves and to stay consistent with the current round and integrated rules.
+Use this history to stay consistent with the current round and integrated rules.
 </history_format>"""
 
 
@@ -114,11 +143,16 @@ class PromptTemplates:
     # ---- System: shared argument-construction framework ----
     ARGUMENT_SYSTEM_NO_SCHEMA = _system(
         _GROUNDING,
+        _PROTOCOL_FLOW,
         _ARGUMENTATION_RULES,
+        _HISTORY_FORMAT_FREE,
     )
 
     ARGUMENT_SYSTEM = _system(
-        ARGUMENT_SYSTEM_NO_SCHEMA,
+        _GROUNDING,
+        _PROTOCOL_FLOW,
+        _ARGUMENTATION_RULES,
+        _ATTACK_TYPES,
         _SCHEMA_OVERLAY,
         _HISTORY_FORMAT,
     )
@@ -147,10 +181,15 @@ class PromptTemplates:
         "</role>",
         "<stance>\n{stance}\n</stance>",
         "<integration_principles>\n"
-        "- Abstract each side's warrant away from issue-specific entities, then unify them into "
-        "one rule usable by either side in the next round; do not merely list the warrants.\n"
+        "- Priority: preserving every distinct substantive requirement from both source stances "
+        "outranks abstraction. Abstract the STRUCTURE of each side's warrant (the general "
+        "condition-to-conclusion pattern, so the rule is usable by either side in the next round; "
+        "do not merely list the warrants) — but never abstract away a specific named entity, legal "
+        "or factual characterization, threshold, or affected group that is the substance of a "
+        "requirement itself (e.g. keep 'protects an individual right', not just 'affects a right').\n"
         "- Use the source stances as a coverage check: the rule must not silently drop a distinct "
-        "substantive requirement from either side, even one a compressed warrant did not repeat.\n"
+        "substantive requirement from either side, even one a compressed warrant did not repeat, "
+        "and even if keeping it means the rule is less general than it could otherwise be.\n"
         "- When the sides support different outcomes, express one decision rule that says which "
         "outcome follows under each condition; do not combine opposing conditions under one OR "
         "and leave their outcomes ambiguous.\n"
@@ -207,11 +246,23 @@ class PromptTemplates:
 
     # justified側: AG1が常に客観的な統合役として最終回答を書く（justifiedされたのが
     # AG1/AG2どちらのstanceでも、勝った側の代弁者ではなく中立な報告者として書く）。
+    # schema/no_schema で dialogue_history 内の Argument の形式が違うため、
+    # 対応する history_format（三人称版）を分けて埋め込む。
     FINAL_ANSWER_SYSTEM = _system(
         "<task>\n"
         "Based on the debate so far and the argument that was justified, write the final "
         "answer to the original question.\n"
         "</task>",
+        _FINAL_ANSWER_HISTORY_FORMAT,
+        _FINAL_ANSWER_PRESERVATION,
+    )
+
+    FINAL_ANSWER_SYSTEM_NO_SCHEMA = _system(
+        "<task>\n"
+        "Based on the debate so far and the argument that was justified, write the final "
+        "answer to the original question.\n"
+        "</task>",
+        _FINAL_ANSWER_HISTORY_FORMAT_FREE,
         _FINAL_ANSWER_PRESERVATION,
     )
 
@@ -244,6 +295,33 @@ class PromptTemplates:
         "was reached. Write the answer as a direct, self-contained response to the "
         "question.\n"
         "</style>",
+        _FINAL_ANSWER_HISTORY_FORMAT,
+        _FINAL_ANSWER_PRESERVATION,
+    )
+
+    FINAL_ANSWER_NO_CONSENSUS_SYSTEM_NO_SCHEMA = _system(
+        "<task>\n"
+        "Based on the debate so far, write the final answer to the original question. "
+        "Weigh the strengths of both sides' reasoning and commit to the best-supported "
+        "answer, stating it directly with its supporting rationale. If integrated rules "
+        "are provided below, ground your answer in them.\n"
+        "</task>",
+        "<calibration>\n"
+        "Match your confidence to how decisively the debate actually resolved the question. "
+        "If the strongest objections against your answer were substantively answered, state "
+        "your conclusion with full confidence. If a serious objection was never adequately "
+        "answered, say so as part of the answer itself — name the specific unresolved point "
+        "and explain why you still lean one way despite it — rather than presenting the "
+        "conclusion as more settled than the reasoning actually supports. Do not manufacture "
+        "false certainty just to sound decisive.\n"
+        "</calibration>",
+        "<style>\n"
+        "The debate above is internal reasoning; the reader sees only your answer. "
+        "Do not mention the debate process, the agents, rounds, or whether agreement "
+        "was reached. Write the answer as a direct, self-contained response to the "
+        "question.\n"
+        "</style>",
+        _FINAL_ANSWER_HISTORY_FORMAT_FREE,
         _FINAL_ANSWER_PRESERVATION,
     )
 
@@ -367,15 +445,11 @@ def main_instruction(state: Any) -> str:
         "<stance_coverage>",
         "Before constructing the argument, silently identify every distinct substantive reason, "
         "requirement, condition, affected group, and tradeoff stated in your stance.",
-        "Do not front-load all of them into this single argument. Select the single reason that "
-        "most directly and decisively answers the Issue, and develop only that one with real "
-        "support (do not pad it out with your other reasons as filler).",
-        "Leave your stance's other distinct reasons available for later in the debate: if this "
-        "argument is defeated or the debate continues, a later argument can introduce one of them "
-        "as genuinely new content, rather than this turn restating everything at once and leaving "
-        "nothing new to say afterward.",
+        "Use as many of them as you can genuinely chain into one coherent line of reasoning "
+        "toward your direct answer — do not artificially force unrelated reasons into a single "
+        "chain just to mention them; only include a reason where it does real work in the chain.",
         "Keep any material number, threshold, exception, or named affected group from the stance "
-        "intact when it is part of the reason you do use.",
+        "intact when it is part of a reason you use.",
         "</stance_coverage>",
         "",
         "<no_repetition>",
@@ -442,30 +516,20 @@ def _target_block(target: Any) -> str:
     )
 
 
-def target_engagement_instruction(target: Any) -> str:
-    """攻撃の本体を作る前に、狙う弱点を先に一言で言語化させる指示文（schema条件専用）.
-
-    ArgumentBody を直接組み立てさせると、対象への言及（Attack.target）と実際の反論内容
-    （Argument.rules の strong premise）が別々に独立して生成され、後者が対象の中身に
-    触れないまま一般論で済まされることがある（実測で確認済み）。本体生成の前にこの
-    軽量な一段階を挟み、狙う弱点を先に言語化させてから本体生成の指示に埋め込むことで、
-    対象への言及を本体の推論に対する前提条件にする。
-    """
-    return "\n".join(
-        [
-            "<task>",
-            "Before constructing your attack, identify the single specific weakness you will attack.",
-            "</task>",
-            "",
-            _target_block(target),
-            "",
-            "<response_contract>",
-            "In 1-2 sentences: name the specific claim or assumption in the target you will attack, "
-            "and the specific reason it is vulnerable (a gap, an unsupported step, a fact it "
-            "conflicts with). Do not construct the full argument yet.",
-            "</response_contract>",
-        ]
-    )
+_CONTENT_REQUIREMENT_BLOCK = "\n".join(
+    [
+        "<content_requirement>",
+        "Your Argument's rules must state a substantive position about the issue itself "
+        "(facts, causal claims, values, tradeoffs) — never a verdict about the dialectical "
+        "game (e.g. \"the target attack fails\", \"X does not defeat Y\", \"X's conclusion "
+        "does not follow from its premises\"). Whether your argument defeats the target is "
+        "determined separately from the Attack field and the defeat-checking logic, not from "
+        "how you phrase your conclusion. State your own substantive position, engaging the "
+        "target's specific content (see below) — never phrase the conclusion itself as a "
+        "verdict about whether that content holds up.",
+        "</content_requirement>",
+    ]
+)
 
 
 def attack_instruction(
@@ -473,26 +537,17 @@ def attack_instruction(
     target: Any,
     state: Any | None = None,
     main_argument: Any | None = None,
-    engagement_point: str | None = None,
 ) -> str:
     """攻撃（defeat/counter）の手番に渡す指示文を組む."""
     debate_round = getattr(state, "debate_round", 1) if state is not None else 1
     issue = getattr(state, "question", "") if state is not None else ""
-    engagement_block = (
-        [
-            "",
-            "<target_engagement_point>",
-            engagement_point,
-            "Your first rule's antecedent must build directly from this point.",
-            "</target_engagement_point>",
-        ]
-        if engagement_point
-        else []
-    )
     if purpose == "counter":
         blocks = [
             "<task>",
-            f"Round {debate_round}. Construct a counterargument that defends your prior main argument against the target attack.",
+            f"Round {debate_round}. The opponent's attack below challenges your position on the issue. "
+            "State what you hold to be true about the issue that directly answers this specific "
+            "challenge — a substantive claim about the issue, not a verdict about whether the attack "
+            "succeeds.",
             "</task>",
             "",
             "<issue>",
@@ -510,20 +565,35 @@ def attack_instruction(
             ]
         blocks += [
             _target_block(target),
-            *engagement_block,
+            "",
+            _CONTENT_REQUIREMENT_BLOCK,
             "",
             "<attack_conditions>",
             "- Your counterargument must defeat the target attack.",
             "- You may use rebut or undercut.",
             "- rebut: your argument must directly negate the target's stated conclusion.",
-            "- undercut: your argument must directly negate an assumption the target relies on.",
+            "- undercut: identify a weak_negation assumption (of the form 'X is not the case') that the "
+            "target's argument relies on, and construct your argument to prove that X actually holds. "
+            "Merely asserting the opposite of the target's conclusion, or arguing that the target's "
+            "framing/scope is inappropriate, does not qualify — your reasoning must establish X.",
             "- Do not attack a claim or assumption that is not present in the target argument.",
             "</attack_conditions>",
             "",
             "<non_repetition>",
-            "Do not merely restate your original main argument.",
-            "Do not derive the same conclusion from substantially the same reasoning as any of your previous arguments.",
-            "If the only available counterargument would repeat a previous argument, set can_defeat=NO.",
+            "You are the proponent: Prakken & Sartor's dialogue game forbids you (but not the "
+            "opponent) from making two moves with substantially the same content in this debate — "
+            "repeating never helps you, since if the opponent had a move against it the first time, "
+            "it has one the second time too.",
+            "Before answering, explicitly check your planned counterargument against your original "
+            "main argument AND every one of your own earlier counterarguments in this thread — "
+            "including ones the opponent has already defeated, and including any of your immediately "
+            "preceding retries against this exact same target — even if only the wording, the cited "
+            "specifics, or the framing differs. Same underlying conclusion via the same underlying "
+            "reasoning counts as a repeat.",
+            "If the only available counterargument would repeat any of those, set can_defeat=NO.",
+            "When more than one distinct reason from your stance could answer this challenge, prefer "
+            "the one you have not yet used in this debate — this is how the debate as a whole ends up "
+            "covering more of your stance, not any single turn.",
             "</non_repetition>",
             "",
             "<response_contract>",
@@ -535,7 +605,9 @@ def attack_instruction(
     return "\n".join(
         [
             "<task>",
-            f"Round {debate_round}. Construct a defeating argument against the target argument.",
+            f"Round {debate_round}. State what you hold to be true about the issue that challenges "
+            "the target argument's specific claim below — a substantive claim about the issue, not a "
+            "verdict about whether the target argument is defeated.",
             "</task>",
             "",
             "<issue>",
@@ -543,21 +615,19 @@ def attack_instruction(
             "</issue>",
             "",
             _target_block(target),
-            *engagement_block,
+            "",
+            _CONTENT_REQUIREMENT_BLOCK,
             "",
             "<attack_conditions>",
             "- You may use rebut or undercut.",
             "- rebut: your argument must directly negate the target's stated conclusion.",
-            "- undercut: your argument must directly negate an assumption the target relies on.",
+            "- undercut: identify a weak_negation assumption (of the form 'X is not the case') that the "
+            "target's argument relies on, and construct your argument to prove that X actually holds. "
+            "Merely asserting the opposite of the target's conclusion, or arguing that the target's "
+            "framing/scope is inappropriate, does not qualify — your reasoning must establish X.",
             "- Do not attack a claim or assumption that is not present in the target argument.",
             "- Supporting a different option does not by itself count as negating the target.",
             "</attack_conditions>",
-            "",
-            "<non_repetition>",
-            "Do not derive the same conclusion from substantially the same reasoning as any of "
-            "your own earlier attacks against this same target in this thread.",
-            "If the only available attack would repeat an earlier attempt of yours, set can_defeat=NO.",
-            "</non_repetition>",
             "",
             "<response_contract>",
             "If a valid attack exists, set can_defeat=YES and include Argument and Attack.",
@@ -583,9 +653,12 @@ def undercut_instruction(target: Any, state: Any | None = None) -> str:
             "",
             _target_block(target),
             "",
+            _CONTENT_REQUIREMENT_BLOCK,
+            "",
             "<response_contract>",
-            "If your argument can explicitly negate an assumption the target relies on, set can_undercut=YES and include Argument.",
-            "Otherwise, set can_undercut=NO and omit Argument.",
+            "Identify a weak_negation assumption (of the form 'X is not the case') the target relies on. "
+            "If you can construct an argument that proves X actually holds, set can_undercut=YES and "
+            "include Argument. Otherwise, set can_undercut=NO and omit Argument.",
             "</response_contract>",
         ]
     )
@@ -594,13 +667,19 @@ def undercut_instruction(target: Any, state: Any | None = None) -> str:
 def attack_extends_instruction(
     b_argument: Any, c_argument: Any, state: Any | None = None
 ) -> str:
-    """自分の攻撃(B)が相手の新しいカウンター(C)にも及ぶかを尋ねる手番の指示文を組む.
+    """自分の攻撃(B)が相手の新しいカウンター(C)にも及ぶかを尋ね、及ぶ場合はBからCへの攻撃関係（method・対象）を改めて宣言させる指示文を組む.
 
     判定基準は字面の一致（同じ statement が残っているか）ではなく、
     「自分の攻撃の主張を真だと認めた場合、相手の新しい結論が成り立たなくなるか」
     という実質的な脅威性。相手が自分の攻撃内容を前提として受け入れた上で、それでも
     自分の結論は揺るがないと論じている（譲歩した上で結論を守っている）場合は、
     もはやその攻撃は新しい結論を脅かしていないので NO とする。
+
+    YES の場合、method/target は <your_attack> が元の対象に対して宣言したものを
+    流用せず、C の中身（rules/Conc/Ass）を見た上で改めて宣言させる。attack/defeat は
+    Prakken & Sartor では論証単体の性質ではなく「特定の2論証の組」に対して定義される
+    関係であり、B が A に対して undercut だったからといって C に対しても undercut に
+    なるとは限らない（rebut になることもあれば、成り立たないこともある）。
     """
     issue = getattr(state, "question", "") if state is not None else ""
     return "\n".join(
@@ -621,8 +700,8 @@ def attack_extends_instruction(
             "",
             "<your_attack>",
             f"id: {b_argument.id}",
-            f"attack method: {b_argument.attack}",
-            f"statement you negated: {b_argument.target_statement}",
+            f"attack method against the ORIGINAL target: {b_argument.attack}",
+            f"statement you negated in the ORIGINAL target: {b_argument.target_statement}",
             "your argument:",
             b_argument.argument,
             "</your_attack>",
@@ -646,6 +725,18 @@ def attack_extends_instruction(
             "confident or well-argued is not enough by itself to set NO either.",
             "When genuinely uncertain, prefer YES: the burden is on <new_counter> to "
             "clearly defeat your attack, not on you to prove your attack still applies.",
+            "",
+            "If attack_extends=YES, you must ALSO declare how your argument attacks "
+            "<new_counter> SPECIFICALLY — do not copy the method/target you used against "
+            "the original target above; re-derive it from <new_counter>'s actual content:",
+            "- rebut: your argument's conclusion must directly negate a stated conclusion "
+            "(Conc) of <new_counter>.",
+            "- undercut: identify a weak_negation assumption (of the form 'X is not the "
+            "case') in <new_counter>'s Ass that your argument proves X actually holds for.",
+            "- Only declare a method that is actually true of <new_counter>'s own content; "
+            "if your argument does not genuinely negate any of <new_counter>'s stated "
+            "conclusions or assumptions, set attack_extends=NO instead, even if you "
+            "initially leaned YES above.",
             "</response_contract>",
         ]
     )
