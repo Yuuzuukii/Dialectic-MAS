@@ -39,7 +39,8 @@ class SVIEvaluation(BaseModel):
     responses: list[SVIItemResponse]
 
     @model_validator(mode="after")
-    def validate_items(self) -> "SVIEvaluation":
+    def validate_items(self) -> SVIEvaluation:
+        """Ensure responses cover items 1..16 exactly once, in order."""
         item_numbers = [response.item for response in self.responses]
         if item_numbers != list(range(1, 17)):
             raise ValueError("responses must contain items 1..16 exactly once, in order")
@@ -241,7 +242,7 @@ def score_svi(responses: list[dict[str, Any]] | None) -> dict[str, float | None]
     }
 
     def _mean_items(item_numbers: range) -> float | None:
-        values = [raw_by_item[item] for item in item_numbers if raw_by_item.get(item) is not None]
+        values = [v for item in item_numbers if (v := raw_by_item.get(item)) is not None]
         return mean(values) if values else None
 
     instrumental = _mean_items(range(1, 5))

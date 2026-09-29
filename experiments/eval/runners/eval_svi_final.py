@@ -71,6 +71,7 @@ def _evaluate_one(log_path: Path, model_name: str) -> dict[str, Any]:
 
 
 def main() -> None:
+    """CLI entrypoint."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", default=None)
     parser.add_argument("--workers", type=int, default=8)

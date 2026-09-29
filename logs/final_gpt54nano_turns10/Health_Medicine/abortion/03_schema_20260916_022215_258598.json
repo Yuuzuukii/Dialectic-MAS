@@ -1,0 +1,274 @@
+{
+  "method": "schema",
+  "question": "Should abortion be legal?",
+  "agent1_stance": "Your stance:\nYou support abortion being legal.\nYou believe the death rate for legal abortions is 0.46 deaths for every 100,000 abortions, making abortion safer than pregnancy itself.\nYou believe medical treatment for nonviable pregnancies often requires the same procedures as abortion, so bans endanger care for ectopic pregnancies and miscarriages.\nYou believe denying abortion access increases household poverty, debt, and reliance on government assistance while limiting women's educational and workforce opportunities.",
+  "agent2_stance": "Your stance:\nYou oppose abortion being legal.\nYou believe life begins from the moment of conception when the sperm fertilizes the egg, creating a new, totally distinct, integrated organism, making abortion equivalent to ending human life.\nYou believe legal abortion promotes a culture in which human life in its most vulnerable moment is perceived as disposable and connects to broader societal devaluation of vulnerable populations.\nYou believe declining abortion rates result from improved access to long-acting contraception, health insurance coverage, and comprehensive sex education—offering better alternatives than abortion.",
+  "metrics": {
+    "elapsed_seconds": 131.349,
+    "model": "gpt-5.4-nano",
+    "prompt_tokens": 54210,
+    "cached_tokens": 26624,
+    "completion_tokens": 19552,
+    "total_tokens": 73762,
+    "total_cost_usd": 0.03049,
+    "total_dialogue_turns": 4,
+    "attack_turn_count": 2,
+    "meta_conclusion_count": 0,
+    "meta_conclusion_rate": 0.0,
+    "dialogue_tree_node_count": 2,
+    "dialogue_tree_max_depth": 0,
+    "main_argument_count": 2,
+    "justified_proven_count": 1,
+    "justified_by_budget_count": 0,
+    "overruled_count": 1,
+    "defensible_count": 0
+  },
+  "dialogue_history": [
+    {
+      "id": "arg-a942d2854a",
+      "agent": "AG1",
+      "proponent": "AG1",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The death rate for legal abortions is 0.46 deaths per every 100,000 abortions.",
+                  "Continuing a pregnancy has a higher death risk than obtaining a legal abortion."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Legal abortion is medically safer than continuing pregnancy."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Legal abortion is medically safer than continuing pregnancy.",
+                  "Medical treatment for nonviable pregnancies often requires the same procedures used in abortions, including for ectopic pregnancies and miscarriages.",
+                  "Abortion bans restrict provider willingness and access to these procedures, which can interrupt timely care for nonviable pregnancies."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Abortion bans can endanger care for ectopic pregnancies and miscarriages by restricting access to needed procedures."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Legal abortion is medically safer than continuing pregnancy.",
+                  "Abortion bans can endanger care for ectopic pregnancies and miscarriages by restricting access to needed procedures.",
+                  "Denying abortion access increases household poverty, debt, and reliance on government assistance while limiting women's educational and workforce opportunities."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Denying abortion access causes major health and socioeconomic harms (greater health risk in nonviable pregnancies plus increased poverty/debt and reduced education/work opportunities for women)."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Legal abortion is medically safer than continuing pregnancy.",
+                  "Abortion bans can endanger care for ectopic pregnancies and miscarriages by restricting access to needed procedures.",
+                  "Denying abortion access causes major health and socioeconomic harms (greater health risk in nonviable pregnancies plus increased poverty/debt and reduced education/work opportunities for women)."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Abortion should be legal."
+            }
+          ],
+          "Conc": [
+            "Legal abortion is medically safer than continuing pregnancy.",
+            "Abortion bans can endanger care for ectopic pregnancies and miscarriages by restricting access to needed procedures.",
+            "Denying abortion access causes major health and socioeconomic harms (greater health risk in nonviable pregnancies plus increased poverty/debt and reduced education/work opportunities for women).",
+            "Abortion should be legal."
+          ],
+          "Ass": []
+        }
+      },
+      "status": "overruled",
+      "closed_by_budget": false
+    },
+    {
+      "id": "arg-331a6e5794",
+      "agent": "AG2",
+      "proponent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Life begins at the moment of conception (when sperm fertilizes the egg), creating a new, distinct, integrated human organism.",
+                  "A core act of abortion is the intentional ending of the pregnancy by ending that organism’s life."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Induced abortion intentionally ends a human life that begins at conception."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Induced abortion intentionally ends a human life that begins at conception.",
+                  "Killing an innocent human being is morally wrong."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Legalizing abortion would authorize the intentional killing of an innocent human life."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Legalizing abortion would authorize the intentional killing of an innocent human life.",
+                  "A society should not use law to authorize intentionally ending innocent human life."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Abortion should not be legal."
+            }
+          ],
+          "Conc": [
+            "Induced abortion intentionally ends a human life that begins at conception.",
+            "Legalizing abortion would authorize the intentional killing of an innocent human life.",
+            "Abortion should not be legal."
+          ],
+          "Ass": []
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-a942d2854a",
+      "target_field": "Conc",
+      "target_statement": "Abortion should be legal."
+    },
+    {
+      "id": "arg-32d4ad9229",
+      "agent": "AG1",
+      "proponent": "AG1",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The death rate for legal abortions is 0.46 deaths per every 100,000 abortions.",
+                  "Continuing a pregnancy has a higher death risk than obtaining a legal abortion."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Legal abortion is medically safer than continuing pregnancy."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Legal abortion is medically safer than continuing pregnancy.",
+                  "Medical treatment for nonviable pregnancies often requires the same procedures used in abortions, including for ectopic pregnancies and miscarriages.",
+                  "Abortion bans restrict provider willingness and access to these procedures, interrupting timely care for nonviable pregnancies."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Abortion bans can endanger care for ectopic pregnancies and miscarriages by restricting access to needed procedures."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Abortion bans can endanger care for ectopic pregnancies and miscarriages by restricting access to needed procedures.",
+                  "Denying abortion access increases household poverty, debt, and reliance on government assistance while limiting women's educational and workforce opportunities."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Denying abortion access produces major health and socioeconomic harms for women."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Legal abortion is medically safer than continuing pregnancy.",
+                  "Abortion bans can endanger care for ectopic pregnancies and miscarriages by restricting access to needed procedures.",
+                  "Denying abortion access produces major health and socioeconomic harms for women."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Abortion should be legal."
+            }
+          ],
+          "Conc": [
+            "Legal abortion is medically safer than continuing pregnancy.",
+            "Abortion bans can endanger care for ectopic pregnancies and miscarriages by restricting access to needed procedures.",
+            "Denying abortion access produces major health and socioeconomic harms for women.",
+            "Abortion should be legal."
+          ],
+          "Ass": []
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-331a6e5794",
+      "target_field": "Conc",
+      "target_statement": "Abortion should not be legal."
+    },
+    {
+      "id": "arg-ba965dd62d",
+      "agent": "AG2",
+      "proponent": "AG2",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Legal abortion being legal promotes a culture in which human life in its most vulnerable moment is perceived as disposable.",
+                  "Law and public policy shape social norms by signaling which lives society treats as legitimately endable or disposable."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Legalizing abortion fosters broader societal devaluation of vulnerable human populations."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Legalizing abortion fosters broader societal devaluation of vulnerable human populations.",
+                  "A society should not construct its legal framework in a way that normalizes the disposable treatment of vulnerable human lives."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Abortion should not be legal because legal permission would institutionalize devaluation of vulnerable human life."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Declining abortion rates are associated with improved access to long-acting contraception, health insurance coverage, and comprehensive sex education.",
+                  "Those measures provide real alternatives to abortion (preventing unintended pregnancy and reducing the pressures that lead to abortion)."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Abortion rates can be reduced through measures other than legalizing abortion."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Abortion should not be legal because legal permission would institutionalize devaluation of vulnerable human life.",
+                  "Abortion rates can be reduced through measures other than legalizing abortion."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Therefore, abortion should not be legal."
+            }
+          ],
+          "Conc": [
+            "Legalizing abortion fosters broader societal devaluation of vulnerable human populations.",
+            "Abortion should not be legal because legal permission would institutionalize devaluation of vulnerable human life.",
+            "Abortion rates can be reduced through measures other than legalizing abortion.",
+            "Therefore, abortion should not be legal."
+          ],
+          "Ass": []
+        }
+      },
+      "status": "justified",
+      "closed_by_budget": false
+    }
+  ],
+  "final_answer": "Abortion should not be broadly legal.\n\n### Why not\n1. **Conception is morally decisive, not medical convenience.**  \n   The key disagreement is whether the fetus is a distinct human life beginning at fertilization. If so, induced abortion is the intentional ending of an innocent human life, and a legal regime should not authorize intentionally killing innocent human beings.\n\n2. **Legal permission risks normalizing the “disposable” treatment of the most vulnerable.**  \n   Even if some abortions are framed as healthcare, making abortion broadly lawful can send a public signal—through law and policy—that vulnerable human life in its earliest or most fragile stage is something society treats as legitimately “endable.” That broader normative effect is a central reason the law should not enable abortion.\n\n3. **Lower abortion rates can be achieved through alternatives other than legalization.**  \n   Declines in abortion rates are associated with improved access to long-acting contraception, health insurance coverage, and comprehensive sex education. Those steps reduce unintended pregnancy and the pressures that lead people to seek abortion, without needing abortion to be legalized.\n\n### Handling the main counterpoints (safety, ectopic/miscarriage care, and socioeconomic harm)\n1. **“Legal abortion is safer than continuing pregnancy” doesn’t resolve the moral issue.**  \n   Even granting that the death rate from legal abortion is low and that, on average, the medical risk profile may be different from continuing pregnancy, the question here isn’t only which medical option has lower risk—it’s whether the law should authorize the intentional ending of an innocent human life.\n\n2. **Nonviable pregnancy treatment (ectopic pregnancy, miscarriages) need not require broadly legal elective abortion.**  \n   It’s true that some medical management pathways for nonviable pregnancies can overlap with procedures used in abortions. But opposition to broadly legal abortion can still permit *necessary medical treatment* for ectopic pregnancy and miscarriage—i.e., care aimed at ending a nonviable pregnancy or preventing imminent death—while still prohibiting intentional elective abortion as a legal entitlement. In other words: protecting access to lifesaving and nonviable-pregnancy care does not require legalizing abortion on demand.\n\n3. **Poverty, debt, and reduced education/work opportunities are serious, but they can be addressed without legalization.**  \n   Denying abortion access can impose real socioeconomic costs on pregnant people. However, the path to reduce those harms can be prevention and support rather than legalization—through contraception, insurance coverage, sex education, and economic/health supports that reduce unintended pregnancies and lessen downstream burdens.\n\n**Bottom line:** because induced abortion is viewed as the intentional ending of an innocent human life and because broad legal permission risks institutionalizing the idea that vulnerable life is disposable, abortion should not be broadly legal; medically necessary treatment for nonviable pregnancies and miscarriage/ectopic care should be protected in a way that doesn’t transform abortion into a general legal entitlement.",
+  "integrated_rules": [],
+  "consensus_reached": true,
+  "justification_status": "ag2_main_justified"
+}
