@@ -1,11 +1,11 @@
-"""Two-path finalization for Dialectic-MAS.
+"""Two-path finalization shared by schema and no-schema Dialectic-MAS.
 
 Path A: if a main argument is justified, keep the existing justified-argument finalization.
 Path B: if no main argument is justified, ignore partial intermediate synthesis state and
 freshly synthesize the entire dialogue, then generate the final answer from that synthesis.
 
-This module is intentionally independent from the current LangGraph wiring so it can be
-used to re-finalize existing logs without rerunning the dialogue itself.
+The policy is deliberately identical for ``schema`` and ``no_schema`` so experiments differ
+only in argument representation, not in how unresolved debates are finalized.
 """
 
 from __future__ import annotations
@@ -17,6 +17,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 
 from .llm import chat_text
 
+SUPPORTED_METHODS = {"schema", "no_schema"}
 
 _FALLBACK_SYNTHESIS_SYSTEM = """<role>
 You are a neutral synthesis operator.
@@ -67,6 +68,14 @@ controlling basis. Do not re-judge the debate or independently select a winning 
 
 def _dialogue_json(dialogue_history: list[dict[str, Any]]) -> str:
     return json.dumps(dialogue_history, ensure_ascii=False, indent=2)
+
+
+def _is_justified_path(log: dict[str, Any]) -> bool:
+    """Return True only when the original run ended via a justified argument."""
+    if log.get("consensus_reached") is True:
+        return True
+    status = str(log.get("justification_status") or "")
+    return status in {"justified", "justified_argument"}
 
 
 async def synthesize_unresolved_dialogue(
@@ -138,14 +147,15 @@ Integrated synthesis:
 async def refinalize_unresolved_log(
     log: dict[str, Any], *, model: str | None = None
 ) -> dict[str, Any]:
-    """Apply Path B to one unresolved schema log while preserving its dialogue unchanged."""
-    if log.get("method") != "schema":
-        raise ValueError("two-path fallback re-finalization is defined for schema logs only")
-    if log.get("consensus_reached") is True or log.get("justification_status") not in {
-        "fallback_no_consensus",
-        "no_new_main_argument",
-        None,
-    }:
+    """Apply the shared two-path policy while preserving the dialogue unchanged."""
+    method = str(log.get("method") or "")
+    if method not in SUPPORTED_METHODS:
+        raise ValueError(
+            "two-path fallback re-finalization supports only schema and no_schema logs; "
+            f"got {method!r}"
+        )
+
+    if _is_justified_path(log):
         copied = dict(log)
         copied["finalization_path"] = "justified_argument"
         return copied
