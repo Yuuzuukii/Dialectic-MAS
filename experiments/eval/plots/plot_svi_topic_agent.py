@@ -1,4 +1,4 @@
-r"""SVIをトピック・手法・エージェント別に集計し、棒グラフで可視化する。
+r"""SVIをトピック・手法・エージェント別に集計し、棒グラフで可視化する.
 
 前提:
 - 入力は eval_svi_final.py が生成した svi_comparison.json。
@@ -22,6 +22,8 @@ Usage:
     python -m experiments.eval.plots.plot_svi_topic_agent \
       --metrics instrumental self process relationship global
 """
+
+# ruff: noqa: T201, E402, I001
 
 from __future__ import annotations
 
@@ -270,6 +272,7 @@ def _plot_topic_metric(
 
 
 def main() -> None:
+    """CLI entrypoint."""
     args = _parse_args()
     args.out_dir.mkdir(parents=True, exist_ok=True)
 
