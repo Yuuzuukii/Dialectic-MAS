@@ -1,0 +1,591 @@
+{
+  "method": "schema",
+  "question": "Is Binge-Watching Good for You?",
+  "agent1_stance": "Your stance:\nYou support binge-watching.\nYou believe binge-watching creates a shared cultural space that helps viewers connect with others and strengthens relationships, including long-distance partnerships.\nYou believe binge-watching releases dopamine, providing stress relief and a sense of control.\nYou believe watching multiple episodes together creates immersion and makes complex storylines easier to follow, resulting in greater enjoyment of sophisticated narratives.",
+  "agent2_stance": "Your stance:\nYou oppose binge-watching.\nYou believe research links binge-watching to depression, loneliness, and reduced self-control, and that after finishing shows, viewers may experience depression, anxiety, and feelings of emptiness.\nYou believe extended sitting correlates with metabolic slowdown, heart disease, and cancer, and that binge-watching also associates with poor sleep quality, weight gain, and unhealthy eating patterns.\nYou believe studies show viewers experience significantly less show enjoyment when watching multiple episodes at once.",
+  "metrics": {
+    "elapsed_seconds": 235.471,
+    "model": "gpt-5.4-nano",
+    "prompt_tokens": 132401,
+    "cached_tokens": 33280,
+    "completion_tokens": 37069,
+    "total_tokens": 169470,
+    "total_cost_usd": 0.066826
+  },
+  "dialogue_history": [
+    {
+      "id": "arg-6502729033",
+      "agent": "AG1",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "When a person binge-watches (watches multiple episodes in a row), their brain shows a dopamine-related reward/pleasure response to the viewing."
+                ],
+                "weak_negation": [
+                  "This argument is about binge-watching’s immediate psychological effects rather than claiming it has no any possible long-term drawbacks."
+                ]
+              },
+              "consequent": "Binge-watching produces dopamine-driven reward/pleasure that the viewer experiences."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching produces dopamine-driven reward/pleasure that the viewer experiences."
+                ],
+                "weak_negation": [
+                  "Dopamine-associated reward is treated here as a mechanism that can reduce perceived stress and increase control, not as a mechanism whose only effect is harm."
+                ]
+              },
+              "consequent": "Binge-watching provides stress relief and a sense of control during viewing."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching provides stress relief and a sense of control during viewing."
+                ],
+                "weak_negation": [
+                  "Reducing stress and increasing perceived control are considered components of being 'good for you' in this context."
+                ]
+              },
+              "consequent": "Binge-watching is good for you."
+            }
+          ],
+          "Conc": [
+            "Binge-watching produces dopamine-driven reward/pleasure that the viewer experiences.",
+            "Binge-watching provides stress relief and a sense of control during viewing.",
+            "Binge-watching is good for you."
+          ],
+          "Ass": [
+            "This argument is about binge-watching’s immediate psychological effects rather than claiming it has no any possible long-term drawbacks.",
+            "Dopamine-associated reward is treated here as a mechanism that can reduce perceived stress and increase control, not as a mechanism whose only effect is harm.",
+            "Reducing stress and increasing perceived control are considered components of being 'good for you' in this context."
+          ]
+        }
+      },
+      "status": "overruled"
+    },
+    {
+      "id": "arg-09c8e46b64",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "If binge-watching has downstream harms, then temporary dopamine-driven pleasure or stress relief does not justify calling binge-watching “good for you” based only on in-the-moment mood/control."
+                ],
+                "weak_negation": [
+                  "I’m not denying that binge-watching can temporarily feel pleasurable or calming."
+                ]
+              },
+              "consequent": "Temporary stress relief/control cannot, by itself, make binge-watching good for you when downstream harms exist."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching is associated with downstream harms such as depression/loneliness/anxiety or feelings of emptiness, reduced self-control, and poorer outcomes like reduced sleep quality and unhealthy eating/weight gain."
+                ],
+                "weak_negation": [
+                  "This doesn’t require that every individual experiences every harm to make the overall risk relevant."
+                ]
+              },
+              "consequent": "Binge-watching has downstream harms that matter for overall well-being."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Temporary stress relief/control cannot, by itself, make binge-watching good for you when downstream harms exist.",
+                  "Binge-watching has downstream harms that matter for overall well-being."
+                ],
+                "weak_negation": [
+                  "Even if some viewers report feeling better during the episode run."
+                ]
+              },
+              "consequent": "Binge-watching is not good for you."
+            }
+          ],
+          "Conc": [
+            "Temporary stress relief/control cannot, by itself, make binge-watching good for you when downstream harms exist.",
+            "Binge-watching has downstream harms that matter for overall well-being.",
+            "Binge-watching is not good for you."
+          ],
+          "Ass": [
+            "I’m not denying that binge-watching can temporarily feel pleasurable or calming.",
+            "This doesn’t require that every individual experiences every harm to make the overall risk relevant.",
+            "Even if some viewers report feeling better during the episode run."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-6502729033",
+      "target_field": "Ass",
+      "target_statement": "Reducing stress and increasing perceived control are considered components of being 'good for you' in this context."
+    },
+    {
+      "id": "arg-cd0ba5ecb3",
+      "agent": "AG1",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "If an argument infers “binge-watching is not good for you” from downstream harms/associations without doing the needed tradeoff/weighting against binge-watching’s upsides (and without any net threshold), then the harms fact alone is not enough to justify the stronger “not good” conclusion."
+                ],
+                "weak_negation": [
+                  "I’m not denying that downstream harms are possible or that some harms have been associated with binge-watching."
+                ]
+              },
+              "consequent": "The target attack fails because it does not perform the required tradeoff/weighting analysis to support “binge-watching is not good for you.”"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching can create a shared cultural space that helps viewers connect with others and strengthens relationships, including long-distance partnerships.",
+                  "Binge-watching releases dopamine-driven reward/pleasure that can reduce perceived stress and increase a sense of control during viewing."
+                ],
+                "weak_negation": [
+                  "This doesn’t require claiming binge-watching has zero drawbacks; it only requires that it supplies well-being-relevant benefits."
+                ]
+              },
+              "consequent": "Binge-watching provides well-being-relevant benefits (social connection/relationship strengthening and stress relief/control)."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target attack fails because it does not perform the required tradeoff/weighting analysis to support “binge-watching is not good for you.”",
+                  "Binge-watching provides well-being-relevant benefits (social connection/relationship strengthening and stress relief/control)."
+                ],
+                "weak_negation": [
+                  "Even if some viewers experience downsides, the conclusion “not good for you” is still not established without weighing these benefits against those downsides."
+                ]
+              },
+              "consequent": "Binge-watching is good for you."
+            }
+          ],
+          "Conc": [
+            "The target attack fails because it does not perform the required tradeoff/weighting analysis to support “binge-watching is not good for you.”",
+            "Binge-watching provides well-being-relevant benefits (social connection/relationship strengthening and stress relief/control).",
+            "Binge-watching is good for you."
+          ],
+          "Ass": [
+            "I’m not denying that downstream harms are possible or that some harms have been associated with binge-watching.",
+            "This doesn’t require claiming binge-watching has zero drawbacks; it only requires that it supplies well-being-relevant benefits.",
+            "Even if some viewers experience downsides, the conclusion “not good for you” is still not established without weighing these benefits against those downsides."
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-09c8e46b64",
+      "target_field": "Conc",
+      "target_statement": "Binge-watching is not good for you."
+    },
+    {
+      "id": "arg-f55f80c9d8",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "If an argument infers “binge-watching is not good for you” from downstream harms/associations without performing the required tradeoff/weighting against binge-watching’s upsides, then the harms fact alone is not enough to justify the stronger “not good” conclusion."
+                ],
+                "weak_negation": [
+                  "I’m not denying that downstream harms are possible or that some harms have been associated with binge-watching."
+                ]
+              },
+              "consequent": "The target attack’s “not good for you” conclusion is not justified solely by downstream harms/associations because it does not carry out the required tradeoff/weighting against upsides."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching can provide well-being-relevant upsides, including social/relationship support (e.g., a shared cultural space that helps viewers connect) and dopamine-driven pleasure that can reduce perceived stress and increase a sense of control during viewing."
+                ],
+                "weak_negation": [
+                  "This does not require claiming binge-watching has zero drawbacks; it only claims it has benefits relevant to well-being."
+                ]
+              },
+              "consequent": "Binge-watching provides well-being-relevant benefits that bear on overall well-being."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target attack’s “not good for you” conclusion is not justified solely by downstream harms/associations because it does not carry out the required tradeoff/weighting against upsides.",
+                  "Binge-watching provides well-being-relevant benefits that bear on overall well-being."
+                ],
+                "weak_negation": [
+                  "Even if some viewers experience downsides, the overall evaluation (“good for you” vs “not good”) still requires weighting those upsides against those downsides."
+                ]
+              },
+              "consequent": "Therefore, binge-watching is good for you."
+            }
+          ],
+          "Conc": [
+            "The target attack’s “not good for you” conclusion is not justified solely by downstream harms/associations because it does not carry out the required tradeoff/weighting against upsides.",
+            "Binge-watching provides well-being-relevant benefits that bear on overall well-being.",
+            "Therefore, binge-watching is good for you."
+          ],
+          "Ass": [
+            "I’m not denying that downstream harms are possible or that some harms have been associated with binge-watching.",
+            "This does not require claiming binge-watching has zero drawbacks; it only claims it has benefits relevant to well-being.",
+            "Even if some viewers experience downsides, the overall evaluation (“good for you” vs “not good”) still requires weighting those upsides against those downsides."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-cd0ba5ecb3",
+      "target_field": "Ass"
+    },
+    {
+      "id": "arg-183a7224f1",
+      "agent": "AG2",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Studies show that when people watch multiple episodes at once (binge-watching), they experience significantly less show enjoyment than they would with less extended viewing."
+                ],
+                "weak_negation": [
+                  "I’m not claiming people never enjoy shows during binge-watching."
+                ]
+              },
+              "consequent": "Binge-watching significantly reduces show enjoyment for viewers."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Show enjoyment is a well-being-relevant outcome of watching entertainment (it reflects satisfaction/positive affect).",
+                  "Binge-watching significantly reduces show enjoyment for viewers."
+                ],
+                "weak_negation": [
+                  "I’m not claiming enjoyment is the only factor that matters, only that diminished enjoyment is itself a negative for “good for you.”"
+                ]
+              },
+              "consequent": "Binge-watching harms viewer well-being by reducing enjoyment."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching harms viewer well-being by reducing enjoyment."
+                ],
+                "weak_negation": [
+                  "I’m not requiring that binge-watching has no possible upsides; I’m using the harm to the viewer’s enjoyment as decisive evidence against calling it “good for you.”"
+                ]
+              },
+              "consequent": "Binge-watching is not good for you."
+            }
+          ],
+          "Conc": [
+            "Binge-watching significantly reduces show enjoyment for viewers.",
+            "Binge-watching harms viewer well-being by reducing enjoyment.",
+            "Binge-watching is not good for you."
+          ],
+          "Ass": [
+            "I’m not claiming people never enjoy shows during binge-watching.",
+            "I’m not claiming enjoyment is the only factor that matters, only that diminished enjoyment is itself a negative for “good for you.”",
+            "I’m not requiring that binge-watching has no possible upsides; I’m using the harm to the viewer’s enjoyment as decisive evidence against calling it “good for you.”"
+          ]
+        }
+      },
+      "status": "overruled"
+    },
+    {
+      "id": "arg-8320c5bbbd",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target infers “Binge-watching is not good for you” from reduced show enjoyment while conceding possible upsides, but it never establishes a net-tradeoff/weighing rule showing that enjoyment losses decisively outweigh other well-being benefits."
+                ],
+                "weak_negation": [
+                  "I’m not denying that binge-watching can reduce show enjoyment for some viewers."
+                ]
+              },
+              "consequent": "Reduced enjoyment is not decisive evidence of overall “not good for you” without net weighing of upsides vs. downsides."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Reduced enjoyment is not decisive evidence of overall “not good for you” without net weighing of upsides vs. downsides.",
+                  "Binge-watching provides dopamine-driven reward/pleasure that reduces perceived stress and increases a sense of control during viewing."
+                ],
+                "weak_negation": [
+                  "This doesn’t require that binge-watching has no downsides; it requires only that it has well-being-relevant upsides to weigh against any enjoyment loss."
+                ]
+              },
+              "consequent": "Binge-watching provides well-being-relevant benefits (stress relief/control) that must be weighed against any enjoyment loss."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching provides well-being-relevant benefits (stress relief/control) that must be weighed against any enjoyment loss.",
+                  "Binge-watching helps viewers connect with others and strengthens relationships, including long-distance partnerships."
+                ],
+                "weak_negation": [
+                  "This doesn’t require that every individual experiences these relational benefits; it requires that such well-being-relevant upsides exist in the overall evaluation."
+                ]
+              },
+              "consequent": "After weighing these upsides against any enjoyment loss, binge-watching is good for you."
+            }
+          ],
+          "Conc": [
+            "Reduced enjoyment is not decisive evidence of overall “not good for you” without net weighing of upsides vs. downsides.",
+            "Binge-watching provides well-being-relevant benefits (stress relief/control) that must be weighed against any enjoyment loss.",
+            "After weighing these upsides against any enjoyment loss, binge-watching is good for you."
+          ],
+          "Ass": [
+            "I’m not denying that binge-watching can reduce show enjoyment for some viewers.",
+            "This doesn’t require that binge-watching has no downsides; it requires only that it has well-being-relevant upsides to weigh against any enjoyment loss.",
+            "This doesn’t require that every individual experiences these relational benefits; it requires that such well-being-relevant upsides exist in the overall evaluation."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-183a7224f1",
+      "target_field": "Ass",
+      "target_statement": "I’m not requiring that binge-watching has no possible upsides; I’m using the harm to the viewer’s enjoyment as decisive evidence against calling it “good for you.”"
+    },
+    {
+      "id": "arg-47cd34c419",
+      "agent": "AG2",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target concludes “After weighing these upsides against any enjoyment loss, binge-watching is good for you,” but it provides no evidence or explicit weighting that the claimed upsides (stress relief/control and relationship strengthening) outweigh the downstream harms associated with binge-watching."
+                ],
+                "weak_negation": [
+                  "I’m not denying that binge-watching can feel pleasurable or reduce stress during the viewing session."
+                ]
+              },
+              "consequent": "The target’s “good for you” conclusion is not supported by its weighing step without a net-benefit justification."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching is associated with downstream harms including depression, loneliness, anxiety/emptiness after finishing shows, reduced self-control, and poorer outcomes like worse sleep quality and unhealthy eating/weight gain."
+                ],
+                "weak_negation": [
+                  "This doesn’t require every viewer to experience every harm; the overall risk is what matters for “good for you.”"
+                ]
+              },
+              "consequent": "Binge-watching has well-being-relevant downsides that must count against calling it “good for you.”"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s “good for you” conclusion is not supported by its weighing step without a net-benefit justification.",
+                  "Binge-watching has well-being-relevant downsides that must count against calling it “good for you.”"
+                ],
+                "weak_negation": [
+                  "Even if some upsides occur, the target has not shown they create a net positive for overall well-being."
+                ]
+              },
+              "consequent": "Binge-watching is not good for you."
+            }
+          ],
+          "Conc": [
+            "The target’s “good for you” conclusion is not supported by its weighing step without a net-benefit justification.",
+            "Binge-watching has well-being-relevant downsides that must count against calling it “good for you.”",
+            "Binge-watching is not good for you."
+          ],
+          "Ass": [
+            "I’m not denying that binge-watching can feel pleasurable or reduce stress during the viewing session.",
+            "This doesn’t require every viewer to experience every harm; the overall risk is what matters for “good for you.”",
+            "Even if some upsides occur, the target has not shown they create a net positive for overall well-being."
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-8320c5bbbd",
+      "target_field": "Conc",
+      "target_statement": "After weighing these upsides against any enjoyment loss, binge-watching is good for you."
+    },
+    {
+      "id": "arg-219f765ad8",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target treats “binge-watching is associated with downstream harms (e.g., depression/loneliness/anxiety; reduced self-control; worse sleep/unhealthy eating)” as if that supports the claim that these downsides must count against calling binge-watching “good for you.”",
+                  "If those alleged harms are based only on association (not demonstrated causal impact from binge-watching), then the target cannot validly assume binge-watching itself produces the harms that “must count” for the evaluation."
+                ],
+                "weak_negation": [
+                  "I’m not denying that binge-watching and those outcomes can be statistically related in data."
+                ]
+              },
+              "consequent": "Association-only evidence is insufficient to assume binge-watching itself produces well-being-relevant harms that must count against it being “good for you.”"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Association-only evidence is insufficient to assume binge-watching itself produces well-being-relevant harms that must count against it being “good for you.”",
+                  "The target’s later “not good for you” step depends on counting those alleged downstream harms against any upsides."
+                ],
+                "weak_negation": [
+                  "I’m not claiming the target must prove perfect evidence; I’m saying association alone doesn’t license the needed inference for the strong ‘not good’ conclusion."
+                ]
+              },
+              "consequent": "Because the target’s harms premise lacks the needed support, its “not good for you” conclusion is undermined."
+            }
+          ],
+          "Conc": [
+            "Association-only evidence is insufficient to assume binge-watching itself produces well-being-relevant harms that must count against it being “good for you.”",
+            "Because the target’s harms premise lacks the needed support, its “not good for you” conclusion is undermined."
+          ],
+          "Ass": [
+            "I’m not denying that binge-watching and those outcomes can be statistically related in data.",
+            "I’m not claiming the target must prove perfect evidence; I’m saying association alone doesn’t license the needed inference for the strong ‘not good’ conclusion."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-47cd34c419",
+      "target_field": "Ass"
+    },
+    {
+      "id": "arg-58abf7be40",
+      "agent": "AG1",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching (watching multiple episodes in a row) produces a dopamine-related reward/pleasure response to the viewing."
+                ],
+                "weak_negation": [
+                  "This does not claim binge-watching has no possible long-term drawbacks; it focuses on the immediate psychological effects."
+                ]
+              },
+              "consequent": "Binge-watching provides stress relief and increased perceived control during/through viewing."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching provides stress relief and increased perceived control during/through viewing.",
+                  "Available evidence about binge-watching is stronger in favor of these benefits than in favor of comparably-strong contrary harms."
+                ],
+                "weak_negation": [
+                  "This allows that some people may experience downsides; it only requires that, overall, the evidence does not make harms stronger than the benefits."
+                ]
+              },
+              "consequent": "Under the net-evidence standard, binge-watching is classified as GOOD FOR YOU."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Under the net-evidence standard, binge-watching is classified as GOOD FOR YOU."
+                ],
+                "weak_negation": [
+                  "This is not claiming every individual always benefits; it answers whether the practice is good overall given the available evidence."
+                ]
+              },
+              "consequent": "Binge-watching is good for you."
+            }
+          ],
+          "Conc": [
+            "Binge-watching provides stress relief and increased perceived control during/through viewing.",
+            "Under the net-evidence standard, binge-watching is classified as GOOD FOR YOU.",
+            "Binge-watching is good for you."
+          ],
+          "Ass": [
+            "This does not claim binge-watching has no possible long-term drawbacks; it focuses on the immediate psychological effects.",
+            "This allows that some people may experience downsides; it only requires that, overall, the evidence does not make harms stronger than the benefits.",
+            "This is not claiming every individual always benefits; it answers whether the practice is good overall given the available evidence."
+          ]
+        }
+      },
+      "status": "defensible"
+    },
+    {
+      "id": "arg-a9b556ede3",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s key move assumes that “available evidence about binge-watching is stronger in favor of” stress relief/increased control than in favor of “comparably-strong contrary harms,” but it does not establish (i.e., provide evidence comparing relative strength) that the harms are weaker than the claimed benefits.",
+                  "Research-backed harm evidence exists on the harms side: binge-watching is associated with significantly less show enjoyment when multiple episodes are watched at once."
+                ],
+                "weak_negation": [
+                  "I’m not denying that binge-watching can sometimes feel relaxing or pleasurable during the viewing session."
+                ]
+              },
+              "consequent": "The premise that available evidence is stronger for benefits than comparably-strong harms is not established."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The premise that available evidence is stronger for benefits than comparably-strong harms is not established.",
+                  "Under the net-evidence standard, when the available evidence indicates reduced enjoyment and other well-being harms, binge-watching should be classified as NOT GOOD FOR YOU."
+                ],
+                "weak_negation": [
+                  "This does not require that every viewer experiences every harm; it’s about the evidence being stronger for harms overall."
+                ]
+              },
+              "consequent": "Binge-watching should not be classified as GOOD FOR YOU under the net-evidence standard."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching should not be classified as GOOD FOR YOU under the net-evidence standard."
+                ],
+                "weak_negation": [
+                  "I’m not claiming binge-watching has zero upsides for anyone; I’m rejecting the conclusion that it is good overall based on evidence strength."
+                ]
+              },
+              "consequent": "Binge-watching is not good for you."
+            }
+          ],
+          "Conc": [
+            "The premise that available evidence is stronger for benefits than comparably-strong harms is not established.",
+            "Binge-watching should not be classified as GOOD FOR YOU under the net-evidence standard.",
+            "Binge-watching is not good for you."
+          ],
+          "Ass": [
+            "I’m not denying that binge-watching can sometimes feel relaxing or pleasurable during the viewing session.",
+            "This does not require that every viewer experiences every harm; it’s about the evidence being stronger for harms overall.",
+            "I’m not claiming binge-watching has zero upsides for anyone; I’m rejecting the conclusion that it is good overall based on evidence strength."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-58abf7be40",
+      "target_field": "Ass",
+      "target_statement": "This allows that some people may experience downsides; it only requires that, overall, the evidence does not make harms stronger than the benefits."
+    }
+  ],
+  "final_answer": "**No—binge-watching is not good for you overall**, based on the balance of evidence available: the strongest cited downside is that watching multiple episodes back-to-back is linked to **significantly less show enjoyment**, which is a direct well-being-relevant negative outcome. On the benefits side, there are plausible mechanisms (stress relief/control, immersion, and social connection), but in the material provided they are **not supported with comparably strong evidence** that would outweigh the harms.\n\n### Rationale (how key requirements were handled)\n\n1. **Benefits claimed (handled, but not shown to outweigh harms)**\n   - **Stress relief / increased perceived control (via dopamine reward/pleasure):** This is plausible as an explanation for why binge-watching can feel calming or rewarding during viewing. However, the evidence presented for this being a net benefit overall is not shown as stronger than the evidence for downsides.\n   - **Immersion / easier follow-through on complex storylines:** This could increase enjoyment for some viewers, but it was not paired with evidence showing that the overall net effect of binge-watching is beneficial.\n   - **Shared cultural space / social connection (including long-distance partnerships):** This may be true at the social level (people talk about what they watched), but again the provided material does not establish that binge-watching specifically—rather than just watching shows in general—yields a stronger overall benefit than the documented disadvantages.\n\n2. **Harms cited (given decisive weight where evidence was stronger)**\n   - **Reduced show enjoyment when watching multiple episodes at once:** The debate explicitly points to studies showing viewers have **significantly less show enjoyment** when binge-watching. Under the net-evidence standard, that kind of negative outcome counts as a key reason to classify binge-watching as **not good for you** when the harms evidence is stronger than the benefits evidence.\n   - **Depression/loneliness/reduced self-control; post-show emptiness/anxiety; poorer sleep/weight/unhealthy eating; metabolic slowdown and health risks:** These are serious claims, and they were listed as associated with binge-watching. But in the provided discussion, a major limitation remains: **causality and strength** for several of these harms were not resolved, because at least one objection argued that some harm evidence may be association-only rather than proven causal impact.\n\n   Even with that uncertainty, the classification does not require proving every listed harm. It only requires that the **overall available evidence about the practice is stronger on the “harms” side than on the “benefits” side**—and the more concrete, decisive evidence in the provided material points toward reduced enjoyment during binge-watching.\n\n### An important unresolved point (why confidence isn’t absolute)\nA specific unresolved issue is **how strong and causal the longer-term psychological/physical harms are** (vs. correlations due to who binge-watches and why). The objections raised that association alone may not justify treating binge-watching as the direct cause of depression, loneliness, sleep problems, metabolic/health risks, etc.\n\n**Why the answer still leans “not good for you”:** even if those longer-term harms are uncertain in causality, the evidence highlighted for **reduced enjoyment** is a direct negative outcome of binge-watching itself, and the benefits (stress relief, immersion, social connection) were not shown with evidence strong enough to clearly outweigh that downside.\n\n**Bottom line:** binge-watching may feel pleasant or socially connecting, but given the evidence presented, its net effect is **more negative than positive overall**, so it should be treated as **not good for you**.",
+  "integrated_rules": [
+    "Reusable decision rule (net-evidence standard):\n\n1) Treat binge-watching as GOOD FOR YOU if the available evidence about the practice is stronger in favor of benefits than against it—specifically, evidence indicates one or more of: (i) stress relief and increased perceived control during/through viewing; (ii) greater enjoyment via immersion and easier follow-through on complex storylines; and/or (iii) improved social connection/shared cultural space that helps viewers connect and strengthen relationships (including long-distance partnerships)—with no comparably strong contrary harms.\n\n2) Treat binge-watching as NOT GOOD FOR YOU if the available evidence is stronger in favor of harms than for benefits—specifically, evidence indicates one or more of: (i) reduced show enjoyment when multiple episodes are watched at once; (ii) worse psychological well-being (e.g., depression/anxiety/emptiness after finishing); (iii) worsened social/behavioral outcomes (e.g., loneliness, reduced self-control); and/or (iv) adverse physical/behavioral correlates (e.g., worse sleep quality, weight gain/unhealthy eating patterns, metabolic slowdown, and health risks).\n\n3) If the strength of the evidence is unclear or roughly balanced between benefits and harms, do not decide (unresolved).",
+    "[Unintegrated, one-sided position from AG1's final round] If Under the net-evidence standard, binge-watching is classified as GOOD FOR YOU. (unless: This is not claiming every individual always benefits; it answers whether the practice is good overall given the available evidence.), then Binge-watching is good for you."
+  ]
+}

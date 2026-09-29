@@ -1,0 +1,538 @@
+{
+  "method": "schema",
+  "question": "Is Social Media Good for Society?",
+  "agent1_stance": "Your stance:\nYou support social media.\nYou believe social media promotes community, security, and safety, both online and off, facilitating connection among people with shared interests across distances.\nYou believe social media encourages civic and political responsibility, as young people use these platforms to develop civic identities and participate in political activism with low-barrier-to-entry opportunities.\nYou believe social media bolsters inclusivity and diversity, both online and off, enabling marginalized groups—particularly LGBTQ+ youth—to explore identities and connect with peers.",
+  "agent2_stance": "Your stance:\nYou oppose social media.\nYou believe social media spurs digital addiction, cyberbullying, and mental health issues, creating dependency patterns and psychological harms particularly among adolescents and teens.\nYou believe social media encourages the spread of misinformation and dangerous fads, some of them lethal, as false information spreads rapidly and harmful challenges endanger users.\nYou believe social media increases privacy risks across the Internet, as user data collection and unauthorized data sharing compromise personal security and safety.",
+  "metrics": {
+    "elapsed_seconds": 339.871,
+    "model": "gpt-5.4-nano",
+    "prompt_tokens": 113169,
+    "cached_tokens": 51456,
+    "completion_tokens": 42676,
+    "total_tokens": 155845,
+    "total_cost_usd": 0.066717
+  },
+  "dialogue_history": [
+    {
+      "id": "arg-bce3234562",
+      "agent": "AG1",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Young people use social media to participate in political activism with low-barrier-to-entry opportunities"
+                ],
+                "weak_negation": [
+                  "This low-barrier participation is not systematically prevented."
+                ]
+              },
+              "consequent": "Social media provides low-barrier opportunities for young people to participate in political activism."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Social media provides low-barrier opportunities for young people to participate in political activism",
+                  "Participating in activism on these platforms helps young people develop civic identities"
+                ],
+                "weak_negation": [
+                  "Platform-mediated participation translates into learning civic responsibility rather than staying purely symbolic."
+                ]
+              },
+              "consequent": "Using social media tends to encourage civic and political responsibility among young people."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Using social media tends to encourage civic and political responsibility among young people",
+                  "Civic and political responsibility among members of society supports democratic engagement and accountability"
+                ],
+                "weak_negation": [
+                  "Any countervailing harms do not fully negate the responsibility-building effect."
+                ]
+              },
+              "consequent": "Therefore, social media is good for society."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Therefore, social media is good for society."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Therefore, social media is good for society."
+            }
+          ],
+          "Conc": [
+            "Social media provides low-barrier opportunities for young people to participate in political activism.",
+            "Using social media tends to encourage civic and political responsibility among young people.",
+            "Therefore, social media is good for society.",
+            "Therefore, social media is good for society."
+          ],
+          "Ass": [
+            "This low-barrier participation is not systematically prevented.",
+            "Platform-mediated participation translates into learning civic responsibility rather than staying purely symbolic.",
+            "Any countervailing harms do not fully negate the responsibility-building effect."
+          ]
+        }
+      },
+      "status": "overruled"
+    },
+    {
+      "id": "arg-9517f9bc1d",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s argument relies on the assumption that “Any countervailing harms do not fully negate the responsibility-building effect.”"
+                ],
+                "weak_negation": [
+                  "The target does not provide any reasons or evidence showing that those countervailing harms fail to outweigh (or negate) the responsibility-building effect."
+                ]
+              },
+              "consequent": "The target leaves its net-benefit comparison (harms vs. responsibility-building effects) unsupported."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target leaves its net-benefit comparison (harms vs. responsibility-building effects) unsupported",
+                  "Social media spurs digital addiction, cyberbullying, mental-health issues, the spread of misinformation/dangerous fads, and privacy risks that create psychological and safety harms, especially for adolescents and teens."
+                ],
+                "weak_negation": [
+                  "Without a demonstrated offset, substantial psychological, safety, informational, and privacy harms prevent concluding that social media is overall good for society."
+                ]
+              },
+              "consequent": "Therefore, social media is not good for society overall."
+            }
+          ],
+          "Conc": [
+            "The target leaves its net-benefit comparison (harms vs. responsibility-building effects) unsupported.",
+            "Therefore, social media is not good for society overall."
+          ],
+          "Ass": [
+            "The target does not provide any reasons or evidence showing that those countervailing harms fail to outweigh (or negate) the responsibility-building effect.",
+            "Without a demonstrated offset, substantial psychological, safety, informational, and privacy harms prevent concluding that social media is overall good for society."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-bce3234562",
+      "target_field": "Ass",
+      "target_statement": "Any countervailing harms do not fully negate the responsibility-building effect"
+    },
+    {
+      "id": "arg-93937855ba",
+      "agent": "AG1",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target infers “Therefore, social media is not good for society overall” from the premise that “Without a demonstrated offset, substantial harms prevent concluding social media is overall good.”"
+                ],
+                "weak_negation": [
+                  "The target does not justify that offsetting benefits must be proven quantitatively before an overall-positive conclusion is permitted."
+                ]
+              },
+              "consequent": "The target uses an overly strict inference standard: it treats lack of quantified harm-offset evidence as sufficient to rule out that offsetting benefits exist."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target uses an overly strict inference standard: it treats lack of quantified harm-offset evidence as sufficient to rule out that offsetting benefits exist.",
+                  "Social media provides community and safety benefits both online and off, and my prior argument shows it can foster civic responsibility through low-barrier political activism."
+                ],
+                "weak_negation": [
+                  "The target does not show these community/safety and civic-responsibility pathways are absent or ineffective."
+                ]
+              },
+              "consequent": "So the target’s “no demonstrated offset” premise is not supported as a basis for concluding an overall negative effect."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "So the target’s “no demonstrated offset” premise is not supported as a basis for concluding an overall negative effect.",
+                  "Social media supports inclusivity and diversity by letting marginalized groups—especially LGBTQ+ youth—explore identities and connect with peers."
+                ],
+                "weak_negation": [
+                  "The target’s harms list does not logically negate the protective value of peer connection for identity-exploring youth."
+                ]
+              },
+              "consequent": "Therefore, the target cannot establish that social media is not good for society overall."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Therefore, the target cannot establish that social media is not good for society overall."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Social media is good for society overall."
+            }
+          ],
+          "Conc": [
+            "The target uses an overly strict inference standard: it treats lack of quantified harm-offset evidence as sufficient to rule out that offsetting benefits exist.",
+            "So the target’s “no demonstrated offset” premise is not supported as a basis for concluding an overall negative effect.",
+            "Therefore, the target cannot establish that social media is not good for society overall.",
+            "Social media is good for society overall."
+          ],
+          "Ass": [
+            "The target does not justify that offsetting benefits must be proven quantitatively before an overall-positive conclusion is permitted.",
+            "The target does not show these community/safety and civic-responsibility pathways are absent or ineffective.",
+            "The target’s harms list does not logically negate the protective value of peer connection for identity-exploring youth."
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-9517f9bc1d",
+      "target_field": "Conc",
+      "target_statement": "Therefore, social media is not good for society overall."
+    },
+    {
+      "id": "arg-4311df6186",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s rebuttal assumes that “the target’s harms list does not logically negate the protective value of peer connection for identity-exploring youth.”"
+                ],
+                "weak_negation": [
+                  "But the harms AG1 implicitly accepts from its target—especially cyberbullying and mental-health issues that disproportionately harm adolescents and teens—can directly undermine the ‘protective’ effect of peer connection for identity-exploring youth."
+                ]
+              },
+              "consequent": "Therefore, AG1’s assumption that peer-connection benefits remain protective despite the listed harms is unsupported."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Therefore, AG1’s assumption that peer-connection benefits remain protective despite the listed harms is unsupported.",
+                  "AG1’s overall defense depends on that assumption supporting its claim that the target cannot establish social media is not good for society overall."
+                ],
+                "weak_negation": [
+                  "AG1 does not replace this dependency with a separate justification that social-media harms are neutralized for these youth."
+                ]
+              },
+              "consequent": "So AG1 cannot sustain its conclusion that social media is good for society overall against the target’s harms-based case."
+            }
+          ],
+          "Conc": [
+            "Therefore, AG1’s assumption that peer-connection benefits remain protective despite the listed harms is unsupported.",
+            "So AG1 cannot sustain its conclusion that social media is good for society overall against the target’s harms-based case."
+          ],
+          "Ass": [
+            "But the harms AG1 implicitly accepts from its target—especially cyberbullying and mental-health issues that disproportionately harm adolescents and teens—can directly undermine the ‘protective’ effect of peer connection for identity-exploring youth.",
+            "AG1 does not replace this dependency with a separate justification that social-media harms are neutralized for these youth."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-93937855ba",
+      "target_field": "Ass"
+    },
+    {
+      "id": "arg-c21666c67b",
+      "agent": "AG2",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Social media platforms distribute content via sharing/recommendation in ways that can quickly reach many people at once",
+                  "False or misleading content can still be ranked, promoted, or re-circulated like other content"
+                ],
+                "weak_negation": [
+                  "This dissemination mechanism does not reliably stop misinformation before it reaches large audiences"
+                ]
+              },
+              "consequent": "Social media can spread misinformation rapidly to large audiences."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Social media can spread misinformation rapidly to large audiences",
+                  "People often treat viral claims as credible because they see them repeated by peers/influencers (social proof)"
+                ],
+                "weak_negation": [
+                  "Viral trend adoption does not reliably depend on verifying whether the underlying information is true"
+                ]
+              },
+              "consequent": "Rapid misinformation spread increases the likelihood that people adopt dangerous fads or challenges based on false information."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Rapid misinformation spread increases the likelihood that people adopt dangerous fads or challenges based on false information",
+                  "Some of these challenges/fads involve physically risky behavior or unsafe refusals (creating real-world harm pathways)"
+                ],
+                "weak_negation": [
+                  "Misinformation-driven challenges can realistically produce lethal or serious safety harms, not just abstract or negligible risks"
+                ]
+              },
+              "consequent": "Misinformation-driven social-media fads/challenges can be lethal and pose serious safety risks to users."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Misinformation-driven social-media fads/challenges can be lethal and pose serious safety risks to users"
+                ],
+                "weak_negation": [
+                  "These safety risks are not sufficiently constrained/rare such that social media’s overall societal impact could be judged “good for society”"
+                ]
+              },
+              "consequent": "Therefore, social media is not good for society as a whole."
+            }
+          ],
+          "Conc": [
+            "Social media can spread misinformation rapidly to large audiences.",
+            "Rapid misinformation spread increases the likelihood that people adopt dangerous fads or challenges based on false information.",
+            "Misinformation-driven social-media fads/challenges can be lethal and pose serious safety risks to users.",
+            "Therefore, social media is not good for society as a whole."
+          ],
+          "Ass": [
+            "This dissemination mechanism does not reliably stop misinformation before it reaches large audiences",
+            "Viral trend adoption does not reliably depend on verifying whether the underlying information is true",
+            "Misinformation-driven challenges can realistically produce lethal or serious safety harms, not just abstract or negligible risks",
+            "These safety risks are not sufficiently constrained/rare such that social media’s overall societal impact could be judged “good for society”"
+          ]
+        }
+      },
+      "status": "overruled"
+    },
+    {
+      "id": "arg-9668b22afc",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s final “not good for society overall” inference depends on the assumption that misinformation-driven lethal/safety harms are “not sufficiently constrained/rare” relative to societal benefits and mitigations"
+                ],
+                "weak_negation": [
+                  "The target does not provide any reasons or evidence establishing that these harms are common/insufficiently mitigated rather than exceptional outcomes."
+                ]
+              },
+              "consequent": "The target leaves the comparative harms-vs-benefits premise unsupported."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target leaves the comparative harms-vs-benefits premise unsupported.",
+                  "If a net-impact conclusion relies on an unsupported comparative premise about harms vs. benefits, then the net-impact conclusion is not warranted."
+                ],
+                "weak_negation": [
+                  "Therefore, the target’s premises do not justify an overall negative judgment."
+                ]
+              },
+              "consequent": "The target’s “not good for society overall” inference is not justified by its own premises."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s “not good for society overall” inference is not justified by its own premises.",
+                  "Social media can promote community, safety, and safety-by-connection by enabling people with shared interests to connect across distance."
+                ],
+                "weak_negation": [
+                  "The target does not refute these societal-benefit pathways as absent or ineffective."
+                ]
+              },
+              "consequent": "Societal-benefit pathways remain in play rather than being overturned by the target’s argument."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Societal-benefit pathways remain in play rather than being overturned by the target’s argument."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "So the target has not shown that social media is not good for society overall."
+            }
+          ],
+          "Conc": [
+            "The target leaves the comparative harms-vs-benefits premise unsupported.",
+            "The target’s “not good for society overall” inference is not justified by its own premises.",
+            "Societal-benefit pathways remain in play rather than being overturned by the target’s argument.",
+            "So the target has not shown that social media is not good for society overall."
+          ],
+          "Ass": [
+            "The target does not provide any reasons or evidence establishing that these harms are common/insufficiently mitigated rather than exceptional outcomes.",
+            "Therefore, the target’s premises do not justify an overall negative judgment.",
+            "The target does not refute these societal-benefit pathways as absent or ineffective."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-c21666c67b",
+      "target_field": "Ass",
+      "target_statement": "These safety risks are not sufficiently constrained/rare such that social media’s overall societal impact could be judged “good for society”"
+    },
+    {
+      "id": "arg-2930dcbe7c",
+      "agent": "AG2",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s attack treats my “not sufficiently constrained/rare” step as requiring evidence that lethal misinformation-driven outcomes occur on an everyday basis",
+                  "My argument instead uses the mechanism that rapid, incentive-driven dissemination can repeatedly expose many users to dangerous challenges, even if any single lethal event is not literally daily"
+                ],
+                "weak_negation": [
+                  "AG1 does not address that mechanism-based justification for why the harms remain substantial overall."
+                ]
+              },
+              "consequent": "The “not sufficiently constrained/rare” step does not require proving everyday lethal outcomes; it relies on recurring, incentive-driven exposure risks created by rapid misinformation spread."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The “not sufficiently constrained/rare” step does not require proving everyday lethal outcomes; it relies on recurring, incentive-driven exposure risks created by rapid misinformation spread",
+                  "AG1’s attack does not refute the causal links I used: rapid misinformation spread → adoption of dangerous fads/challenges → realistic serious/lethal safety harms"
+                ],
+                "weak_negation": [
+                  "AG1 offers no argument that these specific causal links are absent or blocked before dangerous challenges reach large audiences."
+                ]
+              },
+              "consequent": "Even under AG1’s critique, the causal chain supporting substantial safety harms remains unrefuted, so the harms premise remains supported."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Even under AG1’s critique, the causal chain supporting substantial safety harms remains unrefuted, so the harms premise remains supported",
+                  "AG1’s “societal-benefit pathways remain in play” response does not show that these benefits offset the specific safety-risk mechanism (or eliminate it)"
+                ],
+                "weak_negation": [
+                  "AG1 provides no concrete reason that the net effect flips from negative to positive in light of these unrefuted safety harms."
+                ]
+              },
+              "consequent": "AG1’s response does not establish that social media is good for society overall."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s response does not establish that social media is good for society overall",
+                  "My prior argument supplies the basis for an overall negative societal judgment: misinformation-driven, potentially lethal safety harms are realistic and not adequately constrained."
+                ],
+                "weak_negation": [
+                  "AG1 does not overturn that basis."
+                ]
+              },
+              "consequent": "Therefore, the attack fails to show that social media is not good for society overall is unsupported; social media is not good for society as a whole."
+            }
+          ],
+          "Conc": [
+            "The “not sufficiently constrained/rare” step does not require proving everyday lethal outcomes; it relies on recurring, incentive-driven exposure risks created by rapid misinformation spread.",
+            "Even under AG1’s critique, the causal chain supporting substantial safety harms remains unrefuted, so the harms premise remains supported.",
+            "AG1’s response does not establish that social media is good for society overall.",
+            "Therefore, the attack fails to show that social media is not good for society overall is unsupported; social media is not good for society as a whole."
+          ],
+          "Ass": [
+            "AG1 does not address that mechanism-based justification for why the harms remain substantial overall.",
+            "AG1 offers no argument that these specific causal links are absent or blocked before dangerous challenges reach large audiences.",
+            "AG1 provides no concrete reason that the net effect flips from negative to positive in light of these unrefuted safety harms.",
+            "AG1 does not overturn that basis."
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-9668b22afc",
+      "target_field": "Conc",
+      "target_statement": "So the target has not shown that social media is not good for society overall."
+    },
+    {
+      "id": "arg-598d3b597d",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s defense depends on the claim that AG1 did not refute the component captured by “these safety risks are not sufficiently constrained/rare,” i.e., the harms-magnitude/likelihood premise underlying AG2’s “causal chain remains unrefuted” move",
+                  "AG1’s attack explicitly targeted that very “not sufficiently constrained/rare” comparative premise by arguing it was unsupported, and then pointed to offsetting societal-benefit pathways as still “in play”"
+                ],
+                "weak_negation": [
+                  "AG2 does not show that AG1 left the harms-magnitude/likelihood premise untouched."
+                ]
+              },
+              "consequent": "AG1 directly undermined the harms-likelihood/rarity premise that AG2 relies on to say the harms causal chain remains unrefuted."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1 directly undermined the harms-likelihood/rarity premise that AG2 relies on to say the harms causal chain remains unrefuted",
+                  "AG2’s next step assumes that because the causal chain is “unrefuted,” the harms premise remains supported"
+                ],
+                "weak_negation": [
+                  "If the harms-magnitude/likelihood premise is undermined, then the inference that the harms premise remains supported does not follow from AG2’s framework."
+                ]
+              },
+              "consequent": "AG2’s inference that the harms premise “remains supported” under AG1’s critique is invalid."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s inference that the harms premise “remains supported” under AG1’s critique is invalid",
+                  "AG2’s final conclusion (“social media is not good for society as a whole”) depends on that inference as its key support"
+                ],
+                "weak_negation": [
+                  "AG2 does not provide independent support for the overall negative conclusion that does not rely on the invalid “harms premise remains supported” step."
+                ]
+              },
+              "consequent": "AG2 has not established that social media is not good for society overall."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2 has not established that social media is not good for society overall"
+                ],
+                "weak_negation": [
+                  "Therefore, AG2’s defensive attack against AG1 does not succeed."
+                ]
+              },
+              "consequent": "AG1’s attack is not defeated by AG2’s rebuttal."
+            }
+          ],
+          "Conc": [
+            "AG1 directly undermined the harms-likelihood/rarity premise that AG2 relies on to say the harms causal chain remains unrefuted.",
+            "AG2’s inference that the harms premise “remains supported” under AG1’s critique is invalid.",
+            "AG2 has not established that social media is not good for society overall.",
+            "AG1’s attack is not defeated by AG2’s rebuttal."
+          ],
+          "Ass": [
+            "AG2 does not show that AG1 left the harms-magnitude/likelihood premise untouched.",
+            "If the harms-magnitude/likelihood premise is undermined, then the inference that the harms premise remains supported does not follow from AG2’s framework.",
+            "AG2 does not provide independent support for the overall negative conclusion that does not rely on the invalid “harms premise remains supported” step.",
+            "Therefore, AG2’s defensive attack against AG1 does not succeed."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-2930dcbe7c",
+      "target_field": "Ass"
+    }
+  ],
+  "final_answer": "**Overall: Social media is not good for society overall.**  \n\n### Why the balance of considerations tilts negative\nSocial media can *sometimes* deliver genuine societal benefits—community, civic engagement, and support for marginalized identities—but the downsides described (especially for adolescents/teens and around safety and privacy) are not merely edge cases. On the evidence and reasoning presented, the harmful pathways are supported more directly and more comprehensively than the countervailing benefits, and the benefits are not shown to reliably neutralize the harms.\n\n### Societal benefits are real (but not shown to dominate)\nSocial media plausibly supports:\n- **Community and perceived safety/security** through sustained cross-distance connection among people with shared interests.\n- **Civic and political responsibility**, including among young people, via low-barrier participation and identity formation around civic action.\n- **Inclusivity/diversity**, including for **LGBTQ+ youth**, by enabling identity exploration and peer support.\n\nThese benefits matter, but the arguments do not establish that they are **robustly sustained in the face of the platform’s standard dynamics** (recommendation, virality incentives, exposure to hostile content, and privacy/data extraction). In particular, the protective value of peer connection for vulnerable groups is left insufficiently defended against the harms that are also likely to be concentrated in the same populations (e.g., cyberbullying and mental-health impacts on adolescents/teens).\n\n### Harms are supported as predictable and widespread\nThe negative case is supported by clearer causal mechanisms and broader risk categories:\n\n1. **Psychological and social harms (especially for teens)**\n   - Dependency/addiction dynamics, cyberbullying, and mental-health harm are highlighted as predictable outcomes of platform incentives and engagement structures.\n   - The benefits for young people (community, activism, identity support) were not shown to reliably outweigh these psychological harms for adolescents/teens.\n\n2. **Misinformation → dangerous real-world fads/challenges**\n   - The reasoning that social media can rapidly disseminate misleading content to large audiences is compelling.\n   - Even if any single “lethal” event is not literally constant, the argument shows that the mechanism can repeatedly generate risky “challenges” where some users adopt dangerous behavior before misinformation is corrected.\n   - The rebuttal did not successfully remove this risk chain; it primarily argued about what level of frequency would count as sufficient, rather than showing that dangerous outcomes are meaningfully constrained by default.\n\n3. **Privacy and data-security risks**\n   - The risk that user data collection/sharing and exposure to unauthorized access compromise personal security is included as a core harmful pathway.\n   - The pro-social-media case did not provide a strong basis for believing these privacy/security risks are outweighed overall by community/civic benefits in the absence of strong, demonstrated mitigation.\n\n### Addressing the main counterpoint\nA key objection was that concluding “overall bad” shouldn’t require finely quantified proof that harms outweigh benefits. That’s reasonable—however, you still need **more than** plausible benefits while the harms remain **predictably embedded** in the platform’s operation. Here, the harmful mechanisms (psychological harms, misinformation-driven dangerous trends, privacy risks) were not meaningfully neutralized by the benefits beyond assertion.\n\n### Bottom line\nBecause the harmful dynamics are supported as **predictable, recurring, and not effectively counterbalanced** in the reasoning provided—particularly for adolescents/teens, and for safety/privacy outcomes—the best-supported judgment is that **social media is not good for society overall**, even though it can produce real benefits for community, civic life, and some marginalized users.  \n\n**Confidence: moderate.** The conclusion depends on comparing mechanisms without strong quantitative weighting in the arguments; still, the harms case is developed more concretely than the benefits-versus-harms offset, so leaning negative is better supported than leaning positive.",
+  "integrated_rules": [
+    "Unified decision rule (apply the same evidential strength standard to both sides):\n\nLet B be supported if the platform reliably promotes community and perceived safety/security via sustained cross-distance connection among people with shared interests, OR measurably supports civic/political responsibility by helping users (especially young people) form civic identities and participate in low-barrier political activism, OR measurably increases inclusivity/diversity by enabling marginalized users (including LGBTQ+ youth) to explore identity and connect with supportive peers both online and off.\n\nLet H be supported if the platform’s dynamics predictably produce psychological/social harms (e.g., addiction/dependency, cyberbullying, mental-health harms), particularly among adolescents/teens, OR the platform enables rapid misinformation that motivates dangerous trends/challenges causing serious physical safety harms (including fatalities) where such safety risks are not sufficiently constrained/rare so that overall positive judgment remains reasonably possible, OR the platform’s data practices (collection/sharing/exposure to unauthorized access) create privacy/data-security risks that compromise users’ personal security and safety.\n\nOutcome mapping:\n- If B is supported and H is not supported (or is supported only far less strongly), conclude there are grounds to judge social media good for society.\n- If H is supported (one or more H-subconditions) and the harms are better supported than the benefits—assessed by comparing their relative magnitude, breadth, likelihood, reversibility, and available mitigation—conclude there are grounds to judge social media not good for society overall.\n- If both B and H are supported with roughly comparable strength and the decision hinges on uncertain or finely balanced comparisons, leave the overall judgment unresolved rather than choosing automatically."
+  ]
+}

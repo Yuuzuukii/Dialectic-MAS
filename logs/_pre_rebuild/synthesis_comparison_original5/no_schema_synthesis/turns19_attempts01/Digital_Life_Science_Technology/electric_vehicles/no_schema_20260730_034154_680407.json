@@ -1,0 +1,197 @@
+{
+  "method": "no_schema",
+  "question": "Is Driving an Electric Vehicle Good?",
+  "agent1_stance": "Your stance:\nYou support electric vehicles.\nYou believe EVs are better for the environment than gas-powered cars, as they produce no harmful emissions during operation and can be powered by renewable energy sources.\nYou believe EVs are less expensive to fuel and maintain, as EV drivers don't need to worry about engine oil or transmission fluid in their cars, and electricity costs less than gasoline.\nYou believe EVs are quiet and offer better handling than gas-powered cars, as they lack internal combustion engines and their lower center of gravity improves handling and responsiveness.",
+  "agent2_stance": "Your stance:\nYou oppose electric vehicles.\nYou believe EVs are not carbon-neutral and their batteries pose environmental and safety risks, as lithium mining causes water loss, contamination, and biodiversity loss, and lithium-ion batteries can explode and produce toxic fumes difficult to extinguish.\nYou believe EVs cost significantly more to purchase than gas-powered cars, and that fewer than 15% of Americans can afford EVs.\nYou believe EVs lack reliability and adequate charging infrastructure, as Consumer Reports found EVs have 42% more problems than gas-powered cars and there are only 22 EV charging stations per 1,000 road miles versus 104 gas pumps.",
+  "metrics": {
+    "elapsed_seconds": 233.105,
+    "model": "gpt-5.4-nano",
+    "prompt_tokens": 130165,
+    "cached_tokens": 29440,
+    "completion_tokens": 29778,
+    "total_tokens": 159943,
+    "total_cost_usd": 0.057956
+  },
+  "dialogue_history": [
+    {
+      "id": "arg-59bbceb2cd",
+      "agent": "AG1",
+      "type": "main",
+      "argument": "Driving an electric vehicle is good primarily because, during operation, it produces no harmful emissions—unlike gas-powered cars that emit pollutants as they burn fuel. Since EVs can also be powered by renewable energy sources, the electricity used to drive them can come from cleaner generation, further reducing environmental harm. Therefore, EV driving is beneficial for the environment in a direct, mechanistic way.",
+      "status": "defensible"
+    },
+    {
+      "id": "arg-c69ffa2427",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": "The target claims EV driving is “beneficial for the environment” primarily because it has “no harmful emissions” during operation. I rebut that conclusion: even if tailpipe emissions are zero, EVs are not environmentally benign overall—battery production and lithium mining cause major harms (water loss, contamination, and biodiversity loss), and lithium-ion batteries pose safety risks (including explosions that can release toxic fumes that are difficult to extinguish). Therefore, the environmental benefit does not follow from the target’s operational-emissions-only, renewable-possibility reasoning.",
+      "attack": "rebut",
+      "target_id": "arg-59bbceb2cd",
+      "target_field": "Conc",
+      "target_statement": "Therefore, EV driving is beneficial for the environment in a direct, mechanistic way."
+    },
+    {
+      "id": "arg-158628b147",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": "The undercut is that AG2’s rebut assumes the target’s reasoning treats EVs as environmentally “harmless overall” (i.e., that tailpipe-free driving is invalidated whenever there are upstream harms). But the target argument only grounds environmental benefit in **what happens during operation**—EVs produce **no harmful emissions during operation**—and in the possibility of powering EVs with **renewable energy sources**. So the existence of battery-manufacturing/mining impacts (or rare safety hazards) does not negate the specific assumption the target relies on: that **driving an EV itself avoids harmful emissions** and can therefore reduce environmental harm relative to burning gasoline while driving. As a result, AG2’s conclusion (“therefore the environmental benefit does not follow”) doesn’t follow from the target’s stated operational-emissions premise.",
+      "attack": "undercut",
+      "target_id": "arg-c69ffa2427",
+      "target_field": "Ass"
+    },
+    {
+      "id": "arg-5f7a49170c",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": "The target’s conclusion relies on the idea that EVs are often powered by “renewable energy sources,” so the electricity “used to drive them can come from cleaner generation.” But that is only a possibility, not a guarantee. If the local grid is powered significantly by fossil fuels, then EV charging still causes substantial emissions upstream—so the target’s operational “no harmful emissions” premise does not establish an environmental benefit in general. Therefore, the argument fails to show that driving an electric vehicle is good for the environment.",
+      "attack": "undercut",
+      "target_id": "arg-59bbceb2cd",
+      "target_field": "Ass",
+      "target_statement": "Since EVs can also be powered by renewable energy sources, the electricity used to drive them can come from cleaner generation, further reducing environmental harm."
+    },
+    {
+      "id": "arg-16b0db3851",
+      "agent": "AG1",
+      "type": "counter",
+      "argument": "The target attack treats my argument as if it must prove that renewable-powered charging is a guarantee, but that isn’t what the original reasoning does. My main point is that **during operation** an EV produces **no harmful emissions** at the tailpipe—so it directly reduces local air pollution regardless of what the grid mix is. The “renewable energy sources” clause is an additional reason that can further reduce environmental harm, not the sole foundation. Therefore, even if renewables aren’t always used, the operational, mechanistic environmental benefit still follows, so the target’s “therefore the argument fails” conclusion doesn’t hold.",
+      "attack": "undercut",
+      "target_id": "arg-5f7a49170c",
+      "target_field": "Ass",
+      "target_statement": "that “only a possibility, not a guarantee” means the operational “no harmful emissions” premise does not establish an environmental benefit in general"
+    },
+    {
+      "id": "arg-e917a7ba4f",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": "The target’s core premise is that an EV “during operation…produces no harmful emissions.” That’s not true: even without tailpipe exhaust, EVs still generate harmful pollution from non-exhaust sources like tire wear and brake wear (particulate pollution) while driving. Because the argument’s “no harmful emissions” mechanistic basis fails, the conclusion that EV driving is beneficial for the environment follows no longer on the basis the target provided.",
+      "attack": "undercut",
+      "target_id": "arg-59bbceb2cd",
+      "target_field": "Ass",
+      "target_statement": "during operation, it produces no harmful emissions—unlike gas-powered cars that emit pollutants as they burn fuel"
+    },
+    {
+      "id": "arg-b6b6d1b207",
+      "agent": "AG1",
+      "type": "counter",
+      "argument": "The target treats my “no harmful emissions during operation” claim as if it meant EVs produce zero harmful pollution from every source (like tire or brake wear). But that’s not what the mechanism I pointed to is: EVs have **no tailpipe exhaust** from fuel combustion while operating, which is the major source of vehicle air pollutants. Tire and brake wear particulates are produced by **all** cars regardless of powertrain, so they don’t overturn the specific comparison I used (EVs eliminate exhaust emissions). Therefore, the target’s inference that my mechanistic environmental basis “fails” is incorrect, and the conclusion that EV driving is environmentally beneficial still follows on the basis provided.",
+      "attack": "undercut",
+      "target_id": "arg-e917a7ba4f",
+      "target_field": "Ass",
+      "target_statement": "even without tailpipe exhaust, EVs still generate harmful pollution from non-exhaust sources like tire wear and brake wear while driving, so the argument’s ‘no harmful emissions’ mechanistic basis fails"
+    },
+    {
+      "id": "arg-b1fafcecf0",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": "The target’s conclusion claims EV driving is “beneficial for the environment in a direct, mechanistic way” based on zero tailpipe emissions and the possibility of renewables. But that misses the practical mechanism by which environmental benefits would be realized: if EVs can’t be used reliably or conveniently at scale, people keep driving gas cars and the environmental harm isn’t eliminated. Yet EV charging infrastructure is far too limited (only 22 EV charging stations per 1,000 road miles versus 104 gas pumps), and reliability is worse (Consumer Reports found EVs have 42% more problems than gas-powered cars). So the target can’t establish a direct environmental benefit from operation alone; in practice, inadequate charging and reliability undercut the claimed environmental advantage.",
+      "attack": "rebut",
+      "target_id": "arg-59bbceb2cd",
+      "target_field": "Conc",
+      "target_statement": "Therefore, EV driving is beneficial for the environment in a direct, mechanistic way."
+    },
+    {
+      "id": "arg-417141033b",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": "The target undercuts its own conclusion by assuming that the only way EVs can be “beneficial for the environment in a direct, mechanistic way” is if EVs reliably and conveniently replace essentially all gas-car driving. But my original argument’s mechanism is trip-by-trip: **when an EV is driven, it has no tailpipe combustion emissions**, unlike a gas car. Even if charging infrastructure and reliability limits prevent full replacement, the environmental benefit still holds for the miles that *are* driven by EVs, and those miles directly displace some gasoline burning. Therefore, the target’s “at-scale” complaint doesn’t negate the mechanistic claim— it only challenges the size of the overall impact, not whether EV driving is environmentally beneficial in principle.",
+      "attack": "undercut",
+      "target_id": "arg-b1fafcecf0",
+      "target_field": "Ass"
+    },
+    {
+      "id": "arg-8eda911250",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": "The target’s conclusion (“EV driving is beneficial for the environment in a direct, mechanistic way”) treats an individual EV’s tailpipe/energy-source advantage as if it reliably translates into real environmental benefit. But EVs cost significantly more to purchase, and fewer than 15% of Americans can afford EVs—so most driving miles are unlikely to be displaced from gas cars. That means the “direct” environmental advantage the target implies from operation cannot be realized at scale, so the target hasn’t established that driving an EV is good for the environment in the way it claims.",
+      "attack": "rebut",
+      "target_id": "arg-59bbceb2cd",
+      "target_field": "Conc",
+      "target_statement": "Therefore, EV driving is beneficial for the environment in a direct, mechanistic way."
+    },
+    {
+      "id": "arg-14866a0e06",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": "The target assumes my argument requires that EVs be affordable enough for “most driving miles” to be displaced from gas cars in order for EV driving to be environmentally good. But that’s not part of the original claim: it says that *during operation* an EV has **no harmful emissions from fuel combustion**, which is an environmental benefit for the vehicle that is actually driven, regardless of whether everyone switches. Even if adoption is limited by cost, the mechanistic tailpipe-emissions advantage still makes *driving an EV* environmentally beneficial for the user and local air quality, so the target’s “can’t be realized at scale” step doesn’t negate my conclusion.",
+      "attack": "undercut",
+      "target_id": "arg-8eda911250",
+      "target_field": "Ass"
+    },
+    {
+      "id": "arg-9c0cf7a457",
+      "agent": "AG2",
+      "type": "main",
+      "argument": "Driving an electric vehicle is not good primarily because it is **not carbon-neutral overall**. Even though an EV has **no tailpipe emissions during operation**, the electricity used to charge it is generated somewhere (and battery production also requires energy and materials), which means greenhouse gases are emitted upstream rather than disappearing. Since the EV’s overall climate impact depends on these lifecycle emissions—not just tailpipe output—EV driving cannot fairly be treated as environmentally “good” on the basis of zero emissions during operation. Therefore, driving an electric vehicle is not good.",
+      "status": "defensible"
+    },
+    {
+      "id": "arg-faa5bdb37b",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": "The target’s conclusion depends on the idea that because an EV is not perfectly “carbon-neutral overall,” driving it is therefore not good. I rebut that: “not carbon-neutral” does not follow to “not good.” The relevant environmental question is whether EV driving **reduces** harmful emissions compared with gas cars—and EVs have **zero tailpipe emissions during operation**, while also being able to run on electricity from renewable energy sources. So even with some lifecycle emissions from electricity generation and battery production, EV driving can still be environmentally beneficial (and becomes better as the grid gets cleaner). Therefore, the target’s inference to “not good” doesn’t hold.",
+      "attack": "undercut",
+      "target_id": "arg-9c0cf7a457",
+      "target_field": "Ass",
+      "target_statement": "EV driving cannot fairly be treated as environmentally “good” on the basis of zero emissions during operation (i.e., that not being carbon-neutral overall implies EV driving isn’t good)."
+    },
+    {
+      "id": "arg-7e1aca8905",
+      "agent": "AG2",
+      "type": "counter",
+      "argument": "Your counterargument depends on shifting the standard: you argue that because an EV is not perfectly “carbon-neutral overall,” that alone doesn’t show it’s “not good,” and you replace my claim with a relative question about whether EVs reduce emissions compared to gas. But my argument is not “EVs are worse than gas cars.” It’s that **EVs are not carbon-neutral overall**, meaning **they still contribute lifecycle greenhouse-gas emissions**, so EV driving **cannot fairly be treated as environmentally “good” on the basis of zero tailpipe emissions during operation**. Since you don’t negate the fact that EV driving is not carbon-neutral overall, your “not good doesn’t follow” move doesn’t defeat my conclusion.",
+      "attack": "undercut",
+      "target_id": "arg-faa5bdb37b",
+      "target_field": "Ass",
+      "target_statement": "the relevant question is whether EVs reduce emissions compared with gas, so ‘not carbon-neutral overall’ doesn’t imply ‘not good’"
+    },
+    {
+      "id": "arg-d7848f1a62",
+      "agent": "AG1",
+      "type": "main",
+      "argument": "Driving an electric vehicle is good because, when compared to a similar gas car, EV driving can be expected to win on the overall net environmental and practical criteria.\n\n1) Net environmental impact (not just operation): Gas cars emit greenhouse gases at the tailpipe, while EVs shift emissions upstream to electricity generation and also include energy/materials for batteries. But the tailpipe advantage plus cleaner electricity potential means the **lifecycle greenhouse-gas emissions and upstream environmental costs are typically substantially lower** than gas-car fuel emissions—so the operational air-quality benefit isn’t erased upstream.\n\n2) Battery-related environmental/safety harms: Battery mining/disposal and associated safety risks are real, but they are part of a product lifecycle; they do not have to be worse in a way that cancels the lifecycle emissions advantage in order for EVs to be environmentally good. Overall, the battery impacts are **not material enough to negate** the net climate benefit.\n\n3) Practical accessibility and use constraints: EVs are also **practically usable** because electricity is generally cheaper than gasoline and EVs avoid costs/maintenance tied to engine oil and transmission fluids; with charging infrastructure expanding, EV use is sufficiently reliable for typical drivers.\n\nTherefore, considering lifecycle emissions and upstream costs, battery-related impacts, and real-world usability, driving an EV is good.",
+      "status": "defensible"
+    },
+    {
+      "id": "arg-744ea2cfbb",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": "The target argues EVs are “practically usable” for typical drivers because charging infrastructure is expanding and EVs are sufficiently reliable. But the practical-access assumptions don’t hold up: EVs have **meaningfully worse reliability** (Consumer Reports found EVs have **42% more problems** than gas-powered cars), and charging access is far behind (only **22 EV charging stations per 1,000 road miles** versus **104 gas pumps**). On top of that, EVs have **significantly higher purchase cost**, and **fewer than 15% of Americans can afford EVs**—so typical drivers can’t reliably switch from gas to EVs. With (3) undermined, the target’s “therefore…driving an EV is good” conclusion fails.",
+      "attack": "undercut",
+      "target_id": "arg-d7848f1a62",
+      "target_field": "Ass",
+      "target_statement": "EVs are also **practically usable** because electricity is generally cheaper than gasoline and EVs avoid costs/maintenance tied to engine oil and transmission fluids; with charging infrastructure expanding, EV use is sufficiently reliable for typical drivers."
+    },
+    {
+      "id": "arg-ce95ec108c",
+      "agent": "AG1",
+      "type": "counter",
+      "argument": "The target attack undermines (3) by treating **public charging-station density** and a **survey-reported “% more problems”** figure as if they determined whether EVs are “sufficiently reliable for typical drivers.” But that overstates the link.\n\n- **Charging access:** The station-per-road-mile comparison ignores that many “typical drivers” can charge **at home or at work**, where they park for hours—so day-to-day usability depends far more on routine overnight/employee charging than on how many public stations exist per road mile.\n- **Reliability:** Even if EVs show higher reported problem rates in a study, the question in (3) is whether EVs are reliable enough for typical use; increased “problems” in surveys doesn’t automatically mean drivers can’t use the vehicles reliably, especially since EV drivetrains have fewer maintenance items tied to combustion systems and issues are often covered by warranty.\n\nSo the target doesn’t actually establish that EVs fail the “practical usability” criterion for typical drivers; therefore its claim that the overall conclusion fails doesn’t hold.",
+      "attack": "undercut",
+      "target_id": "arg-744ea2cfbb",
+      "target_field": "Ass",
+      "target_statement": "the practical-access assumptions don’t hold up, so typical drivers can’t reliably switch and therefore the conclusion fails"
+    },
+    {
+      "id": "arg-747ea0e53a",
+      "agent": "AG2",
+      "type": "main",
+      "argument": "Driving an electric vehicle is not good because EVs’ **battery-related environmental and safety harms** are material and can cancel any operational pollution advantage.\n\nUnder the criteria for calling EV driving “good,” EVs are only “good” if battery mining/disposal and safety risks are **not worse in a way that cancels** the benefits from cleaner operation. But EV batteries rely on lithium mining that causes **water loss, contamination, and biodiversity loss**, and lithium-ion batteries can **explode**, producing **toxic fumes that are difficult to extinguish**. These harms occur upstream and during battery failures, so the “during operation” tailpipe advantage doesn’t remove or offset them. \n\nTherefore, because battery-related impacts are not minor and can outweigh the environmental gains claimed from zero tailpipe emissions, driving an electric vehicle is not good.",
+      "status": "defensible"
+    },
+    {
+      "id": "arg-6705c433eb",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": "The target argues that battery-related environmental/safety harms are “material” and “can cancel” EVs’ operational advantages. I rebut the key link: those harms don’t have to outweigh the benefits, because they are largely **up-front (manufacturing/initial battery impacts)**, while the EV avoids harmful emissions **every day of use**. As a result, battery impacts can be **amortized/offset** by the ongoing reduction in tailpipe pollution over the vehicle’s lifetime. \n\nAlso, even if battery failures can release hazardous fumes, that does not follow that these safety risks are commonly severe or environmentally dominant compared to the repeated emissions avoided during operation. So the target’s conclusion (“therefore…not good”) doesn’t follow from the existence of battery harms; it depends on showing they outweigh/cancel the net benefits, which the argument doesn’t establish.",
+      "attack": "undercut",
+      "target_id": "arg-747ea0e53a",
+      "target_field": "Ass",
+      "target_statement": "EVs’ battery-related environmental and safety harms are material and can cancel any operational pollution advantage (i.e., the harms are materially significant and not offset/can outweigh the benefits)."
+    }
+  ],
+  "final_answer": "Driving an electric vehicle is **not clearly “good” based on the evidence and claims presented**. The strongest reasons for EVs are plausible (especially reduced tailpipe pollution and potential lifecycle climate benefits), but the debate does not establish—at the required level—that EV driving is **substantially better overall** after accounting for lifecycle impacts and that it is **practically usable for typical drivers**. So the most defensible conclusion is **unresolved rather than a confident “good.”**\n\n## Why it doesn’t clearly meet the “good” standard\n\n### 1) Net environmental impact (including upstream + full battery lifecycle) is not shown convincingly\n- **Pro-EV points that matter:**  \n  EVs have **no tailpipe emissions during operation**, and if electricity comes from cleaner sources, operational climate impacts can be lower. EVs also avoid some conventional air pollutants tied to combustion.\n- **Key objections that weren’t decisively answered:**  \n  - The anti-EV side argues EVs are **not carbon-neutral overall** because upstream electricity generation still emits greenhouse gases and because **battery production** requires energy and materials.  \n  - It also argues **battery-related environmental harms and safety risks** (mining impacts and the possibility of toxic fumes from rare battery failures) are serious enough to potentially offset benefits.\n- **What’s missing for a clear “good” verdict:**  \n  The pro-EV side asserts lifecycle emissions are typically substantially lower, but the debate provides **no concrete lifecycle greenhouse-gas comparison figures** (e.g., per-mile or per-lifetime) to show the advantage is “substantially lower” in the strongest sense required. The counter about “amortizing” battery impacts by years of use is plausible, but the debate still doesn’t show that the upstream harms and safety risks are **not material enough to cancel** the lifecycle advantage.\n\n**Result:** Criterion (1) is **not clearly satisfied**.\n\n### 2) Practical affordability/infrastructure/reliability for typical drivers is contested, not settled\n- **Pro-EV points that matter:**  \n  EVs can be cheaper to fuel and maintain (no engine oil/transmission fluid; electricity often cheaper than gasoline), and charging can work well when people can charge at home or work. Reliability and usability concerns are often overstated by survey percentages.\n- **Anti-EV points that matter (and are specific):**  \n  - **Purchase affordability:** the claim that **fewer than 15% of Americans can afford EVs** is a serious practical barrier to typical-driver adoption.  \n  - **Charging access:** **22 EV charging stations per 1,000 road miles vs 104 gas pumps** suggests public charging availability is behind.  \n  - **Reliability:** the claim that EVs have **42% more problems** than gas cars challenges “sufficient reliability.”\n- **Why this still doesn’t fully resolve in favor of EVs here:**  \n  The pro-EV rebuttal that many drivers charge at home/work is reasonable, but the debate does not provide evidence showing that *typical drivers lacking home/work charging* still have reliable access. Likewise, the affordability claim isn’t directly answered by showing that most typical drivers can cost-effectively obtain and operate an EV despite higher upfront prices.\n\n**Result:** Criterion (2) is also **not clearly satisfied**.\n\n## Bottom line\nBecause the debate does **not** clearly establish both (1) **substantially lower net lifecycle environmental impact after battery harms** and (2) **practical affordability + dependable charging/reliability for typical drivers**, the best-supported answer is:\n\n**Driving an electric vehicle is not clearly “good” (it’s unresolved with the information actually provided).**\n\nThis doesn’t mean EVs are bad; it means the strongest support for “good” is largely asserted rather than demonstrated with the kind of lifecycle and typical-user practical evidence needed to confidently conclude “good” under strict criteria.",
+  "integrated_rules": [
+    "Assess EVs (or EV driving) on three linked criteria versus comparable gas vehicles: (1) **Net environmental impact (not just operational outputs)**: conclude EV driving is environmentally good only if the best evidence shows that **lifecycle greenhouse-gas emissions and upstream environmental costs** (electricity generation needed to charge + energy/materials for batteries) are **substantially lower** than the lifecycle harms from gas-car fuel, so that the tailpipe/air-quality advantage isn’t erased upstream; conclude EV driving is not environmentally good if the best evidence shows EVs are **not meaningfully lower overall** (e.g., overall not carbon-neutral because upstream emissions and battery impacts offset the operational advantage). (2) **Battery-related environmental/safety harms**: conclude EV is good only if any battery mining and disposal impacts and safety risks are **not worse in a way that cancels** the environmental benefits; conclude EV is not good if these harms are **materially significant** and not offset. (3) **Practical accessibility and use constraints**: conclude EV is good only if evidence supports that EVs are **more affordable to fuel/maintain and sufficiently reliable with accessible charging** (or at least not meaningfully worse for typical drivers); conclude EV is not good if evidence supports that purchase/usage cost burdens and charging reliability/infrastructure are **meaningfully worse**. If the evidence is mixed or fails to show EVs clearly win on (1)–(3), leave the verdict unresolved rather than assuming either side’s conclusion.",
+    "Treat “driving an electric vehicle is good” as depending on two reusable checks compared against a similar gasoline alternative:\n\n1) Net environmental & safety check: If credible evidence shows that, after accounting for upstream electricity-generation impacts and full battery lifecycle (production + disposal), the EV’s *net* environmental impact (e.g., lifecycle greenhouse gases and other upstream environmental costs) is substantially lower than the gas car’s tailpipe emissions *and* any battery-related environmental and safety harms (e.g., mining/disposal impacts and credible failure risks with harmful consequences) are not material enough to cancel that lifecycle advantage, then the environmental side supports “good.”\n\n2) Practical/affordability & infrastructure check: If credible evidence shows EV use is sufficiently practical for typical drivers—i.e., total operating costs are generally lower (cheaper energy vs gasoline, less maintenance) and charging access/reliability and purchase affordability are adequate (e.g., not so limited that most drivers can’t reliably charge/use the vehicle), then the practical side supports “good.”\n\nDecision rule: Conclude “good” only when both (1) the net environmental & safety check and (2) the practical/affordability & infrastructure check are satisfied. Conclude “not good” if (1) the battery-related environmental/safety harms are evidenced to be material enough to cancel the EV’s lifecycle environmental advantage *or* (2) EVs are evidenced to be practically unusable/uneconomic for typical drivers due to affordability, charging infrastructure, or reliability constraints. If the evidence does not clearly satisfy one side’s threshold for (1) and/or (2), leave the issue unresolved rather than deciding either way."
+  ]
+}

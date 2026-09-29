@@ -1,0 +1,197 @@
+{
+  "method": "schema",
+  "question": "Is the Internet \"Making Us Stupid\"?",
+  "agent1_stance": "Your stance:\nYou support the view that the Internet is making us stupid.\nYou believe the Internet degrades human intelligence by subverting patience and concentration.\nYou believe IQ measurements have dropped approximately 7 points per generation since the mid-1970s, coinciding with Internet expansion, indicating that people are getting dumber.\nYou believe reliance on Internet-connected devices causes atrophy of everyday abilities, and that young adults increasingly lack knowledge of basic tasks because digital tools have replaced traditional skill-building.",
+  "agent2_stance": "Your stance:\nYou oppose the view that the Internet is making us stupid.\nYou believe society has repeatedly feared new technologies such as the printing press, telephone, radio, and television, yet these fears proved largely unfounded, suggesting current Internet concerns follow a predictable but ultimately mistaken pattern.\nYou believe the Internet provides invaluable information access for marginalized populations, including disabled individuals and older adults who benefit from remote communication and resource availability previously unavailable.\nYou believe shifting how we access and process information isn't inherently harmful, and that leveraging external resources for fact-storage allows mental capacity for more important problems.",
+  "metrics": {
+    "elapsed_seconds": 156.938,
+    "model": "gpt-5.4-nano",
+    "prompt_tokens": 53063,
+    "cached_tokens": 16384,
+    "completion_tokens": 21298,
+    "total_tokens": 74361,
+    "total_cost_usd": 0.034286
+  },
+  "dialogue_history": [
+    {
+      "id": "arg-534a158fdb",
+      "agent": "AG1",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Measured general intelligence (IQ) has been getting lower by about 7 points per generation since the mid-1970s.",
+                  "The period of this decline coincides with the expansion of Internet access and Internet-connected exposure."
+                ],
+                "weak_negation": [
+                  "This decline is not merely an unrelated coincidence unconnected to Internet expansion."
+                ]
+              },
+              "consequent": "Human measured general intelligence has been declining by about 7 IQ points per generation since the mid-1970s, during a period that coincides with Internet expansion."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Human measured general intelligence has been declining by about 7 IQ points per generation since the mid-1970s, during a period that coincides with Internet expansion.",
+                  "When a large, sustained decline coincides with Internet expansion, it is likely driven by Internet exposure rather than being fully explained by unrelated factors."
+                ],
+                "weak_negation": [
+                  "Other non-Internet causes do not fully account for the observed magnitude and generational pattern."
+                ]
+              },
+              "consequent": "Internet expansion/exposure is a likely cause of the observed intelligence decline rather than an unrelated coincidence."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Internet expansion/exposure is a likely cause of the observed intelligence decline rather than an unrelated coincidence."
+                ],
+                "weak_negation": [
+                  "The causal link does not amount to a negligible effect with no real-world cognitive impact."
+                ]
+              },
+              "consequent": "Yes: the Internet is making us stupid by degrading human intelligence over time."
+            }
+          ],
+          "Conc": [
+            "Human measured general intelligence has been declining by about 7 IQ points per generation since the mid-1970s, during a period that coincides with Internet expansion.",
+            "Internet expansion/exposure is a likely cause of the observed intelligence decline rather than an unrelated coincidence.",
+            "Yes: the Internet is making us stupid by degrading human intelligence over time."
+          ],
+          "Ass": [
+            "This decline is not merely an unrelated coincidence unconnected to Internet expansion.",
+            "Other non-Internet causes do not fully account for the observed magnitude and generational pattern.",
+            "The causal link does not amount to a negligible effect with no real-world cognitive impact."
+          ]
+        }
+      },
+      "status": "justified"
+    },
+    {
+      "id": "arg-64301f869e",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s argument relies on the assumption: \"Other non-Internet causes do not fully account for the observed magnitude and generational pattern.\"",
+                  "The target’s causal support is mainly the temporal coincidence between IQ decline and Internet expansion."
+                ],
+                "weak_negation": [
+                  "Without ruling out major confounders (e.g., changes in schooling, health, substance use, test-taking/selection effects, or other broad socioeconomic shifts), temporal coincidence does not adequately justify the claim that non-Internet causes cannot explain the pattern."
+                ]
+              },
+              "consequent": "The target does not justify its assumption that non-Internet causes cannot fully account for the observed IQ decline pattern."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target does not justify its assumption that non-Internet causes cannot fully account for the observed IQ decline pattern.",
+                  "The target’s inference to \"Internet expansion/exposure is a likely cause\" depends on that assumption."
+                ],
+                "weak_negation": [
+                  "If the confounder-robustness assumption is unsupported, the causal inference from coincidence is undercut."
+                ]
+              },
+              "consequent": "The target’s inference that the Internet is a likely cause of the IQ decline is undercut."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s inference that the Internet is a likely cause of the IQ decline is undercut."
+                ],
+                "weak_negation": [
+                  "Therefore the target’s final conclusion that the Internet is making us stupid is not warranted by its own evidence."
+                ]
+              },
+              "consequent": "The target argument fails to establish that the Internet is making us stupid."
+            }
+          ],
+          "Conc": [
+            "The target does not justify its assumption that non-Internet causes cannot fully account for the observed IQ decline pattern.",
+            "The target’s inference that the Internet is a likely cause of the IQ decline is undercut.",
+            "The target argument fails to establish that the Internet is making us stupid."
+          ],
+          "Ass": [
+            "Without ruling out major confounders (e.g., changes in schooling, health, substance use, test-taking/selection effects, or other broad socioeconomic shifts), temporal coincidence does not adequately justify the claim that non-Internet causes cannot explain the pattern.",
+            "If the confounder-robustness assumption is unsupported, the causal inference from coincidence is undercut.",
+            "Therefore the target’s final conclusion that the Internet is making us stupid is not warranted by its own evidence."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-534a158fdb",
+      "target_field": "Ass",
+      "target_statement": "Other non-Internet causes do not fully account for the observed magnitude and generational pattern."
+    },
+    {
+      "id": "arg-604c87486b",
+      "agent": "AG1",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target attack’s key move is: because major confounders are not ruled out, temporal coincidence cannot adequately justify the step from correlation to a “likely cause.”",
+                  "Probabilistic causal inferences (i.e., “likely cause”) do not logically require the complete elimination of every alternative explanation before the inference is warranted."
+                ],
+                "weak_negation": [
+                  "The absence of fully eliminated confounders is not equivalent to invalidating a probabilistic inference; it more strongly affects confidence level than logical permissibility."
+                ]
+              },
+              "consequent": "The target attack applies an evidential standard that is too strong for supporting a “likely cause” conclusion."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target attack applies an evidential standard that is too strong for supporting a “likely cause” conclusion.",
+                  "My main argument’s relevant step is specifically about a “likely cause” (not certainty), inferred from a sustained generational IQ decline that temporally aligns with Internet expansion/exposure."
+                ],
+                "weak_negation": [
+                  "Maintaining a “likely cause” inference does not presuppose that non-Internet explanations are impossible or fully quantified to zero."
+                ]
+              },
+              "consequent": "Given that evidential-standard correction, the target attack does not remove the warrant needed for the “Internet is a likely cause” step."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Given that evidential-standard correction, the target attack does not remove the warrant needed for the “Internet is a likely cause” step.",
+                  "If Internet expansion/exposure is a likely cause of an observed decline in measured general intelligence, then it supports the main conclusion that the Internet is making us stupid (degrading intelligence over time)."
+                ],
+                "weak_negation": [
+                  "This does not claim certainty; it claims the main conclusion is still warranted against the target’s undercut."
+                ]
+              },
+              "consequent": "The target’s conclusion that the Internet is not warranted as the likely cause—and thus not “making us stupid”—is not established, so the main argument stands against this attack."
+            }
+          ],
+          "Conc": [
+            "The target attack applies an evidential standard that is too strong for supporting a “likely cause” conclusion.",
+            "Given that evidential-standard correction, the target attack does not remove the warrant needed for the “Internet is a likely cause” step.",
+            "The target’s conclusion that the Internet is not warranted as the likely cause—and thus not “making us stupid”—is not established, so the main argument stands against this attack."
+          ],
+          "Ass": [
+            "The absence of fully eliminated confounders is not equivalent to invalidating a probabilistic inference; it more strongly affects confidence level than logical permissibility.",
+            "Maintaining a “likely cause” inference does not presuppose that non-Internet explanations are impossible or fully quantified to zero.",
+            "This does not claim certainty; it claims the main conclusion is still warranted against the target’s undercut."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-64301f869e",
+      "target_field": "Ass",
+      "target_statement": "Without ruling out major confounders ..., temporal coincidence does not adequately justify the claim that non-Internet causes cannot explain the pattern."
+    }
+  ],
+  "final_answer": "**Yes—there is a credible case that the Internet is making us “dumber,” at least in the sense of weakening certain kinds of thinking and everyday competencies.** But it’s not an across-the-board, universal effect: the Internet also brings substantial benefits that can offset (or outweigh) some harms depending on how people use it.\n\n## Why the “making us stupid” concern is warranted\n1. **Measured intelligence trends track the Internet era.**  \n   The view rests partly on the claim that **general intelligence (IQ) has fallen by roughly ~7 points per generation since the mid-1970s**, and that this decline **coincides with the expansion of Internet access/exposure**. Even if coincidence doesn’t prove causation by itself, a **sustained generational decline aligned with massive exposure change** makes it *plausible* that Internet-related factors are contributing rather than being purely unrelated.\n\n2. **Mechanism: weaker patience and concentration.**  \n   The concern isn’t only “IQ scores”; it’s also that the Internet environment (constant novelty, fast switching, feeds designed to keep attention) can **subvert patience and sustained concentration**—skills needed for deep reading, long problem-solving, and mastery through practice. That kind of attention fragmentation can reduce the amount of “high-quality cognitive training” people get day to day.\n\n3. **Atrophy of everyday abilities and skill replacement.**  \n   The argument further claims that **reliance on digital/Internet-connected tools can atrophy everyday abilities**—for example, reducing the practice that builds competence in basic tasks (navigation, mental calculation, spelling/grammar from recall, remembering routines, doing things without step-by-step guidance). It also asserts that **young adults increasingly lack knowledge of basic tasks** because digital tools replace the traditional “learn by doing” pipeline.\n\n## Why the opposing cautions still matter (and don’t fully erase the concern)\n1. **Technology panics have a history—but that doesn’t settle this question.**  \n   It’s true that societies have often feared earlier technologies (printing press, telephone, radio, television) and many of those panics turned out exaggerated. However, that pattern is best read as a warning not to assume harm automatically—not as evidence that *current* harms can’t be real. The present worry is not “technology is new, so it’s bad”; it’s tied to a specific observed decline claim plus plausible cognitive mechanisms.\n\n2. **The Internet genuinely helps many people.**  \n   The Internet provides **invaluable information access** for **marginalized populations**, including **disabled individuals and older adults**, through remote communication and resource availability that might otherwise be unavailable. That’s a real counterweight: reduced accessibility would be a net harm, and the Internet can reduce it.\n\n3. **Using external information isn’t inherently harmful.**  \n   Shifting how we access and process information is **not automatically bad**. External storage can let the mind **spend limited time/effort on more meaningful problems**—for instance, looking up facts rather than wasting working memory on them.\n\n   The key difference is **how dependence works in practice**: using the Internet as *support* for higher-level thinking is different from using it in a way that *crowds out* practice, comprehension, and sustained attention.\n\n## Bottom line\n- The Internet appears to **carry real risks to sustained attention, patience, and certain practical competencies**, and the **claimed IQ decline (~7 points per generation since the mid-1970s) that coincides with Internet expansion** is enough to make the “making us stupid” concern **nontrivial and plausibly contribution-based**, not merely alarmism.\n- At the same time, the Internet is also **highly beneficial**, especially for accessibility and for people who use it thoughtfully as an external memory and information tool.\n\nSo the most defensible position is: **the Internet can make people less capable in specific cognitive and everyday-skill ways, even while delivering major gains—meaning the net effect depends strongly on usage patterns and support structures.**",
+  "integrated_rules": []
+}

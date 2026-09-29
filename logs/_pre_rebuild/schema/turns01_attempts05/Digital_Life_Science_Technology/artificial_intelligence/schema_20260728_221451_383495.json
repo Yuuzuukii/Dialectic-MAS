@@ -1,0 +1,488 @@
+{
+  "method": "schema",
+  "question": "Is Artificial Intelligence Good for Society?",
+  "agent1_stance": "Your stance:\nYou support artificial intelligence.\nYou believe AI can make everyday life more enjoyable and convenient, while improving our health and standard of living.\nYou believe AI makes work easier for students and professionals alike.\nYou believe AI helps marginalized groups by offering accessibility for people with disabilities.\nYou believe AI can improve workplace safety.",
+  "agent2_stance": "Your stance:\nYou oppose artificial intelligence.\nYou believe AI is harming the economic well-being of many people and businesses.\nYou believe AI undermines critical thinking skills for students and adults alike.\nYou believe AI hurts racial minorities by repeating and exacerbating racism.\nYou believe AI poses dangerous privacy risks.",
+  "metrics": {
+    "elapsed_seconds": 304.087,
+    "model": "gpt-5.4-nano",
+    "prompt_tokens": 118007,
+    "cached_tokens": 55552,
+    "completion_tokens": 36323,
+    "total_tokens": 154330,
+    "total_cost_usd": 0.059006
+  },
+  "dialogue_history": [
+    {
+      "id": "arg-2dff818fb7",
+      "agent": "AG1",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AI systems can assist users by automating or recommending solutions for common tasks in daily life."
+                ],
+                "weak_negation": [
+                  "Assuming AI is deployed in beneficial ways (e.g., to help people get tasks done) rather than primarily in harmful ways."
+                ]
+              },
+              "consequent": "AI can increase convenience and everyday quality of life for many people."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI can increase convenience and everyday quality of life for many people."
+                ],
+                "weak_negation": [
+                  "Assuming those convenience gains translate into real reductions in time, effort, and daily burden (rather than being mostly superficial)."
+                ]
+              },
+              "consequent": "By reducing time, effort, and stress in daily tasks, AI can raise people's standard of living."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "By reducing time, effort, and stress in daily tasks, AI can raise people's standard of living."
+                ],
+                "weak_negation": [
+                  "Improving people's standard of living and wellbeing is a socially good outcome."
+                ]
+              },
+              "consequent": "Therefore, artificial intelligence is good for society."
+            }
+          ],
+          "Conc": [
+            "AI can increase convenience and everyday quality of life for many people.",
+            "By reducing time, effort, and stress in daily tasks, AI can raise people's standard of living.",
+            "Therefore, artificial intelligence is good for society."
+          ],
+          "Ass": [
+            "Assuming AI is deployed in beneficial ways (e.g., to help people get tasks done) rather than primarily in harmful ways.",
+            "Assuming those convenience gains translate into real reductions in time, effort, and daily burden (rather than being mostly superficial).",
+            "Improving people's standard of living and wellbeing is a socially good outcome."
+          ]
+        }
+      },
+      "status": "overruled"
+    },
+    {
+      "id": "arg-fccc3a3400",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AI systems that provide “convenience” commonly rely on collecting and using personal data in ways that create privacy and surveillance risks for users."
+                ],
+                "weak_negation": [
+                  "Assuming those privacy/surveillance risks do not add non-trivial stress, consent friction, or extra everyday hassle for ordinary people."
+                ]
+              },
+              "consequent": "AI-provided convenience can be offset by added daily burdens stemming from privacy and surveillance risks."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI-provided convenience can be offset by added daily burdens stemming from privacy and surveillance risks."
+                ],
+                "weak_negation": [
+                  "Assuming these added burdens are not substantial enough to prevent a net reduction in time, effort, and daily burden."
+                ]
+              },
+              "consequent": "Convenience gains from AI will not reliably translate into net real reductions in time, effort, and daily burden (i.e., the net effect can be neutral or negative rather than clearly beneficial)."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target argument depends on the assumption that convenience gains translate into real reductions in time, effort, and daily burden (rather than being mostly superficial).",
+                  "My argument concludes that such net real reductions do not reliably occur because convenience can be offset by privacy/surveillance-related burdens."
+                ],
+                "weak_negation": [
+                  "Assuming the target argument’s inference from convenience to social good still holds even when its key assumption is false."
+                ]
+              },
+              "consequent": "Therefore, the target argument does not establish that AI is good for society."
+            }
+          ],
+          "Conc": [
+            "AI-provided convenience can be offset by added daily burdens stemming from privacy and surveillance risks.",
+            "Convenience gains from AI will not reliably translate into net real reductions in time, effort, and daily burden (i.e., the net effect can be neutral or negative rather than clearly beneficial).",
+            "Therefore, the target argument does not establish that AI is good for society."
+          ],
+          "Ass": [
+            "Assuming those privacy/surveillance risks do not add non-trivial stress, consent friction, or extra everyday hassle for ordinary people.",
+            "Assuming these added burdens are not substantial enough to prevent a net reduction in time, effort, and daily burden.",
+            "Assuming the target argument’s inference from convenience to social good still holds even when its key assumption is false."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-2dff818fb7",
+      "target_field": "Ass",
+      "target_statement": "Assuming those convenience gains translate into real reductions in time, effort, and daily burden (rather than being mostly superficial)."
+    },
+    {
+      "id": "arg-3e0468e461",
+      "agent": "AG1",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Privacy/surveillance burdens are not inevitable: many AI deployments can use privacy-preserving designs and user controls (e.g., data minimization, transparency/consent mechanisms, opt-outs, and sometimes on-device processing)."
+                ],
+                "weak_negation": [
+                  "Assuming ordinary users can understand and access those controls without it turning into major additional work or hassle."
+                ]
+              },
+              "consequent": "Privacy/surveillance risks need not translate into non-trivial everyday stress or extra effort for ordinary people."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Privacy/surveillance risks need not translate into non-trivial everyday stress or extra effort for ordinary people.",
+                  "If the privacy/surveillance channel does not impose non-trivial hassle, it cannot reliably offset AI’s time- and effort-saving convenience."
+                ],
+                "weak_negation": [
+                  "Assuming AI is used in beneficial ways (automation/recommendations for common tasks) rather than mainly in harmful or coercive ways."
+                ]
+              },
+              "consequent": "Convenience gains from AI can still produce net real reductions in time and effort for many users."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target attack relies on the idea that convenience gains will not reliably translate into net reductions because privacy/surveillance burdens offset them.",
+                  "But net real reductions can occur for many users, so the target does not establish that the convenience-to-burden step is mostly superficial or reliably negated."
+                ],
+                "weak_negation": [
+                  "Assuming reduced daily burden (time/effort/stress) counts toward socially good outcomes like higher standard of living and wellbeing."
+                ]
+              },
+              "consequent": "Therefore, the target attack does not successfully undercut the main argument’s key step, and the main argument remains sufficient to support that AI is good for society."
+            }
+          ],
+          "Conc": [
+            "Privacy/surveillance risks need not translate into non-trivial everyday stress or extra effort for ordinary people.",
+            "Convenience gains from AI can still produce net real reductions in time and effort for many users.",
+            "Therefore, the target attack does not successfully undercut the main argument’s key step, and the main argument remains sufficient to support that AI is good for society."
+          ],
+          "Ass": [
+            "Assuming ordinary users can understand and access those controls without it turning into major additional work or hassle.",
+            "Assuming AI is used in beneficial ways (automation/recommendations for common tasks) rather than mainly in harmful or coercive ways.",
+            "Assuming reduced daily burden (time/effort/stress) counts toward socially good outcomes like higher standard of living and wellbeing."
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-fccc3a3400",
+      "target_field": "Conc",
+      "target_statement": "Therefore, the target argument does not establish that AI is good for society."
+    },
+    {
+      "id": "arg-8c7cc3f4cf",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "In typical consumer and platform deployments, “privacy controls” (permissions, settings, consent choices, and ongoing account management) are complex and hard to maintain for ordinary users, creating additional everyday hassle/effort."
+                ],
+                "weak_negation": [
+                  "Assuming ordinary users can understand and access privacy controls without it turning into major additional work or hassle."
+                ]
+              },
+              "consequent": "Privacy-preserving controls often impose non-trivial extra effort/hassle on ordinary users."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Privacy-preserving controls often impose non-trivial extra effort/hassle on ordinary users.",
+                  "When privacy-related hassles are non-trivial, they can offset the practical time/effort savings that convenience-focused AI aims to provide."
+                ],
+                "weak_negation": [
+                  "Assuming these added privacy-related hassles do not meaningfully offset AI’s convenience gains."
+                ]
+              },
+              "consequent": "Privacy-related burdens can meaningfully offset AI’s time/effort-saving convenience for ordinary users."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Privacy-related burdens can meaningfully offset AI’s time/effort-saving convenience for ordinary users.",
+                  "The target argument’s rebuttal depends on the assumption that privacy/surveillance risks “need not translate” into non-trivial everyday stress/extra effort (and thus do not negate net convenience gains)."
+                ],
+                "weak_negation": [
+                  "Assuming the target argument’s key step still works even when privacy burdens meaningfully offset convenience."
+                ]
+              },
+              "consequent": "Therefore, the target argument fails to undercut the privacy-based critique, because its central assumption about convenience surviving privacy burdens is undermined."
+            }
+          ],
+          "Conc": [
+            "Privacy-preserving controls often impose non-trivial extra effort/hassle on ordinary users.",
+            "Privacy-related burdens can meaningfully offset AI’s time/effort-saving convenience for ordinary users.",
+            "Therefore, the target argument fails to undercut the privacy-based critique, because its central assumption about convenience surviving privacy burdens is undermined."
+          ],
+          "Ass": [
+            "Assuming ordinary users can understand and access privacy controls without it turning into major additional work or hassle.",
+            "Assuming these added privacy-related hassles do not meaningfully offset AI’s convenience gains.",
+            "Assuming the target argument’s key step still works even when privacy burdens meaningfully offset convenience."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-3e0468e461",
+      "target_field": "Ass"
+    },
+    {
+      "id": "arg-8423be7971",
+      "agent": "AG2",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AI systems that automate tasks can displace workers and increase competitive pressure on businesses forced to adapt or replace human roles."
+                ],
+                "weak_negation": [
+                  "Assuming the resulting changes are not so small or so quickly balanced by new, widely available jobs that most affected people and businesses avoid economic harm."
+                ]
+              },
+              "consequent": "AI deployment tends to cause economic displacement for many people and competitive pressure on many businesses."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI deployment tends to cause economic displacement for many people and competitive pressure on many businesses."
+                ],
+                "weak_negation": [
+                  "Assuming these displacement and competitive-pressure effects are not fully offset for those groups by higher wages, stable new employment, or improved business profitability."
+                ]
+              },
+              "consequent": "For many people and businesses, AI can lower economic well-being in net effect."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "For many people and businesses, AI can lower economic well-being in net effect."
+                ],
+                "weak_negation": [
+                  "Assuming lowering economic well-being is socially bad (i.e., reducing human welfare in economically relevant ways counts against “good for society”)."
+                ]
+              },
+              "consequent": "Therefore, artificial intelligence is not good for society."
+            }
+          ],
+          "Conc": [
+            "AI deployment tends to cause economic displacement for many people and competitive pressure on many businesses.",
+            "For many people and businesses, AI can lower economic well-being in net effect.",
+            "Therefore, artificial intelligence is not good for society."
+          ],
+          "Ass": [
+            "Assuming the resulting changes are not so small or so quickly balanced by new, widely available jobs that most affected people and businesses avoid economic harm.",
+            "Assuming these displacement and competitive-pressure effects are not fully offset for those groups by higher wages, stable new employment, or improved business profitability.",
+            "Assuming lowering economic well-being is socially bad (i.e., reducing human welfare in economically relevant ways counts against “good for society”)."
+          ]
+        }
+      },
+      "status": "overruled"
+    },
+    {
+      "id": "arg-a33f14a98e",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s third step treats 'lowering economic well-being' as automatically socially bad, but societal judgments about whether something is good should weigh multiple welfare dimensions—not only economic welfare (e.g., convenience, health, accessibility, and safety can also improve welfare)."
+                ],
+                "weak_negation": [
+                  "Assuming the presence of non-economic welfare improvements means economic losses are not automatically disqualifying for the 'good for society' claim."
+                ]
+              },
+              "consequent": "Lowering economic well-being alone is not automatically socially bad; it must be weighed against other welfare effects."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Lowering economic well-being alone is not automatically socially bad; it must be weighed against other welfare effects.",
+                  "The target argument concludes 'AI is not good for society' based only on the claim that AI can lower economic well-being, without establishing that the non-economic welfare effects are outweighed."
+                ],
+                "weak_negation": [
+                  "Assuming the target argument provides no separate premise showing that net welfare across relevant dimensions is negative."
+                ]
+              },
+              "consequent": "Therefore, the target’s inference from 'AI may lower economic well-being' to 'AI is not good for society' does not follow."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Therefore, the target’s inference from 'AI may lower economic well-being' to 'AI is not good for society' does not follow.",
+                  "The target’s conclusion depends on the challenged economic-only normative step."
+                ],
+                "weak_negation": [
+                  "Assuming a failed inference prevents the target from establishing its conclusion."
+                ]
+              },
+              "consequent": "So the target argument does not establish that AI is not good for society."
+            }
+          ],
+          "Conc": [
+            "Lowering economic well-being alone is not automatically socially bad; it must be weighed against other welfare effects.",
+            "Therefore, the target’s inference from 'AI may lower economic well-being' to 'AI is not good for society' does not follow.",
+            "So the target argument does not establish that AI is not good for society."
+          ],
+          "Ass": [
+            "Assuming the presence of non-economic welfare improvements means economic losses are not automatically disqualifying for the 'good for society' claim.",
+            "Assuming the target argument provides no separate premise showing that net welfare across relevant dimensions is negative.",
+            "Assuming a failed inference prevents the target from establishing its conclusion."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-8423be7971",
+      "target_field": "Ass",
+      "target_statement": "Assuming lowering economic well-being is socially bad (i.e., reducing human welfare in economically relevant ways counts against “good for society”)."
+    },
+    {
+      "id": "arg-df890612c9",
+      "agent": "AG2",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target attack treats my third step as if it relies on an unargued “economic loss is automatically disqualifying” idea, and therefore it says my inference fails for lack of “weighing” non-economic welfare effects."
+                ],
+                "weak_negation": [
+                  "Assuming my main argument already includes an explicit normative assumption: that reducing human welfare in economically relevant ways counts against “good for society.”"
+                ]
+              },
+              "consequent": "The target’s “missing weighing” critique mischaracterizes my setup: the argument already assumes economic-welfare loss is socially bad, so it does not require a premise that other welfare dimensions are negative."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s “missing weighing” critique mischaracterizes my setup: the argument already assumes economic-welfare loss is socially bad, so it does not require a premise that other welfare dimensions are negative.",
+                  "My main argument’s second step states that, in net effect, AI can lower economic well-being for many people and businesses (displacement/competitive pressure not offset for most affected groups)."
+                ],
+                "weak_negation": [
+                  "Assuming the specified “not fully offset” condition in my argument holds for the relevant groups."
+                ]
+              },
+              "consequent": "Given net economic well-being losses for many plus the explicit social-bad economic-welfare assumption, the inference to “AI is not good for society” follows from my main argument."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Given net economic well-being losses for many plus the explicit social-bad economic-welfare assumption, the inference to “AI is not good for society” follows from my main argument.",
+                  "The target’s conclusion depends on the claim that this inference does not follow because I lacked a weighing premise."
+                ],
+                "weak_negation": [
+                  "Assuming the target does not offer an independent reason to reject the net-economic-harm premises used in my argument."
+                ]
+              },
+              "consequent": "Therefore, the target attack does not successfully defeat the main argument."
+            }
+          ],
+          "Conc": [
+            "The target’s “missing weighing” critique mischaracterizes my setup: the argument already assumes economic-welfare loss is socially bad, so it does not require a premise that other welfare dimensions are negative.",
+            "Given net economic well-being losses for many plus the explicit social-bad economic-welfare assumption, the inference to “AI is not good for society” follows from my main argument.",
+            "Therefore, the target attack does not successfully defeat the main argument."
+          ],
+          "Ass": [
+            "Assuming my main argument already includes an explicit normative assumption: that reducing human welfare in economically relevant ways counts against “good for society.”",
+            "Assuming the specified “not fully offset” condition in my argument holds for the relevant groups.",
+            "Assuming the target does not offer an independent reason to reject the net-economic-harm premises used in my argument."
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-a33f14a98e",
+      "target_field": "Conc",
+      "target_statement": "So the target argument does not establish that AI is not good for society."
+    },
+    {
+      "id": "arg-e24a8314e4",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Whether AI is 'good for society' requires assessing overall social welfare, so even if economic-welfare losses are socially bad, they must be weighed against potential welfare gains rather than treated as automatically decisive by themselves."
+                ],
+                "weak_negation": [
+                  "Assuming that negative economic-welfare effects alone automatically suffice to show 'AI is not good for society' (without any premise about offsetting welfare effects) is false."
+                ]
+              },
+              "consequent": "Economic-welfare losses being socially bad does not remove the need for a premise about net welfare (or about offsetting welfare gains/absence of gains)."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Economic-welfare losses being socially bad does not remove the need for a premise about net welfare (or about offsetting welfare gains/absence of gains).",
+                  "The target counterargument claims that my 'missing weighing' critique is mischaracterization because its main argument already assumes economic-welfare loss is socially bad, so it does not require other welfare premises."
+                ],
+                "weak_negation": [
+                  "Assuming the target does not separately argue that non-economic welfare effects of AI are negative or outweighed."
+                ]
+              },
+              "consequent": "Therefore, the target’s claim that the 'missing weighing' critique lacks force is unsupported."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Therefore, the target’s claim that the 'missing weighing' critique lacks force is unsupported.",
+                  "The target then uses that defended step to conclude its overall rebuttal succeeds (that the original attack does not defeat the main argument)."
+                ],
+                "weak_negation": [
+                  "Assuming unsupported reasoning is sufficient to undermine the target’s overall defense."
+                ]
+              },
+              "consequent": "So the target counterargument does not successfully defeat the original 'missing weighing' attack."
+            }
+          ],
+          "Conc": [
+            "Economic-welfare losses being socially bad does not remove the need for a premise about net welfare (or about offsetting welfare gains/absence of gains).",
+            "Therefore, the target’s claim that the 'missing weighing' critique lacks force is unsupported.",
+            "So the target counterargument does not successfully defeat the original 'missing weighing' attack."
+          ],
+          "Ass": [
+            "Assuming that negative economic-welfare effects alone automatically suffice to show 'AI is not good for society' (without any premise about offsetting welfare effects) is false.",
+            "Assuming the target does not separately argue that non-economic welfare effects of AI are negative or outweighed.",
+            "Assuming unsupported reasoning is sufficient to undermine the target’s overall defense."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-df890612c9",
+      "target_field": "Ass"
+    }
+  ],
+  "final_answer": "**Cannot say decisively—under the stated “strong evidence” criteria, the evidence is insufficient to conclude whether AI is good or not good for society.**\n\n### Why this is the best-supported answer\nTo conclude **AI is good for society**, there would need to be **demonstrably strong, society-welfare–improving effects** (e.g., clear, net reductions in everyday time/effort/stress; health/wellbeing gains; reliably easier work/learning; strong accessibility benefits for people with disabilities; or clear workplace-safety improvements).\n\nTo conclude **AI is not good for society**, there would need to be **demonstrably strong, society-welfare–damaging effects in net effect** (e.g., clear economic-wellbeing harm for a meaningful number of people/businesses; undermining critical thinking; systematic worsening of outcomes for racial minorities; or dangerous privacy risks that meaningfully threaten individual welfare).\n\n### What the debate did (and didn’t) establish strongly enough\n- **Everyday convenience / less time/effort/stress (pro case):**  \n  This was argued, but the key bridge to “strong societal benefit” depended on assumptions about whether any added burdens (especially privacy-related ones) negate the net gain. The discussion did not provide strong, decisive evidence that the net effect is reliably beneficial across society, only that it *can* be.\n- **Health, standard of living, student/professional work ease:**  \n  These were listed as beliefs, but the debate did not establish them with the kind of strong, demonstrable net-effect evidence required by the criteria.\n- **Accessibility for people with disabilities:**  \n  This was part of the supportive stance, but it was not supported in the debate with strong, demonstrated welfare effects.\n- **Workplace safety:**  \n  Again, asserted as a belief, but not shown in the debate with strong evidence.\n\nOn the negative side:\n- **Economic harm / economic displacement:**  \n  There was an argument that AI can displace workers and harm businesses in net effect, but it was not established to the required strong-evidence threshold that the *net effect* is meaningfully welfare-damaging for a substantial number of people/businesses.\n- **Undermining critical thinking:**  \n  This was asserted as a concern, but the debate did not demonstrate it at a strong evidence level.\n- **Racism and racial minorities:**  \n  This was asserted as a concern, but there was no demonstrated, strong evidence in the discussion that AI systems systematically worsen outcomes for racial minorities.\n- **Dangerous privacy risks:**  \n  Privacy/surveillance harms were the most directly engaged. However, the exchange turned on whether privacy harms are inevitable and whether privacy-preserving designs/controls can prevent non-trivial everyday burden. The debate did not conclusively settle that privacy risks meet the criterion of **dangerously threatening welfare** (and doing so in net, strongly negative effect), versus being avoidable or mitigatable in realistic deployments.\n\n### The specific unresolved points preventing a clear “yes” or “no”\n1. **Net effect at a strong evidence level:** For both sides, the discussion didn’t reach decisive evidence that either (a) the net societal impact is reliably welfare-improving, or (b) it is reliably welfare-damaging.\n2. **Privacy harms magnitude and inevitability:** It remains unclear—based on the presented arguments—whether privacy risks are **dangerous in a way that meaningfully threatens welfare for ordinary people**, and whether those harms *typically* outweigh convenience gains.\n3. **Critical thinking, racism, and safety/accessibility:** These were not supported with strong, demonstrated effects in the debate, so they cannot be used to reach a confident conclusion under the criteria.\n\n### Bottom line\nGiven the requirement to rely on **strong, demonstrated net effects**, the provided arguments are plausible on both sides but **do not establish either the necessary strong benefits or the necessary strong harms**. Therefore, the correct supported answer is **insufficient evidence to decide**, rather than “AI is good” or “AI is not good.”",
+  "integrated_rules": [
+    "Decision rule (apply the strongest evidence available):\n\n1) Identify whether AI has demonstrated, strong, society-welfare–improving effects of any kind:\n- demonstrably reduces time, effort, and stress in everyday tasks; OR\n- improves day-to-day life in ways people experience as more enjoyable and convenient; OR\n- improves health outcomes or supports wellbeing; OR\n- makes work and learning easier for students and professionals by increasing effectiveness or reducing friction; OR\n- increases accessibility for marginalized people—especially people with disabilities—by enabling participation and usability; OR\n- reduces risks and improves safety in workplace or other high-risk settings.\n\n2) Identify whether AI has demonstrated, strong, society-welfare–damaging effects of any kind:\n- in net effect, lowers economic wellbeing for a meaningful number of people and/or businesses; OR\n- undermines critical thinking skills in students and/or adults; OR\n- systematically repeats/reinforces/exacerbates racism, producing worse outcomes for racial minorities; OR\n- poses dangerous privacy risks that meaningfully threaten individuals’ privacy and related welfare.\n\n3) Output:\n- If any (2) damaging condition is met at the strong evidence level, conclude: AI is not good for society.\n- Else, if any (1) improving condition is met at the strong evidence level, conclude: AI is good for society.\n- Else, do not claim either; the evidence is insufficient to decide under these criteria."
+  ]
+}

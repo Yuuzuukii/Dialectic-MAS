@@ -1,0 +1,433 @@
+{
+  "method": "schema",
+  "question": "Has Ridesharing Been Good for Society?",
+  "agent1_stance": "Your stance:\nYou support ridesharing.\nYou believe ridesharing is convenient, affordable, and generally safe for riders and drivers alike, with features including real-time tracking, upfront pricing, built-in safety measures, and driver ratings.\nYou believe rideshare companies create jobs with attractive perks while boosting the economy, as drivers enjoy flexible scheduling and independence, and Uber contributed $17 billion to U.S. GDP.\nYou believe ridesharing has been a boon to consumer choice, increasing transportation options while decreasing the discrimination experienced with taxis.",
+  "agent2_stance": "Your stance:\nYou oppose ridesharing.\nYou believe ridesharing aggravates traffic and environmental problems while taking advantage of riders, as drivers operate empty 40% of the time and surge pricing exploits stranded consumers.\nYou believe rideshare drivers earn low pay and receive few, if any, standard worker benefits, with compensation falling below minimum wage in major markets and no unemployment insurance, health coverage, or paid leave.\nYou believe rideshare companies often deny responsibility for accidents and have a history of poor driver screening, putting passengers at risk, with 3,045 sexual assaults reported in 2018.",
+  "metrics": {
+    "elapsed_seconds": 290.582,
+    "model": "gpt-5.4-nano",
+    "prompt_tokens": 113832,
+    "cached_tokens": 53248,
+    "completion_tokens": 38425,
+    "total_tokens": 152257,
+    "total_cost_usd": 0.061213
+  },
+  "dialogue_history": [
+    {
+      "id": "arg-0a71301f42",
+      "agent": "AG1",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Ridesharing increases transportation options while decreasing the discrimination experienced with taxis."
+                ],
+                "weak_negation": [
+                  "Assume the discrimination-reducing effect is not fully offset by new discriminatory barriers within the ridesharing process."
+                ]
+              },
+              "consequent": "Ridesharing delivers more equitable transportation access by expanding options and reducing discrimination faced with traditional taxis."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Ridesharing delivers more equitable transportation access by expanding options and reducing discrimination faced with traditional taxis."
+                ],
+                "weak_negation": [
+                  "Assume increased and more equitable access to transportation generally translates into social benefits rather than being neutral."
+                ]
+              },
+              "consequent": "More equitable transportation access promotes fairness and equal opportunity, which benefits society."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "More equitable transportation access promotes fairness and equal opportunity, which benefits society."
+                ],
+                "weak_negation": [
+                  "Assume these fairness-and-equity benefits are not outweighed in the overall balance by negative effects on social welfare."
+                ]
+              },
+              "consequent": "Yes—ridesharing has been good for society."
+            }
+          ],
+          "Conc": [
+            "Ridesharing delivers more equitable transportation access by expanding options and reducing discrimination faced with traditional taxis.",
+            "More equitable transportation access promotes fairness and equal opportunity, which benefits society.",
+            "Yes—ridesharing has been good for society."
+          ],
+          "Ass": [
+            "Assume the discrimination-reducing effect is not fully offset by new discriminatory barriers within the ridesharing process.",
+            "Assume increased and more equitable access to transportation generally translates into social benefits rather than being neutral.",
+            "Assume these fairness-and-equity benefits are not outweighed in the overall balance by negative effects on social welfare."
+          ]
+        }
+      },
+      "status": "defensible"
+    },
+    {
+      "id": "arg-ff48ad05c5",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s final “Yes—ridesharing has been good for society” depends on the assumption that fairness-and-equity benefits are not outweighed by negative effects on social welfare.",
+                  "Ridesharing creates major negative social-welfare effects: drivers are empty ~40% of the time (increasing congestion/emissions), surge pricing exploits stranded consumers, and drivers often earn below minimum wage and lack standard benefits (like health coverage, unemployment insurance, and paid leave), while rideshare companies may deny responsibility for accidents and have poor screening (with 3,045 sexual assaults reported in 2018)."
+                ],
+                "weak_negation": [
+                  "Assume these negative effects are not negligible in overall social-welfare terms."
+                ]
+              },
+              "consequent": "Ridesharing creates substantial negative effects that materially worsen overall social welfare."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Ridesharing creates substantial negative effects that materially worsen overall social welfare.",
+                  "The target assumes those negative effects do not outweigh any equity gains."
+                ],
+                "weak_negation": [
+                  "Assume any equity/discrimination benefits do not cancel out these welfare losses in the overall balance."
+                ]
+              },
+              "consequent": "Equity-and-fairness gains are outweighed (net social welfare is not positive)."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Equity-and-fairness gains are outweighed (net social welfare is not positive)."
+                ],
+                "weak_negation": [
+                  "Assume that ‘good for society’ requires net positive social welfare, not just one dimension of improvement."
+                ]
+              },
+              "consequent": "No—ridesharing has not been good for society."
+            }
+          ],
+          "Conc": [
+            "Ridesharing creates substantial negative effects that materially worsen overall social welfare.",
+            "Equity-and-fairness gains are outweighed (net social welfare is not positive).",
+            "No—ridesharing has not been good for society."
+          ],
+          "Ass": [
+            "Assume these negative effects are not negligible in overall social-welfare terms.",
+            "Assume any equity/discrimination benefits do not cancel out these welfare losses in the overall balance.",
+            "Assume that ‘good for society’ requires net positive social welfare, not just one dimension of improvement."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-0a71301f42",
+      "target_field": "Ass",
+      "target_statement": "Assume these fairness-and-equity benefits are not outweighed in the overall balance by negative effects on social welfare."
+    },
+    {
+      "id": "arg-1b2233a245",
+      "agent": "AG1",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s netting-out step asserts that fairness/equity gains are outweighed by several alleged negative effects, but it does not provide any comparable weighting method or evidence to compare the magnitude of those benefits versus those harms."
+                ],
+                "weak_negation": [
+                  "Assume the target actually supplies a valid, comparable weighting/evidence basis for concluding that harms outweigh equity gains."
+                ]
+              },
+              "consequent": "The target has not established the premise that equity/equity gains are outweighed in the overall social-welfare balance."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target has not established the premise that equity/equity gains are outweighed in the overall social-welfare balance."
+                ],
+                "weak_negation": [
+                  "Assume there is an independently supplied, well-justified comparison showing net harm dominates."
+                ]
+              },
+              "consequent": "The key condition needed for the target’s “No—ridesharing has not been good for society” conclusion remains unproven."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The key condition needed for the target’s “No—ridesharing has not been good for society” conclusion remains unproven."
+                ],
+                "weak_negation": [
+                  "Assume ridesharing’s equity gains are plausibly not outweighed, so the supportive netting assumption in the main argument is not defeated."
+                ]
+              },
+              "consequent": "Yes—ridesharing has been good for society."
+            }
+          ],
+          "Conc": [
+            "The target has not established the premise that equity/equity gains are outweighed in the overall social-welfare balance.",
+            "The key condition needed for the target’s “No—ridesharing has not been good for society” conclusion remains unproven.",
+            "Yes—ridesharing has been good for society."
+          ],
+          "Ass": [
+            "Assume the target actually supplies a valid, comparable weighting/evidence basis for concluding that harms outweigh equity gains.",
+            "Assume there is an independently supplied, well-justified comparison showing net harm dominates.",
+            "Assume ridesharing’s equity gains are plausibly not outweighed, so the supportive netting assumption in the main argument is not defeated."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-ff48ad05c5",
+      "target_field": "Ass",
+      "target_statement": "Assume any equity/discrimination benefits do not cancel out these welfare losses in the overall balance."
+    },
+    {
+      "id": "arg-d38cdc397a",
+      "agent": "AG2",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "In major markets, rideshare drivers’ compensation falls below minimum wage.",
+                  "Rideshare drivers receive few, if any, standard worker benefits, with no unemployment insurance, no health coverage, and no paid leave."
+                ],
+                "weak_negation": [
+                  "Assume these conditions are not largely offset by other compensating protections or benefits for drivers."
+                ]
+              },
+              "consequent": "Ridesharing creates severe worker economic insecurity and removes core safety-net benefits for drivers (below minimum wage; no unemployment insurance, health coverage, or paid leave)."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Ridesharing creates severe worker economic insecurity and removes core safety-net benefits for drivers (below minimum wage; no unemployment insurance, health coverage, or paid leave).",
+                  "A system that relies on widespread underpayment and the absence of basic protections predictably harms people’s well-being and increases risk that would otherwise be covered by social safety nets."
+                ],
+                "weak_negation": [
+                  "Assume this harms overall social welfare rather than being socially neutral."
+                ]
+              },
+              "consequent": "This worker exploitation is a negative social-welfare effect, making ridesharing bad for society."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "This worker exploitation is a negative social-welfare effect, making ridesharing bad for society."
+                ],
+                "weak_negation": [
+                  "Assume “good for society” requires that the service not be built on substantial, unprotected exploitation of working people."
+                ]
+              },
+              "consequent": "No—ridesharing has not been good for society."
+            }
+          ],
+          "Conc": [
+            "Ridesharing creates severe worker economic insecurity and removes core safety-net benefits for drivers (below minimum wage; no unemployment insurance, health coverage, or paid leave).",
+            "This worker exploitation is a negative social-welfare effect, making ridesharing bad for society.",
+            "No—ridesharing has not been good for society."
+          ],
+          "Ass": [
+            "Assume these conditions are not largely offset by other compensating protections or benefits for drivers.",
+            "Assume this harms overall social welfare rather than being socially neutral.",
+            "Assume “good for society” requires that the service not be built on substantial, unprotected exploitation of working people."
+          ]
+        }
+      },
+      "status": "overruled"
+    },
+    {
+      "id": "arg-3a737340c0",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s case for “severe worker economic insecurity” depends on the unargued assumption that rideshare drivers’ pay/benefit deficiencies are not largely offset by other compensating protections or benefits.",
+                  "The target does not supply evidence or a method showing that such offsets are absent or too small to matter; instead it relies on an “Assume these conditions are not largely offset …” clause."
+                ],
+                "weak_negation": [
+                  "Assume that if compensating offsets exist at least to a large degree, the inference from the listed deficiencies to “severe” insecurity and a negative social-welfare effect is not warranted."
+                ]
+              },
+              "consequent": "The target has not established that the listed pay/benefit shortcomings are not largely offset."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target has not established that the listed pay/benefit shortcomings are not largely offset.",
+                  "Therefore the target has not justified its further step from those deficiencies to “severe worker economic insecurity” as a negative social-welfare effect."
+                ],
+                "weak_negation": [
+                  "Assume the target’s conclusion requires the “not largely offset” premise to do essential work in its logic."
+                ]
+              },
+              "consequent": "The target fails to justify that ridesharing creates a severe worker economic insecurity and a negative social-welfare effect."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target fails to justify that ridesharing creates a severe worker economic insecurity and a negative social-welfare effect.",
+                  "With that key negative-welfare support missing, the target’s overall “No—ridesharing has not been good for society” conclusion is not supported."
+                ],
+                "weak_negation": [
+                  "Assume that “good for society” can be supported when major negative claims are not established."
+                ]
+              },
+              "consequent": "Yes—ridesharing has been good for society."
+            }
+          ],
+          "Conc": [
+            "The target has not established that the listed pay/benefit shortcomings are not largely offset.",
+            "The target fails to justify that ridesharing creates a severe worker economic insecurity and a negative social-welfare effect.",
+            "Yes—ridesharing has been good for society."
+          ],
+          "Ass": [
+            "Assume that if compensating offsets exist at least to a large degree, the inference from the listed deficiencies to “severe” insecurity and a negative social-welfare effect is not warranted.",
+            "Assume the target’s conclusion requires the “not largely offset” premise to do essential work in its logic.",
+            "Assume that “good for society” can be supported when major negative claims are not established."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-d38cdc397a",
+      "target_field": "Ass",
+      "target_statement": "Assume these conditions are not largely offset by other compensating protections or benefits for drivers."
+    },
+    {
+      "id": "arg-730f0e0e68",
+      "agent": "AG2",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target claims our case depends on an “unargued” assumption that pay/benefit deficiencies are not largely offset, as if we had to prove offsets are totally absent.",
+                  "But our argument’s severity claim is anchored in the specific documented conditions we stated: below-minimum-wage compensation and lack of core worker protections (no unemployment insurance, no health coverage, and no paid leave)."
+                ],
+                "weak_negation": [
+                  "Assume that if these deficiencies remain substantial (i.e., are not largely offset), they still constitute severe worker economic insecurity rather than being socially neutral."
+                ]
+              },
+              "consequent": "Our argument does not require proving that compensating protections are completely absent; it only requires that the stated deficiencies are not largely offset so they still imply severe insecurity."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Our argument does not require proving that compensating protections are completely absent; it only requires that the stated deficiencies are not largely offset so they still imply severe insecurity.",
+                  "The target’s criticism attacks a non-existent burden of proof (total absence) instead of addressing the conditional link: if the deficiencies are not largely offset, severe insecurity follows from them."
+                ],
+                "weak_negation": [
+                  "Assume the target does not supply a credible reason to think any offsets would be large enough to neutralize the severity implied by below-minimum-wage pay and missing core safety-net benefits."
+                ]
+              },
+              "consequent": "The target fails to defeat the worker-insecurity premise; its “unsupported not largely offset” critique is misplaced given the grounding in the listed deficiencies."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target fails to defeat the worker-insecurity premise; its “unsupported not largely offset” critique is misplaced given the grounding in the listed deficiencies.",
+                  "A system that produces severe worker economic insecurity and removes core safety-net benefits creates negative social-welfare effects rather than social neutrality."
+                ],
+                "weak_negation": [
+                  "Assume “good for society” is not satisfied when a major service relies on substantial, unprotected exploitation of working people."
+                ]
+              },
+              "consequent": "No—ridesharing has not been good for society."
+            }
+          ],
+          "Conc": [
+            "Our argument does not require proving that compensating protections are completely absent; it only requires that the stated deficiencies are not largely offset so they still imply severe insecurity.",
+            "The target fails to defeat the worker-insecurity premise; its “unsupported not largely offset” critique is misplaced given the grounding in the listed deficiencies.",
+            "No—ridesharing has not been good for society."
+          ],
+          "Ass": [
+            "Assume that if these deficiencies remain substantial (i.e., are not largely offset), they still constitute severe worker economic insecurity rather than being socially neutral.",
+            "Assume the target does not supply a credible reason to think any offsets would be large enough to neutralize the severity implied by below-minimum-wage pay and missing core safety-net benefits.",
+            "Assume “good for society” is not satisfied when a major service relies on substantial, unprotected exploitation of working people."
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-3a737340c0",
+      "target_field": "Conc",
+      "target_statement": "Yes—ridesharing has been good for society."
+    },
+    {
+      "id": "arg-6d5a0fb46c",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s argument relies on the assumption that when rideshare drivers face below-minimum pay and lack some benefits, those deficiencies still “constitute severe worker economic insecurity rather than being socially neutral.”",
+                  "Ridesharing is structured to offer drivers flexible scheduling and independence (drivers can choose when to work), which can materially compensate—at least for many drivers—for some missing traditional protections like unemployment insurance, paid leave, and employer health coverage."
+                ],
+                "weak_negation": [
+                  "Assume that this flexibility/independence compensation is substantial enough that the same pay/benefit deficiencies do not necessarily imply “severe” insecurity for the worker population."
+                ]
+              },
+              "consequent": "The target’s inference from stated pay/benefit deficiencies to “severe worker economic insecurity (not neutrality)” is not warranted."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s inference from stated pay/benefit deficiencies to “severe worker economic insecurity (not neutrality)” is not warranted.",
+                  "Therefore, the target’s next step—from worker-deficiency severity to a negative social-welfare effect—lacks the needed underpinning."
+                ],
+                "weak_negation": [
+                  "Assume the target does not supply an independent basis for negative social-welfare harm beyond that disputed “severity vs neutrality” inference."
+                ]
+              },
+              "consequent": "The target does not establish a negative social-welfare effect from worker deficiencies."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target does not establish a negative social-welfare effect from worker deficiencies.",
+                  "So the target’s final “No—ridesharing has not been good for society” conclusion is not supported by its own worker-insecurity chain of reasoning."
+                ],
+                "weak_negation": [
+                  "Assume the target’s conclusion requires that the worker-harm premise be established rather than merely asserted."
+                ]
+              },
+              "consequent": "The target’s conclusion (“No—ridesharing has not been good for society”) is not justified."
+            }
+          ],
+          "Conc": [
+            "The target’s inference from stated pay/benefit deficiencies to “severe worker economic insecurity (not neutrality)” is not warranted.",
+            "The target does not establish a negative social-welfare effect from worker deficiencies.",
+            "The target’s conclusion (“No—ridesharing has not been good for society”) is not justified."
+          ],
+          "Ass": [
+            "Assume that this flexibility/independence compensation is substantial enough that the same pay/benefit deficiencies do not necessarily imply “severe” insecurity for the worker population.",
+            "Assume the target does not supply an independent basis for negative social-welfare harm beyond that disputed “severity vs neutrality” inference.",
+            "Assume the target’s conclusion requires that the worker-harm premise be established rather than merely asserted."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-730f0e0e68",
+      "target_field": "Ass"
+    }
+  ],
+  "final_answer": "No—on balance, ridesharing has **not** been good for society.\n\n### Rationale (weighing the main claimed upsides vs. downsides)\n\n#### 1) The strongest “good for society” case is real but doesn’t clearly dominate the harms\nRidesharing plausibly improves **consumer convenience/choice** and can reduce some friction and discrimination relative to older taxi arrangements. It also offers features like **real-time tracking, upfront pricing, driver ratings, and other safety tooling**, which can reduce some kinds of avoidable risk and make trips more predictable.\n\nEconomically, it likely creates **job opportunities** with **flexible scheduling/independence** and may contribute to output and local economic activity.\n\nHowever, under the governing balance standard, these positives matter only if they are **not outweighed** by larger negative effects—especially negative effects that are systemic and not credibly mitigated.\n\n#### 2) The most decisive concerns are systemic worker-protection failures and broad external harms\nThe negative side identifies multiple harms that, taken together, align closely with “predominant” categories:\n\n- **Worker exploitation / baseline worker-protection failure**: drivers reportedly earn **below minimum wage in major markets** and lack core protections such as **unemployment insurance, health coverage, and paid leave**.  \n  Even if flexibility and independence are genuine benefits, the standard here is strict: such harms are treated as socially bad **unless offsetting benefits clearly dominate**. Flexibility alone generally does not “clearly dominate” missing health/unemployment/leave protections, particularly when pay is alleged to fall below minimum wage.\n\n- **Externality harms**: ridesharing is said to aggravate **traffic congestion and environmental damage**, including via a high share of “empty driving” (e.g., the claim that drivers operate empty a substantial portion of the time). These harms are broad (affecting many non-riders) and can be difficult to reverse at the individual-trip level.\n\n- **Exploitative pricing under duress**: **surge pricing** is described as worsening welfare for stranded consumers by making predictable access less affordable.\n\n- **Safety/accountability legitimacy deficits**: beyond generic “safety features,” there are claims that **driver screening is poor** and that companies have a pattern of **denying responsibility for accidents**, alongside reporting of a large number of **sexual assaults** in 2018. Safety tools like tracking and ratings may help, but these allegations point to risks that are not credibly eliminated by app-based features alone.\n\n#### 3) Equity gains are not enough to offset predominant harms\nThe pro side’s fairness/discrimination argument is important, but it is narrower than the set of harms above. Under the balancing approach, equity and choice benefits don’t override outcomes when **worker-protection failures, externalities, exploitative pricing, and serious safety/accountability problems** are collectively predominant and not clearly mitigated.\n\n### Important unresolved point (why this isn’t fully “settled”)\nA serious uncertainty is **how much** the claimed safety improvements (tracking, upfront pricing, ratings) and the potential consumer convenience benefits **actually counterbalance** the alleged magnitude of the safety/screening and accountability problems, and how large the true net effect is after accounting for substitution (e.g., whether ridesharing replaces other trips or induces extra driving). The debate that occurred focused more on logical framing than on resolving that quantitative comparison.\n\nStill, even allowing for that uncertainty, the negative case relies on **multiple overlapping, system-level harms**—especially the baseline worker-protection failures—that the standard treats as socially unacceptable unless clearly outweighed. That makes “ridesharing has been good for society” not the best-supported bottom line.",
+  "integrated_rules": [
+    "**Reusable net-balance decision rule (good vs. not good for society):**\n\n1) **Assess positive effects (P)**—the service is potentially socially beneficial when it **meaningfully improves**:\n- **Equitable access/fairness** (fair opportunity for people facing mobility barriers), and these gains are **not outweighed** by negative effects.\n- **Inclusion/choice** via expanded options that **reduce discriminatory barriers** compared to prior alternatives.\n- **Practical consumer welfare and avoidable risk reduction** (e.g., convenience/affordability plus substantial safety/traceability tooling like real-time tracking, upfront pricing, and driver ratings).\n- **Jobs/economic contribution** via meaningful positive employment/economic impacts (e.g., flexibility/independence and measurable macro/output gains) **provided** worker/labor harms are not **predominant**.\n\n2) **Assess negative effects (N)**—the service is potentially socially harmful when it **significantly** produces:\n- **Worker exploitation**: conditions amounting to substantial unprotected exploitation (e.g., very low pay and/or lack of core protections/benefits or unprotected labor risk) such that the resulting harms are **not outweighed** by competing benefits.\n- **Baseline worker-protection failure**: business model/labor practices systematically undercut basic worker standards (e.g., below-legal-minimum compensation in major markets and/or absence of standard benefits like health coverage, paid leave, or unemployment insurance). Treat as socially bad **unless offsetting benefits clearly dominate**.\n- **Major externality harms** (traffic congestion and environmental damage) that are **not adequately offset**.\n- **Exploitative pricing under duress** (e.g., surge/urgency pricing) that meaningfully worsens consumer welfare (affordability/predictable access).\n- **Safety/accountability legitimacy deficits**: passenger safety risk increases due to factors like inadequate driver screening, insufficient safety accountability, or practices that deny responsibility for accidents, where risks are significant and **not credibly mitigated**.\n\n3) **Compare P vs. N using a consistent “outweighing/dominance/offset” standard**, considering relative **magnitude, breadth, likelihood, reversibility, and availability of credible mitigation**.\n- If **P is supported** and the relevant positive effects are **not outweighed** by larger negative effects in **N**, conclude **GOOD for society**.\n- If **N is supported** and the relevant negative effects are **predominant** or **not adequately offset** (including the “worker-protection failure” case where offsets must **clearly dominate**), conclude **NOT GOOD for society**.\n- If both positive and negative criteria are satisfied but the comparison is **not determinable at the required “not outweighed/clearly offset/predominant” level**, leave the judgment **unresolved** (do not force a conclusion)."
+  ]
+}

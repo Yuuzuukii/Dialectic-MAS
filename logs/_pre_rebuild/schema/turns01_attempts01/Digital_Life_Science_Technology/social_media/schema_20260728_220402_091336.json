@@ -1,0 +1,309 @@
+{
+  "method": "schema",
+  "question": "Is Social Media Good for Society?",
+  "agent1_stance": "Your stance:\nYou support social media.\nYou believe social media promotes community, security, and safety, both online and off, facilitating connection among people with shared interests across distances.\nYou believe social media encourages civic and political responsibility, as young people use these platforms to develop civic identities and participate in political activism with low-barrier-to-entry opportunities.\nYou believe social media bolsters inclusivity and diversity, both online and off, enabling marginalized groups—particularly LGBTQ+ youth—to explore identities and connect with peers.",
+  "agent2_stance": "Your stance:\nYou oppose social media.\nYou believe social media spurs digital addiction, cyberbullying, and mental health issues, creating dependency patterns and psychological harms particularly among adolescents and teens.\nYou believe social media encourages the spread of misinformation and dangerous fads, some of them lethal, as false information spreads rapidly and harmful challenges endanger users.\nYou believe social media increases privacy risks across the Internet, as user data collection and unauthorized data sharing compromise personal security and safety.",
+  "metrics": {
+    "elapsed_seconds": 202.417,
+    "model": "gpt-5.4-nano",
+    "prompt_tokens": 83063,
+    "cached_tokens": 24064,
+    "completion_tokens": 27348,
+    "total_tokens": 110411,
+    "total_cost_usd": 0.046466
+  },
+  "dialogue_history": [
+    {
+      "id": "arg-ad30091580",
+      "agent": "AG1",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Social media provides low-barrier-to-entry opportunities for young people to develop civic identities and participate in political activism."
+                ],
+                "weak_negation": [
+                  "Using social media in this way tends to enable participation/coordination rather than functioning only as passive entertainment."
+                ]
+              },
+              "consequent": "Social media strengthens civic and political responsibility—especially among young people."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Social media strengthens civic and political responsibility—especially among young people."
+                ],
+                "weak_negation": [
+                  "Increased youth civic and political responsibility contributes to society’s civic functioning rather than being mostly neutralized by negative side effects."
+                ]
+              },
+              "consequent": "Social media contributes to healthier civic functioning in society."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Social media contributes to healthier civic functioning in society."
+                ],
+                "weak_negation": [
+                  "Healthier civic functioning is a marker of social good."
+                ]
+              },
+              "consequent": "Therefore, social media is good for society."
+            }
+          ],
+          "Conc": [
+            "Social media strengthens civic and political responsibility—especially among young people.",
+            "Social media contributes to healthier civic functioning in society.",
+            "Therefore, social media is good for society."
+          ],
+          "Ass": [
+            "Using social media in this way tends to enable participation/coordination rather than functioning only as passive entertainment.",
+            "Increased youth civic and political responsibility contributes to society’s civic functioning rather than being mostly neutralized by negative side effects.",
+            "Healthier civic functioning is a marker of social good."
+          ]
+        }
+      },
+      "status": "defensible"
+    },
+    {
+      "id": "arg-0505794a24",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s second rule assumes that youth civic/political gains are “not mostly neutralized by negative side effects,” but the argument never compares the magnitude of civic benefits against harms such as addiction, cyberbullying, misinformation, or privacy risks to justify that net outcome."
+                ],
+                "weak_negation": [
+                  "To support a claim that civic gains are “not mostly neutralized,” one needs at least a net or magnitude comparison between benefits and harms rather than an unsupported assertion."
+                ]
+              },
+              "consequent": "The target’s “not mostly neutralized by negative side effects” assumption is unsupported."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s “not mostly neutralized by negative side effects” assumption is unsupported."
+                ],
+                "weak_negation": [
+                  "Given the severity and breadth of common harms from social media (addiction, cyberbullying, misinformation, privacy risks), it is plausible that these harms could mostly neutralize any civic-responsibility gains, making a net-positive “healthier civic functioning” claim unwarranted."
+                ]
+              },
+              "consequent": "The target argument does not establish net healthier civic functioning in society."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target argument does not establish net healthier civic functioning in society."
+                ],
+                "weak_negation": [
+                  "If net healthier civic functioning is not established, then the target’s final conclusion that “therefore, social media is good for society” does not follow from its premises."
+                ]
+              },
+              "consequent": "Therefore, the target conclusion that social media is good for society does not follow."
+            }
+          ],
+          "Conc": [
+            "The target’s “not mostly neutralized by negative side effects” assumption is unsupported.",
+            "The target argument does not establish net healthier civic functioning in society.",
+            "Therefore, the target conclusion that social media is good for society does not follow."
+          ],
+          "Ass": [
+            "To support a claim that civic gains are “not mostly neutralized,” one needs at least a net or magnitude comparison between benefits and harms rather than an unsupported assertion.",
+            "Given the severity and breadth of common harms from social media (addiction, cyberbullying, misinformation, privacy risks), it is plausible that these harms could mostly neutralize any civic-responsibility gains, making a net-positive “healthier civic functioning” claim unwarranted.",
+            "If net healthier civic functioning is not established, then the target’s final conclusion that “therefore, social media is good for society” does not follow from its premises."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-ad30091580",
+      "target_field": "Ass",
+      "target_statement": "Increased youth civic and political responsibility contributes to society’s civic functioning rather than being mostly neutralized by negative side effects."
+    },
+    {
+      "id": "arg-3a2d9f1eb9",
+      "agent": "AG1",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target attack depends on the assumption that, without a quantified benefit-vs-harm net/magnitude comparison, civic gains cannot be said to be “not mostly neutralized by negative side effects.”",
+                  "A claim that harms do not “mostly neutralize” civic gains can be supported by showing that low-barrier civic/activism participation persists even when negative side effects exist."
+                ],
+                "weak_negation": [
+                  "It is not required that every harm be absent, or that the argument provide an exact numeric net-effect estimate, to treat “mostly neutralized” as not established."
+                ]
+              },
+              "consequent": "Therefore, the target’s demand for a quantified net/magnitude comparison is an unjustified epistemic burden and does not show the prior argument’s “not mostly neutralized” assumption is unsupported."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Therefore, the target’s demand for a quantified net/magnitude comparison is an unjustified epistemic burden and does not show the prior argument’s “not mostly neutralized” assumption is unsupported.",
+                  "If the prior argument plausibly connects social media to civic responsibility through low-barrier pathways, that connection can still support “healthier civic functioning” even in the presence of harms."
+                ],
+                "weak_negation": [
+                  "It is not the case that the existence of harms automatically breaks any inference from civic-participation mechanisms to civic functioning."
+                ]
+              },
+              "consequent": "Thus, the prior argument can still validly support healthier civic functioning rather than being undermined by the lack of explicit net-effect quantification."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Thus, the prior argument can still validly support healthier civic functioning rather than being undermined by the lack of explicit net-effect quantification.",
+                  "In this debate’s framework, healthier civic functioning counts as a marker of social good."
+                ],
+                "weak_negation": [
+                  "Healthier civic functioning is not a socially irrelevant or morally neutral outcome."
+                ]
+              },
+              "consequent": "Accordingly, the target’s conclusion that “social media is good for society” does not follow is defeated; social media is good for society."
+            }
+          ],
+          "Conc": [
+            "Therefore, the target’s demand for a quantified net/magnitude comparison is an unjustified epistemic burden and does not show the prior argument’s “not mostly neutralized” assumption is unsupported.",
+            "Thus, the prior argument can still validly support healthier civic functioning rather than being undermined by the lack of explicit net-effect quantification.",
+            "Accordingly, the target’s conclusion that “social media is good for society” does not follow is defeated; social media is good for society."
+          ],
+          "Ass": [
+            "It is not required that every harm be absent, or that the argument provide an exact numeric net-effect estimate, to treat “mostly neutralized” as not established.",
+            "It is not the case that the existence of harms automatically breaks any inference from civic-participation mechanisms to civic functioning.",
+            "Healthier civic functioning is not a socially irrelevant or morally neutral outcome."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-0505794a24",
+      "target_field": "Ass",
+      "target_statement": "To support a claim that civic gains are “not mostly neutralized,” one needs at least a net or magnitude comparison between benefits and harms rather than an unsupported assertion."
+    },
+    {
+      "id": "arg-d618605ce6",
+      "agent": "AG2",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Social media spurs digital addiction and mental health issues by creating dependency patterns and psychological harms particularly among adolescents and teens."
+                ],
+                "weak_negation": [
+                  "These harms are not merely harmless entertainment effects; they are psychological harms that affect real functioning and wellbeing."
+                ]
+              },
+              "consequent": "Social media produces psychological harms in the adolescent/teen population."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Social media produces psychological harms in the adolescent/teen population."
+                ],
+                "weak_negation": [
+                  "Adolescents and teens are not socially irrelevant; widespread harms to their wellbeing undermine society’s overall wellbeing."
+                ]
+              },
+              "consequent": "Social media harms society’s overall wellbeing by damaging the wellbeing of adolescents and teens."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Social media harms society’s overall wellbeing by damaging the wellbeing of adolescents and teens."
+                ],
+                "weak_negation": [
+                  "If an activity harms society’s overall wellbeing, then it is not good for society."
+                ]
+              },
+              "consequent": "Social media is not good for society."
+            }
+          ],
+          "Conc": [
+            "Social media produces psychological harms in the adolescent/teen population.",
+            "Social media harms society’s overall wellbeing by damaging the wellbeing of adolescents and teens.",
+            "Social media is not good for society."
+          ],
+          "Ass": [
+            "These harms are not merely harmless entertainment effects; they are psychological harms that affect real functioning and wellbeing.",
+            "Adolescents and teens are not socially irrelevant; widespread harms to their wellbeing undermine society’s overall wellbeing.",
+            "If an activity harms society’s overall wellbeing, then it is not good for society."
+          ]
+        }
+      },
+      "status": "overruled"
+    },
+    {
+      "id": "arg-5d8f05f514",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s argument relies on a bridge assumption: “If an activity harms society’s overall wellbeing, then it is not good for society.” But this bridge treats any harm as automatically decisive and ignores that “good/bad for society” requires a net and tradeoff-sensitive judgment (including possible benefits and mitigation), which the target never provides."
+                ],
+                "weak_negation": [
+                  "It is not the case that the presence of harm alone logically entails that the overall social impact is not good."
+                ]
+              },
+              "consequent": "The target’s bridge assumption is an unwarranted general rule because it requires a net/tradeoff rationale that the target does not supply."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s bridge assumption is an unwarranted general rule because it requires a net/tradeoff rationale that the target does not supply.",
+                  "The target premises establish psychological harms for adolescents/teens, but do not establish that these harms outweigh social benefits or are not mitigated."
+                ],
+                "weak_negation": [
+                  "It is not the case that the target has shown the harms are net-negative at the societal level."
+                ]
+              },
+              "consequent": "Therefore, the target’s premises do not justify the inference from “harms society’s overall wellbeing” to “not good for society.”"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Therefore, the target’s premises do not justify the inference from “harms society’s overall wellbeing” to “not good for society.”"
+                ],
+                "weak_negation": [
+                  "So the target conclusion does not follow from its premises as stated."
+                ]
+              },
+              "consequent": "The target’s conclusion that “social media is not good for society” is not supported by its reasoning."
+            }
+          ],
+          "Conc": [
+            "The target’s bridge assumption is an unwarranted general rule because it requires a net/tradeoff rationale that the target does not supply.",
+            "Therefore, the target’s premises do not justify the inference from “harms society’s overall wellbeing” to “not good for society.”",
+            "The target’s conclusion that “social media is not good for society” is not supported by its reasoning."
+          ],
+          "Ass": [
+            "It is not the case that the presence of harm alone logically entails that the overall social impact is not good.",
+            "It is not the case that the target has shown the harms are net-negative at the societal level.",
+            "So the target conclusion does not follow from its premises as stated."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-d618605ce6",
+      "target_field": "Ass",
+      "target_statement": "If an activity harms society’s overall wellbeing, then it is not good for society."
+    }
+  ],
+  "final_answer": "**On the available reasons and evidence in this discussion, social media is *not clearly good for society* overall; the final verdict is *unresolved***—because neither side establishes the needed “net welfare” comparison between benefits (civic/community/inclusion) and harms (especially to teens).\n\n### How the key “society-good” and “society-not-good” considerations are handled\n\n**1) Possible societal benefits (not fully established as net-positive here)**  \n- **Civic and political responsibility / civic functioning:** It’s argued that social media enables low-barrier civic identity formation and activism among young people. That fits the “civic health as social good” criterion.  \n  - **But** the supporting reasoning does **not** actually compare the *magnitude* or *overall net effect* of these civic benefits against the documented harms. So it does not establish that the benefits are not mostly neutralized in practice.\n- **Community and safety through connectedness:** The pro view claims social media strengthens community connection and can improve safety/security via supportive contact across distance.  \n  - **However**, this discussion does not provide the kind of direct evidence or tradeoff analysis needed to show that these effects outweigh major downsides at the societal level.\n- **Inclusion and diversity (especially LGBTQ+ youth identity exploration):** The pro view claims social media can help marginalized groups explore identity and connect with peers.  \n  - **But** again, the discussion does not supply a net-welfare comparison showing these inclusion gains dominate over harms.\n\n**Net result for the “good for society” side:** plausible and relevant, but **not shown to win on overall societal impact** in the evidence presented.\n\n---\n\n**2) Societal harms (the strongest support here is for teen mental wellbeing)**  \n- **Protecting vulnerable wellbeing (adolescents/teens):** The anti case is explicitly strongest on the claim that social media can drive **addiction-like dependency patterns and mental health harms**, particularly for adolescents and teens.  \n  - This directly satisfies the “significant psychological/developmental harm to adolescents/teens” criterion, which pushes toward “not good for society.”\n- **Cyberbullying:** Mentioned in the general stance, but not substantively developed with specific debate evidence here. So it supports the overall concern in principle, but **is not the best-supported part** of the discussion.\n- **Misinformation and dangerous fads:** Also present in the stance, but **not actually substantiated in the debate record** with enough detail to weigh magnitude, likelihood, and mitigation.\n- **Privacy and security risks:** Likewise identified in the stance, but **not developed in the debate** with comparative evidence.\n\n**Net result for the “not good for society” side:** the discussion provides comparatively more concrete support that harms to teens are real and socially salient. That said, it still does **not** demonstrate the decisive point that these harms **outweigh** the societal benefits when everything is aggregated.\n\n---\n\n### The core unresolved requirement: the missing “net welfare” tradeoff\nThe framework for answering “good for society” requires a comparison of **overall wellbeing** in practice—considering **magnitude, breadth, likelihood, reversibility, and mitigation**.\n\n- The **pro** case does not show that civic/community/inclusion benefits are large enough (or harms are small enough/mitigated enough) to make the overall impact positive.\n- The **con** case argues strongly about teen mental harms, but it also does not provide the decisive aggregation showing that the harms are **net-negative** across society after accounting for benefits and mitigation.\n\n### Conclusion\nBecause the discussion does not settle the required net-welfare tradeoff—and because several major harm categories (misinformation/dangerous fads, privacy risks) are not actually weighed against benefits here—the best-supported answer is:\n\n**The overall question is unresolved from this evidence; social media is not clearly “good for society” on balance, mainly due to insufficiently established net outcomes despite credible concerns about teen mental wellbeing.**",
+  "integrated_rules": [
+    "Reusable decision rule (integrated):\n\nEvaluate a proposed use of social media by checking—using the same evidential standard for all checks—whether it satisfies any of the following *society-good* antecedents and any of the following *society-not-good* antecedents.\n\n1) Society-good antecedents (any):\n- Civic health as social good: If the activity improves society’s civic functioning (e.g., supports civic identity formation and low-barrier civic/political participation) and healthier civic functioning counts as a marker of social good, then it supports the conclusion “good for society.”\n- Community and safety through connectedness: If the activity strengthens community connection and contributes to security/safety in social life (including online and offline), especially by enabling supportive contact across distance among people with shared interests, then it supports “good for society.”\n- Inclusion as social benefit: If the activity promotes inclusivity and diversity by enabling marginalized individuals (e.g., identity-exploring LGBTQ+ youth) to safely explore identities and connect with peers, then it supports “good for society.”\n\n2) Society-not-good antecedents (any):\n- Protect vulnerable wellbeing: If the activity causes significant psychological or developmental harm to adolescents/teens (e.g., fostering addiction-like dependence, cyberbullying, or other mental-health harms), undermining the activity’s social acceptability, then it supports “not good for society.”\n- Net welfare standard: If the activity harms society’s overall wellbeing (net welfare), then it supports the conclusion “not good for society.”\n- Risk prevention via informational integrity: If the activity facilitates the rapid spread of misinformation and enables harmful/dangerous social trends/challenges (including those that can endanger users), then it supports “not good for society.”\n- Personal security and privacy: If the activity increases privacy/security risks by enabling extensive data collection and/or unauthorized sharing that compromises personal safety, then it supports “not good for society.”\n\n3) Conflict resolution when both kinds of antecedents are supported:\n- If the *net welfare standard* antecedent is supported, conclude “not good for society.”\n- Otherwise, when both society-good and society-not-good antecedents are supported, decide by comparing which side more strongly supports “overall wellbeing” in practice, using the relative strength of evidence about magnitude, breadth, likelihood, reversibility, and available mitigation (no automatic veto). The conclusion follows the more compelling net-welfare direction.\n- If after that comparison the balance cannot be determined from the available evidence (i.e., neither side clearly dominates on net welfare), leave the evaluation unresolved rather than favoring either side by default."
+  ]
+}

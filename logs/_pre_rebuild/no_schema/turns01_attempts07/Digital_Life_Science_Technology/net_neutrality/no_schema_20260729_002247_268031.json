@@ -1,0 +1,191 @@
+{
+  "method": "no_schema",
+  "question": "Are Net Neutrality Laws Good for Society?",
+  "agent1_stance": "Your stance:\nYou support net neutrality.\nYou believe net neutrality preserves free speech by prohibiting ISPs from blocking content, as ISPs may slow or block websites that disagree with the companies' political viewpoints or interfere with their monetary interests.\nYou believe net neutrality protects consumers by preventing ISPs from accelerating, decelerating, or imposing surcharges on specific online content.\nYou believe net neutrality promotes competition by creating equitable conditions for emerging businesses, and that without net neutrality protections, startups would face discrimination from ISP-owned or preferred content.",
+  "agent2_stance": "Your stance:\nYou oppose net neutrality.\nYou believe net neutrality regulations are unnecessary because the Internet flourished without them, as major companies like Google, Facebook, and YouTube achieved success prior to net neutrality implementation.\nYou believe net neutrality imposed excessive regulatory burdens on ISPs, with one ISP documenting over 5,000 extra paperwork hours annually.\nYou believe net neutrality reduces investment in Internet infrastructure, limiting consumer access and increasing costs, as between 2011 and 2015, the mere threat of implementing them reduced ISPs investments in network upgrades by 20–30%.",
+  "metrics": {
+    "elapsed_seconds": 182.868,
+    "model": "gpt-5.4-nano",
+    "prompt_tokens": 123371,
+    "cached_tokens": 26624,
+    "completion_tokens": 23659,
+    "total_tokens": 147030,
+    "total_cost_usd": 0.049456
+  },
+  "dialogue_history": [
+    {
+      "id": "arg-5ccd419f8e",
+      "agent": "AG1",
+      "type": "main",
+      "argument": "Net neutrality laws are good for society because they protect free speech by stopping ISPs from blocking or slowing online content based on the ISP’s political preferences or monetary interests. If an ISP can control how fast or whether particular websites load, it can effectively punish viewpoints it dislikes or prioritize content that benefits the ISP financially—without needing to formally censor anyone. Net neutrality prevents that kind of backdoor censorship and discriminatory interference with what people can access and share online, keeping the internet a place where speech isn’t filtered by whoever controls last‑mile infrastructure.",
+      "status": "defensible"
+    },
+    {
+      "id": "arg-51fa606a1b",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": "Net neutrality laws aren’t good for society overall because their costs outweigh the claimed free-speech benefit. Before net neutrality, the Internet already flourished—major platforms like Google, Facebook, and YouTube achieved major success—so protecting speech didn’t require these rules. Meanwhile, the regulations create real operational and economic harm: one ISP documented over 5,000 extra paperwork hours annually, and between 2011 and 2015 the mere threat of net neutrality reduced ISPs’ investment in network upgrades by 20–30%. Less investment means slower improvements and reduced access for consumers, which increases costs. So the net effect is worse for society than the target argument’s free-speech framing suggests.",
+      "attack": "rebut",
+      "target_id": "arg-5ccd419f8e",
+      "target_field": "Conc",
+      "target_statement": "Net neutrality laws are good for society because they protect free speech by stopping ISPs from blocking or slowing online content based on the ISP’s political preferences or monetary interests."
+    },
+    {
+      "id": "arg-ee32e51172",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": "The target argument assumes that the cited paperwork/investment changes from the “threat” of net-neutrality rules translate into a real, society-wide harm to consumers that outweighs speech benefits. That causal step is not justified: (1) a drop in *planned* or *incremental* investment (especially due to regulatory uncertainty) doesn’t necessarily mean fewer realized network upgrades or worse user experience, since ISPs can reallocate capital, proceed with the most critical projects, or adjust timelines; and (2) “5,000 extra paperwork hours” for one provider is an operational burden, but it doesn’t automatically imply a measurable reduction in service quality for the public. If the claimed consumer-access harm isn’t reliably produced at scale, then the conclusion that “costs outweigh the free-speech benefit” is undermined.",
+      "attack": "undercut",
+      "target_id": "arg-51fa606a1b",
+      "target_field": "Ass"
+    },
+    {
+      "id": "arg-3656f73b4d",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": "The target’s pro–net neutrality conclusion depends on the idea that ISPs can effectively punish disliked viewpoints simply by slowing/blocking specific content “without needing to formally censor.” But that premise is overstated: ISPs operate in competitive last‑mile markets and have strong incentives to deliver good performance to retain subscribers, and discriminatory throttling would be quickly observable via third‑party measurement and user reports. Also, most speech/content reaches users through redundancies (multiple routes) and largely ISP-agnostic delivery layers (e.g., CDNs/caching), limiting an ISP’s ability to selectively control which viewpoints people can access in a reliable, censorship-like way. If ISPs generally can’t (or won’t) execute the kind of viewpoint-based interference the target describes, then net neutrality laws aren’t “good for society” on free-speech grounds—because the harm they’re meant to prevent is limited even without the rules.",
+      "attack": "undercut",
+      "target_id": "arg-5ccd419f8e",
+      "target_field": "Ass",
+      "target_statement": "If an ISP can control how fast or whether particular websites load, it can effectively punish viewpoints it dislikes or prioritize content that benefits the ISP financially—without needing to formally censor anyone."
+    },
+    {
+      "id": "arg-6e7b47e51d",
+      "agent": "AG1",
+      "type": "counter",
+      "argument": "The target attack assumes that because ISPs face competition and some content is delivered via CDNs/multiple paths, they generally can’t (or won’t) interfere in a speech-relevant way. But net neutrality is aimed precisely at the *subtle, incentive-driven* differential treatment that can still happen even if the ISP doesn’t “formally censor.” For example, ISPs can degrade or prioritize specific services/traffic classes in ways that are hard for ordinary users to verify in real time and that don’t require banning content outright—so speech can be “effectively” punished via worse reliability, speed, or access. Also, redundancy/CDNs do not eliminate an ISP’s control at key points in delivery: CDNs still must traverse the ISP’s networks, where throttling or prioritization decisions matter most during congestion. Finally, competition doesn’t remove the incentive: an ISP can discriminate as a profit strategy (e.g., favoring content that benefits the ISP financially) while still competing on overall service quality. Because these speech-inhibiting mechanisms can persist even under the conditions the target cites, net neutrality laws remain good for society on free-speech grounds.",
+      "attack": "undercut",
+      "target_id": "arg-3656f73b4d",
+      "target_field": "Ass",
+      "target_statement": "If ISPs generally can’t (or won’t) execute the kind of viewpoint-based interference the target describes, then net neutrality laws aren’t “good for society” on free-speech grounds—because the harm they’re meant to prevent is limited even without the rules."
+    },
+    {
+      "id": "arg-c3fdea18f1",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": "The target’s “free speech” conclusion relies on the idea that stopping ISPs from slowing content prevents viewpoint punishment. But slowing or deprioritizing traffic—even if it happens—does not reliably equate to censorship: it may change quality of service, yet it doesn’t remove the ability to access, read, or publish the content. The target explicitly frames the harm as “without needing to formally censor anyone,” which highlights that what’s being prevented is not blocking but performance differences. Performance throttling is therefore, at most, an annoyance and inconvenience, not a dependable mechanism for suppressing speech. If net neutrality’s key speech-protection mechanism is merely maintaining equal speed (rather than preventing actual access denial), then the laws don’t clearly provide the major societal free-speech benefit the target claims.",
+      "attack": "rebut",
+      "target_id": "arg-5ccd419f8e",
+      "target_field": "Conc",
+      "target_statement": "Net neutrality prevents that kind of backdoor censorship and discriminatory interference… keeping the internet a place where speech isn’t filtered by whoever controls last‑mile infrastructure."
+    },
+    {
+      "id": "arg-a8a1bd75e6",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": "The target assumes that because throttling doesn’t “formally” block access, it can’t function as viewpoint punishment. But net neutrality’s free-speech concern is exactly about *effective* suppression: if an ISP slows or deprioritizes specific sites/services (especially during peak congestion), people may be unable to reliably load them, participate in real-time discussion, or disseminate content at all—effectively denying reach and influence in practice. In other words, “speech” isn’t just the theoretical ability to fetch a webpage; it depends on timely, reliable delivery. Therefore, performance throttling can be a dependable mechanism for discouraging certain viewpoints even without explicit “censorship,” so the target’s assumption that it’s merely an annoyance/inconvenience is invalid.",
+      "attack": "undercut",
+      "target_id": "arg-c3fdea18f1",
+      "target_field": "Ass"
+    },
+    {
+      "id": "arg-2dafeb804d",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": "The target argument’s “free speech” benefit depends on the assumption that preventing ISPs from blocking or slowing content meaningfully protects speech for society. But net neutrality laws address only one channel—ISP last‑mile blocking/throttling—while major real-world speech constraints come from other intermediaries (platforms, app stores, search/discovery, and content-moderation/algorithmic prioritization). Since those other bottlenecks can still determine what people see and whether they can reach audiences, net neutrality does not reliably prevent the broader “speech isn’t filtered” outcome it claims. Therefore, net neutrality laws aren’t clearly “good for society” on free-speech grounds; at best they provide a narrow and often marginal protection relative to where most speech gatekeeping actually occurs.",
+      "attack": "rebut",
+      "target_id": "arg-5ccd419f8e",
+      "target_field": "Conc",
+      "target_statement": "Net neutrality laws are good for society because they protect free speech by stopping ISPs from blocking or slowing online content based on the ISP’s political preferences or monetary interests."
+    },
+    {
+      "id": "arg-dfef05b594",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": "The target attack assumes that because net neutrality targets only last‑mile ISP blocking/throttling, the free‑speech benefit is “narrow and often marginal” compared to other gatekeepers (platforms, app stores, search). But that premise is wrong because the ability to *reach* any platform or moderation/discovery layer depends on transport getting packets reliably through the ISP network. If an ISP can slow or block particular websites/services, it can reduce access to the very content that platforms and search would otherwise make available—so ISP interference can directly change what people can see, share, and publish (even if other intermediaries also influence speech). Net neutrality therefore isn’t merely one minor channel; it prevents ISPs from becoming an additional, ISP-controlled speech gatekeeper whose interference can compound with other bottlenecks.",
+      "attack": "undercut",
+      "target_id": "arg-2dafeb804d",
+      "target_field": "Ass"
+    },
+    {
+      "id": "arg-5a67d0c4f7",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": "Net neutrality laws don’t actually guarantee the free-speech protection the target claims, because they still leave room for ISPs to manage traffic under broad categories like “network management” (e.g., shaping, prioritizing, or throttling during congestion or for technical/security reasons). That means an ISP can pursue differential treatment that disadvantages certain viewpoints while presenting it as ordinary technical management, so the “prevents backdoor censorship” link is not assured. If the law allows performance-based discrimination to be justified as legitimate network management, then net neutrality may not reliably prevent the viewpoint punishment mechanism it highlights.",
+      "attack": "undercut",
+      "target_id": "arg-5ccd419f8e",
+      "target_field": "Ass",
+      "target_statement": "Net neutrality prevents that kind of backdoor censorship and discriminatory interference with what people can access and share online"
+    },
+    {
+      "id": "arg-a37e27bb3c",
+      "agent": "AG1",
+      "type": "counter",
+      "argument": "The target attack treats “network management” allowances as a blank check, but net neutrality laws are specifically designed to prevent ISPs from using these leeway provisions to discriminate based on content or incentives. The relevant distinction is between (1) **necessary, application-agnostic network management** (e.g., congestion control for all traffic in a technically required way) and (2) **viewpoint- or money-driven differential treatment** (slowing/blocking/prioritizing particular websites or services to punish or reward them). Net neutrality rules bar the second kind while permitting only the first, so an ISP can’t reliably “present viewpoint punishment as technical management” without violating the nondiscrimination limits that the laws impose. And importantly, “good for society” doesn’t require an absolute guarantee—reducing the practical ability of ISPs to engage in backdoor content discrimination is still a meaningful free-speech safeguard.",
+      "attack": "undercut",
+      "target_id": "arg-5a67d0c4f7",
+      "target_field": "Ass",
+      "target_statement": "If the law allows performance-based discrimination to be justified as legitimate network management, then net neutrality may not reliably prevent the viewpoint punishment mechanism it highlights."
+    },
+    {
+      "id": "arg-c0830ba694",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": "Net neutrality laws aren’t clearly good for society’s free-speech interests because they can create *regulatory compliance incentives* that still interfere with what people can access. The target assumes the law’s effect is straightforward: it prevents ISPs from blocking or slowing content for political/monetary reasons. But when rules are costly and complex to administer, ISPs have strong incentives to adopt conservative, broad “safe” traffic-handling policies (e.g., more aggressive throttling or restricting certain categories of traffic) to avoid violating the rules—especially since violations can be unpredictable and enforcement can be lagged. That means the laws can reduce actual access quality/reliability even if they don’t implement formal viewpoint censorship, undermining the “keeping the internet a place where speech isn’t filtered” claim.",
+      "attack": "rebut",
+      "target_id": "arg-5ccd419f8e",
+      "target_field": "Conc",
+      "target_statement": "Net neutrality prevents that kind of backdoor censorship and discriminatory interference with what people can access and share online, keeping the internet a place where speech isn’t filtered by whoever controls last‑mile infrastructure."
+    },
+    {
+      "id": "arg-6717f7a428",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": "The target’s “compliance incentives” story depends on an assumption that net neutrality rules will push ISPs to use *broad, conservative traffic restrictions* (e.g., throttling or restricting categories of traffic) just to avoid accidentally discriminating. But net neutrality laws are specifically structured to prohibit discrimination based on content or incentives while still allowing **reasonable, nondiscriminatory network management** (like congestion control applied across traffic). If ISPs can remain compliant by managing traffic on technical/congestion grounds without imposing viewpoint- or money-driven differentials, then there’s no need for the hypothesized “safe” blanket throttling that would reduce access quality in a speech-relevant way. So the target’s central assumption—that compliance will inherently lead to broadly worse reliability that undermines the “not filtered by last‑mile owners” claim—is not warranted.",
+      "attack": "undercut",
+      "target_id": "arg-c0830ba694",
+      "target_field": "Ass"
+    },
+    {
+      "id": "arg-5c0a93cec0",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": "Net neutrality doesn’t clearly deliver the “prevents backdoor censorship” outcome the target claims, because it doesn’t eliminate all the practical ways an ISP can restrict what users can reach. Net neutrality mainly targets how ISPs treat traffic (e.g., whether they slow/deprioritize it by content or service), but ISPs can still interfere with access through other last‑mile mechanisms such as blocking at the connection/routing level, manipulating name-resolution/path selection, or using policy/processes outside pure traffic “speed” discrimination. If ISPs can still take access-away actions using methods not captured by the rules, then net neutrality can’t reliably ensure that speech “isn’t filtered by whoever controls last‑mile infrastructure.”",
+      "attack": "undercut",
+      "target_id": "arg-5ccd419f8e",
+      "target_field": "Ass",
+      "target_statement": "Net neutrality prevents that kind of backdoor censorship and discriminatory interference with what people can access and share online, keeping the internet a place where speech isn’t filtered by whoever controls last‑mile infrastructure."
+    },
+    {
+      "id": "arg-b716b4fad5",
+      "agent": "AG1",
+      "type": "counter",
+      "argument": "The target’s conclusion depends on an overly strict standard: it treats net neutrality as “not good for society” unless it eliminates *every* possible way an ISP could interfere with access, and it claims this prevents us from reliably protecting speech. But net neutrality is aimed at the specific, dominant leverage an ISP has over users’ speech—content- or service-specific blocking and slowing—because that’s the scalable, incentive-driven method described in the pro–net neutrality argument. Even if other interference methods are theoretically possible, net neutrality still meaningfully reduces the ISP’s ability to punish viewpoints in the most straightforward, high-impact way the target itself references (blocking/speed degradation). So the fact that no law can guarantee absolute prevention doesn’t defeat the claim that net neutrality is good for society by cutting off a major channel for backdoor censorship and discriminatory interference with what people can access and share.",
+      "attack": "undercut",
+      "target_id": "arg-5c0a93cec0",
+      "target_field": "Ass",
+      "target_statement": "If ISPs can still take access-away actions using methods not captured by the rules, then net neutrality can’t reliably ensure that speech “isn’t filtered by whoever controls last‑mile infrastructure.”"
+    },
+    {
+      "id": "arg-6eebf5edaf",
+      "agent": "AG2",
+      "type": "main",
+      "argument": "Net neutrality laws aren’t good for society because society already got a thriving, innovative Internet without them. The stance’s key evidence is that major companies like Google, Facebook, and YouTube achieved widespread success prior to net neutrality implementation. That matters because if the Internet could grow and deliver major consumer value before these rules existed, then the laws are not necessary to produce the public benefits people care about (innovation, access to services, and vibrant online speech/commerce). When a regulation isn’t needed to achieve the baseline outcomes already achieved, it’s hard to justify calling it “good for society”—it risks adding constraints without providing a decisive, demonstrably required upside.",
+      "status": "defensible"
+    },
+    {
+      "id": "arg-0b8473432e",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": "The target’s argument assumes that because the Internet became successful before net neutrality, the laws can’t be “good for society.” But that doesn’t follow: an economy can grow while still allowing powerful actors (ISPs) to engage in discriminatory behavior that can chill speech. Net neutrality is specifically meant to stop ISPs from blocking or slowing particular online content based on political preferences or monetary interests—i.e., preventing “backdoor censorship.” So even if major platforms succeeded without these rules, net neutrality can still be socially good because it reduces the ability of last‑mile gatekeepers to interfere with what people can read, share, and publish.",
+      "attack": "undercut",
+      "target_id": "arg-6eebf5edaf",
+      "target_field": "Ass",
+      "target_statement": "if society already got a thriving, innovative Internet without net neutrality, then net neutrality laws are not necessary to produce a decisive public upside (so it’s hard to justify calling them good for society)."
+    },
+    {
+      "id": "arg-04ac35e29a",
+      "agent": "AG2",
+      "type": "counter",
+      "argument": "The target attack’s move from “ISPs could discriminate” to “therefore net neutrality is socially good” is incomplete: it substitutes a possibility for a necessity. Even if last‑mile gatekeeping can, in theory, chill speech, that does not rebut the core point of my position—that society produced a thriving Internet (and major online platforms like Google, Facebook, and YouTube achieved widespread success) *without* net neutrality. If viewpoint/chilling harms were socially significant enough to justify sweeping regulation of ISPs, we would expect the pre‑net‑neutrality era to show clear evidence of speech or innovation being materially suppressed. The target provides no such necessity; at most it claims discrimination could happen. Given that, the burden isn’t met to show net neutrality laws are “good for society” rather than an avoidable constraint.",
+      "attack": "undercut",
+      "target_id": "arg-0b8473432e",
+      "target_field": "Ass",
+      "target_statement": "an economy can grow while still allowing powerful actors (ISPs) to engage in discriminatory behavior that can chill speech; therefore net neutrality can still be socially good"
+    }
+  ],
+  "final_answer": "**No—net neutrality laws, in the form argued here, are not clearly good for society overall.**  \n\n### Rationale (weighing the claimed upsides vs. the documented downsides)\n\n#### 1) The potential social benefits are real, but they’re not shown to be *necessary* at scale\nNet neutrality proponents argue it would:\n- **Protect free speech** by preventing ISPs from blocking or slowing content for political or financial reasons.\n- **Protect consumers** by stopping ISPs from accelerating/decelerating specific services or imposing content-specific surcharges.\n- **Support competition** by reducing the ability of incumbent or ISP-favored content to get preferential treatment that disadvantages emerging rivals.\n\nThose mechanisms could, in principle, reduce “backdoor censorship” and unfair carriage.\n\nHowever, the anti–net neutrality position raises a key difficulty for a “good for society” claim: **the Internet already grew and delivered major consumer and innovation outcomes before net neutrality rules existed** (with large platforms like Google, Facebook, and YouTube thriving). That doesn’t prove ISPs never discriminated, but it does mean the policy’s case must overcome the burden of showing that the regulation is **needed** to achieve (or substantially improve) baseline outcomes, not merely that discrimination is possible in theory.\n\nIn the debate presented, the free-speech benefit is largely argued through possibility and incentives, rather than through strong evidence that net neutrality prevented a large, measurable amount of socially harmful discrimination that otherwise would have happened.\n\n#### 2) The compliance and investment risks are more concrete, and the policy may reduce capacity improvements\nOpponents cite several tangible costs:\n- **Administrative/compliance burden** (one ISP reportedly documenting **5,000+ extra paperwork hours annually**).\n- **Investment reduction under regulatory threat**, where **between 2011 and 2015** the threat of net neutrality reduced ISPs’ network upgrade investment by **~20–30%**.\n\nEven the pro side challenges the causal chain (“threat” vs. realized harm, and one provider’s paperwork doesn’t automatically mean worse service for everyone), the fact remains: **these are not just speculative harms**. They indicate that net neutrality rules (or the uncertainty around them) can reasonably create real economic friction—especially for infrastructure-heavy upgrades that drive long-run service quality.\n\n#### 3) The free-speech mechanism is not guaranteed, which weakens the benefit side\nSeveral objections remain relevant to whether net neutrality reliably delivers the promised speech outcomes:\n- **Network-management exceptions** can allow differential treatment framed as technical necessity, so the rule may not fully eliminate the “effective suppression” channel.\n- **Net neutrality targets last-mile traffic treatment**, while other intermediaries (platforms, app stores, discovery systems, algorithmic ranking, moderation) can still determine what people see and can reach audiences.\n- **Even if ISPs can’t perfectly censor**, performance-based or subtle prioritization during congestion could matter—but the debate did not settle how reliably such behavior would occur, how detectable it would be, and how effectively net neutrality would block it in practice.\n\nSo the benefit story is plausibly significant, but **not airtight**—and when the benefit’s magnitude/necessity is uncertain, large compliance/investment risks become more decisive.\n\n---\n\n### Bottom line\nBecause:\n- the pro case depends heavily on incentives and hypothetical discriminatory practices,\n- the anti case points to **concrete** compliance burdens and **evidence-consistent** investment risk,\n- and the speech benefits are not shown to be reliably comprehensive (given exceptions and other gatekeepers),\n\nthe better-supported overall conclusion is that **net neutrality laws are not clearly good for society** as a general rule in the way described here.\n\n**Confidence: moderate.** The main unresolved issue is the lack of strong, direct evidence in the debate about how often ISP discrimination in the relevant “backdoor censorship” sense actually caused large social harm that net neutrality would have prevented. Still, given the quantified-ish cost/risk arguments and the “baseline already succeeded” point, the downside case is more grounded than the upside case in the evidence provided.",
+  "integrated_rules": [
+    "Assess whether the proposed nondiscrimination (net neutrality–type) rule is socially beneficial by weighing two sets of considerations: \n\n1) **Pro-benefit (free speech / consumer / competition protection): conclude the rules are socially beneficial if** there is a credible basis that the relevant access infrastructure actor (e.g., last‑mile gatekeepers) would be able to **intentionally discriminate among online content or services** (rather than doing purely technical network management) in ways that (i) function as “backdoor censorship” tied to political preferences or financial interests—thereby protecting free speech; or (ii) predictably **harm consumers** by accelerating/decaying specific content or imposing content-specific surcharges; or (iii) **disadvantage emerging competitors** (startups) because preferred/incumbent content can receive preferential access, thereby promoting competition.\n\n2) **Anti-benefit (unnecessary / costly / investment-reducing): conclude the rules may be not good or likely not good if** the evidence shows one or more of the following: (iv) the baseline outcomes the policy claims to improve (e.g., innovation, widespread access, vibrant online speech/commerce) were already achieved substantially without the regulation, making the additional constraints hard to justify (skepticism is warranted); (v) the regulation creates substantial administrative/compliance burdens (net social value questionable); (vi) regulation (or credible threat of it) reduces essential capacity/infrastructure investment (e.g., lowering upgrade spending) and thereby worsens consumer access/increases effective costs (likely harmful); and/or (vii) the policy increases constraints while the claimed benefits are not demonstrably required to achieve already-existing baseline outcomes (the policy is not good).\n\n3) **If opposing conditions both apply, decide by symmetric comparison:** compare the supported **magnitude, breadth, likelihood, reversibility/mitigation** of (1)’s discrimination-protection benefits against (2)’s necessity/investment/burden harms; conclude **socially beneficial** when (1) is better supported and (2) is not shown as substantial enough to outweigh it, and conclude **not good** when (2) is better supported and the claimed discrimination-protection benefits are not necessary or are weak relative to the documented costs. If the evidence is too evenly balanced or underspecified to determine which side’s claims dominate, leave the overall assessment **unresolved** rather than picking a default."
+  ]
+}

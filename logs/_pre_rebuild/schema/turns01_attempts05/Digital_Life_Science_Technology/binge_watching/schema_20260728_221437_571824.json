@@ -1,0 +1,614 @@
+{
+  "method": "schema",
+  "question": "Is Binge-Watching Good for You?",
+  "agent1_stance": "Your stance:\nYou support binge-watching.\nYou believe binge-watching creates a shared cultural space that helps viewers connect with others and strengthens relationships, including long-distance partnerships.\nYou believe binge-watching releases dopamine, providing stress relief and a sense of control.\nYou believe watching multiple episodes together creates immersion and makes complex storylines easier to follow, resulting in greater enjoyment of sophisticated narratives.",
+  "agent2_stance": "Your stance:\nYou oppose binge-watching.\nYou believe research links binge-watching to depression, loneliness, and reduced self-control, and that after finishing shows, viewers may experience depression, anxiety, and feelings of emptiness.\nYou believe extended sitting correlates with metabolic slowdown, heart disease, and cancer, and that binge-watching also associates with poor sleep quality, weight gain, and unhealthy eating patterns.\nYou believe studies show viewers experience significantly less show enjoyment when watching multiple episodes at once.",
+  "metrics": {
+    "elapsed_seconds": 283.058,
+    "model": "gpt-5.4-nano",
+    "prompt_tokens": 156300,
+    "cached_tokens": 70656,
+    "completion_tokens": 37467,
+    "total_tokens": 193767,
+    "total_cost_usd": 0.065376
+  },
+  "dialogue_history": [
+    {
+      "id": "arg-d629e3ffe0",
+      "agent": "AG1",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching involves watching multiple episodes back-to-back in one session.",
+                  "The viewer experiences the binge as rewarding/pleasant rather than forced."
+                ],
+                "weak_negation": [
+                  "It is not the case that the binge is coercive or aversive for the viewer."
+                ]
+              },
+              "consequent": "Binge-watching can trigger dopamine-related reward/reinforcement processes for the viewer during and right after the session."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching can trigger dopamine-related reward/reinforcement processes for the viewer during and right after the session.",
+                  "Dopamine-linked reward/reinforcement is associated with reduced stress and increased perceived control."
+                ],
+                "weak_negation": [
+                  "It is not the case that the viewer experiences the binge as harmful or compulsive."
+                ]
+              },
+              "consequent": "For viewers who experience the binge as pleasurable rather than coercive, binge-watching tends to provide stress relief and a greater sense of control."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "For viewers who experience the binge as pleasurable rather than coercive, binge-watching tends to provide stress relief and a greater sense of control.",
+                  "Stress relief and perceived control are indicators of psychological well-being (i.e., “good for you”)."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Yes—binge-watching can be good for you (at least psychologically), because for viewers who enjoy it rather than feel coerced, it relieves stress and increases their sense of control."
+            }
+          ],
+          "Conc": [
+            "Binge-watching can trigger dopamine-related reward/reinforcement processes for the viewer during and right after the session.",
+            "For viewers who experience the binge as pleasurable rather than coercive, binge-watching tends to provide stress relief and a greater sense of control.",
+            "Yes—binge-watching can be good for you (at least psychologically), because for viewers who enjoy it rather than feel coerced, it relieves stress and increases their sense of control."
+          ],
+          "Ass": [
+            "It is not the case that the binge is coercive or aversive for the viewer.",
+            "It is not the case that the viewer experiences the binge as harmful or compulsive."
+          ]
+        }
+      },
+      "status": "overruled"
+    },
+    {
+      "id": "arg-ec6484c315",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s key step treats “stress relief” and “increased perceived control” during/right after binge-watching as evidence that binge-watching is psychologically good for you.",
+                  "Such immediate relief can be temporary and is not a reliable proxy for lasting overall psychological well-being."
+                ],
+                "weak_negation": [
+                  "It is not the case that immediate stress relief/perceived control reliably track overall psychological well-being."
+                ]
+              },
+              "consequent": "Immediate stress relief and perceived control during/right after a binge do not reliably indicate overall psychological well-being."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Immediate stress relief and perceived control during/right after a binge do not reliably indicate overall psychological well-being.",
+                  "Research links binge-watching to poorer psychological outcomes (e.g., depression, loneliness, reduced self-control) and, for many viewers, feelings of anxiety/emptiness after finishing shows."
+                ],
+                "weak_negation": [
+                  "It is not the case that binge-watching generally leads to better psychological well-being after the session."
+                ]
+              },
+              "consequent": "Binge-watching is associated with worse psychological outcomes after the session for many viewers, not with overall psychological well-being."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching is associated with worse psychological outcomes after the session for many viewers, not with overall psychological well-being.",
+                  "If something is not associated with overall psychological well-being, then it is not “good for you” psychologically overall."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Therefore, binge-watching is not good for you psychologically overall."
+            }
+          ],
+          "Conc": [
+            "Immediate stress relief and perceived control during/right after a binge do not reliably indicate overall psychological well-being.",
+            "Binge-watching is associated with worse psychological outcomes after the session for many viewers, not with overall psychological well-being.",
+            "Therefore, binge-watching is not good for you psychologically overall."
+          ],
+          "Ass": [
+            "It is not the case that immediate stress relief/perceived control reliably track overall psychological well-being.",
+            "It is not the case that binge-watching generally leads to better psychological well-being after the session."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-d629e3ffe0",
+      "target_field": "Ass",
+      "target_statement": "Stress relief and perceived control are indicators of psychological well-being (i.e., “good for you”)."
+    },
+    {
+      "id": "arg-258e7b5403",
+      "agent": "AG1",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target attack infers “binge-watching is not good for you psychologically overall” from the claims that stress relief/perceived control are (at best) not a reliable proxy and that binge-watching can be associated with worse outcomes for many viewers.",
+                  "That inference depends on the assumption that “mixed evidence / harms for many” logically rules out any psychologically positive effect for those who experience the binge as pleasant rather than coercive."
+                ],
+                "weak_negation": [
+                  "It is not the case that “mixed or unreliable proxy evidence” logically eliminates the possibility that some viewers benefit."
+                ]
+              },
+              "consequent": "The target’s inference does not logically follow: evidence of harm for many viewers or proxy unreliability does not rule out psychological benefits for at least some viewers."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s inference does not logically follow: evidence of harm for many viewers or proxy unreliability does not rule out psychological benefits for at least some viewers.",
+                  "Psychological well-being evaluations depend on net effects and heterogeneity in how viewers experience binge-watching (e.g., pleasurable vs coercive), not on an across-the-board “for everyone” generalization from “many.”"
+                ],
+                "weak_negation": [
+                  "It is not the case that any evidence of harm for many viewers determines the overall verdict as “not good for you” for all conditional cases."
+                ]
+              },
+              "consequent": "Binge-watching can be psychologically good for viewers who experience it as pleasurable rather than coercive, even if some other viewers experience harms."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching can be psychologically good for viewers who experience it as pleasurable rather than coercive, even if some other viewers experience harms.",
+                  "For those same (non-coerced, non-harmful) viewers, our main argument links binge sessions to rewarding reinforcement that tends to reduce stress and increase perceived control."
+                ],
+                "weak_negation": [
+                  "It is not the case that the target attack addresses or removes the conditional benefit pathway for viewers who enjoy the binge rather than feel coerced."
+                ]
+              },
+              "consequent": "So the target attack fails to establish the strong global conclusion that binge-watching is not psychologically good overall."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "So the target attack fails to establish the strong global conclusion that binge-watching is not psychologically good overall.",
+                  "The Issue asks whether binge-watching is good for you, and “can be good (at least psychologically)” is supported for viewers who enjoy it rather than feel coerced."
+                ],
+                "weak_negation": [
+                  "It is not the case that the Issue requires binge-watching to be universally beneficial for everyone to be “good for you.”"
+                ]
+              },
+              "consequent": "Yes—binge-watching can be good for you psychologically (at least for viewers who enjoy it rather than feel coerced)."
+            }
+          ],
+          "Conc": [
+            "The target’s inference does not logically follow: evidence of harm for many viewers or proxy unreliability does not rule out psychological benefits for at least some viewers.",
+            "Binge-watching can be psychologically good for viewers who experience it as pleasurable rather than coercive, even if some other viewers experience harms.",
+            "So the target attack fails to establish the strong global conclusion that binge-watching is not psychologically good overall.",
+            "Yes—binge-watching can be good for you psychologically (at least for viewers who enjoy it rather than feel coerced)."
+          ],
+          "Ass": [
+            "It is not the case that “mixed or unreliable proxy evidence” logically eliminates the possibility that some viewers benefit.",
+            "It is not the case that any evidence of harm for many viewers determines the overall verdict as “not good for you” for all conditional cases.",
+            "It is not the case that the target attack addresses or removes the conditional benefit pathway for viewers who enjoy the binge rather than feel coerced.",
+            "It is not the case that the Issue requires binge-watching to be universally beneficial for everyone to be “good for you.”"
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-ec6484c315",
+      "target_field": "Conc",
+      "target_statement": "Therefore, binge-watching is not good for you psychologically overall."
+    },
+    {
+      "id": "arg-38e0277d41",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s counterargument assumes the target attack does not undermine the *conditional* “benefit pathway” in which immediate stress relief/perceived control is used to support that binge-watching can be psychologically good for viewers who enjoy it.",
+                  "The target attack directly challenges the evidential bridge that immediate stress relief and perceived control are reliable indicators of psychological well-being (i.e., overall “good for you”)."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The target attack undermines the key conditional evidence link AG1 needs to justify any psychological “good for you” conclusion."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target attack undermines the key conditional evidence link AG1 needs to justify any psychological “good for you” conclusion.",
+                  "If AG1’s justification depends on an undermined evidential link, then AG1 does not successfully establish its conditional claim that binge-watching can be psychologically good (even for viewers who enjoy it)."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AG1 does not establish that binge-watching can be psychologically good, because its support relies on an unreliable proxy."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1 does not establish that binge-watching can be psychologically good, because its support relies on an unreliable proxy.",
+                  "Binge-watching is associated (in line with the stance) with poorer psychological outcomes for many viewers (e.g., depression, loneliness, reduced self-control, and post-finish anxiety/emptiness).",
+                  "If the “good” case is not established and the prevailing association is with worse psychological outcomes, then binge-watching is not good for you psychologically overall."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Binge-watching is not good for you psychologically overall."
+            }
+          ],
+          "Conc": [
+            "The target attack undermines the key conditional evidence link AG1 needs to justify any psychological “good for you” conclusion.",
+            "AG1 does not establish that binge-watching can be psychologically good, because its support relies on an unreliable proxy.",
+            "Binge-watching is not good for you psychologically overall."
+          ],
+          "Ass": []
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-258e7b5403",
+      "target_field": "Ass"
+    },
+    {
+      "id": "arg-4bccb12717",
+      "agent": "AG2",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching means watching multiple episodes back-to-back in one sitting.",
+                  "Watching multiple episodes back-to-back in one sitting necessarily involves extended sedentary time (staying seated for long stretches)."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Binge-watching involves extended sitting (prolonged sedentary behavior)."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching involves extended sitting (prolonged sedentary behavior).",
+                  "Extended sitting correlates with metabolic slowdown and higher risk of heart disease and cancer."
+                ],
+                "weak_negation": [
+                  "It is not the case that the health-risk associations of extended sitting are either fully absent or irrelevant for binge-watching."
+                ]
+              },
+              "consequent": "Binge-watching is associated with metabolic slowdown and increased health risk (heart disease and cancer)."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching is associated with metabolic slowdown and increased health risk (heart disease and cancer).",
+                  "“Good for you” (health-wise) rules in activities associated with better health outcomes and rules out activities associated with worse health outcomes."
+                ],
+                "weak_negation": [
+                  "It is not the case that increased metabolic slowdown and disease risk are beneficial to health."
+                ]
+              },
+              "consequent": "No—binge-watching is not good for you (health-wise)."
+            }
+          ],
+          "Conc": [
+            "Binge-watching involves extended sitting (prolonged sedentary behavior).",
+            "Binge-watching is associated with metabolic slowdown and increased health risk (heart disease and cancer).",
+            "No—binge-watching is not good for you (health-wise)."
+          ],
+          "Ass": [
+            "It is not the case that the health-risk associations of extended sitting are either fully absent or irrelevant for binge-watching.",
+            "It is not the case that increased metabolic slowdown and disease risk are beneficial to health."
+          ]
+        }
+      },
+      "status": "overruled"
+    },
+    {
+      "id": "arg-82076a379b",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s health-wise “No” conclusion depends on the key leap from “extended sitting correlates with higher heart disease/cancer risk” to the idea that binge-watching specifically inherits those risks in a causally meaningful way.",
+                  "The target only provides a correlation for extended sitting and does not establish that binge-watching sessions (as opposed to overall sitting time and confounders like diet, exercise, and smoking) are the causal source of the increased risk."
+                ],
+                "weak_negation": [
+                  "It is not the case that the target controls for confounders that would distinguish binge-watching from general lifestyle/overall sitting patterns."
+                ]
+              },
+              "consequent": "The target does not establish that binge-watching itself causes or meaningfully increases heart disease/cancer risk."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target does not establish that binge-watching itself causes or meaningfully increases heart disease/cancer risk.",
+                  "If the causal/meaningful health-risk link to binge-watching is not established, then an “inference to global health-wise badness” is not warranted."
+                ],
+                "weak_negation": [
+                  "It is not the case that correlation alone (without a meaningful binge-watching link) is sufficient to conclude “not good for you” health-wise."
+                ]
+              },
+              "consequent": "The target’s argument fails to justify the global claim that binge-watching is not good for you health-wise."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s argument fails to justify the global claim that binge-watching is not good for you health-wise.",
+                  "A conclusion that is not justified by its premises should be rejected."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Therefore, the target’s “No—binge-watching is not good for you (health-wise)” conclusion does not follow. "
+            }
+          ],
+          "Conc": [
+            "The target does not establish that binge-watching itself causes or meaningfully increases heart disease/cancer risk.",
+            "The target’s argument fails to justify the global claim that binge-watching is not good for you health-wise.",
+            "Therefore, the target’s “No—binge-watching is not good for you (health-wise)” conclusion does not follow."
+          ],
+          "Ass": [
+            "It is not the case that the target controls for confounders that would distinguish binge-watching from general lifestyle/overall sitting patterns.",
+            "It is not the case that correlation alone (without a meaningful binge-watching link) is sufficient to conclude “not good for you” health-wise."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-4bccb12717",
+      "target_field": "Ass",
+      "target_statement": "It is not the case that the health-risk associations of extended sitting are either fully absent or irrelevant for binge-watching."
+    },
+    {
+      "id": "arg-a433fc725b",
+      "agent": "AG2",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target attack claims my health-wise “No” conclusion depends on requiring a binge-watching–specific, causally separated link from general extended sitting.",
+                  "But binge-watching (watching multiple episodes back-to-back) necessarily involves extended sedentary time (extended sitting) as a direct component of the activity."
+                ],
+                "weak_negation": [
+                  "It is not the case that binge-watching is separate from extended sitting such that extended-sitting risk associations become irrelevant."
+                ]
+              },
+              "consequent": "Therefore, if extended sitting is associated with metabolic slowdown and higher heart-disease/cancer risk, binge-watching is plausibly covered by that same risk association because it is an instance of extended sitting."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Therefore, if extended sitting is associated with metabolic slowdown and higher heart-disease/cancer risk, binge-watching is plausibly covered by that same risk association because it is an instance of extended sitting.",
+                  "The target’s objection is thus that I inferred “global badness” without proving binge-watching–specific causation.",
+                  "However, my argument needs only the health-relevance of the activity’s risk-linked exposure profile (extended sedentary time), not proof of separate binge-only causation distinct from the sitting component."
+                ],
+                "weak_negation": [
+                  "It is not the case that an inference of “not good health-wise” requires binge-watching to be shown as a uniquely causal cause rather than as an instance of a risk-associated exposure."
+                ]
+              },
+              "consequent": "So the target’s “causal/meaningful binge-specific link required” standard is too strict, and their undercut does not defeat my inference."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "So the target’s “causal/meaningful binge-specific link required” standard is too strict, and their undercut does not defeat my inference.",
+                  "My original conclusion follows from the fact that binge-watching is associated with metabolic slowdown and increased heart disease/cancer risk, which is health-wise bad relative to criteria for “good for you.”"
+                ],
+                "weak_negation": [
+                  "It is not the case that increased metabolic slowdown and disease risk count as health-wise “good.”"
+                ]
+              },
+              "consequent": "Therefore, binge-watching is not good for you health-wise, and the target attack fails."
+            }
+          ],
+          "Conc": [
+            "Therefore, if extended sitting is associated with metabolic slowdown and higher heart-disease/cancer risk, binge-watching is plausibly covered by that same risk association because it is an instance of extended sitting.",
+            "So the target’s “causal/meaningful binge-specific link required” standard is too strict, and their undercut does not defeat my inference.",
+            "Therefore, binge-watching is not good for you health-wise, and the target attack fails."
+          ],
+          "Ass": [
+            "It is not the case that binge-watching is separate from extended sitting such that extended-sitting risk associations become irrelevant.",
+            "It is not the case that an inference of “not good health-wise” requires binge-watching to be shown as a uniquely causal cause rather than as an instance of a risk-associated exposure.",
+            "It is not the case that increased metabolic slowdown and disease risk count as health-wise “good.”"
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-82076a379b",
+      "target_field": "Ass",
+      "target_statement": "If the causal/meaningful health-risk link to binge-watching is not established, then an “inference to global health-wise badness” is not warranted."
+    },
+    {
+      "id": "arg-27628dab00",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s Rule 1 makes a “necessity” leap: binge-watching “necessarily involves extended sedentary time (staying seated for long stretches).”",
+                  "In typical binge-watching, viewers can take breaks between episodes (e.g., stand up, walk around, do chores) while still watching multiple episodes back-to-back as part of the same viewing session."
+                ],
+                "weak_negation": [
+                  "It is not the case that binge-watching always involves staying seated for long, uninterrupted stretches."
+                ]
+              },
+              "consequent": "Binge-watching does not necessarily involve prolonged sedentary time."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching does not necessarily involve prolonged sedentary time.",
+                  "The target’s later health-risk step depends on that necessity, because it applies the risks of extended sitting to the activity as such (binge-watching)."
+                ],
+                "weak_negation": [
+                  "It is not the case that health risks tied to extended sitting automatically transfer to binge-watching when prolonged sitting is not necessary."
+                ]
+              },
+              "consequent": "The target does not justify that binge-watching is associated with metabolic slowdown and increased heart-disease/cancer risk."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target does not justify that binge-watching is associated with metabolic slowdown and increased heart-disease/cancer risk.",
+                  "Therefore the target cannot support its global health-wise conclusion from that insufficient bridge."
+                ],
+                "weak_negation": [
+                  "It is not the case that the target has established its “No—binge-watching is not good for you (health-wise)” conclusion."
+                ]
+              },
+              "consequent": "The target’s conclusion (“No—binge-watching is not good for you (health-wise)”) does not follow from its premises. "
+            }
+          ],
+          "Conc": [
+            "Binge-watching does not necessarily involve prolonged sedentary time.",
+            "The target does not justify that binge-watching is associated with metabolic slowdown and increased heart-disease/cancer risk.",
+            "The target’s conclusion (“No—binge-watching is not good for you (health-wise)”) does not follow from its premises."
+          ],
+          "Ass": [
+            "It is not the case that binge-watching always involves staying seated for long, uninterrupted stretches.",
+            "It is not the case that health risks tied to extended sitting automatically transfer to binge-watching when prolonged sitting is not necessary.",
+            "It is not the case that the target has established its “No—binge-watching is not good for you (health-wise)” conclusion."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-4bccb12717",
+      "target_field": "Ass",
+      "target_statement": "Watching multiple episodes back-to-back in one sitting necessarily involves extended sedentary time (staying seated for long stretches)."
+    },
+    {
+      "id": "arg-9f4c2ff2fe",
+      "agent": "AG2",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s undercut assumes that if viewers can stand briefly between episodes, binge-watching fails to involve prolonged sedentary time.",
+                  "But even with brief breaks, binge-watching typically involves substantial cumulative sitting and reduced movement across the overall multi-episode viewing period (the time-scale is extended, even if movement is not literally zero or continuously uninterrupted)."
+                ],
+                "weak_negation": [
+                  "It is not the case that brief standing breaks eliminate prolonged sedentary exposure across a binge session."
+                ]
+              },
+              "consequent": "Binge-watching typically still involves prolonged sedentary behavior in the relevant (cumulative, time-spanning) sense, so it supports the “extended sitting” premise."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching typically still involves prolonged sedentary behavior in the relevant (cumulative, time-spanning) sense, so it supports the “extended sitting” premise.",
+                  "Extended sitting correlates with metabolic slowdown and higher risk of heart disease and cancer."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Binge-watching is associated with metabolic slowdown and increased health risk (heart disease and cancer)."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching is associated with metabolic slowdown and increased health risk (heart disease and cancer).",
+                  "Health-wise, activities associated with increased disease risk are not “good for you.”"
+                ],
+                "weak_negation": [
+                  "It is not the case that increased metabolic slowdown and disease risk count as health-wise good."
+                ]
+              },
+              "consequent": "No—binge-watching is not good for you (health-wise)."
+            }
+          ],
+          "Conc": [
+            "Binge-watching typically still involves prolonged sedentary behavior in the relevant (cumulative, time-spanning) sense, so it supports the “extended sitting” premise.",
+            "Binge-watching is associated with metabolic slowdown and increased health risk (heart disease and cancer).",
+            "No—binge-watching is not good for you (health-wise)."
+          ],
+          "Ass": [
+            "It is not the case that brief standing breaks eliminate prolonged sedentary exposure across a binge session.",
+            "It is not the case that increased metabolic slowdown and disease risk count as health-wise good."
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-27628dab00",
+      "target_field": "Conc",
+      "target_statement": "Binge-watching does not necessarily involve prolonged sedentary time."
+    },
+    {
+      "id": "arg-dc9a086e65",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s undercut challenges the target’s claim that “even with brief breaks, binge-watching typically still involves prolonged sedentary behavior in the relevant (cumulative, time-spanning) sense.”",
+                  "If standing/walking breaks during the binge substantially interrupt sedentary time, then binge-watching may not involve the kind/amount of “extended sitting” exposure that the target is treating as comparable to the studies behind metabolic slowdown and disease risk."
+                ],
+                "weak_negation": [
+                  "It is not the case that any sitting-with-possible-interruptions automatically counts as the same “extended sitting” relevant to the risk associations the target cites."
+                ]
+              },
+              "consequent": "Brief breaks during binge-watching can substantially reduce the binge’s sedentary exposure so that binge-watching may fall outside the “extended sitting” exposure the target needs."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Brief breaks during binge-watching can substantially reduce the binge’s sedentary exposure so that binge-watching may fall outside the “extended sitting” exposure the target needs.",
+                  "If binge-watching does not meaningfully meet the extended-sitting exposure condition, then the target’s step that imports the extended-sitting risk correlation is not warranted for binge-watching specifically."
+                ],
+                "weak_negation": [
+                  "It is not the case that the risk correlation for extended sitting transfers unchanged to binge-watching when the sedentary exposure is substantially reduced."
+                ]
+              },
+              "consequent": "The target’s inference from “extended sitting risk correlations” to “binge-watching is associated with metabolic slowdown and increased heart disease/cancer risk” lacks support."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s inference from “extended sitting risk correlations” to “binge-watching is associated with metabolic slowdown and increased heart disease/cancer risk” lacks support.",
+                  "Without that supported association, the target’s health-wise “No—binge-watching is not good for you” conclusion does not follow from its premises."
+                ],
+                "weak_negation": [
+                  "It is not the case that a conclusion can follow while its key risk-association link is unsupported."
+                ]
+              },
+              "consequent": "Therefore, the target’s conclusion that binge-watching is not good for you (health-wise) is not justified by its argument."
+            }
+          ],
+          "Conc": [
+            "Brief breaks during binge-watching can substantially reduce the binge’s sedentary exposure so that binge-watching may fall outside the “extended sitting” exposure the target needs.",
+            "The target’s inference from “extended sitting risk correlations” to “binge-watching is associated with metabolic slowdown and increased heart disease/cancer risk” lacks support.",
+            "Therefore, the target’s conclusion that binge-watching is not good for you (health-wise) is not justified by its argument."
+          ],
+          "Ass": [
+            "It is not the case that any sitting-with-possible-interruptions automatically counts as the same “extended sitting” relevant to the risk associations the target cites.",
+            "It is not the case that the risk correlation for extended sitting transfers unchanged to binge-watching when the sedentary exposure is substantially reduced.",
+            "It is not the case that a conclusion can follow while its key risk-association link is unsupported."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-9f4c2ff2fe",
+      "target_field": "Ass"
+    }
+  ],
+  "final_answer": "**Overall: binge-watching is generally not “good for you,”** even though it can feel pleasurable and offer some relationship and enjoyment benefits for some people.\n\n### Why the “not good for you” conclusion wins\n#### 1) Physical-health reasons (health-wise not good)\nBinge-watching typically means **multiple episodes back-to-back**, which—at minimum—substantially increases **extended sedentary time**. Research summarized in the anti-binge stance links extended sedentary behavior with:\n- **metabolic slowdown**\n- higher risk of serious disease (including **heart disease** and **cancer**)\n- downstream lifestyle and health problems such as **poor sleep quality**, **weight gain**, and **unhealthy eating patterns**\n\nEven if someone takes brief pauses between episodes, bingeing still often involves **large blocks of low-movement time** and reduced opportunities for normal activity (standing, walking, meal timing, etc.). Under a “health-outcome” standard, being associated with these physical harms disqualifies binge-watching from being broadly “good for you.”\n\n#### 2) Psychological/social reasons (harm can outweigh claimed benefits)\nThe pro case emphasizes benefits like **stress relief**, **increased perceived control**, and **dopamine-related reward**—and it also argues binge-watching can help people share a **cultural reference point** and connect socially (including long-distance relationships).\n\nHowever, the anti-binge stance points to research associations between binge-watching and:\n- **depression**\n- **loneliness**\n- **reduced self-control**\n- and **negative after-effects** for some viewers (e.g., **anxiety** and **feelings of emptiness** after finishing)\n\nCrucially, even if binge-watching can improve mood *during* viewing for some people, the availability of credible harm associations (including after-effects) means the activity is not reliably “good for you” psychologically/socially in general. The potential relationship/communication benefits may occur, but they don’t neutralize these mental-health risks at the population level.\n\n#### 3) Enjoyment/engagement (subjective benefit is not robust)\nThe anti-binge stance also claims that studies find viewers get **significantly less show enjoyment** when they watch multiple episodes at once.\n\nYes, the pro side argues bingeing increases **immersion** and helps you follow **complex storylines**, which could improve enjoyment. But the “good for you” verdict on enjoyment isn’t just about *possible* upsides—it depends on whether bingeing tends to produce **less** enjoyment overall. With the stance that bingeing is associated with lower enjoyment, bingeing fails this subjective-benefit test.\n\n### Where the pro-case still matters\nIt’s fair to acknowledge the pro benefits:\n- bingeing can feel relaxing or empowering for someone who watches **autonomously**\n- shared binges can create **conversation fuel** and relationship closeness\n\nBut those positives appear to be **conditional and variable**, while the disqualifying factors listed (physical harm signals from sedentary time, mental-health/social harm associations, and reduced overall enjoyment findings) are presented as more general and outweigh the claimed benefits for a blanket “good for you” judgment.\n\n### Bottom line\nBinge-watching may be enjoyable and can sometimes support bonding, but **the best-supported overall picture is that it is not broadly good for your health or well-being**, and it may even reduce enjoyment in typical research comparisons.",
+  "integrated_rules": [
+    "Unified decision rule (single mapping across domains):\n\nFor a given person and viewing pattern, evaluate these domain-specific conditionals in parallel:\n\n1) Health-wise outcome:\n- If there is evidence the practice is associated with physical-health harms disqualifying by a health-outcome standard (e.g., metabolic slowdown and increased risk of serious diseases), OR if it involves extended sedentary time correlated with downstream lifestyle harms (e.g., poor sleep quality, weight gain, unhealthy eating patterns),\n→ then the practice is NOT “good for you” health-wise.\n\n2) Psychological/social outcome:\n- If there is evidence linking the practice to worse mental-health and/or social-wellbeing outcomes (e.g., depression, loneliness, reduced self-control) OR evidence that after-effects predict negative affect (e.g., anxiety and emptiness),\n→ then the practice is NOT “good for you” psychologically/socially (harm overrides claimed psychological/social benefits).\n- Otherwise (i.e., if those mental-health/social-harm conditions do not obtain):\n  a) If the person experiences the viewing pattern as pleasurable and autonomous (non-coercive, not forced) AND it produces psychological benefits such as stress relief and increased perceived control,\n  → then the practice is plausibly “good for you” psychologically.\n  b) If the viewing pattern creates shared cultural reference points that enable communication, bonding, and relationship maintenance (including across distance),\n  → then the practice is plausibly “good for you” socially/for relationships.\n\n3) Enjoyment/engagement outcome (subjective benefit):\n- If research indicates binge-style viewing (multiple episodes at once) leads to significantly less enjoyment than other viewing patterns,\n→ then the practice is NOT “good for you” in terms of subjective enjoyment/benefit.\n- Otherwise: if consuming multiple episodes together increases immersion and makes complex storylines easier to follow—thereby improving enjoyment of sophisticated narratives—\n→ then the practice is plausibly “good for you” in terms of enjoyment/engagement with complex content."
+  ]
+}

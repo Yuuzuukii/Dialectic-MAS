@@ -1,0 +1,782 @@
+{
+  "method": "schema",
+  "question": "Is Binge-Watching Good for You?",
+  "agent1_stance": "Your stance:\nYou support binge-watching.\nYou believe binge-watching creates a shared cultural space that helps viewers connect with others and strengthens relationships, including long-distance partnerships.\nYou believe binge-watching releases dopamine, providing stress relief and a sense of control.\nYou believe watching multiple episodes together creates immersion and makes complex storylines easier to follow, resulting in greater enjoyment of sophisticated narratives.",
+  "agent2_stance": "Your stance:\nYou oppose binge-watching.\nYou believe research links binge-watching to depression, loneliness, and reduced self-control, and that after finishing shows, viewers may experience depression, anxiety, and feelings of emptiness.\nYou believe extended sitting correlates with metabolic slowdown, heart disease, and cancer, and that binge-watching also associates with poor sleep quality, weight gain, and unhealthy eating patterns.\nYou believe studies show viewers experience significantly less show enjoyment when watching multiple episodes at once.",
+  "metrics": {
+    "elapsed_seconds": 248.495,
+    "model": "gpt-5.4-nano",
+    "prompt_tokens": 216064,
+    "cached_tokens": 76288,
+    "completion_tokens": 38273,
+    "total_tokens": 254337,
+    "total_cost_usd": 0.077322
+  },
+  "dialogue_history": [
+    {
+      "id": "arg-54055fad8c",
+      "agent": "AG1",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching involves sustained episode viewing that generates anticipation of what happens next."
+                ],
+                "weak_negation": [
+                  "The viewer’s experience is not so disrupted that the anticipation/reward loop fails to operate meaningfully."
+                ]
+              },
+              "consequent": "Binge-watching triggers dopamine-mediated reward/anticipation that heightens enjoyment and creates a felt sense of control."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching triggers dopamine-mediated reward/anticipation that heightens enjoyment and creates a felt sense of control."
+                ],
+                "weak_negation": [
+                  "That dopamine-driven reward is not experienced mainly as distress or compulsive harm in the relevant context."
+                ]
+              },
+              "consequent": "That dopamine-driven reward produces stress relief during/after binge-watching."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "That dopamine-driven reward produces stress relief during/after binge-watching.",
+                  "Binge-watching triggers dopamine-mediated reward/anticipation that heightens enjoyment and creates a felt sense of control."
+                ],
+                "weak_negation": [
+                  "Stress relief plus perceived control translates into improved well-being rather than only a fleeting moment with no benefit."
+                ]
+              },
+              "consequent": "Stress relief and a felt sense of control improve mental well-being."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Stress relief and a felt sense of control improve mental well-being."
+                ],
+                "weak_negation": [
+                  "Any downsides of binge-watching do not outweigh the well-being benefits in the context being considered."
+                ]
+              },
+              "consequent": "Binge-watching is good for you because it can improve mental well-being via dopamine-linked stress relief and a felt sense of control."
+            }
+          ],
+          "Conc": [
+            "Binge-watching triggers dopamine-mediated reward/anticipation that heightens enjoyment and creates a felt sense of control.",
+            "That dopamine-driven reward produces stress relief during/after binge-watching.",
+            "Stress relief and a felt sense of control improve mental well-being.",
+            "Binge-watching is good for you because it can improve mental well-being via dopamine-linked stress relief and a felt sense of control."
+          ],
+          "Ass": [
+            "The viewer’s experience is not so disrupted that the anticipation/reward loop fails to operate meaningfully.",
+            "That dopamine-driven reward is not experienced mainly as distress or compulsive harm in the relevant context.",
+            "Stress relief plus perceived control translates into improved well-being rather than only a fleeting moment with no benefit.",
+            "Any downsides of binge-watching do not outweigh the well-being benefits in the context being considered."
+          ]
+        }
+      },
+      "status": "overruled"
+    },
+    {
+      "id": "arg-2804adc2c2",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s final step depends on the assumption that any downsides of binge-watching do not outweigh the well-being benefits in context.",
+                  "Binge-watching is linked (in the research-based view underlying this debate) to depression, loneliness, and reduced self-control, and after finishing shows many viewers report depression/anxiety/emptiness.",
+                  "Binge-watching is also associated with poorer sleep quality (and related weight/unhealthy eating patterns)."
+                ],
+                "weak_negation": [
+                  "These negative effects are not negligible or easily prevented in typical viewing patterns."
+                ]
+              },
+              "consequent": "The assumption that downsides do not outweigh benefits is not credible; binge-watching’s net effect is more likely to harm well-being than to improve it."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The assumption that downsides do not outweigh benefits is not credible; binge-watching’s net effect is more likely to harm well-being than to improve it."
+                ],
+                "weak_negation": [
+                  "Binge-watching would still be good for you if downsides were larger than benefits."
+                ]
+              },
+              "consequent": "Binge-watching is not good for you overall (including for mental well-being)."
+            }
+          ],
+          "Conc": [
+            "The assumption that downsides do not outweigh benefits is not credible; binge-watching’s net effect is more likely to harm well-being than to improve it.",
+            "Binge-watching is not good for you overall (including for mental well-being)."
+          ],
+          "Ass": [
+            "These negative effects are not negligible or easily prevented in typical viewing patterns.",
+            "Binge-watching would still be good for you if downsides were larger than benefits."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-54055fad8c",
+      "target_field": "Ass",
+      "target_statement": "Any downsides of binge-watching do not outweigh the well-being benefits in the context being considered."
+    },
+    {
+      "id": "arg-2715bbe416",
+      "agent": "AG2",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Studies show that when people watch multiple episodes at once (binge-watching), they experience significantly less show enjoyment than when watching fewer episodes."
+                ],
+                "weak_negation": [
+                  "This reduction in enjoyment is not merely a rare exception limited to atypical viewers or unusual circumstances."
+                ]
+              },
+              "consequent": "Binge-watching tends to reduce the viewer’s enjoyment of the show."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching tends to reduce the viewer’s enjoyment of the show."
+                ],
+                "weak_negation": [
+                  "Reduced enjoyment does not normally count as a beneficial outcome for a viewer assessing whether binge-watching is good for them."
+                ]
+              },
+              "consequent": "Binge-watching is not good for you because it undermines a key positive aspect of watching (enjoyment)."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching is not good for you because it undermines a key positive aspect of watching (enjoyment)."
+                ],
+                "weak_negation": [
+                  "There is no other reason in this argument that shows binge-watching counteracts that enjoyment loss for the viewer."
+                ]
+              },
+              "consequent": "Overall, binge-watching is not good for you."
+            }
+          ],
+          "Conc": [
+            "Binge-watching tends to reduce the viewer’s enjoyment of the show.",
+            "Binge-watching is not good for you because it undermines a key positive aspect of watching (enjoyment).",
+            "Overall, binge-watching is not good for you."
+          ],
+          "Ass": [
+            "This reduction in enjoyment is not merely a rare exception limited to atypical viewers or unusual circumstances.",
+            "Reduced enjoyment does not normally count as a beneficial outcome for a viewer assessing whether binge-watching is good for them.",
+            "There is no other reason in this argument that shows binge-watching counteracts that enjoyment loss for the viewer."
+          ]
+        }
+      },
+      "status": "overruled"
+    },
+    {
+      "id": "arg-c7088875f1",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s “no other reason” step assumes that reduced enjoyment is not offset by any other plausible benefits that binge-watching might provide.",
+                  "Binge-watching can plausibly deliver non-enjoyment positives such as dopamine-linked stress relief and a sense of control (and, for many viewers, immersion/greater ease following complex stories)."
+                ],
+                "weak_negation": [
+                  "AG2 has not established that these potential offsets are absent in the relevant cases."
+                ]
+              },
+              "consequent": "There are plausible non-enjoyment benefits of binge-watching that could offset enjoyment loss."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "There are plausible non-enjoyment benefits of binge-watching that could offset enjoyment loss."
+                ],
+                "weak_negation": [
+                  "Therefore, it does not follow that the enjoyment loss has no countervailing benefits."
+                ]
+              },
+              "consequent": "AG2’s assumption that there is “no other reason” counteracting the enjoyment loss is not supported."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s assumption that there is “no other reason” counteracting the enjoyment loss is not supported."
+                ],
+                "weak_negation": [
+                  "Without that assumption, AG2’s argument does not establish net-negative overall well-being."
+                ]
+              },
+              "consequent": "AG2’s overall conclusion that binge-watching is not good for you does not follow from its stated premises."
+            }
+          ],
+          "Conc": [
+            "There are plausible non-enjoyment benefits of binge-watching that could offset enjoyment loss.",
+            "AG2’s assumption that there is “no other reason” counteracting the enjoyment loss is not supported.",
+            "AG2’s overall conclusion that binge-watching is not good for you does not follow from its stated premises."
+          ],
+          "Ass": [
+            "AG2 has not established that these potential offsets are absent in the relevant cases.",
+            "Therefore, it does not follow that the enjoyment loss has no countervailing benefits.",
+            "Without that assumption, AG2’s argument does not establish net-negative overall well-being."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-2715bbe416",
+      "target_field": "Ass",
+      "target_statement": "There is no other reason in this argument that shows binge-watching counteracts that enjoyment loss for the viewer."
+    },
+    {
+      "id": "arg-4630dbb503",
+      "agent": "AG2",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s attack relies on non-enjoyment positives being merely possible (“could”) rather than being shown to typically occur in the binge-watching pattern that empirical work links to lower enjoyment.",
+                  "AG2’s main premises are specifically about typical binge-watching involving significantly less show enjoyment."
+                ],
+                "weak_negation": [
+                  "AG1 does not supply evidence that the alleged offsets typically occur in the same binge-watching cases that reduce enjoyment."
+                ]
+              },
+              "consequent": "A countervailing offset that is only speculative (“could”) is not enough to rebut an enjoyment-loss finding about typical binge-watching."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "A countervailing offset that is only speculative (“could”) is not enough to rebut an enjoyment-loss finding about typical binge-watching.",
+                  "In AG2’s argument, reduced enjoyment is treated as not normally a beneficial outcome for judging whether binge-watching is good for you."
+                ],
+                "weak_negation": [
+                  "AG1 provides a basis—within AG2’s argument framing—for concluding the enjoyment loss is normally outweighed by demonstrated countervailing benefits."
+                ]
+              },
+              "consequent": "Given that, AG2’s argument legitimately concludes binge-watching is not good for you."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Given that, AG2’s argument legitimately concludes binge-watching is not good for you."
+                ],
+                "weak_negation": [
+                  "AG1’s ‘does not follow’ critique is therefore unsupported as a defeater."
+                ]
+              },
+              "consequent": "AG1’s claim that AG2’s overall conclusion does not follow from its premises is defeated."
+            }
+          ],
+          "Conc": [
+            "A countervailing offset that is only speculative (“could”) is not enough to rebut an enjoyment-loss finding about typical binge-watching.",
+            "Given that, AG2’s argument legitimately concludes binge-watching is not good for you.",
+            "AG1’s claim that AG2’s overall conclusion does not follow from its premises is defeated."
+          ],
+          "Ass": [
+            "AG1 does not supply evidence that the alleged offsets typically occur in the same binge-watching cases that reduce enjoyment.",
+            "AG1 provides a basis—within AG2’s argument framing—for concluding the enjoyment loss is normally outweighed by demonstrated countervailing benefits.",
+            "AG1’s ‘does not follow’ critique is therefore unsupported as a defeater."
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-c7088875f1",
+      "target_field": "Conc",
+      "target_statement": "AG2’s overall conclusion that binge-watching is not good for you does not follow from its stated premises."
+    },
+    {
+      "id": "arg-c1c311a278",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s argument assumes that countervailing benefits framed only as “could” (i.e., not demonstrated as typical within the same binge-watching cases) are categorically “not enough” to rebut an enjoyment-loss finding."
+                ],
+                "weak_negation": [
+                  "AG1 is not required to prove (within the same empirical setup) every possible counter-benefit for AG2’s single-dimension argument to fail on logical grounds."
+                ]
+              },
+              "consequent": "AG2’s assumption that “could” offsets are never sufficient to defeat a net “not good for you” conclusion is invalid."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s assumption that “could” offsets are never sufficient to defeat a net “not good for you” conclusion is invalid.",
+                  "The target in AG2’s rebut is an argument whose main negative inference turns on reduced enjoyment as a key factor."
+                ],
+                "weak_negation": [
+                  "Enjoyment loss alone is sufficient to establish that binge-watching is not good for you overall."
+                ]
+              },
+              "consequent": "AG1’s challenge (that the argument doesn’t establish net-negative well-being) can remain unrefuted even if the counter-benefits are not proven typical with the same studies."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s challenge (that the argument doesn’t establish net-negative well-being) can remain unrefuted even if the counter-benefits are not proven typical with the same studies."
+                ],
+                "weak_negation": [
+                  "AG1’s ‘does not follow’ critique must be defeated merely because AG1’s offsets were stated as plausible rather than empirically quantified."
+                ]
+              },
+              "consequent": "AG2’s conclusion that AG1’s ‘does not follow’ critique is defeated does not follow."
+            }
+          ],
+          "Conc": [
+            "AG2’s assumption that “could” offsets are never sufficient to defeat a net “not good for you” conclusion is invalid.",
+            "AG1’s challenge (that the argument doesn’t establish net-negative well-being) can remain unrefuted even if the counter-benefits are not proven typical with the same studies.",
+            "AG2’s conclusion that AG1’s ‘does not follow’ critique is defeated does not follow."
+          ],
+          "Ass": [
+            "AG1 is not required to prove (within the same empirical setup) every possible counter-benefit for AG2’s single-dimension argument to fail on logical grounds.",
+            "Enjoyment loss alone is sufficient to establish that binge-watching is not good for you overall.",
+            "AG1’s ‘does not follow’ critique must be defeated merely because AG1’s offsets were stated as plausible rather than empirically quantified."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-4630dbb503",
+      "target_field": "Ass"
+    },
+    {
+      "id": "arg-6094d21550",
+      "agent": "AG1",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching creates a shared cultural space by giving viewers a common storyline/experience they can discuss and relate to together."
+                ],
+                "weak_negation": [
+                  "That shared experience does not require the viewer to be cut off from relationships (e.g., it can be used for discussion with partners/friends)."
+                ]
+              },
+              "consequent": "Binge-watching strengthens social/relational connection, including for long-distance partnerships."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching strengthens social/relational connection, including for long-distance partnerships."
+                ],
+                "weak_negation": [
+                  "There is no clear evidence (in the relevant context of shared viewing/discussion) that social/relational harms outweigh this connection benefit."
+                ]
+              },
+              "consequent": "In the relevant context, the relational benefits of binge-watching are key improvements to “being good for you.”"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "In the relevant context, the relational benefits of binge-watching are key improvements to “being good for you.”"
+                ],
+                "weak_negation": [
+                  "The case is not one where harms are shown to clearly outweigh those benefits under the decision standard used in this debate."
+                ]
+              },
+              "consequent": "Binge-watching is good for you."
+            }
+          ],
+          "Conc": [
+            "Binge-watching strengthens social/relational connection, including for long-distance partnerships.",
+            "In the relevant context, the relational benefits of binge-watching are key improvements to “being good for you.”",
+            "Binge-watching is good for you."
+          ],
+          "Ass": [
+            "That shared experience does not require the viewer to be cut off from relationships (e.g., it can be used for discussion with partners/friends).",
+            "There is no clear evidence (in the relevant context of shared viewing/discussion) that social/relational harms outweigh this connection benefit.",
+            "The case is not one where harms are shown to clearly outweigh those benefits under the decision standard used in this debate."
+          ]
+        }
+      },
+      "status": "overruled"
+    },
+    {
+      "id": "arg-8421490a4e",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s step relies on the weak_negation premise: “There is no clear evidence (in the relevant context of shared viewing/discussion) that social/relational harms outweigh this connection benefit,” to infer that the relational benefits are “key improvements.”",
+                  "Under the debate’s decision mapping, concluding binge-watching is good requires weighing Benefits against Harms, not merely pointing out an evidential gap about only one category (relational harms)."
+                ],
+                "weak_negation": [
+                  "The target argument does not establish that other binge-watching harms counted in Harms (e.g., enjoyment loss, mental-health harms, or sleep/weight-related physical/behavioral harms) are absent or outweighed in the relevant context."
+                ]
+              },
+              "consequent": "The target’s “no clear evidence harms outweigh” premise is insufficient to justify the claim that relational benefits are key improvements."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s “no clear evidence harms outweigh” premise is insufficient to justify the claim that relational benefits are key improvements."
+                ],
+                "weak_negation": [
+                  "In the absence of evidence-based weighing that Benefits outweigh Harms, the inference to “key improvements” is not warranted."
+                ]
+              },
+              "consequent": "The inference to “relational benefits are key improvements” is unwarranted."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The inference to “relational benefits are key improvements” is unwarranted.",
+                  "The target’s final conclusion (“Binge-watching is good for you”) depends on treating those relational benefits as key improvements dominating the overall Harms/Benefits assessment."
+                ],
+                "weak_negation": [
+                  "The target provides no alternative evidence-based route showing overall Benefits outweigh Harms."
+                ]
+              },
+              "consequent": "Therefore, the target conclusion that binge-watching is good for you is not supported."
+            }
+          ],
+          "Conc": [
+            "The target’s “no clear evidence harms outweigh” premise is insufficient to justify the claim that relational benefits are key improvements.",
+            "The inference to “relational benefits are key improvements” is unwarranted.",
+            "Therefore, the target conclusion that binge-watching is good for you is not supported."
+          ],
+          "Ass": [
+            "The target argument does not establish that other binge-watching harms counted in Harms (e.g., enjoyment loss, mental-health harms, or sleep/weight-related physical/behavioral harms) are absent or outweighed in the relevant context.",
+            "In the absence of evidence-based weighing that Benefits outweigh Harms, the inference to “key improvements” is not warranted.",
+            "The target provides no alternative evidence-based route showing overall Benefits outweigh Harms."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-6094d21550",
+      "target_field": "Ass",
+      "target_statement": "There is no clear evidence (in the relevant context of shared viewing/discussion) that social/relational harms outweigh this connection benefit."
+    },
+    {
+      "id": "arg-a14c6e8a4c",
+      "agent": "AG1",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The decision mapping in this debate says binge-watching is good for you if evidence supports Benefits being present and Harms are either not supported or not strong enough to outweigh those Benefits."
+                ],
+                "weak_negation": [
+                  "Therefore, concluding “good for you” does not require proving that every other harm category (enjoyment loss, mental-health harms, sleep/weight effects) is absent or individually outweighed."
+                ]
+              },
+              "consequent": "The evaluation standard does not require demonstrating that each harm category is absent or individually outweighed; it is enough that Harms are not supported or not strong enough overall to outweigh the relevant Benefits."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The evaluation standard does not require demonstrating that each harm category is absent or individually outweighed; it is enough that Harms are not supported or not strong enough overall to outweigh the relevant Benefits.",
+                  "The target attack treats a “missing proof for other harm categories” as if it were a required premise for “binge-watching is good,” i.e., as a misapplied necessity condition rather than checking whether Harms are strong enough to outweigh Benefits."
+                ],
+                "weak_negation": [
+                  "That misreading is incompatible with the stated decision mapping."
+                ]
+              },
+              "consequent": "The target’s “you didn’t rule out all other harms” critique misapplies the standard and so does not undercut the inference to overall goodness."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s “you didn’t rule out all other harms” critique misapplies the standard and so does not undercut the inference to overall goodness.",
+                  "Your main argument establishes a concrete Benefit: binge-watching creates a shared cultural space that strengthens social/relational connection (including for long-distance partnerships).",
+                  "Your main argument also claims harms are not clearly shown to outweigh that connection benefit in the relevant context (and the case is not one where harms are shown to clearly outweigh the benefits)."
+                ],
+                "weak_negation": [
+                  "If Harms were shown clearly to outweigh those Benefits, your argument’s conclusion would fail under the decision mapping."
+                ]
+              },
+              "consequent": "Given Benefits are supported (relational connection) and Harms are not shown to clearly outweigh them, the relational benefit can count as a key improvement."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Given Benefits are supported (relational connection) and Harms are not shown to clearly outweigh them, the relational benefit can count as a key improvement."
+                ],
+                "weak_negation": [
+                  "Nothing in the target attack supplies evidence that Harms are strong enough to outweigh those Benefits under the mapping."
+                ]
+              },
+              "consequent": "So the target attack’s conclusion that your argument is not supported is defeated."
+            }
+          ],
+          "Conc": [
+            "The evaluation standard does not require demonstrating that each harm category is absent or individually outweighed; it is enough that Harms are not supported or not strong enough overall to outweigh the relevant Benefits.",
+            "The target’s “you didn’t rule out all other harms” critique misapplies the standard and so does not undercut the inference to overall goodness.",
+            "Given Benefits are supported (relational connection) and Harms are not shown to clearly outweigh them, the relational benefit can count as a key improvement.",
+            "So the target attack’s conclusion that your argument is not supported is defeated."
+          ],
+          "Ass": [
+            "Therefore, concluding “good for you” does not require proving that every other harm category (enjoyment loss, mental-health harms, sleep/weight effects) is absent or individually outweighed.",
+            "That misreading is incompatible with the stated decision mapping.",
+            "If Harms were shown clearly to outweigh those Benefits, your argument’s conclusion would fail under the decision mapping.",
+            "Nothing in the target attack supplies evidence that Harms are strong enough to outweigh those Benefits under the mapping."
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-8421490a4e",
+      "target_field": "Conc",
+      "target_statement": "Therefore, the target conclusion that binge-watching is good for you is not supported."
+    },
+    {
+      "id": "arg-d573cebbf1",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s defense assumes the evidential “gap” premise: “Nothing in the target attack supplies evidence that Harms are strong enough to outweigh those Benefits under the mapping,” so it treats Harms as not clearly outweighing the relational Benefit."
+                ],
+                "weak_negation": [
+                  "This assumption remains valid even when the debate’s integrated decision mapping and AG2’s stance already supply evidence-content for multiple Harms (enjoyment loss, mental-health harm such as depression/loneliness/reduced self-control and post-finish emptiness/anxiety, and sleep/weight/unhealthy eating correlations)."
+                ]
+              },
+              "consequent": "AG1’s assumption is invalid: Harms are not merely speculative or evidentially unaddressed; they are supported within the debate’s own Harms standard (via enjoyment loss and mental/physical-health correlates)."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s assumption is invalid: Harms are not merely speculative or evidentially unaddressed; they are supported within the debate’s own Harms standard (via enjoyment loss and mental/physical-health correlates).",
+                  "Under the decision mapping, concluding binge-watching is good requires that Harms are either not supported or not strong enough to outweigh Benefits."
+                ],
+                "weak_negation": [
+                  "The decision standard can be satisfied without showing that Harms are not strong enough overall to outweigh Benefits."
+                ]
+              },
+              "consequent": "AG1’s inference that the relational benefit is a ‘key improvement’ is not justified, because the mapping’s net-benefit requirement is not met."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s inference that the relational benefit is a ‘key improvement’ is not justified, because the mapping’s net-benefit requirement is not met."
+                ],
+                "weak_negation": [
+                  "The target rebuttal still licenses a ‘good for you’ conclusion despite Harms being supported and not weighed against the Benefit."
+                ]
+              },
+              "consequent": "AG1’s target defense fails to defeat the AG2 attack; the claim that binge-watching is good for you is not supported."
+            }
+          ],
+          "Conc": [
+            "AG1’s assumption is invalid: Harms are not merely speculative or evidentially unaddressed; they are supported within the debate’s own Harms standard (via enjoyment loss and mental/physical-health correlates).",
+            "AG1’s inference that the relational benefit is a ‘key improvement’ is not justified, because the mapping’s net-benefit requirement is not met.",
+            "AG1’s target defense fails to defeat the AG2 attack; the claim that binge-watching is good for you is not supported."
+          ],
+          "Ass": [
+            "This assumption remains valid even when the debate’s integrated decision mapping and AG2’s stance already supply evidence-content for multiple Harms (enjoyment loss, mental-health harm such as depression/loneliness/reduced self-control and post-finish emptiness/anxiety, and sleep/weight/unhealthy eating correlations).",
+            "The decision standard can be satisfied without showing that Harms are not strong enough overall to outweigh Benefits.",
+            "The target rebuttal still licenses a ‘good for you’ conclusion despite Harms being supported and not weighed against the Benefit."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-a14c6e8a4c",
+      "target_field": "Ass"
+    },
+    {
+      "id": "arg-7e9b2eef2d",
+      "agent": "AG2",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Research links binge-watching to worse mental-health outcomes: depression, loneliness, and reduced self-control, and many viewers report depression/anxiety/emptiness after finishing shows."
+                ],
+                "weak_negation": [
+                  "These mental-health effects are not merely negligible or limited to rare atypical circumstances."
+                ]
+              },
+              "consequent": "Binge-watching undermines viewers’ mental well-being."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching undermines viewers’ mental well-being.",
+                  "In this debate’s decision criterion, mental well-being is a key value for deciding whether binge-watching is good for you (Harms include depression/anxiety/emptiness and reduced self-control)."
+                ],
+                "weak_negation": [
+                  "The argument for binge-watching good would require a supported reason that these mental-health harms are meaningfully offset, and that supported offset is not established here."
+                ]
+              },
+              "consequent": "Under the decision criterion, binge-watching is not good for you."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Under the decision criterion, binge-watching is not good for you."
+                ],
+                "weak_negation": [
+                  "There is no evidence that any mental-well-being benefits clearly outweigh the documented harms in the typical binge-watching pattern."
+                ]
+              },
+              "consequent": "Overall, binge-watching is not good for you."
+            }
+          ],
+          "Conc": [
+            "Binge-watching undermines viewers’ mental well-being.",
+            "Under the decision criterion, binge-watching is not good for you.",
+            "Overall, binge-watching is not good for you."
+          ],
+          "Ass": [
+            "These mental-health effects are not merely negligible or limited to rare atypical circumstances.",
+            "The argument for binge-watching good would require a supported reason that these mental-health harms are meaningfully offset, and that supported offset is not established here.",
+            "There is no evidence that any mental-well-being benefits clearly outweigh the documented harms in the typical binge-watching pattern."
+          ]
+        }
+      },
+      "status": "defensible"
+    },
+    {
+      "id": "arg-7fbd4ae7ed",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s inference from “research links binge-watching to worse mental-health outcomes” to the conclusion “binge-watching undermines viewers’ mental well-being” relies on treating an observed association as (i) causation and (ii) a typical effect of binge-watching itself.",
+                  "Association evidence does not automatically establish that binge-watching is the cause of those harms, nor that the effect is meaningfully large for the typical binge-watching pattern."
+                ],
+                "weak_negation": [
+                  "This inference is not established by the target’s stated premises alone."
+                ]
+              },
+              "consequent": "The target does not provide support for the causal/typical claim needed for “binge-watching undermines mental well-being.”"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target does not provide support for the causal/typical claim needed for “binge-watching undermines mental well-being.”",
+                  "The target’s later steps (“Under the decision criterion, binge-watching is not good for you”) depend on accepting that mental-well-being harm is actually undermined by binge-watching as a key value."
+                ],
+                "weak_negation": [
+                  "Without a supported undermining-harm premise, the decision mapping cannot justify concluding “not good for you.”"
+                ]
+              },
+              "consequent": "Therefore, the target’s overall conclusion that binge-watching is not good for you is not supported (at best, unresolved)."
+            }
+          ],
+          "Conc": [
+            "The target does not provide support for the causal/typical claim needed for “binge-watching undermines mental well-being.”",
+            "Therefore, the target’s overall conclusion that binge-watching is not good for you is not supported (at best, unresolved)."
+          ],
+          "Ass": [
+            "This inference is not established by the target’s stated premises alone.",
+            "Without a supported undermining-harm premise, the decision mapping cannot justify concluding “not good for you.”"
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-7e9b2eef2d",
+      "target_field": "Ass",
+      "target_statement": "Overall, binge-watching is not good for you."
+    },
+    {
+      "id": "arg-0b727cc88b",
+      "agent": "AG2",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s attack assumes the only way to support “binge-watching undermines mental well-being / is not good for you” is to have explicitly proven causation and a large, typical effect size.",
+                  "But under this debate’s decision mapping, “Harms” are counted when there is evidence that binge-watching undermines mental well-being (including depression/loneliness/reduced self-control and post-finish depression/anxiety/emptiness), not when a causal-proof of perfect typical effect magnitude is demonstrated to the strict “proven typical harm” standard AG1 demands.",
+                  "AG2’s target premises include (i) “Research links binge-watching to worse mental-health outcomes” and (ii) “many viewers report depression/anxiety/emptiness after finishing shows,” which supplies the decision-relevant support for typical undermining effects (at least at the level of ‘many viewers’)."
+                ],
+                "weak_negation": [
+                  "Therefore, AG1’s required standard (perfect causality + explicitly proven large typical effect size) is not necessary for the target’s inference within the mapping."
+                ]
+              },
+              "consequent": "AG1’s “causation/typical effect size not established” premise does not defeat the target’s mental-well-being harm inference."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s “causation/typical effect size not established” premise does not defeat the target’s mental-well-being harm inference.",
+                  "AG2’s target argument also treats mental-well-being harms as a key value and includes no supported reason that benefits meaningfully offset those documented harms (the decision mapping’s “Benefits offset” condition)."
+                ],
+                "weak_negation": [
+                  "So the decision criterion supports concluding “not good for you” rather than ‘unresolved.’"
+                ]
+              },
+              "consequent": "Given harms support plus lack of supported offset, the decision mapping supports “binge-watching is not good for you.”"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Given harms support plus lack of supported offset, the decision mapping supports “binge-watching is not good for you.”",
+                  "AG1’s conclusion was that the target’s overall conclusion is ‘not supported (at best, unresolved)’"
+                ],
+                "weak_negation": [
+                  "That rebuttal conclusion is therefore undermined."
+                ]
+              },
+              "consequent": "So AG1’s attack fails; the target’s overall “not good for you” conclusion is supported."
+            }
+          ],
+          "Conc": [
+            "AG1’s “causation/typical effect size not established” premise does not defeat the target’s mental-well-being harm inference.",
+            "Given harms support plus lack of supported offset, the decision mapping supports “binge-watching is not good for you.”",
+            "So AG1’s attack fails; the target’s overall “not good for you” conclusion is supported."
+          ],
+          "Ass": [
+            "Therefore, AG1’s required standard (perfect causality + explicitly proven large typical effect size) is not necessary for the target’s inference within the mapping.",
+            "So the decision criterion supports concluding “not good for you” rather than ‘unresolved.’",
+            "That rebuttal conclusion is therefore undermined."
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-7fbd4ae7ed",
+      "target_field": "Conc",
+      "target_statement": "Therefore, the target’s overall conclusion that binge-watching is not good for you is not supported (at best, unresolved)."
+    }
+  ],
+  "final_answer": "**No—binge-watching is not good for you overall.**\n\n### Rationale (weighing benefits vs. harms for the typical binge pattern)\n\n#### 1) The potential benefits exist, but they’re not shown to clearly outweigh the downsides\n- **Stress relief / “felt control” via dopamine:** It’s plausible that the anticipation/reward loop makes the experience feel good and can reduce stress in the moment.  \n  **But** the arguments supporting this advantage were mainly theoretical/plausibility-based rather than showing that it reliably produces net well-being gains *for typical binge-watching*, especially after the binge ends.\n- **Immersion and easier tracking of complex storylines:** Watching multiple episodes back-to-back can help some people stay immersed and follow plots.\n  **However**, even if comprehension improves, that does not automatically imply net mental/physical benefits—especially when other harms (below) are also present.\n- **Social/relational value (shared cultural space, including long-distance partnerships):** Sharing shows can strengthen connection.\n  **Still**, the anti-binge case includes multiple harm pathways (mental health, enjoyment loss, sleep and health-related issues). The pro-binge case did not provide evidence that the relationship benefit is strong enough—by itself or in combination—to *clearly outweigh* those documented harms in the typical pattern.\n\n#### 2) The harms are both broader and better supported in the typical binge setting\n- **Enjoyment can drop when watching multiple episodes at once.** There was a direct claim that binge-like viewing is associated with **significantly less show enjoyment** than watching fewer episodes. Since “enjoyment” is one of the key positives in the first place, this matters heavily under the “clearly outweigh” standard.\n- **Mental well-being risks:** The opposing view cites research links binge-watching with **depression, loneliness, and reduced self-control**, and notes that after finishing shows, viewers may experience **depression/anxiety/emptiness**.\n  - Even if one argues about *strict causation* versus *association*, the harm evidence is still decision-relevant here because the standard being applied is whether binge-like viewing undermines mental well-being in typical use. The pro side did not supply a comparably strong, typical-pattern offset.\n- **Physical/behavioral harms correlated with extended sitting:** The opposing view also points to correlations with **metabolic slowdown** and increased health risks (including **heart disease** and **cancer** as correlations), along with **poor sleep quality**, **weight gain**, and **unhealthy eating patterns**.\n  - Again, even if these are not framed as perfectly proven causation in every case, they are part of the documented harm profile used for the overall judgment, and the pro side did not establish that the benefits clearly cancel them out.\n\n### Bottom line under the “clearly outweigh” standard\nTo conclude binge-watching is good for you, the benefits (stress relief/control, immersion/comprehension, and relational connection) would need to **clearly outweigh** the documented harms (especially **enjoyment loss**, **mental-health undermining**, and **sleep/metabolic/weight-related** risks) in the typical binge pattern.\n\nThat “clear net-win” condition is not met: the benefits were mostly framed as plausible or situational, while the harms were presented as more consistently relevant across the key value dimensions.\n\n**Therefore, binge-watching is not good for you overall.**\n\n### Note on an important unresolved point (why the verdict is still “not good”)\nA serious objection that remains is whether the mental-health and health findings are **fully causal** and how large the effects are for the average person. But the pro side did not provide evidence strong enough to demonstrate that any dopamine/immersion/social benefits would reliably and clearly compensate for those documented harms in typical binge use—so the overall judgment still lands on **not good for you**.",
+  "integrated_rules": [
+    "Use this decision criterion in a future case: \n\nLet Benefits = evidence that binge-watching improves any key value you care about in the relevant context, especially (i) mental well-being via stress relief and a felt sense of control (dopamine-linked), (ii) enjoyment via immersion and easier tracking of complex storylines (including sophisticated narratives), and/or (iii) social/relational value via shared cultural space that helps connection (including long-distance relationships).\n\nLet Harms = evidence that binge-watching undermines enjoyment and/or causes mental-health harms (e.g., depression/loneliness/reduced self-control, or post-finish depression/anxiety/emptiness) and/or physical harms (e.g., sleep disruption, weight gain/unhealthy eating patterns, metabolic/cardiovascular/cancer-related risk correlates).\n\nDecision mapping:\n- If the evidence supports that Benefits are present **and** Harms are either not supported or are not strong enough to outweigh those Benefits, conclude: **binge-watching is good for you**.\n- If the evidence supports that Harms (especially enjoyment loss as a key positive aspect) are present **and** there is no supported reason that the Benefits meaningfully offset those enjoyment/health harms (i.e., Harms are at least comparable to, and not outweighed by, Benefits), conclude: **binge-watching is not good for you**.\n- If neither side’s evidence clearly outweighs the other under this standard, the case is **unresolved** (do not infer either conclusion).",
+    "Reusable criterion: Assess whether, for the typical binge-like viewing pattern in the relevant context, the aggregate upsides to mental/relational well-being and narrative enjoyment (e.g., stress relief/control via dopamine, greater immersion and comprehension, and shared social/relational connection) *clearly outweigh* the aggregate documented harms to mental well-being, self-control/social well-being, and physical health (e.g., depression/loneliness/reduced self-control; depression/anxiety/emptiness after completion; metabolic/cardiovascular/cancer risks; poor sleep/weight gain/unhealthy eating). If the upsides clearly outweigh the harms → conclude “good for you.” If the harms clearly outweigh the upsides, or if there is no evidence that any mental-well-being benefits clearly outweigh the documented harms in the typical pattern → conclude “not good for you.” If neither side’s “clearly outweigh” condition is met → evaluation remains unresolved."
+  ]
+}

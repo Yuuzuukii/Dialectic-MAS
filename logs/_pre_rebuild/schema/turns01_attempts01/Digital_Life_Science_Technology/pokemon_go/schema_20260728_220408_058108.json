@@ -1,0 +1,421 @@
+{
+  "method": "schema",
+  "question": "Has Pokémon GO Been Good for Society?",
+  "agent1_stance": "Your stance:\nYou support Pokémon GO.\nYou believe the walking required to play the game provides exercise benefits, as one player reported being able to leave the house and walk outside for hours while enjoying it.\nYou believe the game brings people together through shared exploration, fostering connections across different demographics and backgrounds.\nYou believe Pokémon GO has provided an economic boost for local businesses, with some businesses reporting sales increases between 5-30 percent from the added customer engagement.",
+  "agent2_stance": "Your stance:\nYou oppose Pokémon GO.\nYou believe players have sustained serious harm while gaming, as tracking data shows there were 25 deaths and 64 injuries among players, including accidents involving vehicles and falls.\nYou believe players have captured Pokémon in solemn places including emergency rooms, the Auschwitz memorial, funerals, and active battlefields, demonstrating disrespect for sacred spaces.\nYou believe the app contributes to digital addiction, with up to 9 percent of players meeting gaming disorder criteria, and that criminals have also exploited the game to lure and rob distracted players.",
+  "metrics": {
+    "elapsed_seconds": 208.383,
+    "model": "gpt-5.4-nano",
+    "prompt_tokens": 101923,
+    "cached_tokens": 30208,
+    "completion_tokens": 23557,
+    "total_tokens": 125480,
+    "total_cost_usd": 0.044393
+  },
+  "dialogue_history": [
+    {
+      "id": "arg-fc34589d12",
+      "agent": "AG1",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Pokémon GO gameplay strongly incentivizes players to move in the real world (walk to find/encounter and reach in-game content).",
+                  "A player reported being able to leave the house and walk outside for hours while enjoying Pokémon GO."
+                ],
+                "weak_negation": [
+                  "Assume this kind of walking motivation reflects a real exercise behavior for players (not merely an extreme, non-representative outlier)."
+                ]
+              },
+              "consequent": "Pokémon GO leads some players to sustained real-world walking (hours)."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Sustained real-world walking (hours) constitutes physical exercise and therefore increases physical activity.",
+                  "Physical activity/exercise is the mechanism by which walking produces exercise benefits."
+                ],
+                "weak_negation": [
+                  "Assume the walking involved is sufficiently non-trivial to count as meaningful exercise rather than incidental movement."
+                ]
+              },
+              "consequent": "For those players, Pokémon GO increases their physical activity/exercise."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Increased physical activity/exercise improves health and lowers health risks.",
+                  "Improvements in health for people in society produce societal benefits (e.g., better well-being and reduced overall health strain)."
+                ],
+                "weak_negation": [
+                  "Assume any downsides do not negate the net benefit from increased physical activity across society overall."
+                ]
+              },
+              "consequent": "Pokémon GO’s promotion of physical activity yields net public-health benefits."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Pokémon GO’s promotion of physical activity yields net public-health benefits."
+                ],
+                "weak_negation": [
+                  "Assume that public-health improvements count as being 'good for society.'"
+                ]
+              },
+              "consequent": "Yes—Pokémon GO has been good for society because it gets players to leave the house and walk for hours, increasing physical activity and improving public health."
+            }
+          ],
+          "Conc": [
+            "Pokémon GO leads some players to sustained real-world walking (hours).",
+            "For those players, Pokémon GO increases their physical activity/exercise.",
+            "Pokémon GO’s promotion of physical activity yields net public-health benefits.",
+            "Yes—Pokémon GO has been good for society because it gets players to leave the house and walk for hours, increasing physical activity and improving public health."
+          ],
+          "Ass": [
+            "Assume this kind of walking motivation reflects a real exercise behavior for players (not merely an extreme, non-representative outlier).",
+            "Assume the walking involved is sufficiently non-trivial to count as meaningful exercise rather than incidental movement.",
+            "Assume any downsides do not negate the net benefit from increased physical activity across society overall.",
+            "Assume that public-health improvements count as being 'good for society.'"
+          ]
+        }
+      },
+      "status": "defensible"
+    },
+    {
+      "id": "arg-ff1c1cc313",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s support for its first premise relies on only one anecdotal report: “A player reported being able to leave the house and walk outside for hours.”",
+                  "The target then assumes this anecdote is representative by adding: “Assume this kind of walking motivation reflects a real exercise behavior for players (not merely an extreme, non-representative outlier).”"
+                ],
+                "weak_negation": [
+                  "Assume that at least some Pokémon GO players do not typically walk outside for hours (i.e., the cited “hours” could plausibly be non-representative)."
+                ]
+              },
+              "consequent": "The target does not establish that hours of meaningful walking are common across players; the “hours” claim may reflect an outlier rather than typical behavior."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target does not establish that hours of meaningful walking are common across players; the “hours” claim may reflect an outlier rather than typical behavior.",
+                  "The target’s next step requires that increased physical activity be broad enough to yield “net public-health benefits.”"
+                ],
+                "weak_negation": [
+                  "Assume that net public-health benefits require effects that are shared by a substantial portion of the player population, not only a rare outlier group."
+                ]
+              },
+              "consequent": "Without evidence of common, non-outlier exercise behavior, the target fails to justify any societal-level (net) public-health benefit."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Without evidence of common, non-outlier exercise behavior, the target fails to justify any societal-level (net) public-health benefit.",
+                  "Therefore, the target’s chain from “some players walk for hours” to “net public-health benefits” is unsupported as a general claim about society."
+                ],
+                "weak_negation": [
+                  "Assume that an argument demonstrating only a possible benefit for a few outliers does not establish that Pokémon GO has been good for society overall."
+                ]
+              },
+              "consequent": "The target conclusion (“Pokémon GO has been good for society”) does not follow from the evidence and assumptions it provides."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target conclusion (“Pokémon GO has been good for society”) does not follow from the evidence and assumptions it provides."
+                ],
+                "weak_negation": [
+                  "Assume the burden of showing “good for society” is not met by a logically non-warranted leap from one outlier anecdote to societal net benefits."
+                ]
+              },
+              "consequent": "Pokémon GO being good for society is not demonstrated by the target argument."
+            }
+          ],
+          "Conc": [
+            "The target does not establish that hours of meaningful walking are common across players; the “hours” claim may reflect an outlier rather than typical behavior.",
+            "Without evidence of common, non-outlier exercise behavior, the target fails to justify any societal-level (net) public-health benefit.",
+            "The target conclusion (“Pokémon GO has been good for society”) does not follow from the evidence and assumptions it provides.",
+            "Pokémon GO being good for society is not demonstrated by the target argument."
+          ],
+          "Ass": [
+            "Assume that at least some Pokémon GO players do not typically walk outside for hours (i.e., the cited “hours” could plausibly be non-representative).",
+            "Assume that net public-health benefits require effects that are shared by a substantial portion of the player population, not only a rare outlier group.",
+            "Assume that an argument demonstrating only a possible benefit for a few outliers does not establish that Pokémon GO has been good for society overall.",
+            "Assume the burden of showing “good for society” is not met by a logically non-warranted leap from one outlier anecdote to societal net benefits."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-fc34589d12",
+      "target_field": "Ass",
+      "target_statement": "Assume this kind of walking motivation reflects a real exercise behavior for players (not merely an extreme, non-representative outlier)."
+    },
+    {
+      "id": "arg-ff7a83f989",
+      "agent": "AG1",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target attack’s critical move relies on a premise that “net public-health benefits” require effects shared by a substantial portion (majority-style reach) of the player population, not merely benefits for some people.",
+                  "My main argument’s chain is explicitly about “some players” who are motivated to walk for hours, and then “for those players” exercise improves health."
+                ],
+                "weak_negation": [
+                  "Assume that a society can be improved by health gains for some members of society, even if the game’s exercise effect is not proven to be majority-wide."
+                ]
+              },
+              "consequent": "The main argument does not depend on Pokémon GO producing majority-wide public-health effects."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The main argument does not depend on Pokémon GO producing majority-wide public-health effects.",
+                  "So the target’s representativeness objection (that the “hours” report might be a non-representative outlier) mainly attacks prevalence, not whether the main argument’s “some players” exercise/health pathway can still hold for the people it claims to motivate."
+                ],
+                "weak_negation": [
+                  "Assume the reported “hours” is evidence that at least some players engage in meaningful walking/exercise while playing (not purely incidental movement)."
+                ]
+              },
+              "consequent": "The target’s outlier/representativeness critique does not defeat the inference from some hours of walking to health benefits."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s outlier/representativeness critique does not defeat the inference from some hours of walking to health benefits.",
+                  "Sustained real-world walking constitutes physical exercise that increases physical activity/exercise.",
+                  "Increased physical activity/exercise improves health and lowers health risks; health improvements for people in society yield societal benefits."
+                ],
+                "weak_negation": [
+                  "Assume downsides do not negate the net benefit from increased physical activity across society overall."
+                ]
+              },
+              "consequent": "Yes—Pokémon GO has been good for society because it motivates some players to walk for hours, increasing physical activity and improving health."
+            }
+          ],
+          "Conc": [
+            "The main argument does not depend on Pokémon GO producing majority-wide public-health effects.",
+            "The target’s outlier/representativeness critique does not defeat the inference from some hours of walking to health benefits.",
+            "Yes—Pokémon GO has been good for society because it motivates some players to walk for hours, increasing physical activity and improving health."
+          ],
+          "Ass": [
+            "Assume that a society can be improved by health gains for some members of society, even if the game’s exercise effect is not proven to be majority-wide.",
+            "Assume the reported “hours” is evidence that at least some players engage in meaningful walking/exercise while playing (not purely incidental movement).",
+            "Assume downsides do not negate the net benefit from increased physical activity across society overall."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-ff1c1cc313",
+      "target_field": "Ass",
+      "target_statement": "Assume that net public-health benefits require effects that are shared by a substantial portion of the player population, not only a rare outlier group."
+    },
+    {
+      "id": "arg-a0a1b986e3",
+      "agent": "AG2",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Tracking data indicates Pokémon GO has been associated with 25 deaths and 64 injuries among players.",
+                  "These incidents include accidents involving vehicles and falls while gaming."
+                ],
+                "weak_negation": [
+                  "Assume the deaths/injuries are causally connected in a way that makes the game part of what causes harm (not just unrelated co-occurrence)."
+                ]
+              },
+              "consequent": "Pokémon GO has been associated with serious physical harms to players, including fatalities."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Pokémon GO has been associated with serious physical harms to players, including fatalities.",
+                  "Deaths and injuries are severe negative outcomes for people in society."
+                ],
+                "weak_negation": [
+                  "Assume these harms are substantial enough that society is harmed rather than helped overall."
+                ]
+              },
+              "consequent": "Pokémon GO imposes substantial harm on members of society (players and those affected by those accidents)."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Pokémon GO imposes substantial harm on members of society (players and those affected by those accidents).",
+                  "An activity that imposes substantial death/injury harms cannot reasonably be classified as “good for society.”"
+                ],
+                "weak_negation": [
+                  "Assume “good for society” requires more than any limited benefits; it must not produce large-scale serious harms."
+                ]
+              },
+              "consequent": "No—Pokémon GO has not been good for society."
+            }
+          ],
+          "Conc": [
+            "Pokémon GO has been associated with serious physical harms to players, including fatalities.",
+            "Pokémon GO imposes substantial harm on members of society (players and those affected by those accidents).",
+            "No—Pokémon GO has not been good for society."
+          ],
+          "Ass": [
+            "Assume the deaths/injuries are causally connected in a way that makes the game part of what causes harm (not just unrelated co-occurrence).",
+            "Assume these harms are substantial enough that society is harmed rather than helped overall.",
+            "Assume “good for society” requires more than any limited benefits; it must not produce large-scale serious harms."
+          ]
+        }
+      },
+      "status": "defensible"
+    },
+    {
+      "id": "arg-aa6bc7bda8",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s first premise is only that Pokémon GO is “associated with 25 deaths and 64 injuries.”",
+                  "The target’s first step then depends on an added causation assumption: “Assume the deaths/injuries are causally connected in a way that makes the game part of what causes harm (not just unrelated co-occurrence).”"
+                ],
+                "weak_negation": [
+                  "Assume that “associated with” does not by itself establish that Pokémon GO caused the accidents (i.e., correlation/co-occurrence can occur without the game being the cause)."
+                ]
+              },
+              "consequent": "The target argument does not establish that Pokémon GO itself is causally responsible for the reported deaths and injuries."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target argument does not establish that Pokémon GO itself is causally responsible for the reported deaths and injuries.",
+                  "The target’s later steps treat those events as harm “imposed” by Pokémon GO (e.g., “Pokémon GO imposes substantial harm on members of society”)."
+                ],
+                "weak_negation": [
+                  "Assume that if the causal link to Pokémon GO is unproven, then classifying the harms as Pokémon GO–imposed is not warranted."
+                ]
+              },
+              "consequent": "The target’s inference from “associated harms” to “Pokémon GO imposes substantial harm” is unsupported."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s inference from “associated harms” to “Pokémon GO imposes substantial harm” is unsupported.",
+                  "The target’s final conclusion (“No—Pokémon GO has not been good for society”) is based on that unsupported harms-imposition claim."
+                ],
+                "weak_negation": [
+                  "Assume a conclusion about “good for society” cannot rest on an inference that relies on an unestablished causal mechanism."
+                ]
+              },
+              "consequent": "Therefore, the target’s conclusion that Pokémon GO “has not been good for society” is not demonstrated by its argument."
+            }
+          ],
+          "Conc": [
+            "The target argument does not establish that Pokémon GO itself is causally responsible for the reported deaths and injuries.",
+            "The target’s inference from “associated harms” to “Pokémon GO imposes substantial harm” is unsupported.",
+            "Therefore, the target’s conclusion that Pokémon GO “has not been good for society” is not demonstrated by its argument."
+          ],
+          "Ass": [
+            "Assume that “associated with” does not by itself establish that Pokémon GO caused the accidents (i.e., correlation/co-occurrence can occur without the game being the cause).",
+            "Assume that if the causal link to Pokémon GO is unproven, then classifying the harms as Pokémon GO–imposed is not warranted.",
+            "Assume a conclusion about “good for society” cannot rest on an inference that relies on an unestablished causal mechanism."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-a0a1b986e3",
+      "target_field": "Ass",
+      "target_statement": "Assume the deaths/injuries are causally connected in a way that makes the game part of what causes harm (not just unrelated co-occurrence)."
+    },
+    {
+      "id": "arg-223021b694",
+      "agent": "AG2",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s attack depends on the assumption that “associated with” cannot reasonably support a causal inference about Pokémon GO causing (or contributing to) the deaths/injuries.",
+                  "AG2’s cited tracking data concerns deaths/injuries that occurred while playing, including accident-types like vehicles and falls while gaming, which are consistent with a distraction/unsafe-activity mechanism."
+                ],
+                "weak_negation": [
+                  "Assume that when an association is explicitly time-linked to “while gaming” and the accident-types fit plausible game-related risk, the association can reasonably be treated as causally informative rather than mere unrelated co-occurrence."
+                ]
+              },
+              "consequent": "The reported “while gaming” deaths/injuries support a reasonable causal inference that Pokémon GO contributes to the harms."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The reported “while gaming” deaths/injuries support a reasonable causal inference that Pokémon GO contributes to the harms.",
+                  "Therefore, AG1’s added step—treating AG2’s causal move as unwarranted just because the evidence is phrased as “associated with”—does not undermine the causal inference needed by AG2’s harms-imposition step."
+                ],
+                "weak_negation": [
+                  "Assume that for the purpose of concluding something is not “good for society,” it is sufficient that the evidence reasonably supports Pokémon GO–related harm, not that it proves causation with absolute certainty."
+                ]
+              },
+              "consequent": "AG1’s “correlation ≠ causation” objection fails to undermine AG2’s inference that the harms are Pokémon GO–related (imposed/contributed by the activity)."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s “correlation ≠ causation” objection fails to undermine AG2’s inference that the harms are Pokémon GO–related (imposed/contributed by the activity).",
+                  "Deaths and injuries are severe negative outcomes, so substantial fatal/injury harms indicate substantial harm to members of society."
+                ],
+                "weak_negation": [
+                  "Assume that substantial death/injury harms are enough to make the activity not reasonably classifiable as “good for society,” even if other benefits exist."
+                ]
+              },
+              "consequent": "AG2’s conclusion that Pokémon GO has not been good for society remains supported."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s conclusion that Pokémon GO has not been good for society remains supported."
+                ],
+                "weak_negation": [
+                  "Assume “good for society” requires the overall outcome not to be dominated by severe death/injury harms."
+                ]
+              },
+              "consequent": "AG1’s attack does not succeed; Pokémon GO has not been good for society."
+            }
+          ],
+          "Conc": [
+            "The reported “while gaming” deaths/injuries support a reasonable causal inference that Pokémon GO contributes to the harms.",
+            "AG1’s “correlation ≠ causation” objection fails to undermine AG2’s inference that the harms are Pokémon GO–related (imposed/contributed by the activity).",
+            "AG2’s conclusion that Pokémon GO has not been good for society remains supported.",
+            "AG1’s attack does not succeed; Pokémon GO has not been good for society."
+          ],
+          "Ass": [
+            "Assume that when an association is explicitly time-linked to “while gaming” and the accident-types fit plausible game-related risk, the association can reasonably be treated as causally informative rather than mere unrelated co-occurrence.",
+            "Assume that for the purpose of concluding something is not “good for society,” it is sufficient that the evidence reasonably supports Pokémon GO–related harm, not that it proves causation with absolute certainty.",
+            "Assume that substantial death/injury harms are enough to make the activity not reasonably classifiable as “good for society,” even if other benefits exist.",
+            "Assume “good for society” requires the overall outcome not to be dominated by severe death/injury harms."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-aa6bc7bda8",
+      "target_field": "Ass",
+      "target_statement": "Assume that “associated with” does not by itself establish that Pokémon GO caused the accidents (i.e., correlation/co-occurrence can occur without the game being the cause)."
+    }
+  ],
+  "final_answer": "No—on balance, Pokémon GO has **not** been good for society.\n\n### Why not (the disqualifying harms outweigh the pro-social pathways)\nAccording to the “good for society” standard, an activity fails if it has **serious safety harms**, **meaningful behavioral/mental harms**, or **material increases in victimization**, even if it also brings some benefits.\n\n1) **Serious safety harms (substantial injury/death)**\n- A major concern is the reported tally of **25 deaths and 64 injuries** among players, including accidents involving **vehicles** and **falls** while gaming.\n- The key issue isn’t that a single incident occurred; it’s that Pokémon GO’s real-world play involves **distraction + situational unawareness in traffic/physical environments**, which provides a plausible causal mechanism for severe harms.\n- Even granting some uncertainty about exact causation and how those events compare to baseline accident rates, the existence of **fatalities and serious injuries** tied to gameplay is strong enough under ordinary harm-accounting to make “good for society” unwarranted.\n\n2) **Predation/victimization risk for distracted players**\n- The opposing case also notes that criminals have exploited the game to **lure and rob distracted players**.\n- This maps directly onto the “third-party wrongdoing/victimization” disqualifier: the game changes attention and location behavior in ways that can increase opportunity for crime.\n\n3) **Compulsive-use / addiction risk**\n- The claim that **up to ~9%** of players meet **gaming-disorder-like criteria** (i.e., a non-trivial prevalence of harmful compulsive use) targets another disqualifier.\n- Even if that estimate varies by study/method, this is the kind of concern that—if anywhere near true—would undermine well-being enough to block a “good for society” verdict.\n\n4) **Disrespect for solemn/sacred places**\n- The criticism that players have captured Pokémon in highly sensitive places—such as **emergency rooms, the Auschwitz memorial, funerals, and active battlefields**—is relevant to the “solemn/disrespectful context” disqualifier.\n- Whether it is truly “routine” (in a strict, quantified sense) isn’t settled by the debate record alone. But the fact that such incidents occur at all is still socially serious, and it compounds the safety and wellbeing concerns rather than offsetting them.\n\n### What about the benefits? (they’re real, but not enough to overturn the disqualifiers)\nThe pro-social pathways are:\n\n1) **Physical movement / exercise benefits**\n- Supporters argue that the walking required to play can produce meaningful exercise; one report says a player walked **for hours** while enjoying the game.\n- However, that kind of evidence is at least partially **anecdotal** and doesn’t establish that these exercise gains are broadly representative or large enough at the population level to outweigh severe harms.\n- Also, even if exercise benefits exist for some players, the disqualifiers above (especially safety and victimization risk) are the kind of “dealbreakers” that prevent calling the overall activity “good for society.”\n\n2) **Social cohesion through shared exploration**\n- It’s plausible that some people connect while exploring together.\n- But this pathway wasn’t shown to be large enough (or to reliably compensate) for the safety/mental-health/victimization harms.\n\n3) **Local economic benefit**\n- The claim that some local businesses saw **~5–30% sales increases** due to Pokémon GO-related foot traffic is a positive indicator.\n- Yet measurable local business gains do not neutralize the “substantial serious injury/death” disqualifier.\n\n### Bottom line\nPokémon GO appears to deliver **real but uneven benefits** (exercise for some, community/social activity for some, and some local economic upticks), but it also appears associated with **severe real-world harms**—including **fatalities/injuries**, increased opportunities for **crime against distracted players**, and likely enough **compulsive-use risk**—to fail the standard for “good for society.”\n\n### Confidence and the main unresolved uncertainty\nMy confidence is **moderate** rather than maximum because the debate record doesn’t fully establish:\n- the exact **causal strength** of each death/injury figure relative to baseline risks (i.e., denominator and full attribution), and\n- whether the “solemn place” behavior and addiction prevalence are quantitatively **as routine/high** as claimed.\n\nStill, even accounting for those uncertainties, the combination of **serious safety harms** plus **victimization risk** is sufficient to make “good for society” the wrong overall classification.",
+  "integrated_rules": [
+    "For any activity A, evaluate four disqualifiers and three potential good-for-society pathways:\n\n1) **Disqualify A (=> “not good for society”) if any holds:**\n- **Safety harms disqualifier:** A causes **substantial** serious injury/death to participants or others affected, and the harm magnitude is **sufficient under ordinary harm-accounting** to make “good for society” unwarranted.\n- **Sacred/solemn disrespect disqualifier:** A routinely draws participants into **solemn/sacred/highly sensitive places** (or similar contexts) in a way reasonably interpreted as **disrespectful/socially inappropriate**.\n- **Compulsive-use mental/behavioral harm disqualifier:** A is associated with a **non-trivial prevalence** of harmful compulsive use meeting recognized gaming-disorder-like criteria, plausibly undermining well-being in a sustained way.\n- **Third-party wrongdoing/victimization disqualifier:** A materially increases opportunities for wrongdoing against distracted participants, with a reasonable causal mechanism linking the risk to A’s behavioral effects (distraction/attention capture/situational unawareness).\n\n2) **If no disqualifier holds, classify A as “good for society” if at least one of the following positive pathways is satisfied:**\n- **Public-health via physical movement:** A encourages/increases physical movement, and the resulting changes plausibly improve **population-level public health outcomes**.\n- **Social cohesion via shared real-world participation:** A creates opportunities for people to interact through shared exploration or cooperative engagement that plausibly fosters broader social connection across demographics/backgrounds.\n- **Local economic benefit:** A increases customer foot traffic/engagement in local businesses in a way large enough to produce **measurable economic gains** (e.g., noticeable sales increases reported).\n\n3) **If no disqualifier holds but none of the positive pathways is satisfied,** the criteria do not support calling A “good for society” (so classify as “not good for society” in the sense of failing the pro-social showing)."
+  ]
+}

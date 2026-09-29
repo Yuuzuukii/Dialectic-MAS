@@ -1,0 +1,777 @@
+{
+  "method": "schema",
+  "question": "Is Binge-Watching Good for You?",
+  "agent1_stance": "Your stance:\nYou support binge-watching.\nYou believe binge-watching creates a shared cultural space that helps viewers connect with others and strengthens relationships, including long-distance partnerships.\nYou believe binge-watching releases dopamine, providing stress relief and a sense of control.\nYou believe watching multiple episodes together creates immersion and makes complex storylines easier to follow, resulting in greater enjoyment of sophisticated narratives.",
+  "agent2_stance": "Your stance:\nYou oppose binge-watching.\nYou believe research links binge-watching to depression, loneliness, and reduced self-control, and that after finishing shows, viewers may experience depression, anxiety, and feelings of emptiness.\nYou believe extended sitting correlates with metabolic slowdown, heart disease, and cancer, and that binge-watching also associates with poor sleep quality, weight gain, and unhealthy eating patterns.\nYou believe studies show viewers experience significantly less show enjoyment when watching multiple episodes at once.",
+  "metrics": {
+    "elapsed_seconds": 307.056,
+    "model": "gpt-5.4-nano",
+    "prompt_tokens": 207256,
+    "cached_tokens": 92672,
+    "completion_tokens": 41387,
+    "total_tokens": 248643,
+    "total_cost_usd": 0.076504
+  },
+  "dialogue_history": [
+    {
+      "id": "arg-1f04afc939",
+      "agent": "AG1",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching releases dopamine in the viewer."
+                ],
+                "weak_negation": [
+                  "Assume the viewer’s experience is not dominated by factors that negate the dopamine effect (e.g., it is not mostly replaced by distress)."
+                ]
+              },
+              "consequent": "Binge-watching tends to increase dopamine activity for the viewer."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching tends to increase dopamine activity for the viewer.",
+                  "Increased dopamine activity is associated with stress relief and a sense of control."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "This dopamine increase can relieve stress and increase the viewer’s sense of control."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "This dopamine increase can relieve stress and increase the viewer’s sense of control.",
+                  "Relieving stress and increasing a sense of control are beneficial for a person’s mental well-being."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Yes—binge-watching is good for you because it releases dopamine, which helps relieve stress and gives viewers a sense of control."
+            }
+          ],
+          "Conc": [
+            "Binge-watching tends to increase dopamine activity for the viewer.",
+            "This dopamine increase can relieve stress and increase the viewer’s sense of control.",
+            "Yes—binge-watching is good for you because it releases dopamine, which helps relieve stress and gives viewers a sense of control."
+          ],
+          "Ass": [
+            "Assume the viewer’s experience is not dominated by factors that negate the dopamine effect (e.g., it is not mostly replaced by distress)."
+          ]
+        }
+      },
+      "status": "overruled"
+    },
+    {
+      "id": "arg-eb5f4b8736",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching is linked to worse mood outcomes (e.g., depression, anxiety, and feelings of emptiness) that can follow watching."
+                ],
+                "weak_negation": [
+                  "Assume those worse mood outcomes do not meaningfully override any short-term reward signals for the viewer."
+                ]
+              },
+              "consequent": "Binge-watching is associated with worse mood outcomes that can dominate over any short-term dopamine reward."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching is associated with worse mood outcomes that can dominate over any short-term dopamine reward.",
+                  "Therefore, the viewer’s experience can be dominated by distress rather than reflecting the dopamine effect as beneficial stress relief."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The target’s built-in assumption—that the dopamine effect is not mostly replaced by distress—is not justified."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s built-in assumption—that the dopamine effect is not mostly replaced by distress—is not justified.",
+                  "The target’s conclusion depends on this assumption to connect dopamine release to genuine stress relief and “sense of control.”"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The target’s conclusion that binge-watching is good for you because dopamine relieves stress and increases control is not warranted."
+            }
+          ],
+          "Conc": [
+            "Binge-watching is associated with worse mood outcomes that can dominate over any short-term dopamine reward.",
+            "The target’s built-in assumption—that the dopamine effect is not mostly replaced by distress—is not justified.",
+            "The target’s conclusion that binge-watching is good for you because dopamine relieves stress and increases control is not warranted."
+          ],
+          "Ass": [
+            "Assume those worse mood outcomes do not meaningfully override any short-term reward signals for the viewer."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-1f04afc939",
+      "target_field": "Ass",
+      "target_statement": "Assume the viewer’s experience is not dominated by factors that negate the dopamine effect (e.g., it is not mostly replaced by distress)."
+    },
+    {
+      "id": "arg-51ebe70d5c",
+      "agent": "AG1",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target attack’s key step goes from an association (“linked to worse mood outcomes”) to a dominance/overriding claim (“can dominate over any short-term dopamine reward”)."
+                ],
+                "weak_negation": [
+                  "Assume an association alone is enough to establish that, for the viewer’s relevant moment-to-moment experience during binge-watching, distress mostly replaces (overrides) dopamine’s short-term reward rather than coexisting with it."
+                ]
+              },
+              "consequent": "The target has not shown that distress mostly replaces dopamine’s short-term reward during binge-watching (i.e., the dominance condition is not established from the association move)."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target has not shown that distress mostly replaces dopamine’s short-term reward during binge-watching (i.e., the dominance condition is not established from the association move).",
+                  "The target attack targets the same dominance-style assumption built into the main argument (that the viewer’s experience is not mostly replaced by distress)."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The main argument’s dominance-resistance assumption remains intact against the target’s evidence/move."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The main argument’s dominance-resistance assumption remains intact against the target’s evidence/move.",
+                  "If the viewer’s experience is not mostly replaced by distress, then the dopamine release can still plausibly function as the beneficial mechanism the main argument relies on (stress relief and a sense of control)."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The main argument’s inference from dopamine release to stress relief and a sense of control is not defeated by the target attack."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The main argument’s inference from dopamine release to stress relief and a sense of control is not defeated by the target attack.",
+                  "Stress relief and increased sense of control are beneficial for mental well-being."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Therefore, the target’s claim that the main conclusion (“binge-watching is good for you because dopamine helps relieve stress and gives viewers a sense of control”) is not warranted fails as a defeat."
+            }
+          ],
+          "Conc": [
+            "The target has not shown that distress mostly replaces dopamine’s short-term reward during binge-watching (i.e., the dominance condition is not established from the association move).",
+            "The main argument’s dominance-resistance assumption remains intact against the target’s evidence/move.",
+            "The main argument’s inference from dopamine release to stress relief and a sense of control is not defeated by the target attack.",
+            "Therefore, the target’s claim that the main conclusion (“binge-watching is good for you because dopamine helps relieve stress and gives viewers a sense of control”) is not warranted fails as a defeat."
+          ],
+          "Ass": [
+            "Assume an association alone is enough to establish that, for the viewer’s relevant moment-to-moment experience during binge-watching, distress mostly replaces (overrides) dopamine’s short-term reward rather than coexisting with it."
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-eb5f4b8736",
+      "target_field": "Conc",
+      "target_statement": "The target’s conclusion that binge-watching is good for you because dopamine relieves stress and increases control is not warranted."
+    },
+    {
+      "id": "arg-4ce05be267",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching is linked to depression, loneliness, reduced self-control, and (after finishing shows) depression/anxiety and feelings of emptiness.",
+                  "Those negative outcomes indicate that the viewer’s experienced payoff is not consistently translated into genuine stress relief and a sense of control."
+                ],
+                "weak_negation": [
+                  "Assume the dopamine reward during binge-watching by itself is sufficient to guarantee genuine stress relief and increased sense of control afterward."
+                ]
+              },
+              "consequent": "The target’s key assumption that dopamine release can function as the beneficial mechanism (stress relief + sense of control) is not established, even if distress does not “mostly replace” dopamine moment-to-moment."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s key assumption that dopamine release can function as the beneficial mechanism (stress relief + sense of control) is not established, even if distress does not “mostly replace” dopamine moment-to-moment.",
+                  "The target argument relies on the conditional step: “If the viewer’s experience is not mostly replaced by distress, then dopamine release can still plausibly function as the beneficial mechanism.”"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Because that conditional mechanism-assumption is undermined, the target’s inference that the main argument’s dopamine→stress relief/control link is “not defeated” does not hold."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Because that conditional mechanism-assumption is undermined, the target’s inference that the main argument’s dopamine→stress relief/control link is “not defeated” does not hold.",
+                  "The target’s overall counterargument depends on maintaining that inference to claim its conclusion (“not a defeat”)."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Therefore, the target counterargument cannot adequately defend the main argument against the dominance-style undercut."
+            }
+          ],
+          "Conc": [
+            "The target’s key assumption that dopamine release can function as the beneficial mechanism (stress relief + sense of control) is not established, even if distress does not “mostly replace” dopamine moment-to-moment.",
+            "Because that conditional mechanism-assumption is undermined, the target’s inference that the main argument’s dopamine→stress relief/control link is “not defeated” does not hold.",
+            "Therefore, the target counterargument cannot adequately defend the main argument against the dominance-style undercut."
+          ],
+          "Ass": [
+            "Assume the dopamine reward during binge-watching by itself is sufficient to guarantee genuine stress relief and increased sense of control afterward."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-51ebe70d5c",
+      "target_field": "Ass"
+    },
+    {
+      "id": "arg-5b2b498c6d",
+      "agent": "AG2",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching typically involves long periods of sitting (extended, continuous screen time)."
+                ],
+                "weak_negation": [
+                  "Assume the viewer does not routinely offset this with frequent movement/standing that would break up the extended sitting."
+                ]
+              },
+              "consequent": "Binge-watching tends to produce extended sitting time."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching tends to produce extended sitting time.",
+                  "Extended sitting correlates with metabolic slowdown, heart disease, and cancer."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Extended sitting time during binge-watching is linked to increased risk of serious health harms (metabolic slowdown, heart disease, cancer)."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Extended sitting time during binge-watching is linked to increased risk of serious health harms (metabolic slowdown, heart disease, cancer).",
+                  "These harms are detrimental to a person’s health."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Binge-watching therefore tends to be bad for your health."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching therefore tends to be bad for your health."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Overall, binge-watching is not good for you."
+            }
+          ],
+          "Conc": [
+            "Binge-watching tends to produce extended sitting time.",
+            "Extended sitting time during binge-watching is linked to increased risk of serious health harms (metabolic slowdown, heart disease, cancer).",
+            "Binge-watching therefore tends to be bad for your health.",
+            "Overall, binge-watching is not good for you."
+          ],
+          "Ass": [
+            "Assume the viewer does not routinely offset this with frequent movement/standing that would break up the extended sitting."
+          ]
+        }
+      },
+      "status": "defensible"
+    },
+    {
+      "id": "arg-7919d33f0a",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s health-risk step depends on *actual uninterrupted sedentary time* (extended sitting without meaningful breaks).",
+                  "The target relies on the assumption that viewers do not routinely offset that sitting with frequent movement/standing."
+                ],
+                "weak_negation": [
+                  "Assume viewers never take breaks (or stand/move) during typical binge-watching."
+                ]
+              },
+              "consequent": "The target has not established that binge-watching *typically* produces the uninterrupted sedentary time required for the risk claim to apply."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target has not established that binge-watching *typically* produces the uninterrupted sedentary time required for the risk claim to apply.",
+                  "If viewers routinely take breaks or stand/move, the “extended sitting → serious health harms” link would be materially reduced."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Therefore, the target’s embedded assumption (“viewers do not routinely offset it”) is not justified."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Therefore, the target’s embedded assumption (“viewers do not routinely offset it”) is not justified.",
+                  "The target’s conclusion depends on that assumption to connect binge-watching to serious health harms."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "So the target’s conclusion that “Overall, binge-watching is not good for your health” does not follow from its premises."
+            }
+          ],
+          "Conc": [
+            "The target has not established that binge-watching *typically* produces the uninterrupted sedentary time required for the risk claim to apply.",
+            "Therefore, the target’s embedded assumption (“viewers do not routinely offset it”) is not justified.",
+            "So the target’s conclusion that “Overall, binge-watching is not good for your health” does not follow from its premises."
+          ],
+          "Ass": [
+            "Assume viewers never take breaks (or stand/move) during typical binge-watching."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-5b2b498c6d",
+      "target_field": "Ass",
+      "target_statement": "Assume the viewer does not routinely offset this with frequent movement/standing that would break up the extended sitting."
+    },
+    {
+      "id": "arg-c8a96b9fc8",
+      "agent": "AG2",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The attacked argument does not claim binge-watching requires *uninterrupted* sitting; it claims binge-watching “typically involves long periods of sitting” and adds an assumption that viewers “do not routinely offset this with frequent movement/standing.”"
+                ],
+                "weak_negation": [
+                  "Assume the target’s reasoning depends on viewers never taking any break at all (i.e., a standard of strict uninterruptedness)."
+                ]
+              },
+              "consequent": "The target’s premises are aimed at frequent-offset failure and substantial sedentary time, not an absolute “no breaks ever” condition."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s premises are aimed at frequent-offset failure and substantial sedentary time, not an absolute “no breaks ever” condition.",
+                  "Even if people stand or move occasionally, failing to “routinely offset” means the viewer still accumulates a lot of sitting time across the binge session."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Binge-watching with only occasional breaks still plausibly entails enough extended sedentary exposure for the health-risk correlation to remain relevant."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Binge-watching with only occasional breaks still plausibly entails enough extended sedentary exposure for the health-risk correlation to remain relevant.",
+                  "The target attack’s core move treats the target as requiring evidence of “uninterrupted sedentary time” for the risk link to apply."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The target attack misframes what the target argument needs to establish, so it does not undercut the target’s risk step."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target attack misframes what the target argument needs to establish, so it does not undercut the target’s risk step.",
+                  "The target argument’s chain from extended sitting → correlated health harms → detrimental health therefore remains intact."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Therefore, the target attack does not defeat the original main argument’s conclusion that binge-watching is not good for you."
+            }
+          ],
+          "Conc": [
+            "The target’s premises are aimed at frequent-offset failure and substantial sedentary time, not an absolute “no breaks ever” condition.",
+            "Binge-watching with only occasional breaks still plausibly entails enough extended sedentary exposure for the health-risk correlation to remain relevant.",
+            "The target attack misframes what the target argument needs to establish, so it does not undercut the target’s risk step.",
+            "Therefore, the target attack does not defeat the original main argument’s conclusion that binge-watching is not good for you."
+          ],
+          "Ass": [
+            "Assume the target’s reasoning depends on viewers never taking any break at all (i.e., a standard of strict uninterruptedness)."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-7919d33f0a",
+      "target_field": "Ass",
+      "target_statement": "The target has not established that binge-watching typically produces the uninterrupted sedentary time required for the risk claim to apply."
+    },
+    {
+      "id": "arg-6c0a03c6b5",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s key inference goes from “Extended sitting time during binge-watching is linked to increased risk of serious health harms” to “Binge-watching therefore tends to be bad for your health.”",
+                  "The target premises do not add any premise establishing that binge-watching (rather than confounding factors or general background sedentary behavior) is the cause of those harms."
+                ],
+                "weak_negation": [
+                  "Assume that a correlation (“linked”) is sufficient by itself to infer that binge-watching tends to cause the harms, even in the presence of potential confounders."
+                ]
+              },
+              "consequent": "The target has not established that binge-watching itself is what produces the detrimental health outcomes."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target has not established that binge-watching itself is what produces the detrimental health outcomes.",
+                  "If binge-watching is not established as the cause (i.e., harms may be driven by confounds or by sedentary behavior more generally), then the correlation does not warrant the claim that binge-watching tends to be bad for your health."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The target’s “therefore” step to “binge-watching tends to be bad for your health” is not supported."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s “therefore” step to “binge-watching tends to be bad for your health” is not supported.",
+                  "The target’s final conclusion (“Overall, binge-watching is not good for you”) depends on that unsupported inference."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Overall, the target has not justified the conclusion that binge-watching is not good for you."
+            }
+          ],
+          "Conc": [
+            "The target has not established that binge-watching itself is what produces the detrimental health outcomes.",
+            "The target’s “therefore” step to “binge-watching tends to be bad for your health” is not supported.",
+            "Overall, the target has not justified the conclusion that binge-watching is not good for you."
+          ],
+          "Ass": [
+            "Assume that a correlation (“linked”) is sufficient by itself to infer that binge-watching tends to cause the harms, even in the presence of potential confounders."
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-5b2b498c6d",
+      "target_field": "Conc",
+      "target_statement": "Overall, binge-watching is not good for you."
+    },
+    {
+      "id": "arg-0162dded69",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s rebut relies on a causation requirement: it treats the inference from “extended sitting is linked to serious health harms” to “binge-watching is not good for you” as invalid unless the argument proves binge-watching (rather than confounds/sedentary behavior generally) is the specific cause."
+                ],
+                "weak_negation": [
+                  "Assume that, for a health ‘good for you’ judgment stated in tendency terms (“tends to be bad”), established correlations with serious harms can be sufficient without proving unique causal attribution."
+                ]
+              },
+              "consequent": "AG1’s causation-requirement assumption is not warranted for a ‘tends to be bad’ conclusion."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s causation-requirement assumption is not warranted for a ‘tends to be bad’ conclusion.",
+                  "If AG1’s causation requirement is not warranted, then AG1 cannot validly conclude that AG2’s correlation-based step fails."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AG1 does not successfully show that AG2’s conclusion lacks justification on the correlation/causation point."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1 does not successfully show that AG2’s conclusion lacks justification on the correlation/causation point.",
+                  "AG2’s main argument’s premises include that binge-watching tends to produce extended sitting, and extended sitting correlates with serious health harms that are detrimental."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "So AG1’s undercutting rebut (that binge-watching is not good for you is not justified) fails."
+            }
+          ],
+          "Conc": [
+            "AG1’s causation-requirement assumption is not warranted for a ‘tends to be bad’ conclusion.",
+            "AG1 does not successfully show that AG2’s conclusion lacks justification on the correlation/causation point.",
+            "So AG1’s undercutting rebut (that binge-watching is not good for you is not justified) fails."
+          ],
+          "Ass": [
+            "Assume that, for a health ‘good for you’ judgment stated in tendency terms (“tends to be bad”), established correlations with serious harms can be sufficient without proving unique causal attribution."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-6c0a03c6b5",
+      "target_field": "Ass"
+    },
+    {
+      "id": "arg-58566e9b2d",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s first premise is only that binge-watching “typically involves long periods of sitting.”",
+                  "Long periods of sitting are logically compatible with viewers also “routinely offset[ing]” that sitting with brief movement/standing between episodes or during pauses."
+                ],
+                "weak_negation": [
+                  "Assume (without support) that “long periods of sitting” entails “not routinely” offsetting with movement/standing."
+                ]
+              },
+              "consequent": "The target’s reliance on the specific assumption that viewers do not routinely offset extended sitting is not supported by its own premise and is therefore unearned."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s reliance on the specific assumption that viewers do not routinely offset extended sitting is not supported by its own premise and is therefore unearned.",
+                  "The target’s health-harms chain depends on that particular offset-absence condition to link extended sitting to metabolic slowdown/heart disease/cancer."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Because the key offset-absence assumption is unearned, the target has not established the claimed link from binge-watching to serious health harms."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Because the key offset-absence assumption is unearned, the target has not established the claimed link from binge-watching to serious health harms.",
+                  "Therefore the target’s later “therefore tends to be bad for your health” and “Overall, binge-watching is not good for you” steps do not follow from its premises."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The target’s overall conclusion (“Overall, binge-watching is not good for you”) fails to be justified."
+            }
+          ],
+          "Conc": [
+            "The target’s reliance on the specific assumption that viewers do not routinely offset extended sitting is not supported by its own premise and is therefore unearned.",
+            "Because the key offset-absence assumption is unearned, the target has not established the claimed link from binge-watching to serious health harms.",
+            "The target’s overall conclusion (“Overall, binge-watching is not good for you”) fails to be justified."
+          ],
+          "Ass": [
+            "Assume (without support) that “long periods of sitting” entails “not routinely” offsetting with movement/standing."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-5b2b498c6d",
+      "target_field": "Ass",
+      "target_statement": "Assume the viewer does not routinely offset this with frequent movement/standing that would break up the extended sitting."
+    },
+    {
+      "id": "arg-83e8c1bdf7",
+      "agent": "AG2",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target attack treats the assumption “not routinely offset this with frequent movement/standing” as unsupported by our first premise.",
+                  "But our first premise is not only “long periods of sitting”; it specifies “extended, continuous screen time.”",
+                  "Extended, continuous screen time rules out frequent movement/standing as a routine “offset” within the binge-watching stretch."
+                ],
+                "weak_negation": [
+                  "Assume binge-watching described as “extended, continuous screen time” does not routinely include stand/move breaks that would significantly break up the sitting."
+                ]
+              },
+              "consequent": "Our own first premise already supplies justification for the “not routinely offset” condition rather than leaving it completely unsupported."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Our own first premise already supplies justification for the “not routinely offset” condition rather than leaving it completely unsupported.",
+                  "The target attack therefore fails to undermine the key assumption that drives the health-harms link."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The target’s claim that the offset-absence assumption is “unearned” does not defeat the main argument."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s claim that the offset-absence assumption is “unearned” does not defeat the main argument.",
+                  "With that assumption retained, the argument’s subsequent steps from extended sitting to increased risk of serious health harms remain relevant to the binge-watching scenario."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Therefore, the target attack does not remove the basis for the main conclusion that binge-watching tends to be bad for health."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Therefore, the target attack does not remove the basis for the main conclusion that binge-watching tends to be bad for health.",
+                  "If the main conclusion’s basis is not undermined, then the main conclusion stands against this attack."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The target attack fails to defeat our prior main argument’s conclusion (“Overall, binge-watching is not good for you”)."
+            }
+          ],
+          "Conc": [
+            "Our own first premise already supplies justification for the “not routinely offset” condition rather than leaving it completely unsupported.",
+            "The target’s claim that the offset-absence assumption is “unearned” does not defeat the main argument.",
+            "Therefore, the target attack does not remove the basis for the main conclusion that binge-watching tends to be bad for health.",
+            "The target attack fails to defeat our prior main argument’s conclusion (“Overall, binge-watching is not good for you”)."
+          ],
+          "Ass": [
+            "Assume binge-watching described as “extended, continuous screen time” does not routinely include stand/move breaks that would significantly break up the sitting."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-58566e9b2d",
+      "target_field": "Ass",
+      "target_statement": "Assume (without support) that “long periods of sitting” entails “not routinely” offsetting with movement/standing."
+    },
+    {
+      "id": "arg-e88639abe0",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s step “Extended sitting correlates with metabolic slowdown, heart disease, and cancer” is then applied directly to “extended sitting time during binge-watching” to claim increased risk from binge-watching.",
+                  "That application implicitly assumes the *amount and chronicity* of sedentary exposure in a typical binge-watching session is comparable to the sedentary exposure underlying the correlation used."
+                ],
+                "weak_negation": [
+                  "Assume the correlation reflects risk changes relevant to binge-watching-session doses (not primarily long-term, high-volume inactivity)."
+                ]
+              },
+              "consequent": "The target has not established that binge-watching’s sitting time is sufficiently comparable in dose/chronicity to generate those serious health risks."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target has not established that binge-watching’s sitting time is sufficiently comparable in dose/chronicity to generate those serious health risks.",
+                  "Without that comparability, the inference from “extended sitting → serious health harms” does not reliably license “binge-watching therefore tends to be bad for your health.”"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The target’s health-harms chain does not support its “binge-watching therefore tends to be bad for your health” conclusion."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s health-harms chain does not support its “binge-watching therefore tends to be bad for your health” conclusion.",
+                  "The target’s final claim (“Overall, binge-watching is not good for you”) depends on that unsupported chain."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Therefore, the target’s overall conclusion that binge-watching is not good for you is not justified."
+            }
+          ],
+          "Conc": [
+            "The target has not established that binge-watching’s sitting time is sufficiently comparable in dose/chronicity to generate those serious health risks.",
+            "The target’s health-harms chain does not support its “binge-watching therefore tends to be bad for your health” conclusion.",
+            "Therefore, the target’s overall conclusion that binge-watching is not good for you is not justified."
+          ],
+          "Ass": [
+            "Assume the correlation reflects risk changes relevant to binge-watching-session doses (not primarily long-term, high-volume inactivity)."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-5b2b498c6d",
+      "target_field": "Ass",
+      "target_statement": "Assume the viewer does not routinely offset this with frequent movement/standing that would break up the extended sitting."
+    },
+    {
+      "id": "arg-3298bf0489",
+      "agent": "AG2",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s attack depends on treating our use of the correlation as requiring an unnecessarily strict match: that binge-watching must produce sitting dose/chronicity comparable to the original studies’ participants.",
+                  "But our main argument’s step is only from “extended sitting correlates with serious health harms” to “binge-watching (which tends to involve extended sitting) tends to be bad for your health,” i.e., a probabilistic “tends to” claim, not a claim of exact same dosage or identical long-term exposure profile."
+                ],
+                "weak_negation": [
+                  "Assume a correlation about extended sitting can’t be applied in a weaker “tends to” way to any context that also tends to involve extended sitting."
+                ]
+              },
+              "consequent": "AG1’s “dose/chronicity comparability” requirement is a stronger standard than what our main argument needs to support its “tends to” inference."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s “dose/chronicity comparability” requirement is a stronger standard than what our main argument needs to support its “tends to” inference.",
+                  "Our premises already cover the key bridge in probabilistic terms: binge-watching tends to produce extended sitting, and extended sitting is associated with harms (metabolic slowdown, heart disease, cancer)."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Therefore, the lack of an exact match to the studies’ long-term inactivity profile does not remove the logical basis for the main argument’s extended-sitting risk link."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Therefore, the lack of an exact match to the studies’ long-term inactivity profile does not remove the logical basis for the main argument’s extended-sitting risk link.",
+                  "The main argument’s conclusion (“Overall, binge-watching is not good for you”) follows from that retained link together with “these harms are detrimental to a person’s health.”"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "So AG1’s conclusion that the health-harms chain “does not support” the main claim is not established."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "So AG1’s conclusion that the health-harms chain “does not support” the main claim is not established.",
+                  "If AG1 hasn’t defeated the bridge from extended sitting to health harms, then AG1 hasn’t defeated the main argument’s overall “not good for you” conclusion."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AG1’s target attack fails to defeat the prior main argument."
+            }
+          ],
+          "Conc": [
+            "AG1’s “dose/chronicity comparability” requirement is a stronger standard than what our main argument needs to support its “tends to” inference.",
+            "Therefore, the lack of an exact match to the studies’ long-term inactivity profile does not remove the logical basis for the main argument’s extended-sitting risk link.",
+            "So AG1’s conclusion that the health-harms chain “does not support” the main claim is not established.",
+            "AG1’s target attack fails to defeat the prior main argument."
+          ],
+          "Ass": [
+            "Assume a correlation about extended sitting can’t be applied in a weaker “tends to” way to any context that also tends to involve extended sitting."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-e88639abe0",
+      "target_field": "Ass",
+      "target_statement": "Therefore, the target has not established that binge-watching’s sitting time is sufficiently comparable in dose/chronicity to generate those serious health risks."
+    }
+  ],
+  "final_answer": "**No—binge-watching is generally *not* good for you overall.** It can have some short-term upsides (e.g., stress relief or shared bonding), but the balance of likely harms—especially around prolonged sitting, sleep, and downstream health/mental-health effects—tends to outweigh those benefits.\n\n## Why the overall balance comes out negative\n\n### 1) Mental well-being: short-term reward vs. after-effects\n- There *is* a plausible mechanism for benefit: binge-watching can increase reward-related brain activity (dopamine), which may feel like stress relief and a sense of control.\n- But there are also reported associations that cut the other way: binge-watching is linked to **depression, loneliness, reduced self-control**, and **negative feelings after finishing** (e.g., emptiness/anxiety).\n\nIn the evidence picture we have here, the “dopamine → stress relief” story is plausible, but it wasn’t shown to reliably **outweigh** the broader set of negative associations and after-effects. So for mental well-being, the net is at best mixed and likely negative for many people—especially if binge-watching becomes habitual or replaces healthier coping behaviors.\n\n### 2) Social/relationship: real potential upside (but conditional)\nBinge-watching can create a **shared cultural reference space**, which can strengthen relationships, including long-distance ones—particularly when it’s part of planned shared viewing and conversation.\n\nSo this dimension can be genuinely positive. However, even if relationships benefit, it doesn’t automatically neutralize the physical and sleep risks, and it doesn’t guarantee improved mental health or self-control.\n\n### 3) Enjoyment: mixed and uncertain\nMulti-episode viewing can increase **immersion** and make complex plots easier to follow, which supports greater enjoyment.\nAt the same time, there’s a claim that watching multiple episodes at once can reduce enjoyment (for example by making pacing, emotional processing, or novelty wear off faster).\n\nBecause these enjoyment effects aren’t settled here, they don’t provide strong enough support to overcome the health risks. Enjoyment alone doesn’t make the practice “good for you” when other health dimensions likely move the other way.\n\n### 4) Physical/overall health: the strongest “not good” signal\nBinge-watching typically involves **extended sedentary time**. The concerns raised include:\n- associations between long sedentary exposure and **metabolic slowdown** and serious disease risk (e.g., heart disease, cancer),\n- **poor sleep quality**,\n- and downstream issues such as **weight gain** and unhealthy eating patterns.\n\nEven though some critiques focus on whether binge-watching causes the harms directly versus being correlated with other factors, the overall pathways are still compelling: prolonged sitting and sleep disruption are the kind of things that plausibly worsen health outcomes, and binge-watching commonly entails both.\n\n## Bottom line\n- **Benefits:** possible stress relief/agency (short-term), and social bonding when binge-watching is shared.\n- **Harms:** likely negative effects via prolonged sitting, sleep disruption, and downstream health and possibly mental-health consequences.\n\nWhen all dimensions are considered together, the most defensible conclusion is that binge-watching is **likely not good for you overall**, even if it can be enjoyable and socially connecting in moderation.\n\n",
+  "integrated_rules": [
+    "Integrated reusable decision rule: \n\n1) Identify which evidence the case indicates about the practice:\n- (A) Neurochemical stress relief / increased perceived agency from binge-watching.\n- (B) Creation of a shared cultural space that supports social/emotional connection (incl. across distance).\n- (C) Immersion/narrative continuity from multi-episode viewing that makes complex storylines easier to follow and increases enjoyment of sophisticated narratives.\n- (D) Associations with worse mental-health outcomes and/or negative emotional/psychological states after finishing.\n- (E) Sedentary-time pathway to physical health risk.\n- (F) Associations with poor sleep quality and related downstream harms, including weight gain/unhealthy eating patterns.\n- (G) Empirical evidence that watching multiple episodes at once significantly reduces enjoyment versus alternatives.\n\n2) Apply dimension-to-conclusion mappings (preserving each criterion):\n- Mental well-being dimension:\n  - If (A) (and D is not supported strongly enough to offset it), then “likely beneficial for mental well-being.”\n  - If (D) (and A is not supported strongly enough to offset it), then “likely bad for mental health.”\n  - If both (A) and (D) are supported, resolve by comparing relative magnitude, breadth, likelihood, reversibility, and available mitigation; if the balance remains unclear, leave this dimension unresolved.\n\n- Social/relationship dimension:\n  - If (B), then “likely socially beneficial (good for relationships).”\n\n- Enjoyment dimension:\n  - If (C) (and G is not supported strongly enough to offset it), then “likely to increase enjoyment of complex content.”\n  - If (G) (and C is not supported strongly enough to offset it), then “likely less enjoyable (not good on the enjoyment dimension).”\n  - If both (C) and (G) are supported, resolve by the same neutral comparison (magnitude, breadth, likelihood, reversibility, mitigation); if unclear, leave enjoyment unresolved.\n\n- Physical/overall health dimension:\n  - If (E), then “likely harmful to physical health.”\n  - If (F), then “likely harmful overall health-wise.”\n\n3) Overall verdict (all-things-considered “good for you” vs “not good for you”):\n- Conclude “likely good for you” only if the best-supported balance of benefits across mental well-being/relationships/enjoyment outweighs the best-supported harms across mental/physical/overall health and enjoyment (using the same neutral comparison when tradeoffs arise).\n- Conclude “likely not good for you” if the best-supported harms outweigh the best-supported benefits under that comparison.\n- If the comparative balance across dimensions cannot be resolved from the available evidence, keep the overall judgment unresolved."
+  ]
+}

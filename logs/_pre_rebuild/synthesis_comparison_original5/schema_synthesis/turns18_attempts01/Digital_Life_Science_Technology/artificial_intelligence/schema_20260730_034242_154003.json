@@ -1,0 +1,1155 @@
+{
+  "method": "schema",
+  "question": "Is Artificial Intelligence Good for Society?",
+  "agent1_stance": "Your stance:\nYou support artificial intelligence.\nYou believe AI can make everyday life more enjoyable and convenient, while improving our health and standard of living.\nYou believe AI makes work easier for students and professionals alike.\nYou believe AI helps marginalized groups by offering accessibility for people with disabilities.\nYou believe AI can improve workplace safety.",
+  "agent2_stance": "Your stance:\nYou oppose artificial intelligence.\nYou believe AI is harming the economic well-being of many people and businesses.\nYou believe AI undermines critical thinking skills for students and adults alike.\nYou believe AI hurts racial minorities by repeating and exacerbating racism.\nYou believe AI poses dangerous privacy risks.",
+  "metrics": {
+    "elapsed_seconds": 536.543,
+    "model": "gpt-5.4-nano",
+    "prompt_tokens": 450296,
+    "cached_tokens": 180736,
+    "completion_tokens": 71355,
+    "total_tokens": 521651,
+    "total_cost_usd": 0.14672
+  },
+  "dialogue_history": [
+    {
+      "id": "arg-5942dfba1a",
+      "agent": "AG1",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AI systems can analyze workplace data and detect risk patterns early enough to generate timely warnings or predictions",
+                  "Employers can integrate those AI outputs into safety monitoring and alerting so they are acted upon"
+                ],
+                "weak_negation": [
+                  "This safety-oriented use of AI is appropriately governed and does not itself introduce new accident hazards"
+                ]
+              },
+              "consequent": "AI can provide timely warnings/predictions that help prevent workplace accidents"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI can provide timely warnings/predictions that help prevent workplace accidents",
+                  "When accidents are prevented, workplace injuries decrease"
+                ],
+                "weak_negation": [
+                  "The warnings are actionable in practice (i.e., they lead to behavior or process changes that avert accidents)"
+                ]
+              },
+              "consequent": "Workplaces become safer, reducing injuries and the downstream health/economic burdens on society"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Workplaces become safer, reducing injuries and the downstream health/economic burdens on society",
+                  "Lower injury rates and burdens improve overall societal well-being and free up resources for productive activities"
+                ],
+                "weak_negation": [
+                  "Any costs or risks from implementing AI safety measures do not outweigh these reductions in harm"
+                ]
+              },
+              "consequent": "Reducing injuries and burdens strengthens societal well-being and economic productivity"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Reducing injuries and burdens strengthens societal well-being and economic productivity"
+                ],
+                "weak_negation": [
+                  "There is no larger net societal harm from AI deployment that would reverse the benefit"
+                ]
+              },
+              "consequent": "Yes—Artificial Intelligence is good for society because it can reduce workplace accidents and the societal harms that follow them."
+            }
+          ],
+          "Conc": [
+            "AI can provide timely warnings/predictions that help prevent workplace accidents",
+            "Workplaces become safer, reducing injuries and the downstream health/economic burdens on society",
+            "Reducing injuries and burdens strengthens societal well-being and economic productivity",
+            "Yes—Artificial Intelligence is good for society because it can reduce workplace accidents and the societal harms that follow them."
+          ],
+          "Ass": [
+            "This safety-oriented use of AI is appropriately governed and does not itself introduce new accident hazards",
+            "The warnings are actionable in practice (i.e., they lead to behavior or process changes that avert accidents)",
+            "Any costs or risks from implementing AI safety measures do not outweigh these reductions in harm",
+            "There is no larger net societal harm from AI deployment that would reverse the benefit"
+          ]
+        }
+      },
+      "status": "overruled"
+    },
+    {
+      "id": "arg-911a611205",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target relies on the premise that a safety-oriented use of AI is “appropriately governed” and “does not itself introduce new accident hazards”",
+                  "The target does not specify real-world reliability/guardrail conditions that would prevent failure modes like missed hazards or automation overreliance from AI-driven monitoring/alerts"
+                ],
+                "weak_negation": [
+                  "AI-driven monitoring/alerts are sufficiently reliable in deployment and are governed tightly enough to prevent those failure modes from causing new hazards"
+                ]
+              },
+              "consequent": "The target’s ‘AI introduces no new accident hazards’ assumption is unsupported (i.e., AI monitoring/alerts could plausibly introduce new hazards)"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s ‘AI introduces no new accident hazards’ assumption is unsupported (i.e., AI monitoring/alerts could plausibly introduce new hazards)",
+                  "The target’s case depends on the step that AI warnings reduce accidents and injuries"
+                ],
+                "weak_negation": [
+                  "Even if AI monitoring/alerts can introduce new hazards via failure modes, the net effect would still reliably reduce workplace injuries"
+                ]
+              },
+              "consequent": "The target does not securely establish that AI makes workplaces safer (accidents/injuries will decrease)"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target does not securely establish that AI makes workplaces safer (accidents/injuries will decrease)"
+                ],
+                "weak_negation": [
+                  "Other evidence (not provided by the target) shows overall societal benefits dominate any safety-related uncertainties"
+                ]
+              },
+              "consequent": "The target’s conclusion—‘AI is good for society because it can reduce workplace accidents and the societal harms that follow them’—does not follow from its premises"
+            }
+          ],
+          "Conc": [
+            "The target’s ‘AI introduces no new accident hazards’ assumption is unsupported (i.e., AI monitoring/alerts could plausibly introduce new hazards)",
+            "The target does not securely establish that AI makes workplaces safer (accidents/injuries will decrease)",
+            "The target’s conclusion—‘AI is good for society because it can reduce workplace accidents and the societal harms that follow them’—does not follow from its premises"
+          ],
+          "Ass": [
+            "AI-driven monitoring/alerts are sufficiently reliable in deployment and are governed tightly enough to prevent those failure modes from causing new hazards",
+            "Even if AI monitoring/alerts can introduce new hazards via failure modes, the net effect would still reliably reduce workplace injuries",
+            "Other evidence (not provided by the target) shows overall societal benefits dominate any safety-related uncertainties"
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-5942dfba1a",
+      "target_field": "Ass",
+      "target_statement": "This safety-oriented use of AI is appropriately governed and does not itself introduce new accident hazards"
+    },
+    {
+      "id": "arg-9d6a8482a2",
+      "agent": "AG1",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s undercut relies on an inference from ‘we do not get detailed real-world reliability/guardrail conditions in the argument’ to ‘our “appropriately governed / no new accident hazards” assumption is unsupported’",
+                  "The target does not present evidence that, in appropriately governed deployments, AI monitoring/alerts actually increase accident risk or undermine net safety"
+                ],
+                "weak_negation": [
+                  "Missing specificity in the argument is compatible with the assumption that governance and controls prevent AI-driven failure modes from creating new hazards"
+                ]
+              },
+              "consequent": "Lack of detailed guardrail specification does not, by itself, make the target’s ‘no new accident hazards’ assumption unsupported"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Lack of detailed guardrail specification does not, by itself, make the target’s ‘no new accident hazards’ assumption unsupported",
+                  "The target’s reasoning remains at the level of ‘could plausibly introduce new hazards’ rather than showing that it would likely happen under the relevant deployment conditions"
+                ],
+                "weak_negation": [
+                  "Plausible failure modes alone do not defeat a conditional safety claim without establishing likely net harm"
+                ]
+              },
+              "consequent": "The target attack fails to undercut the relevant assumption that safety-oriented AI is appropriately governed to avoid introducing new hazards"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target attack fails to undercut the relevant assumption that safety-oriented AI is appropriately governed to avoid introducing new hazards",
+                  "Our main argument already treats accident-prevention benefits as depending on actionable integration of AI outputs into safety monitoring"
+                ],
+                "weak_negation": [
+                  "Unquantified residual uncertainty about failure modes does not negate the causal support for prevention when the deployment is governed and the warnings are acted upon"
+                ]
+              },
+              "consequent": "Residual uncertainty about failure modes does not negate the net-benefit structure of our safety claim under governance"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Residual uncertainty about failure modes does not negate the net-benefit structure of our safety claim under governance"
+                ],
+                "weak_negation": [
+                  "The target provides no positive showing that governance would reverse the benefit net of any safety-related costs/risks"
+                ]
+              },
+              "consequent": "Against this attack, the conclusion that AI is good for society via reduced workplace accidents and downstream harms remains supported"
+            }
+          ],
+          "Conc": [
+            "Lack of detailed guardrail specification does not, by itself, make the target’s ‘no new accident hazards’ assumption unsupported",
+            "The target attack fails to undercut the relevant assumption that safety-oriented AI is appropriately governed to avoid introducing new hazards",
+            "Residual uncertainty about failure modes does not negate the net-benefit structure of our safety claim under governance",
+            "Against this attack, the conclusion that AI is good for society via reduced workplace accidents and downstream harms remains supported"
+          ],
+          "Ass": [
+            "Missing specificity in the argument is compatible with the assumption that governance and controls prevent AI-driven failure modes from creating new hazards",
+            "Plausible failure modes alone do not defeat a conditional safety claim without establishing likely net harm",
+            "Unquantified residual uncertainty about failure modes does not negate the causal support for prevention when the deployment is governed and the warnings are acted upon",
+            "The target provides no positive showing that governance would reverse the benefit net of any safety-related costs/risks"
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-911a611205",
+      "target_field": "Conc",
+      "target_statement": "The target’s ‘AI introduces no new accident hazards’ assumption is unsupported (i.e., AI monitoring/alerts could plausibly introduce new hazards)"
+    },
+    {
+      "id": "arg-67b66a6ee1",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target defends the main argument by assuming that “missing guardrail specification” is compatible with the categorical premise that the AI safety use is “appropriately governed” and “does not itself introduce new accident hazards”",
+                  "The target’s counter does not add any concrete deployment conditions, validation evidence, or governance mechanisms that would actually warrant the categorical ‘no new hazards’ premise"
+                ],
+                "weak_negation": [
+                  "This does not require precise numerical probabilities to make an evidential/justificatory gap matter for a categorical claim"
+                ]
+              },
+              "consequent": "Missing guardrail/governance specifics leave the categorical “appropriately governed / no new accident hazards” premise evidentially unsupported"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target also relies on the idea that “plausible failure modes” do not undercut the safety claim unless likely net harm is shown",
+                  "The categorical “no new accident hazards” premise would be falsified by the existence of plausible failure modes unless the argument supplies governance/controls that block them in the relevant deployment context"
+                ],
+                "weak_negation": [
+                  "This does not assert that failure will occur—only that the categorical premise cannot be assumed without warranted controls"
+                ]
+              },
+              "consequent": "Because the premise is categorical, the plausibility of AI-introduced hazard failure modes undercuts the “no new hazards” assumption absent demonstrated governance controls"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Missing guardrail/governance specifics leave the categorical “appropriately governed / no new accident hazards” premise evidentially unsupported",
+                  "Because the premise is categorical, the plausibility of AI-introduced hazard failure modes undercuts the “no new hazards” assumption absent demonstrated governance controls"
+                ],
+                "weak_negation": [
+                  "Residual uncertainty cannot rescue an assumption that was not warranted in the first place"
+                ]
+              },
+              "consequent": "The target’s defense cannot preserve the key ‘no new accident hazards under appropriate governance’ assumption, so its net-benefit structure is not secured"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s defense cannot preserve the key ‘no new accident hazards under appropriate governance’ assumption, so its net-benefit structure is not secured"
+                ],
+                "weak_negation": [
+                  "This does not add a new positive pro-AI claim; it only blocks the target’s attempt to make the prior conclusion go through"
+                ]
+              },
+              "consequent": "Against this undercut, the target’s maintained conclusion that the safety-oriented AI use is “good for society” is not established as follows from its premises"
+            }
+          ],
+          "Conc": [
+            "Missing guardrail/governance specifics leave the categorical “appropriately governed / no new accident hazards” premise evidentially unsupported",
+            "Because the premise is categorical, the plausibility of AI-introduced hazard failure modes undercuts the “no new hazards” assumption absent demonstrated governance controls",
+            "The target’s defense cannot preserve the key ‘no new accident hazards under appropriate governance’ assumption, so its net-benefit structure is not secured",
+            "Against this undercut, the target’s maintained conclusion that the safety-oriented AI use is “good for society” is not established as follows from its premises"
+          ],
+          "Ass": [
+            "This does not require precise numerical probabilities to make an evidential/justificatory gap matter for a categorical claim",
+            "This does not assert that failure will occur—only that the categorical premise cannot be assumed without warranted controls",
+            "Residual uncertainty cannot rescue an assumption that was not warranted in the first place",
+            "This does not add a new positive pro-AI claim; it only blocks the target’s attempt to make the prior conclusion go through"
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-9d6a8482a2",
+      "target_field": "Ass"
+    },
+    {
+      "id": "arg-24016e8ff3",
+      "agent": "AG2",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AI systems commonly require collecting and processing large amounts of personal data to generate outputs",
+                  "AI systems can infer sensitive traits from patterns in users’ behavior and data, not just from explicitly provided information"
+                ],
+                "weak_negation": [
+                  "This data collection and inference can be fully prevented or neutralized so it does not create dangerous privacy risks"
+                ]
+              },
+              "consequent": "AI deployment tends to increase dangerous privacy risks for individuals"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI deployment tends to increase dangerous privacy risks for individuals",
+                  "These risks translate into a practical loss of effective control when individuals cannot reliably monitor, limit, or revoke how their data is collected, shared, or used"
+                ],
+                "weak_negation": [
+                  "Individuals retain effective control over their personal information under typical AI deployment"
+                ]
+              },
+              "consequent": "Individuals lose effective control over their personal information"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Individuals lose effective control over their personal information",
+                  "When people cannot control their data, privacy harms (e.g., misuse or unauthorized downstream use) undermine trust and reduce overall societal well-being"
+                ],
+                "weak_negation": [
+                  "AI-driven privacy harm does not reduce societal well-being"
+                ]
+              },
+              "consequent": "AI-driven privacy harm reduces societal well-being"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI-driven privacy harm reduces societal well-being"
+                ],
+                "weak_negation": [
+                  "Any benefits of AI to society outweigh these privacy-related harms so that, overall, AI is good for society"
+                ]
+              },
+              "consequent": "No—Artificial Intelligence is not good for society because it tends to increase dangerous privacy risks that reduce societal well-being."
+            }
+          ],
+          "Conc": [
+            "AI deployment tends to increase dangerous privacy risks for individuals",
+            "Individuals lose effective control over their personal information",
+            "AI-driven privacy harm reduces societal well-being",
+            "No—Artificial Intelligence is not good for society because it tends to increase dangerous privacy risks that reduce societal well-being."
+          ],
+          "Ass": [
+            "This data collection and inference can be fully prevented or neutralized so it does not create dangerous privacy risks",
+            "Individuals retain effective control over their personal information under typical AI deployment",
+            "AI-driven privacy harm does not reduce societal well-being",
+            "Any benefits of AI to society outweigh these privacy-related harms so that, overall, AI is good for society"
+          ]
+        }
+      },
+      "status": "overruled"
+    },
+    {
+      "id": "arg-50fe78f17c",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s final step assumes that AI’s privacy-related harms ‘tend to’ reduce societal well-being without being outweighed by AI’s benefits",
+                  "The target’s earlier premises establish privacy risk and downstream well-being reductions but do not provide any balancing/likelihood mechanism or evidence for net harm overall"
+                ],
+                "weak_negation": [
+                  "Without a demonstrated net-benefit comparison, the target has not shown that privacy harms outweigh AI benefits in aggregate"
+                ]
+              },
+              "consequent": "The target does not establish the net-harm (benefits-not-outweigh) premise needed for its ‘AI is not good for society’ conclusion"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target does not establish the net-harm (benefits-not-outweigh) premise needed for its ‘AI is not good for society’ conclusion",
+                  "The target therefore lacks support for the inference from ‘privacy harms reduce well-being’ to ‘overall AI is not good for society’"
+                ],
+                "weak_negation": [
+                  "A socially beneficial outcome remains possible if AI benefits outweigh privacy harms under governance and adoption choices"
+                ]
+              },
+              "consequent": "Therefore the target’s conclusion (‘AI is not good for society’) does not follow from its premises"
+            }
+          ],
+          "Conc": [
+            "The target does not establish the net-harm (benefits-not-outweigh) premise needed for its ‘AI is not good for society’ conclusion",
+            "Therefore the target’s conclusion (‘AI is not good for society’) does not follow from its premises"
+          ],
+          "Ass": [
+            "Without a demonstrated net-benefit comparison, the target has not shown that privacy harms outweigh AI benefits in aggregate",
+            "A socially beneficial outcome remains possible if AI benefits outweigh privacy harms under governance and adoption choices"
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-24016e8ff3",
+      "target_field": "Ass",
+      "target_statement": "Any benefits of AI to society outweigh these privacy-related harms so that, overall, AI is good for society"
+    },
+    {
+      "id": "arg-6ddcdfa784",
+      "agent": "AG2",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s attack treats the inference to ‘AI is not good for society’ as failing unless there is a demonstrated, quantified net-benefit/net-harm comparison",
+                  "Our prior main argument makes probabilistic causal claims (e.g., AI ‘tends to’ increase dangerous privacy risks) via a mechanism connecting privacy risk and loss of control to reduced societal well-being rather than claiming exact aggregate accounting"
+                ],
+                "weak_negation": [
+                  "For purposes of judging whether something is ‘good/not good for society,’ it is permissible to rely on substantial, likely harms to well-being without requiring a precise quantified aggregate balance, so long as the countervailing claim (that benefits outweigh harms overall) is not established"
+                ]
+              },
+              "consequent": "AG1’s quantified-net-benefit proof-standard is not logically required to defeat our step from privacy-harm → overall ‘not good for society’"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s quantified-net-benefit proof-standard is not logically required to defeat our step from privacy-harm → overall ‘not good for society’",
+                  "Our prior premises establish that AI deployment tends to increase dangerous privacy risks, which lead to loss of effective data control and thereby reduce societal well-being"
+                ],
+                "weak_negation": [
+                  "AG1 does not provide evidence that AI benefits outweigh privacy-related harms overall (it only notes that net benefit is possible)"
+                ]
+              },
+              "consequent": "AG1 has not undermined the needed countervailing condition (‘benefits outweigh harms overall’) that would block our ‘not good for society’ judgment"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1 has not undermined the needed countervailing condition (‘benefits outweigh harms overall’) that would block our ‘not good for society’ judgment"
+                ],
+                "weak_negation": [
+                  "Given the established privacy-harm mechanism, the absence of a showing that benefits outweigh harms is sufficient to keep the overall judgment negative"
+                ]
+              },
+              "consequent": "Therefore, our prior main conclusion (‘AI is not good for society due to privacy harms that reduce societal well-being’) stands against AG1’s attack"
+            }
+          ],
+          "Conc": [
+            "AG1’s quantified-net-benefit proof-standard is not logically required to defeat our step from privacy-harm → overall ‘not good for society’",
+            "AG1 has not undermined the needed countervailing condition (‘benefits outweigh harms overall’) that would block our ‘not good for society’ judgment",
+            "Therefore, our prior main conclusion (‘AI is not good for society due to privacy harms that reduce societal well-being’) stands against AG1’s attack"
+          ],
+          "Ass": [
+            "For purposes of judging whether something is ‘good/not good for society,’ it is permissible to rely on substantial, likely harms to well-being without requiring a precise quantified aggregate balance, so long as the countervailing claim (that benefits outweigh harms overall) is not established",
+            "AG1 does not provide evidence that AI benefits outweigh privacy-related harms overall (it only notes that net benefit is possible)",
+            "Given the established privacy-harm mechanism, the absence of a showing that benefits outweigh harms is sufficient to keep the overall judgment negative"
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-50fe78f17c",
+      "target_field": "Ass",
+      "target_statement": "Without a demonstrated net-benefit comparison, the target has not shown that privacy harms outweigh AI benefits in aggregate"
+    },
+    {
+      "id": "arg-c252d1b4db",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s first-step inference from “AI systems commonly require collecting and processing large amounts of personal data” and “AI systems can infer sensitive traits” to “AI deployment tends to increase dangerous privacy risks” depends on an implied assumption that these privacy risks cannot be meaningfully neutralized or controlled in typical deployments",
+                  "Privacy-preserving design and governance can limit harmful collection/inference and constrain downstream misuse (e.g., data minimization, access limits/user controls, and technical controls that reduce harmful inference) so the relevant “dangerous” risks do not reliably materialize"
+                ],
+                "weak_negation": [
+                  "The target does not provide a justification that typical AI deployments generally lack or fail these neutralization/controls"
+                ]
+              },
+              "consequent": "The target has not established that AI deployment tends to increase dangerous privacy risks for individuals"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target has not established that AI deployment tends to increase dangerous privacy risks for individuals",
+                  "The target’s later steps (loss of effective control → reduced societal well-being → “AI is not good for society”) rely on that initial “tends to” premise"
+                ],
+                "weak_negation": [
+                  "If the initial tendency is not established, the negative overall judgment is not supported by the target’s premises"
+                ]
+              },
+              "consequent": "Without the first-step “tends to increase dangerous privacy risks” premise, the target’s premises do not support its overall negative conclusion"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Without the first-step “tends to increase dangerous privacy risks” premise, the target’s premises do not support its overall negative conclusion",
+                  "The target’s final conclusion directly claims AI is not good for society on the basis of that alleged tendency"
+                ],
+                "weak_negation": [
+                  "Failing to support the basis defeats the specific ‘not good for society’ conclusion"
+                ]
+              },
+              "consequent": "Therefore, the target’s conclusion that AI is not good for society because it tends to increase dangerous privacy risks is defeated"
+            }
+          ],
+          "Conc": [
+            "The target has not established that AI deployment tends to increase dangerous privacy risks for individuals",
+            "Without the first-step “tends to increase dangerous privacy risks” premise, the target’s premises do not support its overall negative conclusion",
+            "Therefore, the target’s conclusion that AI is not good for society because it tends to increase dangerous privacy risks is defeated"
+          ],
+          "Ass": [
+            "The target does not provide a justification that typical AI deployments generally lack or fail these neutralization/controls",
+            "If the initial tendency is not established, the negative overall judgment is not supported by the target’s premises",
+            "Failing to support the basis defeats the specific ‘not good for society’ conclusion"
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-24016e8ff3",
+      "target_field": "Conc",
+      "target_statement": "No—Artificial Intelligence is not good for society because it tends to increase dangerous privacy risks that reduce societal well-being."
+    },
+    {
+      "id": "arg-8e558b26c0",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s counterargument depends on the implied assumption that, in typical AI deployments, privacy-preserving design and governance can limit harmful data collection/inference and constrain misuse such that “dangerous” privacy risks do not reliably materialize",
+                  "AI systems can infer sensitive traits from behavioral/data patterns and thus can still produce privacy harms even when companies minimize explicitly labeled fields, because the inference can draw on remaining correlational signals",
+                  "Individuals usually cannot reliably monitor, limit, or revoke how AI data is collected, shared, or used, due to complexity/asymmetry in real deployment"
+                ],
+                "weak_negation": [
+                  "Privacy-preserving design and governance are not reliably implemented to the extent needed to prevent dangerous privacy harms in typical deployments"
+                ]
+              },
+              "consequent": "In typical AI deployments, privacy-neutralization controls are generally lacking or insufficient, so dangerous privacy risks from AI data collection/inference do materialize"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "In typical AI deployments, privacy-neutralization controls are generally lacking or insufficient, so dangerous privacy risks from AI data collection/inference do materialize",
+                  "If dangerous privacy risks do materialize in typical deployments, then the premise that the target has not established “tends to increase dangerous privacy risks” is undermined"
+                ],
+                "weak_negation": [
+                  "AG1’s argument requires showing that neutralization/control is generally effective in typical deployments; lacking that, the first-step tendency claim cannot be dismissed"
+                ]
+              },
+              "consequent": "AG1’s key first-step challenge to the target (“the target has not established a tendency”) is invalidated"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s key first-step challenge to the target (“the target has not established a tendency”) is invalidated",
+                  "AG1’s later steps rely on that first-step challenge to conclude that the target’s overall ‘AI is not good for society’ judgment does not follow"
+                ],
+                "weak_negation": [
+                  "Without the first-step challenge, AG1’s inference to defeating the target’s conclusion fails"
+                ]
+              },
+              "consequent": "AG1’s counterargument against the target’s conclusion does not defeat it"
+            }
+          ],
+          "Conc": [
+            "In typical AI deployments, privacy-neutralization controls are generally lacking or insufficient, so dangerous privacy risks from AI data collection/inference do materialize",
+            "AG1’s key first-step challenge to the target (“the target has not established a tendency”) is invalidated",
+            "AG1’s counterargument against the target’s conclusion does not defeat it"
+          ],
+          "Ass": [
+            "Privacy-preserving design and governance are not reliably implemented to the extent needed to prevent dangerous privacy harms in typical deployments",
+            "AG1’s argument requires showing that neutralization/control is generally effective in typical deployments; lacking that, the first-step tendency claim cannot be dismissed",
+            "Without the first-step challenge, AG1’s inference to defeating the target’s conclusion fails"
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-c252d1b4db",
+      "target_field": "Ass"
+    },
+    {
+      "id": "arg-cba9504112",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s final step to the claim ‘AI is not good for society’ depends on the implicit balancing assumption that AI’s benefits do not outweigh privacy-related harms overall",
+                  "In its premises, the target establishes only that privacy harm reduces societal well-being, but it provides no mechanism or evidence about the *relative magnitude* (or likelihood) of privacy harms versus AI benefits"
+                ],
+                "weak_negation": [
+                  "It is still possible that, under realistic deployment choices, AI’s benefits could outweigh privacy harms in net societal terms"
+                ]
+              },
+              "consequent": "The target has not established the needed ‘harms dominate benefits overall’ premise that licenses concluding ‘AI is not good for society’"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target has not established the needed ‘harms dominate benefits overall’ premise that licenses concluding ‘AI is not good for society’",
+                  "Without that premise, the inference from ‘privacy harm reduces well-being’ to ‘overall AI is not good’ is unsupported"
+                ],
+                "weak_negation": [
+                  "If the harms do not dominate, then the target’s negative overall conclusion is not warranted"
+                ]
+              },
+              "consequent": "The target’s conclusion (‘AI is not good for society because it tends to increase dangerous privacy risks…’) does not follow from its premises"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s conclusion (‘AI is not good for society because it tends to increase dangerous privacy risks…’) does not follow from its premises"
+                ],
+                "weak_negation": [
+                  "Therefore, the target’s rebuttal to “AI is good for society” fails rather than succeeding on a logically supported case"
+                ]
+              },
+              "consequent": "The target argument is defeated at the final balancing step"
+            }
+          ],
+          "Conc": [
+            "The target has not established the needed ‘harms dominate benefits overall’ premise that licenses concluding ‘AI is not good for society’",
+            "The target’s conclusion (‘AI is not good for society because it tends to increase dangerous privacy risks…’) does not follow from its premises",
+            "The target argument is defeated at the final balancing step"
+          ],
+          "Ass": [
+            "It is still possible that, under realistic deployment choices, AI’s benefits could outweigh privacy harms in net societal terms",
+            "If the harms do not dominate, then the target’s negative overall conclusion is not warranted",
+            "Therefore, the target’s rebuttal to “AI is good for society” fails rather than succeeding on a logically supported case"
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-24016e8ff3",
+      "target_field": "Ass",
+      "target_statement": "Any benefits of AI to society outweigh these privacy-related harms so that, overall, AI is good for society"
+    },
+    {
+      "id": "arg-303e49af61",
+      "agent": "AG2",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s attack claims our argument provides no mechanism or evidence about the relative likelihood/magnitude of the privacy harms versus AI benefits",
+                  "Our prior main argument *does* give a mechanism and likelihood for the harms: it treats personal-data collection and sensitive-trait inference as common features (“commonly…”, “tend to…”) and then links loss of effective control to reduced societal well-being"
+                ],
+                "weak_negation": [
+                  "The privacy-harm mechanism and likelihood supplied by the “commonly/tends” premises are not sufficient to support a comparative societal judgment without a separate quantified net-benefit study"
+                ]
+              },
+              "consequent": "Our argument supplies a relevant mechanism and likelihood for privacy harms, not merely an abstract possibility"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Our argument supplies a relevant mechanism and likelihood for privacy harms, not merely an abstract possibility",
+                  "AG1’s counter to our final step is essentially that benefits *could* outweigh harms, but it does not negate the typicality premises that generate the ‘tends to’ privacy harm (nor does it show that benefits reliably preserve effective user control)"
+                ],
+                "weak_negation": [
+                  "AG1’s mere ‘could’ is enough to overturn a conclusion grounded in likely, mechanism-driven harm"
+                ]
+              },
+              "consequent": "AG1’s attack fails to block our inference from likely privacy harms to a negative overall judgment"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s attack fails to block our inference from likely privacy harms to a negative overall judgment",
+                  "Our earlier steps show that when people lose effective control of personal data, privacy harms undermine trust and reduce overall societal well-being"
+                ],
+                "weak_negation": [
+                  "Any AI benefits that might exist reliably and sufficiently counteract those privacy harms in typical deployments"
+                ]
+              },
+              "consequent": "No—Artificial Intelligence is not good for society because its deployment tends to increase dangerous privacy risks that reduce societal well-being."
+            }
+          ],
+          "Conc": [
+            "Our argument supplies a relevant mechanism and likelihood for privacy harms, not merely an abstract possibility",
+            "AG1’s attack fails to block our inference from likely privacy harms to a negative overall judgment",
+            "No—Artificial Intelligence is not good for society because its deployment tends to increase dangerous privacy risks that reduce societal well-being."
+          ],
+          "Ass": [
+            "The privacy-harm mechanism and likelihood supplied by the “commonly/tends” premises are not sufficient to support a comparative societal judgment without a separate quantified net-benefit study",
+            "AG1’s mere ‘could’ is enough to overturn a conclusion grounded in likely, mechanism-driven harm",
+            "Any AI benefits that might exist reliably and sufficiently counteract those privacy harms in typical deployments"
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-cba9504112",
+      "target_field": "Conc",
+      "target_statement": "The target does not establish the needed ‘harms dominate benefits overall’ premise that licenses concluding ‘AI is not good for society’"
+    },
+    {
+      "id": "arg-c90ad833d6",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s attack on the target is that the target lacks the needed overall balancing support (i.e., it does not establish harms dominate AI benefits overall), not that privacy harms might occur in the abstract",
+                  "The target’s rule 2 characterizes AG1’s counter as being “essentially” a bare “could outweigh” move rather than a balancing/evidence challenge"
+                ],
+                "weak_negation": [
+                  "AG1’s counter is essentially only a “mere could” challenge that would not matter against a likely, mechanism-driven harm story"
+                ]
+              },
+              "consequent": "AG1’s attack is not merely a “mere could” challenge; it targets the missing net-dominance (overall balancing) support"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s attack is not merely a “mere could” challenge; it targets the missing net-dominance (overall balancing) support",
+                  "The target’s rule 2 relies on the assumption that AG1’s “mere could” characterization is enough to overturn likely harm conclusions"
+                ],
+                "weak_negation": [
+                  "If AG1’s challenge is not merely “could,” then AG1’s rebuttal should not be dismissed as failing to block the inference"
+                ]
+              },
+              "consequent": "The target’s defense in rule 2 (that AG1’s attack fails) depends on a mistaken assumption and is not secure"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s defense in rule 2 (that AG1’s attack fails) depends on a mistaken assumption and is not secure",
+                  "Rule 2 is an intermediate step toward sustaining the target’s final judgment that AI is not good for society due to privacy risks"
+                ],
+                "weak_negation": [
+                  "Without a secure intermediate step, the final “not good for society” inference is not warranted by the target’s premises alone"
+                ]
+              },
+              "consequent": "Therefore, the target’s conclusion that AI is not good for society is undercut by invalidating the “mere could” assumption it relies on"
+            }
+          ],
+          "Conc": [
+            "AG1’s attack is not merely a “mere could” challenge; it targets the missing net-dominance (overall balancing) support",
+            "The target’s defense in rule 2 (that AG1’s attack fails) depends on a mistaken assumption and is not secure",
+            "Therefore, the target’s conclusion that AI is not good for society is undercut by invalidating the “mere could” assumption it relies on"
+          ],
+          "Ass": [
+            "AG1’s counter is essentially only a “mere could” challenge that would not matter against a likely, mechanism-driven harm story",
+            "If AG1’s challenge is not merely “could,” then AG1’s rebuttal should not be dismissed as failing to block the inference",
+            "Without a secure intermediate step, the final “not good for society” inference is not warranted by the target’s premises alone"
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-303e49af61",
+      "target_field": "Ass"
+    },
+    {
+      "id": "arg-ea54074cf8",
+      "agent": "AG1",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AI can be deployed as assistive technology (e.g., language support, reading support, navigation support, communication aids) that improves access for people with disabilities",
+                  "AI-driven assistive tools can reduce barriers that would otherwise limit people’s ability to participate in everyday life and public services"
+                ],
+                "weak_negation": [
+                  "In this context, the accessibility gains are expected to be substantive rather than merely cosmetic"
+                ]
+              },
+              "consequent": "AI is expected to increase accessibility for people with disabilities"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI is expected to increase accessibility for people with disabilities",
+                  "Greater accessibility improves societal well-being by enabling inclusion and participation in work, learning, and everyday life for a marginalized group"
+                ],
+                "weak_negation": [
+                  "The accessibility improvements are expected to translate into real improvements in health/standard of living rather than only limited usability"
+                ]
+              },
+              "consequent": "Increasing accessibility improves societal well-being and the standard of living"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Increasing accessibility improves societal well-being and the standard of living",
+                  "When AI is expected to produce substantial societal-well-being benefits, the overall verdict is YES provided these benefits are expected to outweigh main AI-related harms (including dangerous privacy risks, racism/discriminatory impacts hurting racial minorities, undermining critical thinking/learning, and harms to economic well-being)"
+                ],
+                "weak_negation": [
+                  "In appropriately designed and adopted deployment, these main harms are not expected to outweigh the accessibility-driven well-being gains"
+                ]
+              },
+              "consequent": "Yes—Artificial Intelligence is good for society because it can increase accessibility for people with disabilities and thereby improve societal well-being and the standard of living."
+            }
+          ],
+          "Conc": [
+            "AI is expected to increase accessibility for people with disabilities",
+            "Increasing accessibility improves societal well-being and the standard of living",
+            "Yes—Artificial Intelligence is good for society because it can increase accessibility for people with disabilities and thereby improve societal well-being and the standard of living."
+          ],
+          "Ass": [
+            "In this context, the accessibility gains are expected to be substantive rather than merely cosmetic",
+            "The accessibility improvements are expected to translate into real improvements in health/standard of living rather than only limited usability",
+            "In appropriately designed and adopted deployment, these main harms are not expected to outweigh the accessibility-driven well-being gains"
+          ]
+        }
+      },
+      "status": "defensible"
+    },
+    {
+      "id": "arg-800cb14118",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s key assumption is that ‘in appropriately designed and adopted deployment, the main AI harms (privacy risks, racism/discriminatory impacts, undermining critical thinking/learning, and harms to economic well-being) are not expected to outweigh the accessibility-driven well-being gains’",
+                  "Even assistive AI for people with disabilities commonly relies on collecting/processing personal user data (e.g., communication, behavioral, and interaction signals) and can infer sensitive traits from patterns in that data"
+                ],
+                "weak_negation": [
+                  "This data collection and inference can be fully prevented or neutralized such that dangerous privacy risks do not meaningfully arise in typical deployment"
+                ]
+              },
+              "consequent": "The target’s assumption that the main AI harms are not expected to outweigh the accessibility gains is unsupported because privacy risks remain plausibly material even in assistive deployments"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s assumption that the main AI harms are not expected to outweigh the accessibility gains is unsupported because privacy risks remain plausibly material even in assistive deployments",
+                  "The target’s overall ‘YES—AI is good’ conclusion depends on that harms-not-overweighing condition"
+                ],
+                "weak_negation": [
+                  "Accessibility benefits reliably and sufficiently counteract these privacy harms in typical real-world deployments"
+                ]
+              },
+              "consequent": "The target’s premises do not establish the needed net-effect comparison required to conclude ‘AI is good for society’"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s premises do not establish the needed net-effect comparison required to conclude ‘AI is good for society’",
+                  "Therefore the argument cannot validly support its final verdict"
+                ],
+                "weak_negation": [
+                  "No other premise in the target argument fills the missing justification for why harms won’t dominate"
+                ]
+              },
+              "consequent": "The target argument is defeated (it cannot conclude that AI is good for society based on the stated assumptions)"
+            }
+          ],
+          "Conc": [
+            "The target’s assumption that the main AI harms are not expected to outweigh the accessibility gains is unsupported because privacy risks remain plausibly material even in assistive deployments",
+            "The target’s premises do not establish the needed net-effect comparison required to conclude ‘AI is good for society’",
+            "The target argument is defeated (it cannot conclude that AI is good for society based on the stated assumptions)"
+          ],
+          "Ass": [
+            "This data collection and inference can be fully prevented or neutralized such that dangerous privacy risks do not meaningfully arise in typical deployment",
+            "Accessibility benefits reliably and sufficiently counteract these privacy harms in typical real-world deployments",
+            "No other premise in the target argument fills the missing justification for why harms won’t dominate"
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-ea54074cf8",
+      "target_field": "Ass",
+      "target_statement": "In appropriately designed and adopted deployment, these main harms are not expected to outweigh the accessibility-driven well-being gains"
+    },
+    {
+      "id": "arg-74221d53b4",
+      "agent": "AG1",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s main argument does not claim that privacy risks are ‘fully prevented or neutralized’; its only net-judgment condition is: ‘In appropriately designed and adopted deployment, these main harms are not expected to outweigh the accessibility-driven well-being gains.’",
+                  "AG2’s attack treats the target as relying on a stronger premise that dangerous privacy harms can be fully neutralized in typical assistive deployments."
+                ],
+                "weak_negation": [
+                  "Even if privacy risks remain plausibly material, that does not directly negate the weaker net-condition that harms are not expected to outweigh accessibility benefits in appropriately designed deployment"
+                ]
+              },
+              "consequent": "AG2’s attack rests on a mischaracterization of the relevant assumption in AG1’s argument, so it does not directly undercut the target’s required net-effect comparison"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s attack rests on a mischaracterization of the relevant assumption in AG1’s argument, so it does not directly undercut the target’s required net-effect comparison",
+                  "AG1’s conditional verdict follows the integrated rule: YES when substantial societal well-being benefits are expected to outweigh main AI-related harms in the relevant deployment context"
+                ],
+                "weak_negation": [
+                  "AG2 does not show that, in appropriately designed and adopted assistive deployments, privacy/other harms are expected to outweigh the accessibility-driven gains"
+                ]
+              },
+              "consequent": "AG2 has not defeated the ‘harms-not-expected-to-outweigh’ condition that licenses AG1’s YES conclusion"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2 has not defeated the ‘harms-not-expected-to-outweigh’ condition that licenses AG1’s YES conclusion",
+                  "Therefore the premises provided in AG1 still support the overall verdict under the stated ‘outweigh’ standard"
+                ],
+                "weak_negation": [
+                  "Any remaining privacy uncertainty goes to magnitude, but AG1’s conditional framing already limits the claim to scenarios where harms are not expected to dominate"
+                ]
+              },
+              "consequent": "AG1’s conclusion—AI is good for society in assistive contexts that improve accessibility for people with disabilities—remains supported against this attack"
+            }
+          ],
+          "Conc": [
+            "AG2’s attack rests on a mischaracterization of the relevant assumption in AG1’s argument, so it does not directly undercut the target’s required net-effect comparison",
+            "AG2 has not defeated the ‘harms-not-expected-to-outweigh’ condition that licenses AG1’s YES conclusion",
+            "AG1’s conclusion—AI is good for society in assistive contexts that improve accessibility for people with disabilities—remains supported against this attack"
+          ],
+          "Ass": [
+            "Even if privacy risks remain plausibly material, that does not directly negate the weaker net-condition that harms are not expected to outweigh accessibility benefits in appropriately designed deployment",
+            "AG2 does not show that, in appropriately designed and adopted assistive deployments, privacy/other harms are expected to outweigh the accessibility-driven gains",
+            "Any remaining privacy uncertainty goes to magnitude, but AG1’s conditional framing already limits the claim to scenarios where harms are not expected to dominate"
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-800cb14118",
+      "target_field": "Ass",
+      "target_statement": "This data collection and inference can be fully prevented or neutralized such that dangerous privacy risks do not meaningfully arise in typical deployment"
+    },
+    {
+      "id": "arg-9a7d6d42ea",
+      "agent": "AG2",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "In many everyday education and information settings, AI can generate ready-made explanations, answers, and writing that people can consume without doing the full underlying reasoning",
+                  "This “ready-made output” pattern reduces the amount of effortful practice needed to develop and maintain independent critical-thinking skills in students and adults"
+                ],
+                "weak_negation": [
+                  "Users still reliably do the underlying reasoning/verification in a way that preserves and builds their independent critical-thinking skills"
+                ]
+              },
+              "consequent": "AI use tends to undermine critical thinking and learning"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI use tends to undermine critical thinking and learning",
+                  "Reduced critical thinking and learning skills lead to worse judgment in work and civic life, which reduces societal well-being"
+                ],
+                "weak_negation": [
+                  "Undermined critical thinking and learning does not reduce societal well-being"
+                ]
+              },
+              "consequent": "Undermining critical thinking and learning reduces societal well-being"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Undermining critical thinking and learning reduces societal well-being",
+                  "The integrated standard for this issue says that if the expected main societal harms—especially impairment of critical thinking/learning—are expected to outweigh main AI benefits, then the outcome is NO"
+                ],
+                "weak_negation": [
+                  "The expected benefits of AI in typical deployments are expected to outweigh the critical-thinking/learning harms"
+                ]
+              },
+              "consequent": "No—Artificial Intelligence is not good for society because it tends to undermine critical thinking and learning, thereby reducing societal well-being."
+            }
+          ],
+          "Conc": [
+            "AI use tends to undermine critical thinking and learning",
+            "Undermining critical thinking and learning reduces societal well-being",
+            "No—Artificial Intelligence is not good for society because it tends to undermine critical thinking and learning, thereby reducing societal well-being."
+          ],
+          "Ass": [
+            "Users still reliably do the underlying reasoning/verification in a way that preserves and builds their independent critical-thinking skills",
+            "Undermined critical thinking and learning does not reduce societal well-being",
+            "The expected benefits of AI in typical deployments are expected to outweigh the critical-thinking/learning harms"
+          ]
+        }
+      },
+      "status": "defensible"
+    },
+    {
+      "id": "arg-b4b73cf414",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s argument concludes ‘No—Artificial Intelligence is not good for society…’ using the harms>benefits standard stated in its own final rule",
+                  "However, AG2 does not supply any reasoning/evidence that, in typical deployments, the expected critical-thinking/learning harms actually outweigh the expected benefits (it only posits a tendency to produce ready-made outputs)"
+                ],
+                "weak_negation": [
+                  "It remains possible that, in typical deployments, the learning benefits (e.g., tutoring/feedback or more effective learning support) offset the stated harms"
+                ]
+              },
+              "consequent": "AG2 does not establish the needed comparative premise that expected critical-thinking/learning harms outweigh expected benefits in typical deployments"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2 does not establish the needed comparative premise that expected critical-thinking/learning harms outweigh expected benefits in typical deployments",
+                  "AG2’s ‘harms outweigh benefits → NO’ rule licenses the NO verdict only if that comparative premise is met"
+                ],
+                "weak_negation": [
+                  "If the comparative premise is not established, the integrated standard cannot justify concluding ‘not good for society’"
+                ]
+              },
+              "consequent": "AG2’s NO conclusion is not licensed by its premises under the stated harms>benefits rule"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s NO conclusion is not licensed by its premises under the stated harms>benefits rule",
+                  "Therefore AG2’s final verdict does not follow from the argument it has provided"
+                ],
+                "weak_negation": [
+                  "At most, AG2 shows a possible risk, not a supported overall judgment of ‘not good’"
+                ]
+              },
+              "consequent": "AG2’s argument fails to defeat the claim that AI can be good for society (its negative verdict is unsupported)"
+            }
+          ],
+          "Conc": [
+            "AG2 does not establish the needed comparative premise that expected critical-thinking/learning harms outweigh expected benefits in typical deployments",
+            "AG2’s NO conclusion is not licensed by its premises under the stated harms>benefits rule",
+            "AG2’s argument fails to defeat the claim that AI can be good for society (its negative verdict is unsupported)"
+          ],
+          "Ass": [
+            "It remains possible that, in typical deployments, the learning benefits (e.g., tutoring/feedback or more effective learning support) offset the stated harms",
+            "If the comparative premise is not established, the integrated standard cannot justify concluding ‘not good for society’",
+            "At most, AG2 shows a possible risk, not a supported overall judgment of ‘not good’"
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-9a7d6d42ea",
+      "target_field": "Ass",
+      "target_statement": "The expected benefits of AI in typical deployments are expected to outweigh the critical-thinking/learning harms"
+    },
+    {
+      "id": "arg-7c7d2ed99f",
+      "agent": "AG2",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s attack treats AG2’s harms>benefits comparison as requiring quantified, deployment-wide net-benefit evidence",
+                  "AG2’s argument is framed in terms of predictable, structural mechanisms (“in many everyday” settings where people consume ready-made explanations) that make critical-thinking practice less likely"
+                ],
+                "weak_negation": [
+                  "The integrated harms>benefits adjudication can be satisfied by expected dominance derived from structural/predictable mechanisms rather than requiring a precise quantitative aggregate study"
+                ]
+              },
+              "consequent": "AG2 does not need a quantified, deployment-wide net-benefit study for its harms>benefits comparison to be supported"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2 does not need a quantified, deployment-wide net-benefit study for its harms>benefits comparison to be supported",
+                  "AG2’s premises identify a predictable substitution mechanism: ready-made outputs reduce effortful practice needed to build independent critical-thinking skills"
+                ],
+                "weak_negation": [
+                  "When the output substitutes for practice, residual verification by users does not reliably rebuild the independent skills that are claimed to be reduced"
+                ]
+              },
+              "consequent": "AG2’s premises support a likely expectation of harms to critical-thinking/learning in the everyday use-case it describes"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s premises support a likely expectation of harms to critical-thinking/learning in the everyday use-case it describes",
+                  "Under the integrated rules, the overall outcome depends on whether expected main harms outweigh expected main benefits in that scenario"
+                ],
+                "weak_negation": [
+                  "Any potential learning benefits (e.g., occasional feedback) do not overturn the expected dominance of harm in the “consume ready-made explanations/answers/writing” mode AG2 targets"
+                ]
+              },
+              "consequent": "In AG2’s typical everyday use-case, expected critical-thinking/learning harms outweigh expected learning benefits"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "In AG2’s typical everyday use-case, expected critical-thinking/learning harms outweigh expected learning benefits",
+                  "The integrated standard implies NO when expected main harms outweigh expected main benefits (especially impairment of critical thinking/learning)"
+                ],
+                "weak_negation": [
+                  "Therefore AG1’s claim that AG2 failed to establish the needed comparative premise misapplies the evidentiary requirement for the harms>benefits standard"
+                ]
+              },
+              "consequent": "AG2’s NO conclusion is licensed by its premises under the stated harms>benefits standard, defeating the target attack"
+            }
+          ],
+          "Conc": [
+            "AG2 does not need a quantified, deployment-wide net-benefit study for its harms>benefits comparison to be supported",
+            "AG2’s premises support a likely expectation of harms to critical-thinking/learning in the everyday use-case it describes",
+            "In AG2’s typical everyday use-case, expected critical-thinking/learning harms outweigh expected learning benefits",
+            "AG2’s NO conclusion is licensed by its premises under the stated harms>benefits standard, defeating the target attack"
+          ],
+          "Ass": [
+            "The integrated harms>benefits adjudication can be satisfied by expected dominance derived from structural/predictable mechanisms rather than requiring a precise quantitative aggregate study",
+            "When the output substitutes for practice, residual verification by users does not reliably rebuild the independent skills that are claimed to be reduced",
+            "Any potential learning benefits (e.g., occasional feedback) do not overturn the expected dominance of harm in the “consume ready-made explanations/answers/writing” mode AG2 targets",
+            "Therefore AG1’s claim that AG2 failed to establish the needed comparative premise misapplies the evidentiary requirement for the harms>benefits standard"
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-b4b73cf414",
+      "target_field": "Conc",
+      "target_statement": "AG2’s NO conclusion is not licensed by its premises under the stated harms>benefits rule"
+    }
+  ],
+  "final_answer": "There isn’t enough basis to give a blanket yes-or-no answer. Artificial intelligence is **potentially good for society**, but whether it is actually **good or bad in net terms depends on the deployment context—especially whether benefits are realized while key harms (notably privacy harms and risks to critical thinking/learning) are effectively mitigated.**\n\n## Rationale (using the benefit-vs-harm “outweigh” standard)\n### Main potential benefits (supported in the pro case)\n- **Everyday convenience and improved health/standard of living:** AI can improve services and decision-support in ways that plausibly raise well-being.\n- **Work enablement (students and professionals):** AI can make work/learning more efficient and productive.\n- **Accessibility for people with disabilities:** AI assistive tools can increase participation in everyday life and public services.\n- **Workplace safety:** AI can help predict/detect safety risks and prompt earlier interventions.\n\nThese are exactly the kinds of “substantive societal-well-being benefits” that count toward a **YES** outcome *if* they are expected to dominate harms in practice.\n\n### Main potential harms (emphasized in the opposing case)\n- **Dangerous privacy risks:** AI often involves personal data collection and can infer sensitive traits; this can reduce individuals’ control and reduce overall trust/well-being.\n- **Undermining critical thinking/learning:** Generating ready-made answers/explanations can reduce effortful practice and plausibly degrade independent critical-thinking skills in some common use patterns.\n- **Racism/discriminatory impacts on racial minorities:** This is a central concern in the opposing stance, but it was not decisively developed in the provided arguments.\n- **Economic harm to many people and businesses:** Also central in the opposing stance, but not decisively resolved in the provided arguments.\n\n### Why the overall conclusion is not settled from the available arguments\n- For **privacy**, the harm case argues plausibility and “tends to” effects, while the pro side argues that in *appropriately designed* deployments privacy risks may not meaningfully materialize. But neither side provided a clear, deployment-grounded demonstration that **privacy harms reliably fail to dominate** privacy-related and other harms overall.\n- For **critical thinking/learning**, the harm case presents a mechanism (substitution for practice) that could dominate in certain everyday learning modes. However, the pro side’s counter is largely conditional and does not fully close the **net** comparison gap for broader outcomes across typical deployments.\n- For **workplace safety**, even the pro argument relies on governance/actionability assumptions (“appropriately governed,” “warnings are actionable”). Those assumptions were challenged as not established as reliably holding in real-world deployments.\n- For **racism** and **economic well-being**, the opposing stance raised these concerns, but the debate content shown here did not supply enough argumentation to make the decisive “harms outweigh benefits” (or the reverse) conclusion.\n\n## Bottom line\n- **AI can be good for society** *in the contexts where* its accessibility/work/productivity and safety benefits are realized **and** its major risks (especially privacy and critical-thinking/learning harms) are expected to be controlled such that benefits **outweigh** harms.\n- **But the arguments provided don’t establish that this outweighing condition reliably holds across typical deployments**, and they also don’t establish that harms reliably dominate in net terms.\n\nSo the best-supported answer is: **It depends; with current information, no decisive blanket “AI is good for society” conclusion follows.**",
+  "integrated_rules": [
+    "Apply the rule to the specific AI deployment/context by projecting its main societal effects.\n\n1) Map conditions to outcomes:\n- If the AI is expected to produce substantive societal-well-being benefits—e.g., reducing injuries/burdens via improved workplace safety, improving health/standard of living and everyday convenience, increasing accessibility for people with disabilities, and/or making work and learning more effective—THEN the outcome is:\n  - YES (good for society) provided that these benefits are expected to outweigh the main societal harms (including dangerous privacy risks, racism/discriminatory impacts that hurt racial minorities, undermining critical thinking/learning, and harms to economic well-being for people and businesses).\n\n- If the AI is expected to produce substantive societal-well-being harms—especially dangerous privacy risks that reduce well-being (and, more broadly, racism/discrimination against racial minorities, impairment of critical thinking/learning, and/or economic harm)—THEN the outcome is:\n  - NO (not good for society) provided that these harms are expected to outweigh the main societal benefits.\n\n2) If both benefit-producing and harm-producing factors are present in the same scenario, adjudicate symmetrically using the same “outweigh” standard: compare the expected magnitude/likelihood of total benefits vs. total harms; the side with the larger expected net effect determines the outcome (YES if benefits outweigh harms; NO if harms outweigh benefits).",
+    "For any proposed AI deployment, let “main societal benefits” include gains such as improved accessibility/assistance for marginalized groups and societal well-being (and, where relevant, learning/work enablement); let “main AI-related harms” include dangerous privacy risks, racism/discriminatory impacts, undermining critical thinking/learning, and harms to economic well-being (and any other directly societal-well-being–relevant harms). Then:\n- If, under realistic conditions of appropriate design/adoption and forecasting, the expected main societal benefits are expected to outweigh the expected main AI-related harms in magnitude and likelihood, conclude YES.\n- If, under those conditions, the expected main AI-related harms—especially impairment of critical thinking/learning when it is a main harm—are expected to outweigh the expected main benefits, conclude NO.\n- If the expected net impact is not clear under available evidence/forecasts, no decisive conclusion follows from this rule."
+  ]
+}

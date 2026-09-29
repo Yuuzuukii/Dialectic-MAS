@@ -1,0 +1,1100 @@
+{
+  "method": "schema",
+  "question": "Is Driving an Electric Vehicle Good?",
+  "agent1_stance": "Your stance:\nYou support electric vehicles.\nYou believe EVs are better for the environment than gas-powered cars, as they produce no harmful emissions during operation and can be powered by renewable energy sources.\nYou believe EVs are less expensive to fuel and maintain, as EV drivers don't need to worry about engine oil or transmission fluid in their cars, and electricity costs less than gasoline.\nYou believe EVs are quiet and offer better handling than gas-powered cars, as they lack internal combustion engines and their lower center of gravity improves handling and responsiveness.",
+  "agent2_stance": "Your stance:\nYou oppose electric vehicles.\nYou believe EVs are not carbon-neutral and their batteries pose environmental and safety risks, as lithium mining causes water loss, contamination, and biodiversity loss, and lithium-ion batteries can explode and produce toxic fumes difficult to extinguish.\nYou believe EVs cost significantly more to purchase than gas-powered cars, and that fewer than 15% of Americans can afford EVs.\nYou believe EVs lack reliability and adequate charging infrastructure, as Consumer Reports found EVs have 42% more problems than gas-powered cars and there are only 22 EV charging stations per 1,000 road miles versus 104 gas pumps.",
+  "metrics": {
+    "elapsed_seconds": 634.215,
+    "model": "gpt-5.4-nano",
+    "prompt_tokens": 504814,
+    "cached_tokens": 290304,
+    "completion_tokens": 81066,
+    "total_tokens": 585880,
+    "total_cost_usd": 0.150041
+  },
+  "dialogue_history": [
+    {
+      "id": "arg-2924e86c52",
+      "agent": "AG1",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Gas-powered vehicle operation produces harmful emissions during operation",
+                  "Electric vehicle operation produces no harmful tailpipe emissions during operation"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "EV driving avoids the harmful emissions that gas-powered driving would produce during operation"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "EV driving avoids the harmful emissions that gas-powered driving would produce during operation",
+                  "Avoiding harmful emissions during driving benefits the environment"
+                ],
+                "weak_negation": [
+                  "Assumption: Other environmental harms (e.g., from producing vehicles) do not eliminate the key advantage of EVs having zero harmful tailpipe emissions during operation"
+                ]
+              },
+              "consequent": "Driving an EV is environmentally beneficial compared with driving a gas car"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Driving an EV is environmentally beneficial compared with driving a gas car",
+                  "A driving choice that is environmentally beneficial is good"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Yes—driving an electric vehicle is good"
+            }
+          ],
+          "Conc": [
+            "EV driving avoids the harmful emissions that gas-powered driving would produce during operation",
+            "Driving an EV is environmentally beneficial compared with driving a gas car",
+            "Yes—driving an electric vehicle is good"
+          ],
+          "Ass": [
+            "Assumption: Other environmental harms (e.g., from producing vehicles) do not eliminate the key advantage of EVs having zero harmful tailpipe emissions during operation"
+          ]
+        }
+      },
+      "status": "defensible"
+    },
+    {
+      "id": "arg-125b805d7c",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "EVs require lithium-ion batteries whose production includes lithium mining that can cause water loss, contamination, and biodiversity loss",
+                  "These battery-related harms are additional environmental impacts beyond EV tailpipe emissions during driving"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Battery production/mining harms can offset or outweigh any tailpipe-emissions reductions from driving an EV"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Battery production/mining harms can offset or outweigh any tailpipe-emissions reductions from driving an EV",
+                  "The target argument’s comparative claim relies on the idea that other environmental harms do not eliminate the key tailpipe-emissions advantage"
+                ],
+                "weak_negation": [
+                  "Assuming that “other environmental harms … do not eliminate the key advantage of EVs having zero harmful tailpipe emissions during operation” is warranted"
+                ]
+              },
+              "consequent": "The target’s key assumption that other environmental harms do not eliminate the tailpipe advantage is not justified"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s key assumption that other environmental harms do not eliminate the tailpipe advantage is not justified",
+                  "The target’s “good” conclusion depends on establishing that EV driving is environmentally beneficial despite those other harms"
+                ],
+                "weak_negation": [
+                  "No additional, overriding non-tailpipe justification for “EV driving is good” is provided by the target argument"
+                ]
+              },
+              "consequent": "Driving an electric vehicle is not good"
+            }
+          ],
+          "Conc": [
+            "Battery production/mining harms can offset or outweigh any tailpipe-emissions reductions from driving an EV",
+            "The target’s key assumption that other environmental harms do not eliminate the tailpipe advantage is not justified",
+            "Driving an electric vehicle is not good"
+          ],
+          "Ass": [
+            "Assuming that “other environmental harms … do not eliminate the key advantage of EVs having zero harmful tailpipe emissions during operation” is warranted",
+            "No additional, overriding non-tailpipe justification for “EV driving is good” is provided by the target argument"
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-2924e86c52",
+      "target_field": "Ass",
+      "target_statement": "Assumption: Other environmental harms (e.g., from producing vehicles) do not eliminate the key advantage of EVs having zero harmful tailpipe emissions during operation"
+    },
+    {
+      "id": "arg-f295968b54",
+      "agent": "AG1",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s key claim is that battery production/mining harms can offset or outweigh EV tailpipe-emissions reductions",
+                  "The target provides no lifecycle- or magnitude-based comparison to justify that 'offset or outweigh' conclusion"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The target’s 'offset or outweigh' claim is not supported by the premises it provides"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s 'offset or outweigh' claim is not supported by the premises it provides",
+                  "EV operation produces no harmful tailpipe emissions during driving"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The target does not establish that battery harms eliminate EVs’ net operational environmental advantage from zero tailpipe emissions"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target does not establish that battery harms eliminate EVs’ net operational environmental advantage from zero tailpipe emissions",
+                  "If an option maintains an environmental advantage during driving by avoiding harmful tailpipe emissions, then it is environmentally beneficial compared with a gas car"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Driving an electric vehicle is environmentally beneficial compared with driving a gas car"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Driving an electric vehicle is environmentally beneficial compared with driving a gas car"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Driving an electric vehicle is good"
+            }
+          ],
+          "Conc": [
+            "The target’s 'offset or outweigh' claim is not supported by the premises it provides",
+            "The target does not establish that battery harms eliminate EVs’ net operational environmental advantage from zero tailpipe emissions",
+            "Driving an electric vehicle is environmentally beneficial compared with driving a gas car",
+            "Driving an electric vehicle is good"
+          ],
+          "Ass": []
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-125b805d7c",
+      "target_field": "Conc",
+      "target_statement": "Driving an electric vehicle is not good"
+    },
+    {
+      "id": "arg-70d20ee0d4",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "EVs have zero harmful tailpipe emissions during driving only at the vehicle",
+                  "Driving an EV still requires electricity generation to produce the electricity it uses",
+                  "If the electricity comes from fossil fuels, that generation produces harmful emissions that occur outside the vehicle"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "EVs can be associated with harmful emissions even though they have zero tailpipe emissions during operation"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "EVs can be associated with harmful emissions even though they have zero tailpipe emissions during operation",
+                  "The target argument’s comparative environmental claim depends on the idea that other environmental harms do not eliminate the key advantage of zero tailpipe emissions"
+                ],
+                "weak_negation": [
+                  "Assuming that zero tailpipe emissions during operation is sufficient to confer an overall environmental advantage despite lifecycle emissions is warranted"
+                ]
+              },
+              "consequent": "The target’s assumption that “other environmental harms … do not eliminate the advantage” is not warranted"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s assumption that “other environmental harms … do not eliminate the advantage” is not warranted",
+                  "Without that assumption, the target’s step from “avoids harmful tailpipe emissions” to “environmentally beneficial compared with gas” fails"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Driving an electric vehicle is not good"
+            }
+          ],
+          "Conc": [
+            "EVs can be associated with harmful emissions even though they have zero tailpipe emissions during operation",
+            "The target’s assumption that “other environmental harms … do not eliminate the advantage” is not warranted",
+            "Driving an electric vehicle is not good"
+          ],
+          "Ass": [
+            "Assuming that zero tailpipe emissions during operation is sufficient to confer an overall environmental advantage despite lifecycle emissions is warranted"
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-2924e86c52",
+      "target_field": "Ass",
+      "target_statement": "Assumption: Other environmental harms (e.g., from producing vehicles) do not eliminate the key advantage of EVs having zero harmful tailpipe emissions during operation"
+    },
+    {
+      "id": "arg-87eaefd34c",
+      "agent": "AG1",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target argues that if the electricity used to charge an EV comes from fossil fuels, harmful emissions occur outside the vehicle",
+                  "Gas-powered cars produce harmful emissions during operation via onboard combustion",
+                  "Centralized electricity generation can be more efficient and has stronger pollution controls than onboard combustion in vehicles, and electric drivetrains convert energy to motion efficiently"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Even when EVs rely partly on fossil-based electricity, total operation-related emissions can be lower than in gas-powered cars"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Even when EVs rely partly on fossil-based electricity, total operation-related emissions can be lower than in gas-powered cars",
+                  "Driving choices that reduce harmful emissions are environmentally beneficial"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The target’s inference from “there may be external emissions from electricity” to “driving an EV is not good” is not warranted"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s inference from “there may be external emissions from electricity” to “driving an EV is not good” is not warranted",
+                  "An environmentally beneficial driving choice is good"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Driving an electric vehicle is good"
+            }
+          ],
+          "Conc": [
+            "Even when EVs rely partly on fossil-based electricity, total operation-related emissions can be lower than in gas-powered cars",
+            "The target’s inference from “there may be external emissions from electricity” to “driving an EV is not good” is not warranted",
+            "Driving an electric vehicle is good"
+          ],
+          "Ass": []
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-70d20ee0d4",
+      "target_field": "Conc",
+      "target_statement": "Driving an electric vehicle is not good"
+    },
+    {
+      "id": "arg-416e543c7d",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target argues EV driving is better because it avoids harmful tailpipe emissions during operation",
+                  "The target’s key assumption says other environmental harms (e.g., from producing vehicles) do not eliminate the advantage of zero tailpipe emissions"
+                ],
+                "weak_negation": [
+                  "Assuming that avoiding tailpipe emissions during driving is sufficient to conclude an overall environmental advantage without a lifecycle/weighting comparison"
+                ]
+              },
+              "consequent": "The target’s key assumption depends on an unestablished lifecycle/weighting comparison of non-tailpipe harms vs tailpipe-free operation"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s key assumption depends on an unestablished lifecycle/weighting comparison of non-tailpipe harms vs tailpipe-free operation",
+                  "The target provides no lifecycle evidence or weighting to show that those other harms fail to eliminate the advantage"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The target’s assumption that other environmental harms do not eliminate the tailpipe advantage is not warranted"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s assumption that other environmental harms do not eliminate the tailpipe advantage is not warranted",
+                  "In the target argument, the claim that EV driving is environmentally beneficial compared to gas depends on that assumption"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The target does not establish that driving an EV is environmentally beneficial compared with driving a gas car"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target does not establish that driving an EV is environmentally beneficial compared with driving a gas car",
+                  "In the target argument, “environmentally beneficial” is what licenses the final claim that driving an EV is good"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Driving an electric vehicle is not good (the target’s conclusion does not follow)"
+            }
+          ],
+          "Conc": [
+            "The target’s key assumption depends on an unestablished lifecycle/weighting comparison of non-tailpipe harms vs tailpipe-free operation",
+            "The target’s assumption that other environmental harms do not eliminate the tailpipe advantage is not warranted",
+            "The target does not establish that driving an EV is environmentally beneficial compared with driving a gas car",
+            "Driving an electric vehicle is not good (the target’s conclusion does not follow)"
+          ],
+          "Ass": [
+            "Assuming that avoiding tailpipe emissions during driving is sufficient to conclude an overall environmental advantage without a lifecycle/weighting comparison"
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-2924e86c52",
+      "target_field": "Ass",
+      "target_statement": "Assumption: Other environmental harms (e.g., from producing vehicles) do not eliminate the key advantage of EVs having zero harmful tailpipe emissions during operation"
+    },
+    {
+      "id": "arg-f6902c641b",
+      "agent": "AG1",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target attacks by claiming that the main argument’s key assumption is “not warranted” because it lacks an explicit lifecycle/weighting comparison",
+                  "The target provides no premise that upstream harms actually negate the benefit of EVs’ zero harmful tailpipe emissions during driving"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The target does not supply grounds to reject the operational tailpipe-emissions advantage as environmentally relevant"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target does not supply grounds to reject the operational tailpipe-emissions advantage as environmentally relevant",
+                  "Gas-powered cars produce harmful emissions during operation while EVs produce no harmful tailpipe emissions during operation"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "It remains reasonable to infer that EV driving reduces harmful emissions during driving compared with gas driving"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "It remains reasonable to infer that EV driving reduces harmful emissions during driving compared with gas driving",
+                  "Avoiding harmful emissions during driving benefits the environment"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Driving an EV is environmentally beneficial compared with driving a gas car"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Driving an EV is environmentally beneficial compared with driving a gas car",
+                  "A driving choice that is environmentally beneficial is good"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Driving an electric vehicle is good"
+            }
+          ],
+          "Conc": [
+            "The target does not supply grounds to reject the operational tailpipe-emissions advantage as environmentally relevant",
+            "It remains reasonable to infer that EV driving reduces harmful emissions during driving compared with gas driving",
+            "Driving an EV is environmentally beneficial compared with driving a gas car",
+            "Driving an electric vehicle is good"
+          ],
+          "Ass": []
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-416e543c7d",
+      "target_field": "Conc",
+      "target_statement": "Driving an electric vehicle is not good (the target’s conclusion does not follow)"
+    },
+    {
+      "id": "arg-f9dceb6e87",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "EVs rely on lithium-ion batteries",
+                  "Lithium-ion batteries can explode in crashes/malfunctions and produce toxic fumes that are difficult to extinguish"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Battery failure events (explosions/toxic fumes) create environmental harms beyond tailpipe emissions during normal operation"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Battery failure events (explosions/toxic fumes) create environmental harms beyond tailpipe emissions during normal operation",
+                  "The target’s key assumption is that other environmental harms (e.g., from producing vehicles) do not eliminate the key advantage of EVs having zero harmful tailpipe emissions during operation"
+                ],
+                "weak_negation": [
+                  "Assuming that tailpipe-free driving is not automatically decisive when other substantial environmental harms (like toxic fumes from battery events) can occur"
+                ]
+              },
+              "consequent": "Those “other environmental harms” can eliminate the practical advantage the target relies on"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Those “other environmental harms” can eliminate the practical advantage the target relies on",
+                  "The target’s conclusion “Yes—driving an electric vehicle is good” depends on the assumption that the tailpipe-free advantage is not eliminated by other environmental harms"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Therefore, the target’s conclusion that driving an electric vehicle is good does not follow"
+            }
+          ],
+          "Conc": [
+            "Battery failure events (explosions/toxic fumes) create environmental harms beyond tailpipe emissions during normal operation",
+            "Those “other environmental harms” can eliminate the practical advantage the target relies on",
+            "Therefore, the target’s conclusion that driving an electric vehicle is good does not follow"
+          ],
+          "Ass": [
+            "Assuming that tailpipe-free driving is not automatically decisive when other substantial environmental harms (like toxic fumes from battery events) can occur"
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-2924e86c52",
+      "target_field": "Ass",
+      "target_statement": "Assumption: Other environmental harms (e.g., from producing vehicles) do not eliminate the key advantage of EVs having zero harmful tailpipe emissions during operation"
+    },
+    {
+      "id": "arg-3ff3e89689",
+      "agent": "AG1",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Gas-powered vehicle operation produces harmful emissions during operation",
+                  "Electric vehicle operation produces no harmful tailpipe emissions during operation during normal driving",
+                  "Battery failure events that create toxic fumes require malfunctions/crashes rather than occurring during every mile of routine driving"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "EVs avoid harmful tailpipe emissions consistently during normal driving, while battery-event harms are episodic rather than routine"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "EVs avoid harmful tailpipe emissions consistently during normal driving, while battery-event harms are episodic rather than routine",
+                  "The target provides no basis (e.g., frequency/severity premises) to show episodic battery-event harms outweigh the consistent emissions avoided"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "So the target’s assumption that tailpipe-free driving is not environmentally decisive is not warranted"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "So the target’s assumption that tailpipe-free driving is not environmentally decisive is not warranted",
+                  "If episodic battery-event harms do not outweigh the consistent avoidance of harmful tailpipe emissions, EV driving is environmentally beneficial compared with gas driving"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Driving an EV remains environmentally beneficial compared with driving a gas car"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Driving an EV remains environmentally beneficial compared with driving a gas car",
+                  "A driving choice that is environmentally beneficial is good"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Driving an electric vehicle is good"
+            }
+          ],
+          "Conc": [
+            "EVs avoid harmful tailpipe emissions consistently during normal driving, while battery-event harms are episodic rather than routine",
+            "So the target’s assumption that tailpipe-free driving is not environmentally decisive is not warranted",
+            "Driving an EV remains environmentally beneficial compared with driving a gas car",
+            "Driving an electric vehicle is good"
+          ],
+          "Ass": []
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-f9dceb6e87",
+      "target_field": "Ass",
+      "target_statement": "Assuming that tailpipe-free driving is not automatically decisive when other substantial environmental harms (like toxic fumes from battery events) can occur"
+    },
+    {
+      "id": "arg-960146a79a",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Charging infrastructure for EVs is limited (only 22 EV charging stations per 1,000 road miles versus 104 gas pumps)",
+                  "EVs have reliability issues (Consumer Reports found EVs have 42% more problems than gas-powered cars)"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "EV drivers are more likely to face detours/waiting and disruptions that lead them to use non-EV travel/alternatives that produce harmful tailpipe emissions"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "EV drivers are more likely to face detours/waiting and disruptions that lead them to use non-EV travel/alternatives that produce harmful tailpipe emissions",
+                  "The target’s key assumption claims “other environmental harms … do not eliminate the key advantage of EVs having zero harmful tailpipe emissions during operation”"
+                ],
+                "weak_negation": [
+                  "Assuming that the “zero tailpipe emissions during operation” advantage holds in practice regardless of charging/disruption-driven non-EV travel is warranted"
+                ]
+              },
+              "consequent": "The target’s key assumption is not warranted because real-world charging/reliability problems can introduce harmful tailpipe emissions that are not eliminated by EV operation"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s key assumption is not warranted because real-world charging/reliability problems can introduce harmful tailpipe emissions that are not eliminated by EV operation",
+                  "The target’s inference to “Driving an EV is environmentally beneficial compared with driving a gas car” depends on that assumption"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Therefore, the target does not establish that driving an electric vehicle is environmentally beneficial/good"
+            }
+          ],
+          "Conc": [
+            "EV drivers are more likely to face detours/waiting and disruptions that lead them to use non-EV travel/alternatives that produce harmful tailpipe emissions",
+            "The target’s key assumption is not warranted because real-world charging/reliability problems can introduce harmful tailpipe emissions that are not eliminated by EV operation",
+            "Therefore, the target does not establish that driving an electric vehicle is environmentally beneficial/good"
+          ],
+          "Ass": [
+            "Assuming that the “zero tailpipe emissions during operation” advantage holds in practice regardless of charging/disruption-driven non-EV travel is warranted"
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-2924e86c52",
+      "target_field": "Ass",
+      "target_statement": "Assumption: Other environmental harms (e.g., from producing vehicles) do not eliminate the key advantage of EVs having zero harmful tailpipe emissions during operation"
+    },
+    {
+      "id": "arg-a6e2ce542e",
+      "agent": "AG1",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target claims limited charging infrastructure and EV reliability issues make EV drivers more likely to use detours/waiting and switch to non-EV alternatives that produce harmful tailpipe emissions",
+                  "But the target provides no premise that those detours/waiting actually replace EV driving with tailpipe-emitting (gas) driving in an amount large enough to erase EVs’ tailpipe-free operation advantage"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The target does not establish the causal link that charging/reliability problems cause net tailpipe-emitting (gas) alternative driving sufficient to erase EVs’ tailpipe-free operation advantage"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target does not establish the causal link that charging/reliability problems cause net tailpipe-emitting (gas) alternative driving sufficient to erase EVs’ tailpipe-free operation advantage",
+                  "If the target fails to show that disruptions erase EVs’ tailpipe-emissions avoidance in practice, then it cannot undermine the main argument’s step to an overall environmental benefit from EV driving"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The target’s attempt to undercut the main argument’s key assumption about tailpipe-emissions avoidance in practice is not supported"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s attempt to undercut the main argument’s key assumption about tailpipe-emissions avoidance in practice is not supported",
+                  "EV operation avoids harmful tailpipe emissions during driving, and the target has not shown that this is replaced by enough additional tailpipe emissions from disruption-driven alternatives"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "EV driving remains environmentally beneficial compared with gas driving because it avoids harmful tailpipe emissions during operation"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "EV driving remains environmentally beneficial compared with gas driving because it avoids harmful tailpipe emissions during operation",
+                  "A driving choice that is environmentally beneficial is good"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Driving an electric vehicle is good"
+            }
+          ],
+          "Conc": [
+            "The target does not establish the causal link that charging/reliability problems cause net tailpipe-emitting (gas) alternative driving sufficient to erase EVs’ tailpipe-free operation advantage",
+            "The target’s attempt to undercut the main argument’s key assumption about tailpipe-emissions avoidance in practice is not supported",
+            "EV driving remains environmentally beneficial compared with gas driving because it avoids harmful tailpipe emissions during operation",
+            "Driving an electric vehicle is good"
+          ],
+          "Ass": []
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-960146a79a",
+      "target_field": "Conc",
+      "target_statement": "Therefore, the target does not establish that driving an electric vehicle is environmentally beneficial/good"
+    },
+    {
+      "id": "arg-652560cafa",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "EVs use lithium-ion batteries that must eventually be replaced and disposed of/recycled",
+                  "Battery disposal and recycling can create additional environmental contamination risks (e.g., from toxic electrolyte/heavy-metal residues) beyond tailpipe emissions during normal driving"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Battery end-of-life disposal/recycling is a non-tailpipe environmental harm source"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Battery end-of-life disposal/recycling is a non-tailpipe environmental harm source",
+                  "These end-of-life harms occur even when an EV has zero harmful tailpipe emissions during operation"
+                ],
+                "weak_negation": [
+                  "Assuming that zero harmful tailpipe emissions during operation is enough to guarantee an overall advantage if end-of-life harms are nontrivial"
+                ]
+              },
+              "consequent": "Non-tailpipe end-of-life harms can eliminate the operational (tailpipe-free) advantage"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Non-tailpipe end-of-life harms can eliminate the operational (tailpipe-free) advantage",
+                  "The target’s key assumption says other environmental harms (e.g., from producing vehicles) do not eliminate that operational advantage"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The target’s key assumption is not justified"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s key assumption is not justified",
+                  "The target’s conclusion that EV driving is environmentally beneficial (and thus good) depends on that assumption"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Therefore, the target does not establish that driving an electric vehicle is good"
+            }
+          ],
+          "Conc": [
+            "Battery end-of-life disposal/recycling is a non-tailpipe environmental harm source",
+            "Non-tailpipe end-of-life harms can eliminate the operational (tailpipe-free) advantage",
+            "The target’s key assumption is not justified",
+            "Therefore, the target does not establish that driving an electric vehicle is good"
+          ],
+          "Ass": [
+            "Assuming that zero harmful tailpipe emissions during operation is enough to guarantee an overall advantage if end-of-life harms are nontrivial"
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-2924e86c52",
+      "target_field": "Ass",
+      "target_statement": "Assumption: Other environmental harms (e.g., from producing vehicles) do not eliminate the key advantage of EVs having zero harmful tailpipe emissions during operation"
+    },
+    {
+      "id": "arg-6da954ea1e",
+      "agent": "AG1",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target argument claims that battery end-of-life disposal/recycling harms can eliminate EVs’ tailpipe-free advantage",
+                  "But the target provides no comparative lifecycle/magnitude accounting (e.g., showing those end-of-life harms outweigh the harmful tailpipe emissions avoided over the vehicle’s use)"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The target does not establish that end-of-life harms actually eliminate (or outweigh) the environmental advantage from zero harmful tailpipe emissions during operation"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target does not establish that end-of-life harms actually eliminate (or outweigh) the environmental advantage from zero harmful tailpipe emissions during operation",
+                  "Therefore, it remains reasonable to maintain the main argument’s key assumption that other environmental harms do not eliminate the tailpipe-emissions advantage"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The target attack does not defeat the main argument’s key assumption"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target attack does not defeat the main argument’s key assumption",
+                  "So the main argument’s step from “EVs avoid harmful tailpipe emissions during operation” to “EV driving is environmentally beneficial compared with driving a gas car” holds"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Driving an electric vehicle is environmentally beneficial compared with driving a gas car"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Driving an electric vehicle is environmentally beneficial compared with driving a gas car",
+                  "A driving choice that is environmentally beneficial is good"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Yes—driving an electric vehicle is good"
+            }
+          ],
+          "Conc": [
+            "The target does not establish that end-of-life harms actually eliminate (or outweigh) the environmental advantage from zero harmful tailpipe emissions during operation",
+            "The target attack does not defeat the main argument’s key assumption",
+            "Driving an electric vehicle is environmentally beneficial compared with driving a gas car",
+            "Yes—driving an electric vehicle is good"
+          ],
+          "Ass": []
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-652560cafa",
+      "target_field": "Conc",
+      "target_statement": "Therefore, the target does not establish that driving an electric vehicle is environmentally beneficial/good"
+    },
+    {
+      "id": "arg-40f2fc21be",
+      "agent": "AG2",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "EVs cost significantly more to purchase than gas-powered cars",
+                  "Fewer than 15% of Americans can afford EVs"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Driving an EV is financially inaccessible for most Americans and imposes a major cost barrier"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Driving an EV is financially inaccessible for most Americans and imposes a major cost barrier",
+                  "A broadly “good” choice should be realistically accessible to the intended population rather than reserved for a small minority"
+                ],
+                "weak_negation": [
+                  "Assuming that affordability barriers don’t affect whether the choice is good"
+                ]
+              },
+              "consequent": "Because EVs are unaffordable for most people, driving an EV is not good as a general choice"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Because EVs are unaffordable for most people, driving an EV is not good as a general choice"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "No—driving an electric vehicle is not good"
+            }
+          ],
+          "Conc": [
+            "Driving an EV is financially inaccessible for most Americans and imposes a major cost barrier",
+            "Because EVs are unaffordable for most people, driving an EV is not good as a general choice",
+            "No—driving an electric vehicle is not good"
+          ],
+          "Ass": [
+            "Assuming that affordability barriers don’t affect whether the choice is good"
+          ]
+        }
+      },
+      "status": "overruled"
+    },
+    {
+      "id": "arg-9e657275ea",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s reasoning treats current purchase affordability as decisive for whether EV driving is “good”",
+                  "EVs produce no harmful tailpipe emissions during operation"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "EV driving’s environmental advantage is a reason it can be good that does not depend on most Americans being able to afford the purchase price right now"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "EV driving’s environmental advantage is a reason it can be good that does not depend on most Americans being able to afford the purchase price right now",
+                  "A driving choice that provides environmental benefits is good"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Driving an electric vehicle can be good even if EVs are unaffordable for many people"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Driving an electric vehicle can be good even if EVs are unaffordable for many people",
+                  "The target concludes that because EVs are unaffordable, driving an EV is not good"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The target’s conclusion (“No—driving an electric vehicle is not good”) is not established"
+            }
+          ],
+          "Conc": [
+            "EV driving’s environmental advantage is a reason it can be good that does not depend on most Americans being able to afford the purchase price right now",
+            "Driving an electric vehicle can be good even if EVs are unaffordable for many people",
+            "The target’s conclusion (“No—driving an electric vehicle is not good”) is not established"
+          ],
+          "Ass": []
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-40f2fc21be",
+      "target_field": "Conc",
+      "target_statement": "No—driving an electric vehicle is not good"
+    },
+    {
+      "id": "arg-cf03ac32ae",
+      "agent": "AG2",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Fewer than 15% of Americans can afford EVs",
+                  "EVs cost significantly more to purchase than gas-powered cars"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "For most Americans, driving an EV is not a realistically accessible choice"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "For most Americans, driving an EV is not a realistically accessible choice",
+                  "The target attack argues only that EVs can still be “good” due to their environmental advantage, without establishing that being inaccessible to most does not matter for whether the choice is good"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The target attack fails to undermine the claim that EV driving is not good as a general choice"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target attack fails to undermine the claim that EV driving is not good as a general choice"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Therefore, driving an electric vehicle is not good"
+            }
+          ],
+          "Conc": [
+            "For most Americans, driving an EV is not a realistically accessible choice",
+            "The target attack fails to undermine the claim that EV driving is not good as a general choice",
+            "Therefore, driving an electric vehicle is not good"
+          ],
+          "Ass": []
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-9e657275ea",
+      "target_field": "Conc",
+      "target_statement": "The target’s conclusion (“No—driving an electric vehicle is not good”) is not established"
+    },
+    {
+      "id": "arg-57cf2c5e7a",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "EVs cost significantly more to purchase than gas-powered cars",
+                  "Fewer than 15% of Americans can afford EVs",
+                  "EVs have lower operating costs to fuel and maintain than gas-powered cars"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Upfront purchase affordability (and access to buy) does not by itself determine whether driving an EV is good because EVs can be cheaper to operate and maintain than gas cars"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Upfront purchase affordability (and access to buy) does not by itself determine whether driving an EV is good because EVs can be cheaper to operate and maintain than gas cars",
+                  "Gas-powered vehicle operation produces harmful emissions during operation",
+                  "Electric vehicle operation produces no harmful tailpipe emissions during operation"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Driving an EV can still be good because it both avoids harmful tailpipe emissions during operation and can reduce fuel/maintenance costs"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Driving an EV can still be good because it both avoids harmful tailpipe emissions during operation and can reduce fuel/maintenance costs",
+                  "A driving choice that avoids harmful emissions and provides net benefits is good"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Yes—driving an electric vehicle is good"
+            }
+          ],
+          "Conc": [
+            "Upfront purchase affordability (and access to buy) does not by itself determine whether driving an EV is good because EVs can be cheaper to operate and maintain than gas cars",
+            "Driving an EV can still be good because it both avoids harmful tailpipe emissions during operation and can reduce fuel/maintenance costs",
+            "Yes—driving an electric vehicle is good"
+          ],
+          "Ass": []
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-40f2fc21be",
+      "target_field": "Conc",
+      "target_statement": "No—driving an electric vehicle is not good"
+    },
+    {
+      "id": "arg-58bcdbd43b",
+      "agent": "AG2",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Fewer than 15% of Americans can afford EVs",
+                  "A broadly “good” choice should be realistically accessible to the intended population rather than reserved for a small minority"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "For most Americans, driving an EV is not realistically accessible"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "For most Americans, driving an EV is not realistically accessible",
+                  "The target treats EV driving as possibly “good” based on benefits like avoiding harmful tailpipe emissions during operation and potential lower operating costs"
+                ],
+                "weak_negation": [
+                  "Assuming that operational benefits can make a choice “good” for the general public even when it fails the realistic-accessibility requirement for most people"
+                ]
+              },
+              "consequent": "Because realistic accessibility is a necessary condition for a broadly “good” choice, operational benefits don’t make EV driving good as a general choice"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Because realistic accessibility is a necessary condition for a broadly “good” choice, operational benefits don’t make EV driving good as a general choice"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "No—driving an electric vehicle is not good"
+            }
+          ],
+          "Conc": [
+            "For most Americans, driving an EV is not realistically accessible",
+            "Because realistic accessibility is a necessary condition for a broadly “good” choice, operational benefits don’t make EV driving good as a general choice",
+            "No—driving an electric vehicle is not good"
+          ],
+          "Ass": [
+            "Assuming that operational benefits can make a choice “good” for the general public even when it fails the realistic-accessibility requirement for most people"
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-57cf2c5e7a",
+      "target_field": "Conc",
+      "target_statement": "Yes—driving an electric vehicle is good"
+    },
+    {
+      "id": "arg-aefd12ae11",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target argument relies on the assumption that realistic affordability/accessibility for most Americans is a necessary condition for a choice to be “good”",
+                  "A choice can be “good” based on its environmental benefits for the drivers who adopt it, even if most people cannot yet access it"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Realistic accessibility for most Americans is not a necessary condition for EV driving to be “good”"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Realistic accessibility for most Americans is not a necessary condition for EV driving to be “good”",
+                  "EV driving produces no harmful tailpipe emissions during operation while gas-powered driving does"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "EV driving can be environmentally beneficial—and thus good—even if only a minority can afford it"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "EV driving can be environmentally beneficial—and thus good—even if only a minority can afford it",
+                  "The target concludes “No—driving an electric vehicle is not good” from the accessibility requirement"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The target’s conclusion does not follow, because its accessibility-as-necessary assumption is undermined"
+            }
+          ],
+          "Conc": [
+            "Realistic accessibility for most Americans is not a necessary condition for EV driving to be “good”",
+            "EV driving can be environmentally beneficial—and thus good—even if only a minority can afford it",
+            "The target’s conclusion does not follow, because its accessibility-as-necessary assumption is undermined"
+          ],
+          "Ass": []
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-58bcdbd43b",
+      "target_field": "Ass"
+    }
+  ],
+  "final_answer": "As a general choice, driving an electric vehicle is **not good**—mainly because widespread, reliable everyday use is not sufficiently supported, and EVs are not broadly affordable.\n\n### Why this best-supported conclusion is “not good” overall\n\n#### 1) Accessibility is a major barrier (drives toward NOT GOOD)\nThe argument against EVs as a general choice is that **most people can’t realistically afford them**: fewer than **15% of Americans** can afford EVs, while EVs cost significantly more to purchase than gas cars. That strongly conflicts with the requirement that a “good” option (as a general choice) be **realistically accessible to the general public**.\n\nEven if EVs are beneficial for individual owners, the question here is whether driving an EV is good *as a broadly applicable choice*, and the affordability evidence presented makes that hard to justify.\n\n#### 2) Practical usability and dependability are insufficient (also drives toward NOT GOOD)\nThe anti-EV side also provides concrete evidence that EVs face **use-support problems**:\n- **Charging infrastructure**: only **22 EV charging stations per 1,000 road miles** versus **104 gas pumps**\n- **Reliability/operational problems**: Consumer Reports finding EVs have **42% more problems** than gas-powered cars\n\nThese directly undermine the “everyday use” requirement: if charging and reliability issues make typical driving more disruptive than for alternatives, then the option fails the “practical usability & dependability” standard for being “good” as a general choice.\n\n### What the pro-EV side gets right (but doesn’t overturn the NOT GOOD conclusion)\n\nThe pro-EV case is strong on several dimensions:\n\n- **Environmental stewardship during operation (GOOD)**: EVs produce **no harmful tailpipe emissions during normal driving**, and in principle can be powered by renewable/low-carbon electricity. That supports the idea that EV driving can reduce harmful emissions compared with gas vehicles.\n- **Economic practicality (GOOD)**: EVs can have **lower ongoing fuel and maintenance costs**, including fewer maintenance burdens since there’s no need for engine oil/transmission fluid.\n- **User welfare/performance (GOOD)**: EVs are **quieter** and can have better handling due to design factors (e.g., lower center of gravity).\n\nHowever, the overall conclusion depends not just on whether EVs are cleaner/cheaper for those who can adopt them, but whether they are a **reliably usable and widely accessible** option in everyday life. The strongest, most specific evidence in the debate was for the opposite on those two requirements.\n\n### Handling the lifecycle/safety objections\nThe opposing case also raises lifecycle environmental harm (e.g., **water loss/contamination/biodiversity loss from lithium mining**) and **safety risks** (battery fires/toxic fumes difficult to extinguish). The debate did not fully settle the *net magnitude* question of whether lifecycle impacts erase the operational emissions advantage, and frequency/severity comparisons were not deeply quantified.\n\nBut even putting that aside, the **accessibility** and **usability/dependability** evidence is sufficient to make EVs fail the “good as a general choice” standard.\n\n### Bottom line\n**Driving an electric vehicle is not good as a general choice** under the criteria being applied, because the strongest supported negatives are:\n- **It’s unaffordable for most people**, and\n- **it is less practically reliable/usable in everyday contexts due to charging availability and reported problems**.\n\nAt the same time, EVs are still meaningfully beneficial in the areas where they work well (cleaner operation, lower running costs, comfort/quiet), but those advantages don’t outweigh the demonstrated barriers to broad, dependable day-to-day adoption.",
+  "integrated_rules": [
+    "Evaluate the driving option using the following condition-to-outcome pressures, each triggered only under strong evidence:\n\n(1) Environmental stewardship ⇒ GOOD\n- If operational emissions are zero (or substantially reduced) versus a gas-powered alternative AND the option can be powered by renewable or low-carbon energy sources (so operational emissions can be minimal).\n\n(2) Economic practicality ⇒ GOOD (practical, everyday use)\n- If ongoing consumer costs are lowered (cheaper energy/fuel and/or fewer maintenance needs) AND maintenance burden is reduced because it has fewer or no components requiring regular fluids/servicing (e.g., no engine oil/transmission fluid).\n\n(3) Functional performance & user welfare ⇒ GOOD\n- If the option provides superior user experience/performance due to design characteristics (e.g., quieter operation and improved handling/responsiveness from lower center of gravity and absence of an internal combustion engine).\n\n(4) Accessibility & widespread adoption ⇒ NOT GOOD (as a general choice)\n- If the option is unaffordable for most people, making broad adoption realistically unavailable to the general public.\n\n(5) Practical usability & dependability ⇒ NOT GOOD (as a general choice)\n- If it is significantly less reliable (more operational problems) than alternatives OR if required support for use (e.g., charging infrastructure) is inadequate for typical driving needs.\n\n(6) Risk & lifecycle environmental protection ⇒ NOT GOOD\n- If the option is not carbon-neutral overall (e.g., upstream environmental harm such as battery production/mining) OR it carries material safety risks (e.g., battery fires and toxic fumes that are difficult to extinguish).\n\nDecision step (when pressures conflict):\n- If one side’s “NOT GOOD” conditions (4/5/6) are strongly supported and outweigh the pro-“GOOD” conditions (1/2/3) by having stronger evidential support on the relevant dimensions (accessibility, usability/dependability, lifecycle environmental + safety risk vs operational/environmental benefit, everyday cost/maintenance, and performance/comfort), conclude NOT GOOD.\n- If the pro-“GOOD” conditions (1/2/3) are strongly supported without equally-strong support for the anti-“NOT GOOD” conditions (4/5/6), conclude GOOD.\n- If the evidence is mixed and neither side’s considerations are supported more strongly, the criteria do not determine the conclusion."
+  ]
+}

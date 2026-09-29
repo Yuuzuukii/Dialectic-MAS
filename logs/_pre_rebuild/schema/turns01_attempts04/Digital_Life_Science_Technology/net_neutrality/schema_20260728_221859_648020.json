@@ -1,0 +1,1229 @@
+{
+  "method": "schema",
+  "question": "Are Net Neutrality Laws Good for Society?",
+  "agent1_stance": "Your stance:\nYou support net neutrality.\nYou believe net neutrality preserves free speech by prohibiting ISPs from blocking content, as ISPs may slow or block websites that disagree with the companies' political viewpoints or interfere with their monetary interests.\nYou believe net neutrality protects consumers by preventing ISPs from accelerating, decelerating, or imposing surcharges on specific online content.\nYou believe net neutrality promotes competition by creating equitable conditions for emerging businesses, and that without net neutrality protections, startups would face discrimination from ISP-owned or preferred content.",
+  "agent2_stance": "Your stance:\nYou oppose net neutrality.\nYou believe net neutrality regulations are unnecessary because the Internet flourished without them, as major companies like Google, Facebook, and YouTube achieved success prior to net neutrality implementation.\nYou believe net neutrality imposed excessive regulatory burdens on ISPs, with one ISP documenting over 5,000 extra paperwork hours annually.\nYou believe net neutrality reduces investment in Internet infrastructure, limiting consumer access and increasing costs, as between 2011 and 2015, the mere threat of implementing them reduced ISPs investments in network upgrades by 20–30%.",
+  "metrics": {
+    "elapsed_seconds": 656.669,
+    "model": "gpt-5.4-nano",
+    "prompt_tokens": 494908,
+    "cached_tokens": 292608,
+    "completion_tokens": 88498,
+    "total_tokens": 583406,
+    "total_cost_usd": 0.156935
+  },
+  "dialogue_history": [
+    {
+      "id": "arg-e15c5fde8c",
+      "agent": "AG1",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "ISPs control key network functions between users and websites/apps (e.g., routing, prioritization, and capacity allocation)."
+                ],
+                "weak_negation": [
+                  "No net-neutrality rule blocks ISPs from using that control to discriminate by content."
+                ]
+              },
+              "consequent": "ISPs can block or slow specific online content."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "ISPs can block or slow specific online content.",
+                  "ISPs can have incentives to protect their own business interests and political preferences."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Content-discriminatory control could impede access to certain viewpoints."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Content-discriminatory control could impede access to certain viewpoints.",
+                  "Net neutrality laws prohibit ISPs from blocking, slowing, or giving preferential treatment to specific online content based on who provides it."
+                ],
+                "weak_negation": [
+                  "Net neutrality enforcement prevents effective discrimination in practice."
+                ]
+              },
+              "consequent": "Net neutrality reduces ISPs' ability to impede access to viewpoints."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Net neutrality reduces ISPs' ability to impede access to viewpoints."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Users can reach diverse viewpoints without ISP interference, preserving free speech."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Users can reach diverse viewpoints without ISP interference, preserving free speech."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Net neutrality laws are good for society."
+            }
+          ],
+          "Conc": [
+            "ISPs can block or slow specific online content.",
+            "Content-discriminatory control could impede access to certain viewpoints.",
+            "Net neutrality reduces ISPs' ability to impede access to viewpoints.",
+            "Users can reach diverse viewpoints without ISP interference, preserving free speech.",
+            "Net neutrality laws are good for society."
+          ],
+          "Ass": [
+            "No net-neutrality rule blocks ISPs from using that control to discriminate by content.",
+            "Net neutrality enforcement prevents effective discrimination in practice."
+          ]
+        }
+      },
+      "status": "defensible"
+    },
+    {
+      "id": "arg-31b0c9588f",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target assumes that \"Net neutrality enforcement prevents effective discrimination in practice.\"",
+                  "The target provides no evidence that enforcement can reliably block discriminatory mechanisms that are operationally indistinguishable from ordinary traffic-management practices."
+                ],
+                "weak_negation": [
+                  "If an argument supplies no evidence for a key empirical claim, that claim is not established for purposes of the argument."
+                ]
+              },
+              "consequent": "The target has not established that enforcement actually prevents effective discrimination in practice."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target has not established that enforcement actually prevents effective discrimination in practice.",
+                  "ISPs can implement traffic-management and congestion-handling policies that can still produce meaningfully different user experiences for different content/providers while being framed as legitimate management."
+                ],
+                "weak_negation": [
+                  "Discriminatory outcomes remain possible whenever enforcement cannot perfectly distinguish discrimination from non-discriminatory network management."
+                ]
+              },
+              "consequent": "Discriminatory outcomes may still occur under net-neutrality regimes."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Discriminatory outcomes may still occur under net-neutrality regimes.",
+                  "The target’s later benefit claim depends on effective discrimination being prevented rather than only regulated."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Net neutrality does not necessarily reduce ISP interference with access to viewpoints."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Net neutrality does not necessarily reduce ISP interference with access to viewpoints."
+                ],
+                "weak_negation": [
+                  "If the key premise supporting societal benefits is not established (or is uncertain), then the conclusion that net neutrality laws are \"good for society\" is not warranted."
+                ]
+              },
+              "consequent": "The target’s conclusion that net neutrality laws are good for society does not follow."
+            }
+          ],
+          "Conc": [
+            "The target has not established that enforcement actually prevents effective discrimination in practice.",
+            "Discriminatory outcomes may still occur under net-neutrality regimes.",
+            "Net neutrality does not necessarily reduce ISP interference with access to viewpoints.",
+            "The target’s conclusion that net neutrality laws are good for society does not follow."
+          ],
+          "Ass": [
+            "If an argument supplies no evidence for a key empirical claim, that claim is not established for purposes of the argument.",
+            "Discriminatory outcomes remain possible whenever enforcement cannot perfectly distinguish discrimination from non-discriminatory network management.",
+            "If the key premise supporting societal benefits is not established (or is uncertain), then the conclusion that net neutrality laws are \"good for society\" is not warranted."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-e15c5fde8c",
+      "target_field": "Ass",
+      "target_statement": "Net neutrality enforcement prevents effective discrimination in practice."
+    },
+    {
+      "id": "arg-70c9e2389e",
+      "agent": "AG1",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target attack effectively treats net-neutrality success as requiring proof that ISP discrimination becomes impossible in all cases (a “perfect” evidentiary/standard-setting demand).",
+                  "Net-neutrality is instead justified by reducing ISPs’ ability and incentives to discriminate (e.g., by blocking/slowing or accelerating/surcharging specific online content)."
+                ],
+                "weak_negation": [
+                  "If the claim is only about meaningful reduction of discriminatory ability/incentives, then the absence of proof of perfect, case-by-case impossibility does not defeat the benefit claim."
+                ]
+              },
+              "consequent": "Perfect, zero-discrimination prevention (or proof of it) is not required for the net-neutrality benefit claim to follow."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Perfect, zero-discrimination prevention is not required for the net-neutrality benefit claim to follow.",
+                  "Net neutrality laws prohibit ISPs from blocking, slowing, or giving preferential treatment to specific online content based on who provides it."
+                ],
+                "weak_negation": [
+                  "Even when enforcement is not flawless, legal prohibitions still constrain what ISPs can lawfully do and therefore reduce incentives to use those prohibited tools."
+                ]
+              },
+              "consequent": "Net-neutrality prohibitions remove key content/provider-based discrimination options and reduce incentives to use them."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Net-neutrality prohibitions remove key content/provider-based discrimination options and reduce incentives to use them.",
+                  "ISPs control key network functions between users and websites/apps, and ISPs may have incentives to favor their own monetary interests or political preferences."
+                ],
+                "weak_negation": [
+                  "Whenever the most direct discriminatory tools are constrained, ISPs’ practical ability to impede particular viewpoints relative to a no-net-neutrality baseline is reduced."
+                ]
+              },
+              "consequent": "ISPs’ practical ability to impede access to specific viewpoints is reduced relative to no net-neutrality."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "ISPs’ practical ability to impede access to specific viewpoints is reduced relative to no net-neutrality.",
+                  "Less ISP gatekeeping over which viewpoints load effectively means users experience less interference in reaching diverse viewpoints."
+                ],
+                "weak_negation": [
+                  "If users face less ISP interference in reaching viewpoints, then the free-speech harm from ISP-managed access is correspondingly reduced."
+                ]
+              },
+              "consequent": "Users can reach diverse viewpoints with less ISP interference, preserving free speech."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Users can reach diverse viewpoints with less ISP interference, preserving free speech."
+                ],
+                "weak_negation": [
+                  "If net neutrality preserves free speech by limiting ISP interference with access to viewpoints, then net-neutrality laws are good for society."
+                ]
+              },
+              "consequent": "Net neutrality laws are good for society."
+            }
+          ],
+          "Conc": [
+            "Perfect, zero-discrimination prevention (or proof of it) is not required for the net-neutrality benefit claim to follow.",
+            "Net-neutrality prohibitions remove key content/provider-based discrimination options and reduce incentives to use them.",
+            "ISPs’ practical ability to impede access to specific viewpoints is reduced relative to no net-neutrality.",
+            "Users can reach diverse viewpoints with less ISP interference, preserving free speech.",
+            "Net neutrality laws are good for society."
+          ],
+          "Ass": [
+            "If the claim is only about meaningful reduction of discriminatory ability/incentives, then the absence of proof of perfect, case-by-case impossibility does not defeat the benefit claim.",
+            "Even when enforcement is not flawless, legal prohibitions still constrain what ISPs can lawfully do and therefore reduce incentives to use those prohibited tools.",
+            "Whenever the most direct discriminatory tools are constrained, ISPs’ practical ability to impede particular viewpoints relative to a no-net-neutrality baseline is reduced.",
+            "If users face less ISP interference in reaching viewpoints, then the free-speech harm from ISP-managed access is correspondingly reduced.",
+            "If net neutrality preserves free speech by limiting ISP interference with access to viewpoints, then net-neutrality laws are good for society."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-31b0c9588f",
+      "target_field": "Ass",
+      "target_statement": "Discriminatory outcomes remain possible whenever enforcement cannot perfectly distinguish discrimination from non-discriminatory network management."
+    },
+    {
+      "id": "arg-7cb1d3c693",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target relies on the assumption that \"Net neutrality enforcement prevents effective discrimination in practice.\"",
+                  "The target provides no evidence or mechanism showing enforcement is timely and effective enough to stop discrimination before it produces meaningful user/viewpoint harm."
+                ],
+                "weak_negation": [
+                  "If an argument does not establish a key empirical condition for preventing the relevant real-world harm, that condition is not established for purposes of the argument."
+                ]
+              },
+              "consequent": "The target has not established that net-neutrality enforcement reliably prevents effective discriminatory effects in practice."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target has not established that net-neutrality enforcement reliably prevents effective discriminatory effects in practice.",
+                  "Even if discrimination is later investigated or penalized, discriminatory actions that occur in the interim can still have real effects on which viewpoints users reach (during the period before enforcement results)."
+                ],
+                "weak_negation": [
+                  "If discriminatory effects can occur before enforcement remedies, then enforcement does not prevent effective discrimination."
+                ]
+              },
+              "consequent": "Discriminatory effects on access to viewpoints can still occur under net-neutrality regimes."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Discriminatory effects on access to viewpoints can still occur under net-neutrality regimes.",
+                  "The target’s benefit argument depends on the stronger claim that enforcement reduces ISPs’ ability to impede access to viewpoints in practice."
+                ],
+                "weak_negation": [
+                  "If enforcement does not actually prevent effective discriminatory effects, then the claimed reduction in ISP interference does not follow."
+                ]
+              },
+              "consequent": "The target’s claim that net neutrality reduces ISPs’ ability to impede access to viewpoints is not supported."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s claim that net neutrality reduces ISPs’ ability to impede access to viewpoints is not supported."
+                ],
+                "weak_negation": [
+                  "If the key premise supporting the societal-benefit conclusion fails, the societal-benefit conclusion does not follow."
+                ]
+              },
+              "consequent": "The target’s conclusion that net neutrality laws are good for society does not follow. "
+            }
+          ],
+          "Conc": [
+            "The target has not established that net-neutrality enforcement reliably prevents effective discriminatory effects in practice.",
+            "Discriminatory effects on access to viewpoints can still occur under net-neutrality regimes.",
+            "The target’s claim that net neutrality reduces ISPs’ ability to impede access to viewpoints is not supported.",
+            "The target’s conclusion that net neutrality laws are good for society does not follow."
+          ],
+          "Ass": [
+            "If an argument does not establish a key empirical condition for preventing the relevant real-world harm, that condition is not established for purposes of the argument.",
+            "If discriminatory effects can occur before enforcement remedies, then enforcement does not prevent effective discrimination.",
+            "If enforcement does not actually prevent effective discriminatory effects, then the claimed reduction in ISP interference does not follow.",
+            "If the key premise supporting the societal-benefit conclusion fails, the societal-benefit conclusion does not follow."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-e15c5fde8c",
+      "target_field": "Ass",
+      "target_statement": "Net neutrality enforcement prevents effective discrimination in practice."
+    },
+    {
+      "id": "arg-b575a03713",
+      "agent": "AG1",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target attack treats net-neutrality’s support as if it required proof that enforcement makes discrimination perfectly impossible (including before any interim harm).",
+                  "Our main argument’s key justification is instead that net-neutrality laws reduce ISPs’ ability and incentives to use provider-based discrimination tools."
+                ],
+                "weak_negation": [
+                  "If the justification is about meaningful reduction in capability/incentives rather than guaranteeing perfect, moment-by-moment prevention, then the lack of proof of perfect interim prevention does not defeat the benefit claim."
+                ]
+              },
+              "consequent": "Net-neutrality’s benefit does not depend on proving perfect, zero-discrimination enforcement in every moment; it suffices that the laws reduce ISPs’ discriminatory options and incentives."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Net-neutrality’s benefit does not depend on proving perfect, zero-discrimination enforcement in every moment; it suffices that the laws reduce ISPs’ discriminatory options and incentives.",
+                  "Net-neutrality laws prohibit ISPs from blocking, slowing, or giving preferential treatment to specific online content based on who provides it."
+                ],
+                "weak_negation": [
+                  "Even if enforcement is not flawlessly immediate in every case, legal prohibitions still constrain what ISPs can lawfully do and thus reduce incentives to discriminate in those prohibited ways."
+                ]
+              },
+              "consequent": "Net-neutrality laws reduce ISPs’ provider-based discriminatory options (blocking/slowing/preferential treatment) and reduce incentives to use them."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Net-neutrality laws reduce ISPs’ provider-based discriminatory options (blocking/slowing/preferential treatment) and reduce incentives to use them.",
+                  "ISPs control key network functions (routing, prioritization, and capacity allocation) that affect how content reaches users."
+                ],
+                "weak_negation": [
+                  "When the most direct provider-based discrimination tools are constrained, the practical ability to impede access to specific viewpoints is reduced relative to no net-neutrality."
+                ]
+              },
+              "consequent": "ISPs’ practical ability to impede access to specific viewpoints is reduced relative to a no-net-neutrality baseline."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "ISPs’ practical ability to impede access to specific viewpoints is reduced relative to a no-net-neutrality baseline."
+                ],
+                "weak_negation": [
+                  "If ISP gatekeeping over which viewpoints load effectively is reduced, then users can reach diverse viewpoints with less ISP interference, preserving free speech."
+                ]
+              },
+              "consequent": "Users can reach diverse viewpoints with less ISP interference, preserving free speech."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Users can reach diverse viewpoints with less ISP interference, preserving free speech."
+                ],
+                "weak_negation": [
+                  "If net neutrality preserves free speech by limiting ISP interference with access to viewpoints, then net-neutrality laws are good for society."
+                ]
+              },
+              "consequent": "Net neutrality laws are good for society."
+            }
+          ],
+          "Conc": [
+            "Net-neutrality’s benefit does not depend on proving perfect, zero-discrimination enforcement in every moment; it suffices that the laws reduce ISPs’ discriminatory options and incentives.",
+            "Net-neutrality laws reduce ISPs’ provider-based discriminatory options (blocking/slowing/preferential treatment) and reduce incentives to use them.",
+            "ISPs’ practical ability to impede access to specific viewpoints is reduced relative to a no-net-neutrality baseline.",
+            "Users can reach diverse viewpoints with less ISP interference, preserving free speech.",
+            "Net neutrality laws are good for society."
+          ],
+          "Ass": [
+            "If the justification is about meaningful reduction in capability/incentives rather than guaranteeing perfect, moment-by-moment prevention, then the lack of proof of perfect interim prevention does not defeat the benefit claim.",
+            "Even if enforcement is not flawlessly immediate in every case, legal prohibitions still constrain what ISPs can lawfully do and thus reduce incentives to discriminate in those prohibited ways.",
+            "When the most direct provider-based discrimination tools are constrained, the practical ability to impede access to specific viewpoints is reduced relative to no net-neutrality.",
+            "If ISP gatekeeping over which viewpoints load effectively is reduced, then users can reach diverse viewpoints with less ISP interference, preserving free speech.",
+            "If net neutrality preserves free speech by limiting ISP interference with access to viewpoints, then net-neutrality laws are good for society."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-7cb1d3c693",
+      "target_field": "Ass",
+      "target_statement": "The target relies on the assumption that \"Net neutrality enforcement prevents effective discrimination in practice.\""
+    },
+    {
+      "id": "arg-80a6e8123e",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target relies on the assumption that \"Net neutrality enforcement prevents effective discrimination in practice.\"",
+                  "The target does not address whether enforcement constrains *indirect* ISP-controlled channels that can affect content reach (e.g., interconnection/peering arrangements or congestion-management choices), and instead treats discrimination as if it were limited to blocking/slowing or provider-preferential treatment covered by the law."
+                ],
+                "weak_negation": [
+                  "If an argument’s key premise fails to account for relevant routes by which the harm could occur, then the premise is not established for the argument’s purposes."
+                ]
+              },
+              "consequent": "The target has not established that net-neutrality enforcement prevents effective discrimination in practice, because the argument does not cover discrimination via indirect ISP-controlled channels beyond simple blocking/slowing or provider preference."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target has not established that net-neutrality enforcement prevents effective discrimination in practice, because the argument does not cover discrimination via indirect ISP-controlled channels beyond simple blocking/slowing or provider preference.",
+                  "If indirect ISP-controlled channels remain available for shaping which content reaches users, then effective discriminatory outcomes can persist even when blocking/slowing/provider-preferential actions are constrained."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Net-neutrality enforcement, as argued by the target, may still leave room for effective discriminatory outcomes affecting access to viewpoints."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Net-neutrality enforcement, as argued by the target, may still leave room for effective discriminatory outcomes affecting access to viewpoints.",
+                  "The target’s later benefit chain (diverse viewpoints/limited ISP interference/free speech → “good for society”) depends on effective discrimination being prevented, not merely one category of discriminatory conduct being prohibited."
+                ],
+                "weak_negation": [
+                  "If the premise required for the benefit chain is not established, the final societal-benefit conclusion does not follow."
+                ]
+              },
+              "consequent": "The target’s claim that net neutrality reduces ISP interference with viewpoint access does not follow from its stated premises."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s claim that net neutrality reduces ISP interference with viewpoint access does not follow from its stated premises.",
+                  "Therefore the target has not justified the conclusion that net neutrality laws are good for society."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The target’s conclusion (“Net neutrality laws are good for society”) does not follow."
+            }
+          ],
+          "Conc": [
+            "The target has not established that net-neutrality enforcement prevents effective discrimination in practice, because the argument does not cover discrimination via indirect ISP-controlled channels beyond simple blocking/slowing or provider preference.",
+            "Net-neutrality enforcement, as argued by the target, may still leave room for effective discriminatory outcomes affecting access to viewpoints.",
+            "The target’s claim that net neutrality reduces ISP interference with viewpoint access does not follow from its stated premises.",
+            "The target’s conclusion (“Net neutrality laws are good for society”) does not follow."
+          ],
+          "Ass": [
+            "If an argument’s key premise fails to account for relevant routes by which the harm could occur, then the premise is not established for the argument’s purposes.",
+            "If the premise required for the benefit chain is not established, the final societal-benefit conclusion does not follow."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-e15c5fde8c",
+      "target_field": "Ass",
+      "target_statement": "Net neutrality enforcement prevents effective discrimination in practice."
+    },
+    {
+      "id": "arg-a871f93e9a",
+      "agent": "AG1",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target attack hinges on the assumption that, because my argument does not explicitly discuss every possible indirect channel (e.g., peering/interconnection choices or other workarounds), net-neutrality enforcement cannot prevent effective discrimination in practice.",
+                  "But the target does not establish that net-neutrality rules and enforcement actually *permit* the kind of indirect, content- or provider-based favoritism needed for discrimination to remain effective."
+                ],
+                "weak_negation": [
+                  "If an attack relies on an unsupported assumption about what enforcement allows, then it does not successfully undermine the challenged premise."
+                ]
+              },
+              "consequent": "The target does not successfully show that net-neutrality enforcement fails to prevent effective discrimination in practice."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target does not successfully show that net-neutrality enforcement fails to prevent effective discrimination in practice.",
+                  "Net-neutrality laws prohibit ISPs from blocking, slowing, or giving preferential treatment to specific online content based on who provides it."
+                ],
+                "weak_negation": [
+                  "If the relevant harm would occur only through actions that amount to prohibited preferential treatment (even if implemented indirectly), then enforcement still constrains effective discrimination."
+                ]
+              },
+              "consequent": "Even if discrimination uses indirect mechanisms, actions that function as content/provider-based preferential treatment are still constrained by net-neutrality prohibitions."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Even if discrimination uses indirect mechanisms, actions that function as content/provider-based preferential treatment are still constrained by net-neutrality prohibitions.",
+                  "ISPs’ control of key network functions gives them leverage to shape which content reaches users."
+                ],
+                "weak_negation": [
+                  "When the most direct and leverage-based discriminatory options are constrained, practical ISP interference with access to viewpoints is reduced relative to having no net-neutrality rule."
+                ]
+              },
+              "consequent": "Net neutrality reduces ISPs’ practical ability to impede access to specific viewpoints."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Net neutrality reduces ISPs’ practical ability to impede access to specific viewpoints.",
+                  "Lower ISP gatekeeping over which viewpoints load effectively preserves users’ ability to reach diverse viewpoints, supporting free speech."
+                ],
+                "weak_negation": [
+                  "If net neutrality reduces ISP interference with access to viewpoints, then the societal-benefit conclusion is supported."
+                ]
+              },
+              "consequent": "Net neutrality laws are good for society."
+            }
+          ],
+          "Conc": [
+            "The target does not successfully show that net-neutrality enforcement fails to prevent effective discrimination in practice.",
+            "Even if discrimination uses indirect mechanisms, actions that function as content/provider-based preferential treatment are still constrained by net-neutrality prohibitions.",
+            "Net neutrality reduces ISPs’ practical ability to impede access to specific viewpoints.",
+            "Net neutrality laws are good for society."
+          ],
+          "Ass": [
+            "If an attack relies on an unsupported assumption about what enforcement allows, then it does not successfully undermine the challenged premise.",
+            "If the relevant harm would occur only through actions that amount to prohibited preferential treatment (even if implemented indirectly), then enforcement still constrains effective discrimination.",
+            "When the most direct and leverage-based discriminatory options are constrained, practical ISP interference with access to viewpoints is reduced relative to having no net-neutrality rule.",
+            "If net neutrality reduces ISP interference with access to viewpoints, then the societal-benefit conclusion is supported."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-80a6e8123e",
+      "target_field": "Ass",
+      "target_statement": "the argument does not cover discrimination via indirect ISP-controlled channels beyond simple blocking/slowing or provider preference"
+    },
+    {
+      "id": "arg-f00fc200f4",
+      "agent": "AG2",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "One ISP documented that net neutrality regulation requires over 5,000 extra paperwork hours annually."
+                ],
+                "weak_negation": [
+                  "The extra paperwork hours impose no meaningful additional cost or resource diversion (i.e., they are trivial/absorbed at zero impact)."
+                ]
+              },
+              "consequent": "Net neutrality laws impose substantial administrative/compliance burdens on ISPs."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Net neutrality laws impose substantial administrative/compliance burdens on ISPs.",
+                  "Substantial compliance burdens translate into higher operating costs for regulated firms."
+                ],
+                "weak_negation": [
+                  "ISPs can absorb these compliance burdens without higher costs or resource diversion."
+                ]
+              },
+              "consequent": "Net neutrality increases ISP operating costs."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Net neutrality increases ISP operating costs.",
+                  "Higher operating costs for ISPs lead to social-welfare harm by either (a) higher prices/fees to consumers and/or (b) reduced resources for network improvement relative to what would otherwise occur."
+                ],
+                "weak_negation": [
+                  "Cost increases do not translate into higher consumer prices/fees or reduced quality/access."
+                ]
+              },
+              "consequent": "Net neutrality tends to increase consumer costs and/or reduce consumer access/quality (relative to a no-net-neutrality baseline)."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Net neutrality tends to increase consumer costs and/or reduce consumer access/quality (relative to a no-net-neutrality baseline)."
+                ],
+                "weak_negation": [
+                  "Any offsetting societal benefits are sufficient to outweigh these harms in general."
+                ]
+              },
+              "consequent": "Net neutrality laws are not good for society."
+            }
+          ],
+          "Conc": [
+            "Net neutrality laws impose substantial administrative/compliance burdens on ISPs.",
+            "Net neutrality increases ISP operating costs.",
+            "Net neutrality tends to increase consumer costs and/or reduce consumer access/quality (relative to a no-net-neutrality baseline).",
+            "Net neutrality laws are not good for society."
+          ],
+          "Ass": [
+            "The extra paperwork hours impose no meaningful additional cost or resource diversion (i.e., they are trivial/absorbed at zero impact).",
+            "ISPs can absorb these compliance burdens without higher costs or resource diversion.",
+            "Cost increases do not translate into higher consumer prices/fees or reduced quality/access.",
+            "Any offsetting societal benefits are sufficient to outweigh these harms in general."
+          ]
+        }
+      },
+      "status": "defensible"
+    },
+    {
+      "id": "arg-8274be12bd",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Target infers from “over 5,000 extra paperwork hours annually” to “substantial administrative/compliance burdens,” and then (via later rules) to higher operating costs.",
+                  "That inference assumes the extra hours are materially costly rather than simply reallocated/absorbed, but the target does not provide evidence that these hours translate into meaningful cost increases."
+                ],
+                "weak_negation": [
+                  "If additional paperwork time is not shown to imply meaningful resource cost, then it does not establish that the policy imposes substantial cost-increasing compliance burdens."
+                ]
+              },
+              "consequent": "The over-5,000-extra-hours evidence does not establish materially costly administrative burdens that increase operating costs."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The over-5,000-extra-hours evidence does not establish materially costly administrative burdens that increase operating costs.",
+                  "Target’s step requires that substantial compliance burdens translate into higher operating costs for regulated firms."
+                ],
+                "weak_negation": [
+                  "If the premises for an operating-cost increase are not established, then the operating-cost-increase claim is unsupported."
+                ]
+              },
+              "consequent": "Net neutrality does not necessarily increase ISP operating costs."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Net neutrality does not necessarily increase ISP operating costs.",
+                  "Target’s harm step depends on higher ISP operating costs leading to higher prices/fees and/or reduced network investment/quality."
+                ],
+                "weak_negation": [
+                  "If higher operating costs do not follow, then the claimed consumer-cost/quality harm does not follow."
+                ]
+              },
+              "consequent": "The target’s claimed consumer-cost/quality harm does not follow from its premises."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s claimed consumer-cost/quality harm does not follow from its premises."
+                ],
+                "weak_negation": [
+                  "If the main harm premise fails, the conclusion that “net neutrality laws are not good for society” is not warranted."
+                ]
+              },
+              "consequent": "The target has not justified the conclusion that net neutrality laws are not good for society."
+            }
+          ],
+          "Conc": [
+            "The over-5,000-extra-hours evidence does not establish materially costly administrative burdens that increase operating costs.",
+            "Net neutrality does not necessarily increase ISP operating costs.",
+            "The target’s claimed consumer-cost/quality harm does not follow from its premises.",
+            "The target has not justified the conclusion that net neutrality laws are not good for society."
+          ],
+          "Ass": [
+            "If additional paperwork time is not shown to imply meaningful resource cost, then it does not establish that the policy imposes substantial cost-increasing compliance burdens.",
+            "If the premises for an operating-cost increase are not established, then the operating-cost-increase claim is unsupported.",
+            "If higher operating costs do not follow, then the claimed consumer-cost/quality harm does not follow.",
+            "If the main harm premise fails, the conclusion that “net neutrality laws are not good for society” is not warranted."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-f00fc200f4",
+      "target_field": "Ass",
+      "target_statement": "Substantial compliance burdens translate into higher operating costs for regulated firms."
+    },
+    {
+      "id": "arg-3ef8a70c0e",
+      "agent": "AG2",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target attack treats the “over 5,000 extra paperwork hours annually” fact as insufficient to show a meaningful cost burden unless you also prove the hours translate into costs.",
+                  "The target’s key evidentiary step therefore depends on an (implicit) assumption that extra labor/time could be effectively costless or impact-free at zero opportunity cost."
+                ],
+                "weak_negation": [
+                  "If complying with regulation requires additional employee/administrative labor time, then that time is a real resource diversion with opportunity cost (i.e., it costs money and/or displaces other productive work)."
+                ]
+              },
+              "consequent": "The over-5,000 extra paperwork hours are evidence of meaningful resource diversion (real labor/overhead with opportunity cost), not costless administration."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The over-5,000 extra paperwork hours are evidence of meaningful resource diversion (real labor/overhead with opportunity cost), not costless administration."
+                ],
+                "weak_negation": [
+                  "If regulation diverts scarce labor/overhead to compliance, then it creates a cost burden that shows up as higher operating costs and/or reduced capacity for other investments (e.g., upgrades)."
+                ]
+              },
+              "consequent": "Net neutrality compliance creates a cost burden that increases operating costs and/or reduces investment capacity."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Net neutrality compliance creates a cost burden that increases operating costs and/or reduces investment capacity."
+                ],
+                "weak_negation": [
+                  "If ISPs face higher net costs and/or less ability to invest in network improvement, then consumers can be harmed via higher prices/fees and/or reduced access/quality relative to a no-net-neutrality baseline."
+                ]
+              },
+              "consequent": "That cost burden plausibly translates into consumer cost/quality/access harm relative to the baseline."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "That cost burden plausibly translates into consumer cost/quality/access harm relative to the baseline."
+                ],
+                "weak_negation": [
+                  "If the argument has established cost/quality/access harms, then without specific offsetting proof that benefits outweigh those harms, the policy is not good for society."
+                ]
+              },
+              "consequent": "Net neutrality laws are not good for society."
+            }
+          ],
+          "Conc": [
+            "The over-5,000 extra paperwork hours are evidence of meaningful resource diversion (real labor/overhead with opportunity cost), not costless administration.",
+            "Net neutrality compliance creates a cost burden that increases operating costs and/or reduces investment capacity.",
+            "That cost burden plausibly translates into consumer cost/quality/access harm relative to the baseline.",
+            "Net neutrality laws are not good for society."
+          ],
+          "Ass": [
+            "If complying with regulation requires additional employee/administrative labor time, then that time is a real resource diversion with opportunity cost (i.e., it costs money and/or displaces other productive work).",
+            "If regulation diverts scarce labor/overhead to compliance, then it creates a cost burden that shows up as higher operating costs and/or reduced capacity for other investments (e.g., upgrades).",
+            "If ISPs face higher net costs and/or less ability to invest in network improvement, then consumers can be harmed via higher prices/fees and/or reduced access/quality relative to a no-net-neutrality baseline.",
+            "If the argument has established cost/quality/access harms, then without specific offsetting proof that benefits outweigh those harms, the policy is not good for society."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-8274be12bd",
+      "target_field": "Ass",
+      "target_statement": "If additional paperwork time is not shown to imply meaningful resource cost, then it does not establish that the policy imposes substantial cost-increasing compliance burdens."
+    },
+    {
+      "id": "arg-5a1fb75682",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s first step treats the fact that “one ISP documented… over 5,000 extra paperwork hours annually” as proof that net-neutrality regulation imposes *substantial* administrative/compliance burdens on ISPs.",
+                  "That inference is vulnerable because it does not establish (i) that the paperwork burden is actually substantial in cost/resource terms, or (ii) that the experience of one ISP is representative of ISPs as a whole."
+                ],
+                "weak_negation": [
+                  "If evidence from a single firm (without showing magnitude and generality) does not establish that a regulation imposes substantial compliance burdens, then the target’s first-step conclusion does not follow."
+                ]
+              },
+              "consequent": "The one-ISP figure of over 5,000 extra paperwork hours does not establish that net-neutrality regulation imposes substantial administrative/compliance burdens across ISPs."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The one-ISP figure of over 5,000 extra paperwork hours does not establish that net-neutrality regulation imposes substantial administrative/compliance burdens across ISPs.",
+                  "The target’s subsequent steps rely on the claim that substantial compliance burdens translate into higher operating costs for regulated firms."
+                ],
+                "weak_negation": [
+                  "If substantial compliance burdens are not established, then the claimed translation into higher operating costs is unsupported."
+                ]
+              },
+              "consequent": "The target has not established that net neutrality increases ISP operating costs."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target has not established that net neutrality increases ISP operating costs.",
+                  "The target’s consumer-harm step depends on higher ISP operating costs leading to higher prices/fees and/or reduced network investment/quality."
+                ],
+                "weak_negation": [
+                  "If the operating-cost increase is not established, then the consumer-cost/access/quality harm is not established either."
+                ]
+              },
+              "consequent": "The target has not established that net neutrality tends to increase consumer costs or reduce access/quality."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target has not established that net neutrality tends to increase consumer costs or reduce access/quality.",
+                  "The target’s final conclusion (“Net neutrality laws are not good for society”) depends on those harms being established."
+                ],
+                "weak_negation": [
+                  "If the key harm premises are not established, then the conclusion that net neutrality laws are not good for society is not warranted."
+                ]
+              },
+              "consequent": "The target has not justified the conclusion that net neutrality laws are not good for society."
+            }
+          ],
+          "Conc": [
+            "The one-ISP figure of over 5,000 extra paperwork hours does not establish that net-neutrality regulation imposes substantial administrative/compliance burdens across ISPs.",
+            "The target has not established that net neutrality increases ISP operating costs.",
+            "The target has not established that net neutrality tends to increase consumer costs or reduce access/quality.",
+            "The target has not justified the conclusion that net neutrality laws are not good for society."
+          ],
+          "Ass": [
+            "If evidence from a single firm (without showing magnitude and generality) does not establish that a regulation imposes substantial compliance burdens, then the target’s first-step conclusion does not follow.",
+            "If substantial compliance burdens are not established, then the claimed translation into higher operating costs is unsupported.",
+            "If the operating-cost increase is not established, then the consumer-cost/access/quality harm is not established either.",
+            "If the key harm premises are not established, then the conclusion that net neutrality laws are not good for society is not warranted."
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-f00fc200f4",
+      "target_field": "Conc",
+      "target_statement": "Net neutrality laws are not good for society."
+    },
+    {
+      "id": "arg-3ae6c98540",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Target argument (AG1) relies on the assumption: “If evidence from a single firm (without showing magnitude and generality) does not establish substantial compliance burdens, then the target’s first-step conclusion does not follow.”",
+                  "AG1 treats the “over 5,000 extra paperwork hours annually” fact as insufficient to establish the magnitude of compliance burden."
+                ],
+                "weak_negation": [
+                  "If thousands of hours of additional compliance paperwork represent real diverted labor/administrative time (i.e., nontrivial resource use), then the evidence establishes a meaningful compliance-burden magnitude even without proving it is identical across all ISPs."
+                ]
+              },
+              "consequent": "The over-5,000 extra paperwork hours provide evidence of meaningful, substantial compliance burden for at least the documented ISP, making AG1’s “single-firm/general ity makes it non-substantial” dismissal unwarranted."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The over-5,000 extra paperwork hours provide evidence of meaningful, substantial compliance burden for at least the documented ISP, making AG1’s “single-firm/generality makes it non-substantial” dismissal unwarranted.",
+                  "AG1’s later step treats the operating-cost increase as unsupported whenever substantial compliance burdens are not established."
+                ],
+                "weak_negation": [
+                  "If compliance requires additional staff/admin time, then compliance labor contributes to operating costs for the regulated firm (even if costs are not quantified in the argument)."
+                ]
+              },
+              "consequent": "AG1’s move from “burdens unestablished” to “no operating-cost increase” is undercut, because compliance labor evidences operating-cost pressure at least for the documented ISP."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s move from “burdens unestablished” to “no operating-cost increase” is undercut, because compliance labor evidences operating-cost pressure at least for the documented ISP.",
+                  "AG1’s argument then claims: if the operating-cost increase is not established, consumer cost/access/quality harm is not established either."
+                ],
+                "weak_negation": [
+                  "If operating costs rise for firms responsible for providing network service, then—at minimum—the premise that costs can be passed through via prices/fees or can crowd out investment is not defeated by the mere absence of a precise dollar figure."
+                ]
+              },
+              "consequent": "AG1’s claim that consumer cost/quality harm is not established does not follow from its premises once compliance burdens and operating-cost pressure are taken to be established."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s final conclusion (“The target has not justified that net neutrality laws are not good for society”) depends on its earlier step that consumer harms are unestablished.",
+                  "AG1’s earlier step is undercut by the failure of the “burdens not established ⇒ no operating-cost increase ⇒ no consumer harm” chain."
+                ],
+                "weak_negation": [
+                  "If the core harm premises are not successfully undermined, then the conclusion that the policy is not justified as “not good for society” is unwarranted."
+                ]
+              },
+              "consequent": "AG1’s defeating argument does not succeed, because it hinges on assumptions about compliance magnitude and the cost/harm chain that are undercut by the extra-hours evidence."
+            },
+            {
+              "antecedent": {
+                "strong": [],
+                "weak_negation": []
+              },
+              "consequent": "This rule is omitted in the final structure."
+            }
+          ],
+          "Conc": [
+            "The over-5,000 extra paperwork hours provide evidence of meaningful, substantial compliance burden for at least the documented ISP, making AG1’s “single-firm/general ity makes it non-substantial” dismissal unwarranted.",
+            "AG1’s move from “burdens unestablished” to “no operating-cost increase” is undercut, because compliance labor evidences operating-cost pressure at least for the documented ISP.",
+            "AG1’s claim that consumer cost/quality harm is not established does not follow from its premises once compliance burdens and operating-cost pressure are taken to be established.",
+            "AG1’s defeating argument does not succeed, because it hinges on assumptions about compliance magnitude and the cost/harm chain that are undercut by the extra-hours evidence.",
+            "This rule is omitted in the final structure."
+          ],
+          "Ass": [
+            "If thousands of hours of additional compliance paperwork represent real diverted labor/administrative time (i.e., nontrivial resource use), then the evidence establishes a meaningful compliance-burden magnitude even without proving it is identical across all ISPs.",
+            "If compliance requires additional staff/admin time, then compliance labor contributes to operating costs for the regulated firm (even if costs are not quantified in the argument).",
+            "If operating costs rise for firms responsible for providing network service, then—at minimum—the premise that costs can be passed through via prices/fees or can crowd out investment is not defeated by the mere absence of a precise dollar figure.",
+            "If the core harm premises are not successfully undermined, then the conclusion that the policy is not justified as “not good for society” is unwarranted."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-5a1fb75682",
+      "target_field": "Ass"
+    },
+    {
+      "id": "arg-37a7e12f56",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target uses “over 5,000 extra paperwork hours annually” as evidence that net-neutrality regulation imposes *substantial* administrative/compliance burdens that matter in real-world cost/resource terms.",
+                  "That leap is unsupported because the target does not show that these additional hours correspond to meaningful incremental costs or resource diversion (as opposed to being reallocated/absorbed without material impact)."
+                ],
+                "weak_negation": [
+                  "If additional paperwork time is not shown to imply meaningful incremental resource cost/diversion, then it does not establish “substantial” cost-increasing compliance burdens for the argument’s purposes."
+                ]
+              },
+              "consequent": "The over-5,000 extra paperwork hours do not establish substantial, cost-increasing compliance burdens."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The over-5,000 extra paperwork hours do not establish substantial, cost-increasing compliance burdens.",
+                  "The target’s second step requires substantial compliance burdens to translate into higher operating costs for regulated firms."
+                ],
+                "weak_negation": [
+                  "If the operating-cost increase premise is not established, then the operating-cost increase claim does not follow."
+                ]
+              },
+              "consequent": "Net neutrality does not have a justified basis to increase ISP operating costs."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Net neutrality does not have a justified basis to increase ISP operating costs.",
+                  "The target’s consumer-harm step depends on that operating-cost increase causing higher prices/fees and/or less network improvement (reduced access/quality)."
+                ],
+                "weak_negation": [
+                  "If the ISP operating-cost increase is not established, then the claimed consumer-cost/access/quality harm does not follow."
+                ]
+              },
+              "consequent": "Net neutrality does not have a justified basis to increase consumer costs or reduce access/quality."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Net neutrality does not have a justified basis to increase consumer costs or reduce access/quality.",
+                  "The target’s final conclusion (“Net neutrality laws are not good for society”) depends on those harms being established rather than merely asserted."
+                ],
+                "weak_negation": [
+                  "If the key harm premises fail, then the societal ‘not good’ conclusion does not follow."
+                ]
+              },
+              "consequent": "The claim that net neutrality laws are not good for society does not follow from the target’s premises."
+            }
+          ],
+          "Conc": [
+            "The over-5,000 extra paperwork hours do not establish substantial, cost-increasing compliance burdens.",
+            "Net neutrality does not have a justified basis to increase ISP operating costs.",
+            "Net neutrality does not have a justified basis to increase consumer costs or reduce access/quality.",
+            "The claim that net neutrality laws are not good for society does not follow from the target’s premises."
+          ],
+          "Ass": [
+            "If additional paperwork time is not shown to imply meaningful incremental resource cost/diversion, then it does not establish “substantial” cost-increasing compliance burdens for the argument’s purposes.",
+            "If the operating-cost increase premise is not established, then the operating-cost increase claim does not follow.",
+            "If the ISP operating-cost increase is not established, then the claimed consumer-cost/access/quality harm does not follow.",
+            "If the key harm premises fail, then the societal ‘not good’ conclusion does not follow."
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-f00fc200f4",
+      "target_field": "Conc",
+      "target_statement": "Net neutrality laws are not good for society."
+    },
+    {
+      "id": "arg-e277b58dac",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target attack depends on the idea that “over 5,000 extra paperwork hours annually” might not imply meaningful incremental resource cost/diversion (i.e., the extra time could be trivial/absorbed at zero impact).",
+                  "Paperwork hours are additional labor/admin time, which uses scarce firm resources and has opportunity cost (time spent complying can’t also be spent on other productive activities)."
+                ],
+                "weak_negation": [
+                  "If the extra hours are additional labor/admin time, then they are not costless in resource terms; they require diversion of scarce resources."
+                ]
+              },
+              "consequent": "The extra 5,000+ paperwork hours imply meaningful incremental resource diversion with opportunity cost, not zero-impact compliance."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The extra 5,000+ paperwork hours imply meaningful incremental resource diversion with opportunity cost, not zero-impact compliance.",
+                  "Meaningful diversion of scarce resources qualifies as a substantial administrative/compliance burden."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The 5,000+ extra hours establish substantial cost-increasing compliance burdens rather than failing to do so."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The 5,000+ extra hours establish substantial cost-increasing compliance burdens rather than failing to do so.",
+                  "Substantial compliance burdens translate into higher operating costs for regulated firms."
+                ],
+                "weak_negation": [
+                  "If compliance burdens are cost-increasing, then the operating-cost increase premise is established."
+                ]
+              },
+              "consequent": "Net neutrality regulation can increase ISP operating costs."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Net neutrality regulation can increase ISP operating costs.",
+                  "Higher operating costs tend to produce social-welfare harm via higher consumer prices/fees and/or less ability to fund network improvements (reducing access/quality)."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Net neutrality tends to increase consumer costs and/or reduce access/quality."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Net neutrality tends to increase consumer costs and/or reduce access/quality.",
+                  "The target’s “not good for society” conclusion was rejected on the grounds that these harms were not established (because the cost-burden step failed)."
+                ],
+                "weak_negation": [
+                  "If the cost-burden step is established, then the target’s refusal to let the “not good for society” conclusion follow is undermined."
+                ]
+              },
+              "consequent": "The target’s denial that the “not good for society” conclusion follows from its premises is undercut."
+            }
+          ],
+          "Conc": [
+            "The extra 5,000+ paperwork hours imply meaningful incremental resource diversion with opportunity cost, not zero-impact compliance.",
+            "The 5,000+ extra hours establish substantial cost-increasing compliance burdens rather than failing to do so.",
+            "Net neutrality regulation can increase ISP operating costs.",
+            "Net neutrality tends to increase consumer costs and/or reduce access/quality.",
+            "The target’s denial that the “not good for society” conclusion follows from its premises is undercut."
+          ],
+          "Ass": [
+            "If the extra hours are additional labor/admin time, then they are not costless in resource terms; they require diversion of scarce resources.",
+            "If compliance burdens are cost-increasing, then the operating-cost increase premise is established.",
+            "If the cost-burden step is established, then the target’s refusal to let the “not good for society” conclusion follow is undermined."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-37a7e12f56",
+      "target_field": "Ass"
+    },
+    {
+      "id": "arg-904443136a",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target uses a single ISP’s report (“over 5,000 extra paperwork hours annually”) to extrapolate that net-neutrality rules create *substantial* administrative/compliance burdens in general.",
+                  "But the report does not establish that these extra hours are typical across ISPs *and* that the extra hours are actually caused by net-neutrality requirements rather than by that firm’s unique circumstances or other concurrent changes (i.e., the needed industry-wide, causally identified counterfactual is missing)."
+                ],
+                "weak_negation": [
+                  "If one-firm evidence lacks both typicality and causal attribution to net neutrality, then it does not establish the industry-wide substantial-burden premise."
+                ]
+              },
+              "consequent": "The one-ISP “over 5,000 extra hours” figure does not establish that net-neutrality laws impose substantial administrative/compliance burdens on ISPs in general."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The one-ISP “over 5,000 extra hours” figure does not establish that net-neutrality laws impose substantial administrative/compliance burdens on ISPs in general.",
+                  "The target’s next step depends on that substantial-burden premise to infer higher operating costs."
+                ],
+                "weak_negation": [
+                  "If the substantial-burden premise fails, the operating-cost increase claim is unsupported."
+                ]
+              },
+              "consequent": "The target has not established that net-neutrality increases ISP operating costs."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target has not established that net-neutrality increases ISP operating costs.",
+                  "The target’s consumer-harm step depends on higher operating costs translating into higher prices/fees and/or reduced network investment/quality relative to a no-net-neutrality baseline."
+                ],
+                "weak_negation": [
+                  "If the operating-cost increase is not established, the claimed consumer-cost/quality harm relative to the baseline does not follow."
+                ]
+              },
+              "consequent": "The target has not established that net-neutrality tends to increase consumer costs and/or reduce access/quality."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target has not established that net-neutrality tends to increase consumer costs and/or reduce access/quality.",
+                  "The target’s conclusion (“Net neutrality laws are not good for society”) relies on those harms being established and not outweighed."
+                ],
+                "weak_negation": [
+                  "If the harms premise fails, the conclusion that net-neutrality laws are not good for society does not follow."
+                ]
+              },
+              "consequent": "The target’s conclusion that net-neutrality laws are not good for society is not justified."
+            }
+          ],
+          "Conc": [
+            "The one-ISP “over 5,000 extra hours” figure does not establish that net-neutrality laws impose substantial administrative/compliance burdens on ISPs in general.",
+            "The target has not established that net-neutrality increases ISP operating costs.",
+            "The target has not established that net-neutrality tends to increase consumer costs and/or reduce access/quality.",
+            "The target’s conclusion that net-neutrality laws are not good for society is not justified."
+          ],
+          "Ass": [
+            "If one-firm evidence lacks both typicality and causal attribution to net neutrality, then it does not establish the industry-wide substantial-burden premise.",
+            "If the substantial-burden premise fails, the operating-cost increase claim is unsupported.",
+            "If the operating-cost increase is not established, the claimed consumer-cost/quality harm relative to the baseline does not follow.",
+            "If the harms premise fails, the conclusion that net-neutrality laws are not good for society does not follow."
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-f00fc200f4",
+      "target_field": "Conc",
+      "target_statement": "Net neutrality laws are not good for society."
+    },
+    {
+      "id": "arg-f5186cd1e0",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s argument assumes that the one-ISP “over 5,000 extra paperwork hours annually” fact cannot establish substantial net-neutrality compliance burdens unless the evidence separately proves (i) typicality across ISPs and (ii) causal attribution to net-neutrality requirements.",
+                  "Net-neutrality rules are compliance obligations imposed on regulated ISPs (i.e., the regulation requires actions/documentation to demonstrate adherence)."
+                ],
+                "weak_negation": [
+                  "If the regulation creates broadly applicable compliance obligations for regulated ISPs, then a regulated ISP’s documented extra compliance paperwork is evidence that the rules impose substantial administrative burdens, even without proving the statistic is identical across every ISP or isolating every concurrent factor."
+                ]
+              },
+              "consequent": "AG1’s evidentiary assumption (that one-firm evidence is unusable without proving typicality and causal attribution) is invalid given broadly applicable compliance obligations."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s evidentiary assumption (that one-firm evidence is unusable without proving typicality and causal attribution) is invalid given broadly applicable compliance obligations.",
+                  "AG1’s first step uses that assumption to claim the target has not established substantial administrative/compliance burdens."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AG1 does not successfully undermine the target’s substantial-compliance-burden premise."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1 does not successfully undermine the target’s substantial-compliance-burden premise.",
+                  "AG1’s later steps depend on that premise to argue that the target cannot infer higher operating costs and downstream consumer harm."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AG1’s downstream inference to “no operating-cost increase / no consumer harm” fails to follow from its rebut premises."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s downstream inference to “no operating-cost increase / no consumer harm” fails to follow from its rebut premises.",
+                  "AG1’s overall conclusion is that the target’s “not good for society” conclusion is not justified on the basis of the rebut."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AG1’s conclusion that the target argument is not justified is not supported, so the rebut does not defeat the target. "
+            }
+          ],
+          "Conc": [
+            "AG1’s evidentiary assumption (that one-firm evidence is unusable without proving typicality and causal attribution) is invalid given broadly applicable compliance obligations.",
+            "AG1 does not successfully undermine the target’s substantial-compliance-burden premise.",
+            "AG1’s downstream inference to “no operating-cost increase / no consumer harm” fails to follow from its rebut premises.",
+            "AG1’s conclusion that the target argument is not justified is not supported, so the rebut does not defeat the target."
+          ],
+          "Ass": [
+            "If the regulation creates broadly applicable compliance obligations for regulated ISPs, then a regulated ISP’s documented extra compliance paperwork is evidence that the rules impose substantial administrative burdens, even without proving the statistic is identical across every ISP or isolating every concurrent factor."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-904443136a",
+      "target_field": "Ass"
+    }
+  ],
+  "final_answer": "Yes—on balance, net neutrality laws are good for society.\n\n### Why the benefits are the best-supported conclusion\nNet neutrality is plausibly beneficial under the core “nondiscriminatory access” rationale:\n\n1. **Preserves free speech / viewpoint access**\n   - Internet access providers control important network chokepoints (how data is routed, prioritized, and delivered).\n   - If an ISP has the **capability and incentive** to discriminate among content (e.g., by blocking, slowing, or otherwise disadvantaging some services/viewpoints), then rules that **meaningfully limit that ability** support users reaching a diverse range of viewpoints without ISP interference.\n   - The strongest objection raised was that enforcement may not be perfect and that discrimination could, in theory, occur through subtler channels. However, even if discrimination can’t be eliminated in every moment, legal constraints still reduce the **direct, leverage-heavy** methods (blocking/slowing/content-based prioritization) most responsible for viewpoint access harm.\n\n2. **Protects consumers’ access and quality**\n   - Without nondiscrimination protections, ISPs could impose **content-specific performance differences** and/or **content/provider-specific charges or surcharges**, changing real-world user experience and cost.\n   - Net neutrality-style protections are designed specifically to prevent that kind of content-specific acceleration/deceleration and associated provider-specific pricing/surcharging.\n\n3. **Promotes competition and market entry**\n   - ISPs (or ISP-affiliated entities) have incentives and leverage to favor their own services or partners.\n   - Net neutrality reduces the scope for that favoritism, improving the competitive conditions for emerging businesses.\n\n### Why the harms are not established strongly enough to overturn this\nThe main counterargument is that net neutrality imposes regulatory and cost/investment harms. While those concerns are real, the debate did not establish them at the level needed to conclude net neutrality is *not* good overall:\n\n1. **“The internet flourished without net neutrality” doesn’t settle the issue**\n   - Even if major services succeeded before, that doesn’t automatically show that **incremental** nondiscrimination rules are not worth the compliance costs.\n   - The integrated evaluation here specifically turns on whether the expected incremental benefits are outweighed by predictable harms; “it worked before” isn’t sufficient to rule that out.\n\n2. **Extra compliance paperwork (the “5,000 hours” claim) shows burden, but not clearly enough the decisive harm**\n   - The opposing case relied heavily on the reported extra paperwork hours.\n   - The debate showed real disagreement about whether that paperwork necessarily translates into higher operating costs and—critically—whether it **predictably reduces investment/upgrades enough** to make society worse overall.\n   - The burden-to-harm chain is contested: additional labor is evidence of cost pressure, but the decisive question is whether that cost pressure reliably reduces network investment or consumer access/quality *relative to the baseline* in a way that outweighs the viewpoint/consumer/competition benefits.\n\n3. **The “20–30% less investment” claim wasn’t conclusively tied to net neutrality in the debate record**\n   - The opposing position asserted that the mere threat of net-neutrality rules reduced ISP network upgrade incentives by 20–30% (between 2011 and 2015).\n   - However, within the provided debate material, the causal and predictive link—specifically that *net neutrality laws themselves* produce that level of investment reduction and that the resulting consumer-quality harm exceeds the societal benefits—was not fully established to the standard required for the “not good” conclusion.\n\n### The main unresolved point (and why I still conclude “good”)\nA legitimate unresolved issue is **how completely net neutrality enforcement can prevent discrimination via indirect mechanisms** (e.g., shaping outcomes through arrangements or management choices that may not look like straightforward blocking/slowing/provider preference). The responses argued that discriminatory favoritism would still be constrained when it functions as prohibited preferential treatment, but the debate did not fully eliminate uncertainty about the boundaries of those indirect channels.\n\nStill, even with that uncertainty, the best-supported conclusion is that net neutrality reduces ISP incentives and options for content/provider-based discrimination—supporting free speech, consumer experience, and competition—while the strongest harms were not demonstrated decisively enough (in the provided reasoning) to outweigh those benefits.\n\n**Bottom line:** Net neutrality laws are **good for society overall**, because the benefits align directly with the real leverage providers have over content reach, while the decisive harms (especially predictable investment/quality losses outweighing benefits) were not sufficiently established in the debate record.",
+  "integrated_rules": [
+    "Decision rule (net-neutrality-like rules): Evaluate the rule’s expected incremental effects against two competing sets of considerations.\n\n1) Benefit conditions (support “good” if met): Conclude the rule resembles net neutrality is good insofar as it protects society by enabling nondiscriminatory access, if ANY of the following holds:\n- (Free speech/viewpoint access) Network access providers have the capability and incentive to discriminate among online content, and the proposed rule meaningfully limits that ability so users can reach diverse viewpoints without provider interference.\n- (Consumer access/quality) Without nondiscrimination protections, ISPs could impose content-specific performance changes and/or content-specific charges/surcharges that alter real-world access/experience, and the proposed rule prevents such content-specific acceleration/deceleration and associated surcharges.\n- (Competition/market entry) ISPs (or affiliates) have incentives and leverage to favor certain services (including ISP-owned/preferred content), and the proposed rule reduces/removes that favoritism by enforcing equitable treatment of online services.\n\n2) Harm conditions (support “not good” if met): Conclude the rule resembles net neutrality is not good if ANY of the following holds:\n- (Costly regulatory/investment harm outweighs benefits) The rule would impose substantial compliance/regulatory burdens that predictably reduce investment or network-upgrade incentives, leading to higher costs and/or reduced access quality versus a no-net-neutrality baseline, with the expectation that societal benefits are insufficient to outweigh those harms in general.\n- (Unnecessary because internet flourished anyway) The internet ecosystem substantially flourished without net-neutrality-style rules (e.g., widespread innovation and major services’ success occurred), indicating the expected incremental benefits of the regulation do not justify the incremental compliance/investment costs/burdens.\n\n3) Output mapping:\n- If a Harm condition is met, the rule is “not good.”\n- Otherwise, if at least one Benefit condition is met, the rule is “good.”\n- If neither Benefit nor Harm conditions are met, the criteria do not determine the outcome."
+  ]
+}

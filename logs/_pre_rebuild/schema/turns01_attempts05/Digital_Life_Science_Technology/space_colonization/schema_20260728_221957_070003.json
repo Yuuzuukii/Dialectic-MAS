@@ -1,0 +1,602 @@
+{
+  "method": "schema",
+  "question": "Should We Colonize Space?",
+  "agent1_stance": "Your stance:\nYou support space colonization.\nYou believe space colonization can save our species from suffering and extinction by establishing humanity on multiple planets to protect against catastrophic extinction events on Earth.\nYou believe space colonization is the next logical step in space exploration and human growth, as expanding civilization outward has historically driven innovation and prevented societal stagnation.\nYou believe space colonization can exist alongside conservation efforts on Earth, and that pursuing space settlement need not divert resources from addressing environmental problems on our home planet.",
+  "agent2_stance": "Your stance:\nYou oppose space colonization.\nYou believe humans living in space is pure science fiction, as terraforming Mars would require transforming atmospheric conditions over 100,000+ years using technology that doesn't currently exist.\nYou believe Earth should be cleaned up first before we potentially destroy an extraterrestrial land, and that humanity's failure to maintain Earth demonstrates we're unqualified to colonize other worlds responsibly.\nYou believe life in space, even if possible, would be miserable, as colonists would face radiation exposure, extreme temperatures, isolation, and irreversible health deterioration.",
+  "metrics": {
+    "elapsed_seconds": 361.103,
+    "model": "gpt-5.4-nano",
+    "prompt_tokens": 140686,
+    "cached_tokens": 57600,
+    "completion_tokens": 45720,
+    "total_tokens": 186406,
+    "total_cost_usd": 0.074919
+  },
+  "dialogue_history": [
+    {
+      "id": "arg-b32ad2c9a9",
+      "agent": "AG1",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Catastrophic events on Earth that could eliminate humanity are possible.",
+                  "If humanity remains concentrated only on Earth, then such events could plausibly result in total human extinction."
+                ],
+                "weak_negation": [
+                  "No evidence shows humanity can guarantee permanent survival on Earth despite such events."
+                ]
+              },
+              "consequent": "Earth-only concentration creates a major existential risk to the continued existence of humanity."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Earth-only concentration creates a major existential risk to the continued existence of humanity.",
+                  "Establishing human settlements on multiple planets would create redundancy, so that the loss of one planet would not necessarily eliminate all humanity."
+                ],
+                "weak_negation": [
+                  "No fact shows multi-planet settlement would be unable to preserve any viable human presence after an Earth catastrophe."
+                ]
+              },
+              "consequent": "Multi-planet colonization provides redundancy that lowers the probability of total human extinction."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Multi-planet colonization provides redundancy that lowers the probability of total human extinction.",
+                  "Preventing extinction of humanity is a decisive priority (so policies that reduce extinction risk should be supported)."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "We should colonize space—specifically to establish multi-planet redundancy that reduces existential extinction risk for humanity."
+            }
+          ],
+          "Conc": [
+            "Earth-only concentration creates a major existential risk to the continued existence of humanity.",
+            "Multi-planet colonization provides redundancy that lowers the probability of total human extinction.",
+            "We should colonize space—specifically to establish multi-planet redundancy that reduces existential extinction risk for humanity."
+          ],
+          "Ass": [
+            "No evidence shows humanity can guarantee permanent survival on Earth despite such events.",
+            "No fact shows multi-planet settlement would be unable to preserve any viable human presence after an Earth catastrophe."
+          ]
+        }
+      },
+      "status": "overruled"
+    },
+    {
+      "id": "arg-b8036fff3c",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s redundancy claim depends on treating it as plausible that multi-planet settlements can preserve viable human presence after an Earth catastrophe (it uses the weak idea that we lack “fact” showing the opposite).",
+                  "Terraforming Mars would require transforming atmospheric conditions over 100,000+ years using technology that doesn’t currently exist, so robust off-Earth human habitability is not something we can count on on relevant timescales.",
+                  "Because robust off-Earth habitability is not currently achievable, multi-planet “redundancy” would not reliably exist to carry humanity through an Earth catastrophe."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Robust multi-planet redundancy (viable human presence off Earth after an Earth catastrophe) is not realistically achievable on relevant timescales."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Robust multi-planet redundancy (viable human presence off Earth after an Earth catastrophe) is not realistically achievable on relevant timescales.",
+                  "If that redundancy is not reliably achievable, then multi-planet colonization cannot be justified as a way to lower the probability of total human extinction."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The inference that multi-planet colonization lowers existential extinction risk is not justified."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The inference that multi-planet colonization lowers existential extinction risk is not justified.",
+                  "Preventing extinction is a decisive priority, so policies should not be endorsed when they lack a justified basis for reducing extinction risk."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "We should not colonize space for the purpose of creating multi-planet redundancy to reduce existential extinction risk; we should address and secure Earth first."
+            }
+          ],
+          "Conc": [
+            "Robust multi-planet redundancy (viable human presence off Earth after an Earth catastrophe) is not realistically achievable on relevant timescales.",
+            "The inference that multi-planet colonization lowers existential extinction risk is not justified.",
+            "We should not colonize space for the purpose of creating multi-planet redundancy to reduce existential extinction risk; we should address and secure Earth first."
+          ],
+          "Ass": []
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-b32ad2c9a9",
+      "target_field": "Ass",
+      "target_statement": "No fact shows multi-planet settlement would be unable to preserve any viable human presence after an Earth catastrophe."
+    },
+    {
+      "id": "arg-2780110756",
+      "agent": "AG1",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s redundancy argument hinges on treating 'robust off-Earth human habitability' as something that depends on Mars terraforming over ~100,000+ years.",
+                  "The target’s key step is: because Mars terraforming is not currently achievable, multi-planet redundancy is not realistically achievable on relevant timescales."
+                ],
+                "weak_negation": [
+                  "The target does not show that multi-planet redundancy must rely on Earth-like, terraformed Mars rather than on other forms of off-Earth human presence (e.g., earlier-stage contained settlements)."
+                ]
+              },
+              "consequent": "Non-terraforming off-Earth human settlements could provide redundant viable presence without relying on Mars terraforming."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Non-terraforming off-Earth human settlements could provide redundant viable presence without relying on Mars terraforming.",
+                  "The target’s 'terraforming fails => redundancy fails' inference therefore does not establish the non-achievability of multi-planet redundancy on relevant timescales."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The target’s claim that robust multi-planet redundancy is not realistically achievable on relevant timescales is not supported by its terraforming-based reasoning."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s claim that robust multi-planet redundancy is not realistically achievable on relevant timescales is not supported by its terraforming-based reasoning.",
+                  "Preventing total human extinction is a decisive priority, so policies that plausibly reduce existential extinction risk should be supported."
+                ],
+                "weak_negation": [
+                  "The target provides no fact showing that all off-Earth settlement paths fail to preserve any viable human presence after an Earth catastrophe."
+                ]
+              },
+              "consequent": "We should colonize space to establish multi-planet redundancy that reduces existential extinction risk for humanity."
+            }
+          ],
+          "Conc": [
+            "Non-terraforming off-Earth human settlements could provide redundant viable presence without relying on Mars terraforming.",
+            "The target’s claim that robust multi-planet redundancy is not realistically achievable on relevant timescales is not supported by its terraforming-based reasoning.",
+            "We should colonize space to establish multi-planet redundancy that reduces existential extinction risk for humanity."
+          ],
+          "Ass": [
+            "The target does not show that multi-planet redundancy must rely on Earth-like, terraformed Mars rather than on other forms of off-Earth human presence (e.g., earlier-stage contained settlements).",
+            "The target provides no fact showing that all off-Earth settlement paths fail to preserve any viable human presence after an Earth catastrophe."
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-b8036fff3c",
+      "target_field": "Conc",
+      "target_statement": "We should not colonize space for the purpose of creating multi-planet redundancy to reduce existential extinction risk; we should address and secure Earth first."
+    },
+    {
+      "id": "arg-2a01a006fa",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s rebut depends on the assumption that non-terraforming, earlier-stage “contained settlements” could still preserve viable human presence after an Earth catastrophe.",
+                  "If humanity is eliminated on Earth, then Earth cannot provide continued resupply, replacement parts, or technical support to those off-Earth settlements."
+                ],
+                "weak_negation": [
+                  "The target provides no fact showing those off-Earth settlements could remain fully closed-loop and viable for long durations without any Earth-based support after an extinction-level event."
+                ]
+              },
+              "consequent": "Non-terraforming off-Earth contained settlements would not reliably function as redundancy that preserves viable human presence after an Earth catastrophe."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Non-terraforming off-Earth contained settlements would not reliably function as redundancy that preserves viable human presence after an Earth catastrophe.",
+                  "The target’s inference that colonization lowers existential extinction risk relies on treating that redundancy as reliable even without terraforming."
+                ],
+                "weak_negation": [
+                  "If the supposed redundancy is unreliable, then the claim that colonization lowers existential extinction risk is not supported."
+                ]
+              },
+              "consequent": "The target’s conclusion that colonization reduces existential extinction risk does not follow."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s conclusion that colonization reduces existential extinction risk does not follow.",
+                  "Preventing extinction is a decisive priority, so we should not endorse a policy on the basis of an unsupported risk-reduction claim."
+                ],
+                "weak_negation": [
+                  "The target does not provide an independent justification for colonization that outweighs the failure of its extinction-risk argument."
+                ]
+              },
+              "consequent": "We should not colonize space; Earth should be secured first."
+            }
+          ],
+          "Conc": [
+            "Non-terraforming off-Earth contained settlements would not reliably function as redundancy that preserves viable human presence after an Earth catastrophe.",
+            "The target’s conclusion that colonization reduces existential extinction risk does not follow.",
+            "We should not colonize space; Earth should be secured first."
+          ],
+          "Ass": [
+            "The target provides no fact showing those off-Earth settlements could remain fully closed-loop and viable for long durations without any Earth-based support after an extinction-level event.",
+            "If the supposed redundancy is unreliable, then the claim that colonization lowers existential extinction risk is not supported.",
+            "The target does not provide an independent justification for colonization that outweighs the failure of its extinction-risk argument."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-2780110756",
+      "target_field": "Ass"
+    },
+    {
+      "id": "arg-36fcff0a7d",
+      "agent": "AG2",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Humans living in space would face radiation exposure, extreme temperatures, and isolation.",
+                  "These conditions would produce miserable living conditions and irreversible health deterioration."
+                ],
+                "weak_negation": [
+                  "No evidence is provided that these harms can be fully prevented or made non-irreversible for colonists."
+                ]
+              },
+              "consequent": "Space-based human living would be miserable and would cause irreversible health deterioration."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Space-based human living would be miserable and would cause irreversible health deterioration.",
+                  "Policies should not be endorsed when they foreseeably impose severe, irreversible harms on the people who would be affected (the colonists)."
+                ],
+                "weak_negation": [
+                  "No fact is provided that colonists could avoid the severe harms that are irreversible."
+                ]
+              },
+              "consequent": "Colonizing space would foreseeably impose severe, irreversible harms on colonists."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Colonizing space would foreseeably impose severe, irreversible harms on colonists.",
+                  "If a proposal predictably inflicts severe, irreversible harm on its participants, then it is not justified as a societal course of action."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "We should not colonize space."
+            }
+          ],
+          "Conc": [
+            "Space-based human living would be miserable and would cause irreversible health deterioration.",
+            "Colonizing space would foreseeably impose severe, irreversible harms on colonists.",
+            "We should not colonize space."
+          ],
+          "Ass": [
+            "No evidence is provided that these harms can be fully prevented or made non-irreversible for colonists.",
+            "No fact is provided that colonists could avoid the severe harms that are irreversible."
+          ]
+        }
+      },
+      "status": "overruled"
+    },
+    {
+      "id": "arg-002106a570",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s key move is to interpret 'no evidence is provided that the harms can be fully prevented or made non-irreversible for colonists' as if it shows the harms are *foreseeably severe and irreversible* (i.e., that avoidance/impossibility is established).",
+                  "But absence of evidence for full prevention does not establish that the harms are unavoidable or irreversible, nor that they are foreseeably severe for colonists."
+                ],
+                "weak_negation": [
+                  "The target has not established a warrant for treating 'no evidence of full prevention' as evidence of inevitability/irreversibility."
+                ]
+              },
+              "consequent": "The target does not justify the claim that space colonization would foreseeably impose severe, irreversible harms on colonists."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target does not justify the claim that space colonization would foreseeably impose severe, irreversible harms on colonists.",
+                  "The target’s final 'We should not colonize space' depends on that foreseeably severe/irreversible-harm premise."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The target’s 'We should not colonize space' conclusion is not supported."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s 'We should not colonize space' conclusion is not supported.",
+                  "Preventing extinction of humanity is a decisive priority, and multi-planet colonization provides redundancy against Earth catastrophes that could otherwise eliminate humanity."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "We should colonize space (at least to pursue multi-planet redundancy that reduces existential extinction risk)."
+            }
+          ],
+          "Conc": [
+            "The target does not justify the claim that space colonization would foreseeably impose severe, irreversible harms on colonists.",
+            "The target’s 'We should not colonize space' conclusion is not supported.",
+            "We should colonize space (at least to pursue multi-planet redundancy that reduces existential extinction risk)."
+          ],
+          "Ass": [
+            "The target has not established a warrant for treating 'no evidence of full prevention' as evidence of inevitability/irreversibility."
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-36fcff0a7d",
+      "target_field": "Conc",
+      "target_statement": "We should not colonize space."
+    },
+    {
+      "id": "arg-87d02de4f3",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s ethical argument depends on treating the lack of evidence that harms can be “fully prevented or made non-irreversible” as a reason to conclude the harms are (i) foreseeably severe and (ii) irreversible for colonists.",
+                  "Absence of evidence for full prevention does not by itself establish that harms are unavoidable/foreseeable severe/irreversible; it only shows the target has not demonstrated preventability."
+                ],
+                "weak_negation": [
+                  "The target provides no independent warrant or evidence (beyond “no evidence”) establishing that colonists will foreseeably suffer severe, irreversible harms."
+                ]
+              },
+              "consequent": "The target relies on an unjustified assumption: that “no evidence of full prevention” warrants concluding the harms are foreseeably severe and irreversible."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target relies on an unjustified assumption: that “no evidence of full prevention” warrants concluding the harms are foreseeably severe and irreversible.",
+                  "If that assumption is removed, the target no longer has adequate support for its key harm premise about colonists."
+                ],
+                "weak_negation": [
+                  "No other support in the target argument remains to establish the foreseeably-severe-and-irreversible-harm premise."
+                ]
+              },
+              "consequent": "The target does not establish that space colonization would foreseeably impose severe, irreversible harms on colonists."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target does not establish that space colonization would foreseeably impose severe, irreversible harms on colonists.",
+                  "The target’s final conclusion (“We should not colonize space”) is warranted only if that harms premise is established."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The target’s conclusion (“We should not colonize space”) is not supported by its own argument."
+            }
+          ],
+          "Conc": [
+            "The target relies on an unjustified assumption: that “no evidence of full prevention” warrants concluding the harms are foreseeably severe and irreversible.",
+            "The target does not establish that space colonization would foreseeably impose severe, irreversible harms on colonists.",
+            "The target’s conclusion (“We should not colonize space”) is not supported by its own argument."
+          ],
+          "Ass": [
+            "The target provides no independent warrant or evidence (beyond “no evidence”) establishing that colonists will foreseeably suffer severe, irreversible harms.",
+            "No other support in the target argument remains to establish the foreseeably-severe-and-irreversible-harm premise."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-002106a570",
+      "target_field": "Ass"
+    },
+    {
+      "id": "arg-15b466356f",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s argument derives “irreversible” and “foreseeably” from an evidential gap: it uses only that “no evidence is provided that these harms can be fully prevented or made non-irreversible for colonists.”",
+                  "But lacking evidence that full prevention (or non-irreversibility) can be achieved does not establish that the harms are *foreseeably irreversible* (it could also mean uncertainty about the degree of mitigation or reversibility)."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The target fails to establish that space colonization would foreseeably impose severe, irreversible harms on colonists."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target fails to establish that space colonization would foreseeably impose severe, irreversible harms on colonists.",
+                  "The target’s final prohibition (“If a proposal predictably inflicts severe, irreversible harm… then it is not justified”) requires that foreseeably severe, irreversible harm is predictably inflicted."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The target’s inference to “We should not colonize space” does not follow from its premises."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s inference to “We should not colonize space” does not follow from its premises.",
+                  "Societal justification must account for major competing risks and benefits; in particular, preventing humanity-ending catastrophes is a decisive priority for our species."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "It is not justified to rule out space colonization on the basis of the target’s unsupported “foreseeably severe, irreversible harms” premise."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "It is not justified to rule out space colonization on the basis of the target’s unsupported “foreseeably severe, irreversible harms” premise.",
+                  "Space colonization (e.g., multi-planet redundancy) is plausibly aimed at reducing existential extinction risk for humanity, which is exactly the kind of decisive priority that can outweigh potential harms to early colonists."
+                ],
+                "weak_negation": [
+                  "The target does not show that colonization cannot be structured to reduce these harms while pursuing extinction-risk reduction."
+                ]
+              },
+              "consequent": "We should colonize space rather than accept “We should not colonize space” as supported by the target argument."
+            }
+          ],
+          "Conc": [
+            "The target fails to establish that space colonization would foreseeably impose severe, irreversible harms on colonists.",
+            "The target’s inference to “We should not colonize space” does not follow from its premises.",
+            "It is not justified to rule out space colonization on the basis of the target’s unsupported “foreseeably severe, irreversible harms” premise.",
+            "We should colonize space rather than accept “We should not colonize space” as supported by the target argument."
+          ],
+          "Ass": [
+            "The target does not show that colonization cannot be structured to reduce these harms while pursuing extinction-risk reduction."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-36fcff0a7d",
+      "target_field": "Ass",
+      "target_statement": "No evidence is provided that these harms can be fully prevented or made non-irreversible for colonists."
+    },
+    {
+      "id": "arg-7407001893",
+      "agent": "AG2",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s critique treats the target’s “irreversible/foreseeably” step as resting mainly on an evidential gap (“no evidence…”).",
+                  "But the target’s case also invokes inherent space-habitat hazards (radiation exposure, extreme temperatures, isolation) as the substantive basis for severe health harm that is not something we can reasonably assume will be fully reversible."
+                ],
+                "weak_negation": [
+                  "AG1 does not show that those inherent hazards would be mild/fully reversible such that they would fail to ground foreseeability."
+                ]
+              },
+              "consequent": "The target’s foreseeably severe, irreversible-harm claim is grounded in inherent space-habitat hazards, not merely in absence of evidence about full prevention."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s foreseeably severe, irreversible-harm claim is grounded in inherent space-habitat hazards, not merely in absence of evidence about full prevention.",
+                  "So AG1’s move from “not fully proven impossible to prevent” to “therefore not foreseeable irreversible harm” does not follow."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AG1’s undercut fails: the target’s premise supports the inference to foreseeably severe, irreversible harms on colonists."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s undercut fails: the target’s premise supports the inference to foreseeably severe, irreversible harms on colonists.",
+                  "AG1’s later claim that major competing benefits (e.g., extinction-risk reduction) could outweigh the harms depends on assuming the “foreseeably severe, irreversible harms” premise is not established (or is too weak to apply)."
+                ],
+                "weak_negation": [
+                  "AG1 does not provide a fact in the target’s premises that shows colonization would avoid those severe irreversible harms for colonists."
+                ]
+              },
+              "consequent": "Competing-benefit balancing does not defeat the target here because it does not address the foreseeably severe, irreversible harm premise to affected colonists."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Competing-benefit balancing does not defeat the target here because it does not address the foreseeably severe, irreversible harm premise to affected colonists.",
+                  "If a policy foreseeably imposes severe, irreversible harms on the people affected, then endorsing colonization is not justified."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "We should not colonize space."
+            }
+          ],
+          "Conc": [
+            "The target’s foreseeably severe, irreversible-harm claim is grounded in inherent space-habitat hazards, not merely in absence of evidence about full prevention.",
+            "AG1’s undercut fails: the target’s premise supports the inference to foreseeably severe, irreversible harms on colonists.",
+            "Competing-benefit balancing does not defeat the target here because it does not address the foreseeably severe, irreversible harm premise to affected colonists.",
+            "We should not colonize space."
+          ],
+          "Ass": [
+            "AG1 does not show that those inherent hazards would be mild/fully reversible such that they would fail to ground foreseeability.",
+            "AG1 does not provide a fact in the target’s premises that shows colonization would avoid those severe irreversible harms for colonists."
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-15b466356f",
+      "target_field": "Conc",
+      "target_statement": "We should colonize space rather than accept “We should not colonize space” as supported by the target argument"
+    },
+    {
+      "id": "arg-fe2f3cb21d",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s counterargument assumes that the presence of inherent hazards in space (radiation exposure, extreme temperatures, isolation) is enough to infer that space colonization would foreseeably impose *severe, irreversible* health deterioration on colonists.",
+                  "AG2’s support does not distinguish generic “hazards” from the specific, stronger claim that the harms are both (i) foreseeable in degree and (ii) irreversible for colonists under plausible mitigation."
+                ],
+                "weak_negation": [
+                  "AG2 provides no fact that colonization design decisions (life-support, shielding, medical monitoring, mission duration limits) would fail to prevent irreversibility or make severe irreversibility foreseeable for colonists."
+                ]
+              },
+              "consequent": "AG2’s inference from “inherent hazards” to “foreseeably severe, irreversible harms” is not established."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s inference from “inherent hazards” to “foreseeably severe, irreversible harms” is not established.",
+                  "AG2’s second step (“therefore AG1’s undercut fails”) depends on that established inference holding."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AG2’s claim that its premises support the inference to foreseeably severe, irreversible harms fails."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s claim that its premises support the inference to foreseeably severe, irreversible harms fails.",
+                  "AG2’s final recommendation (“We should not colonize space”) depends on that foreseeably severe/irreversible premise."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AG2’s conclusion to not colonize space is undermined by the failure of its central foreseeably-irreversible-harm premise."
+            }
+          ],
+          "Conc": [
+            "AG2’s inference from “inherent hazards” to “foreseeably severe, irreversible harms” is not established.",
+            "AG2’s claim that its premises support the inference to foreseeably severe, irreversible harms fails.",
+            "AG2’s conclusion to not colonize space is undermined by the failure of its central foreseeably-irreversible-harm premise."
+          ],
+          "Ass": [
+            "AG2 provides no fact that colonization design decisions (life-support, shielding, medical monitoring, mission duration limits) would fail to prevent irreversibility or make severe irreversibility foreseeable for colonists."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-7407001893",
+      "target_field": "Ass"
+    }
+  ],
+  "final_answer": "No—at least not in the sense of launching large-scale, permanent human colonization meant to create “multi-planet redundancy” against Earth catastrophe. What we should do instead is **defer large-scale colonization and pursue limited, well-tested off-Earth habitation and exploration alongside aggressive Earth cleanup**, once feasibility and stewardship responsibilities are clearly met.\n\n### Why the “support colonization” case doesn’t yet clear the bar\n**1) The extinction-risk–redundancy benefit isn’t credibly established (condition on meaningful redundancy).**  \nThe pro case relies on the idea that settling multiple planets would create redundancy such that if Earth is catastrophically damaged, humanity still survives elsewhere. But the strongest objections in the discussion target exactly this: after an extinction-level or near-extinction-level Earth event, off-world settlements would need to be **reliably viable for long durations without Earth-based resupply and support**, and the debate did not establish that plausibly achievable “redundancy” exists right now.  \n- Mars terraforming is not credibly achievable in any relevant timeframe (the “100,000+ years” point), and even “non-terraforming” off-world settlements face the question of **closed-loop viability** under worst-case Earth-loss conditions.\n\nSo the key premise—**foreseeably meaningful multi-location survival that reduces existential extinction risk**—is not sufficiently supported under current capability expectations.\n\n**2) Current capability constraints make the plan speculative in the relevant timeframe (non-speculativeness / feasibility condition).**  \nEven if we can imagine habitats, life-support, and space infrastructure, the specific aim of making off-world settlements robust enough to function as an existential backstop depends on capabilities that aren’t currently demonstrated at the scale and reliability required. In the debate, the pro side’s best counter was essentially: “maybe not terraforming—maybe contained settlements.” But it didn’t show those settlements would remain viable across the extreme scenario (Earth catastrophe + long-term autonomy).  \nGiven that, **large-scale colonization cannot be justified on extinction-risk grounds “as things stand.”**\n\n### Why the “oppose colonization” case also isn’t a clean total win—but still points to deferral\n**3) Foreseeable severe, irreversible harms are plausible, but not conclusively demonstrated as “foreseeably severe and irreversible” in all designs (harm condition).**  \nThe anti side argues space living would be miserable and cause irreversible health deterioration (radiation, extreme temperature stress, isolation). That is a serious concern. However, the discussion also raised a methodological problem: the harm argument leaned heavily on “no evidence of full prevention/irreversibility,” and the pro side attacked the step from “hazards exist” to “severe and irreversible harm is foreseeably inflicted despite plausible mitigation.”  \nSo the debate didn’t fully settle the strict version of the harm condition.\n\nStill, **even without proving inevitability of irreversibility**, the uncertainty plus the known hazards is enough to support **risk-avoidant policy**: don’t treat colonization as justified until we have clear medical/environmental protections and demonstrated life-support/health outcomes.\n\n**4) Earth-first moral priority and stewardship competence strongly favors limiting/delaying (home-environment responsibility condition).**  \nThe anti side claims Earth cleanup should come first and that our failures at maintaining Earth show we’re unqualified to manage other worlds responsibly. The pro side counters that colonization can coexist with Earth conservation. But the debate didn’t provide evidence that we have:\n- **urgent Earth stewardship duties resolved enough** that launching planetary-scale off-world projects won’t risk displacement or resource diversion in practice, or  \n- **demonstrated competence** in planetary-environmental stewardship (including contamination control and long-term ecological/health responsibility).\n\nUnder the provided framework, **when home-world duties are still urgent and stewardship competence isn’t demonstrated, the right move is to defer or limit external projects.**\n\n### Bottom line\n- **Don’t proceed with large-scale space colonization as an extinction-risk redundancy strategy yet**, because the redundancy premise isn’t credibly supported and the feasibility depends on capabilities not currently demonstrated for the worst-case scenario.  \n- **Defer and limit** until (a) off-world settlements can be shown to be genuinely viable and autonomous under catastrophe-like conditions, and (b) we have credible, responsibility-centered stewardship plans that match or exceed our remaining duties on Earth.\n\nThis gives credit to the pro side’s point about preserving humanity and driving innovation, but it rejects treating those hopes as sufficient justification **before** the key redundancy and stewardship requirements are met.",
+  "integrated_rules": [
+    "Reusable decision rule for a proposed space-colonization policy:\n\nGiven evidence about the proposal, evaluate whether the following four condition-sets apply (using a comparable evidential standard for the “best case” benefits and the “worst case” drawbacks):\n\n(1) Extinction-risk–redundancy condition: The proposal would create meaningful multi-location (e.g., multi-planet) redundancy that foreseeably reduces the probability of total human extinction, and reducing existential extinction risk is an overriding priority that the proposal advances.\n\n(2) Foreseeable severe-irreversible harm condition: The proposal foreseeably inflicts severe, irreversible harms on the people who would carry it out (or otherwise participate), including (at least) extreme environmental hazards and predictable lasting health deterioration (e.g., radiation exposure, harsh physiological/temperature stress, isolation).\n\n(3) Feasibility / non-speculativeness condition: The proposal’s expected outcome depends on technologies or transformative capabilities that are not currently available and/or would require feasibility levels not credibly achievable in the relevant timeframe (i.e., it relies on speculative or non-existent capabilities).\n\n(4) Home-environment moral priority / responsibility condition: Before/alongside analogous external projects, there are urgent unresolved duties to remediate or protect the home environment (e.g., clean-up/protection), and the proposal risks environmental degradation elsewhere or effectively externalizes stewardship responsibility while home-world harms remain unaddressed; additionally, a lack of demonstrated competence to manage planetary-environmental stewardship should not be assumed away.\n\nOutcome mapping (including conflicts):\n- If (1) holds and (2), (3), and (4) do not hold (or can be credibly mitigated so the relevant conditions no longer apply), then **support space colonization** as an extinction-risk–reducing strategy via redundancy.\n- If (2) holds (foreseeable severe, irreversible participant harms are not credibly avoidable), then **reject or oppose the proposal (or defer it until those harms are not severe/irreversible)**.\n- If (3) holds (the plan relies on non-credible, speculative, or not-credibly-achievable capabilities in the relevant timeframe), then **do not treat space colonization as justified / do not proceed** under current capability constraints.\n- If (4) holds (urgent home-world remediation/stewardship duties remain unaddressed and/or responsibility/competence is not demonstrated), then **defer or limit space colonization efforts** until home-world duties are met and responsible competence is demonstrated.\n\nIf more than one condition applies simultaneously, apply the same evidence standard and compare the magnitude/breadth/likelihood/irreversibility of (1)’s redundancy benefit against the disqualifying force of (2)–(4), and follow the consequents for any condition that remains genuinely applicable after considering credible mitigation."
+  ]
+}

@@ -1,0 +1,873 @@
+{
+  "method": "schema",
+  "question": "Is the Internet \"Making Us Stupid\"?",
+  "agent1_stance": "Your stance:\nYou support the view that the Internet is making us stupid.\nYou believe the Internet degrades human intelligence by subverting patience and concentration.\nYou believe IQ measurements have dropped approximately 7 points per generation since the mid-1970s, coinciding with Internet expansion, indicating that people are getting dumber.\nYou believe reliance on Internet-connected devices causes atrophy of everyday abilities, and that young adults increasingly lack knowledge of basic tasks because digital tools have replaced traditional skill-building.",
+  "agent2_stance": "Your stance:\nYou oppose the view that the Internet is making us stupid.\nYou believe society has repeatedly feared new technologies such as the printing press, telephone, radio, and television, yet these fears proved largely unfounded, suggesting current Internet concerns follow a predictable but ultimately mistaken pattern.\nYou believe the Internet provides invaluable information access for marginalized populations, including disabled individuals and older adults who benefit from remote communication and resource availability previously unavailable.\nYou believe shifting how we access and process information isn't inherently harmful, and that leveraging external resources for fact-storage allows mental capacity for more important problems.",
+  "metrics": {
+    "elapsed_seconds": 372.741,
+    "model": "gpt-5.4-nano",
+    "prompt_tokens": 280440,
+    "cached_tokens": 140032,
+    "completion_tokens": 59216,
+    "total_tokens": 339656,
+    "total_cost_usd": 0.104902
+  },
+  "dialogue_history": [
+    {
+      "id": "arg-e67c011906",
+      "agent": "AG1",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "IQ tests have shown an approximately 7-point-per-generation drop in average scores since the mid-1970s."
+                ],
+                "weak_negation": [
+                  "unless these declines are fully an artifact of test or cultural measurement changes unrelated to actual cognition."
+                ]
+              },
+              "consequent": "Average measured cognitive ability (IQ) has declined by about 7 points per generation since the mid-1970s."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Average measured cognitive ability (IQ) has declined by about 7 points per generation since the mid-1970s.",
+                  "Internet expansion greatly increased widespread, persistent internet access starting around that period."
+                ],
+                "weak_negation": [
+                  "unless factors other than internet expansion better explain the timing and magnitude of the IQ decline."
+                ]
+              },
+              "consequent": "Internet expansion is a likely contributing driver of that observed IQ decline."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Average measured cognitive ability (IQ) has declined by about 7 points per generation since the mid-1970s.",
+                  "Internet expansion is a likely contributing driver of that observed IQ decline."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Therefore, the Internet is making us stupid (degrading average human intelligence)."
+            }
+          ],
+          "Conc": [
+            "Average measured cognitive ability (IQ) has declined by about 7 points per generation since the mid-1970s.",
+            "Internet expansion is a likely contributing driver of that observed IQ decline.",
+            "Therefore, the Internet is making us stupid (degrading average human intelligence)."
+          ],
+          "Ass": [
+            "unless these declines are fully an artifact of test or cultural measurement changes unrelated to actual cognition.",
+            "unless factors other than internet expansion better explain the timing and magnitude of the IQ decline."
+          ]
+        }
+      },
+      "status": "justified"
+    },
+    {
+      "id": "arg-8cc407473f",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s first step hinges on IQ-score drops being a real cognitive decline rather than test/cultural measurement artifacts, but it only states this as an open possibility ('unless … artifact') and does not actually rule artifacts out.",
+                  "The target does not provide evidence that IQ-change reflects underlying intelligence rather than changes in schooling, test-taking, or measurement methods."
+                ],
+                "weak_negation": [
+                  "unless the target supplies independent support that the observed IQ decline is not primarily an artifact of measurement/culture."
+                ]
+              },
+              "consequent": "The target does not establish that the IQ decline reflects a genuine decline in intelligence rather than measurement/cultural artifact."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s causal step treats the timing of internet expansion alongside IQ changes as enough to infer a 'likely contributing driver,' but without first establishing that the IQ decline itself is real.",
+                  "If the IQ decline is not established as real, then using internet timing to infer causation does not get off the ground."
+                ],
+                "weak_negation": [
+                  "unless the target rules out major alternative contemporaneous explanations for the trend and justifies a causal link beyond temporal correlation."
+                ]
+              },
+              "consequent": "The target’s temporal-correlation-to-causation inference is unsupported."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s temporal-correlation-to-causation inference is unsupported.",
+                  "The target therefore has not demonstrated the required causal premise that internet use degrades average intelligence."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Therefore, the claim that the Internet is making us stupid is not supported by the target’s argument."
+            }
+          ],
+          "Conc": [
+            "The target does not establish that the IQ decline reflects a genuine decline in intelligence rather than measurement/cultural artifact.",
+            "The target’s temporal-correlation-to-causation inference is unsupported.",
+            "Therefore, the claim that the Internet is making us stupid is not supported by the target’s argument."
+          ],
+          "Ass": [
+            "unless the target supplies independent support that the observed IQ decline is not primarily an artifact of measurement/culture.",
+            "unless the target rules out major alternative contemporaneous explanations for the trend and justifies a causal link beyond temporal correlation."
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-e67c011906",
+      "target_field": "Conc",
+      "target_statement": "Therefore, the Internet is making us stupid (degrading average human intelligence)."
+    },
+    {
+      "id": "arg-c7d477c9e4",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s rebuttal treats the target’s argument as failing unless the IQ decline is demonstrated to be non-artifactual (i.e., purely a real intelligence decline rather than test/cultural measurement effects).",
+                  "The target’s conclusion is that the Internet is making us “stupid” in the sense of degrading average measured cognitive performance (via IQ scores), not that it is proving a perfectly pure, measurement-free cognitive-process mechanism."
+                ],
+                "weak_negation": [
+                  "unless it is true that any measurement contribution to IQ-score decline necessarily invalidates using IQ-score decline as evidence about worsening cognitive performance relevant to “making us stupid.”"
+                ]
+              },
+              "consequent": "IQ-score declines still function as evidence of worsening measured cognitive performance consistent with “making us stupid,” even if some portion could involve measurement or cultural factors."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "IQ-score declines still function as evidence of worsening measured cognitive performance consistent with “making us stupid,” even if some portion could involve measurement or cultural factors.",
+                  "Therefore, AG2’s assumed requirement that the target must establish the decline is purely non-artifactual is unnecessary for undermining the target’s “making us stupid” conclusion as framed."
+                ],
+                "weak_negation": [
+                  "unless AG2 is applying a stricter standard than the target’s framing actually requires (operationalized “stupidity” via measured performance)."
+                ]
+              },
+              "consequent": "AG2’s key assumption—“the target must prove the IQ decline is not primarily an artifact”—does not actually undercut the target’s conclusion as stated."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2 also challenges the target’s causal step by claiming the target must rule out major alternative contemporaneous explanations beyond temporal correlation.",
+                  "But if IQ-score decline itself is sufficient evidence for worsening measured cognitive performance (per rule 1), then the target’s “likely contributing driver” claim does not require ruling out every alternative to defeat AG2’s critique of causal inference."
+                ],
+                "weak_negation": [
+                  "unless AG2’s standard requires near-exhaustive elimination of alternatives even for a merely “likely” contribution rather than a definitive sole cause."
+                ]
+              },
+              "consequent": "AG2’s overall rebuttal fails as an undercut, because its core demands (pure non-artifactual IQ decline and extensive alternative-elimination) are not required by the target’s conditional and “likely contributing driver” framing."
+            }
+          ],
+          "Conc": [
+            "IQ-score declines still function as evidence of worsening measured cognitive performance consistent with “making us stupid,” even if some portion could involve measurement or cultural factors.",
+            "AG2’s key assumption—“the target must prove the IQ decline is not primarily an artifact”—does not actually undercut the target’s conclusion as stated.",
+            "AG2’s overall rebuttal fails as an undercut, because its core demands (pure non-artifactual IQ decline and extensive alternative-elimination) are not required by the target’s conditional and “likely contributing driver” framing."
+          ],
+          "Ass": [
+            "unless it is true that any measurement contribution to IQ-score decline necessarily invalidates using IQ-score decline as evidence about worsening cognitive performance relevant to “making us stupid.”",
+            "unless AG2 is applying a stricter standard than the target’s framing actually requires (operationalized “stupidity” via measured performance).",
+            "unless AG2’s standard requires near-exhaustive elimination of alternatives even for a merely “likely” contribution rather than a definitive sole cause."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-8cc407473f",
+      "target_field": "Ass"
+    },
+    {
+      "id": "arg-22c6ab2ed7",
+      "agent": "AG2",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The argument that the Internet is making us stupid relies on a general expectation that adopting a new information/communication technology will degrade cognition or intelligence."
+                ],
+                "weak_negation": [
+                  "unless the Internet is uniquely different in a way that makes those prior expectations non-informative."
+                ]
+              },
+              "consequent": "In past adoption of major communication technologies (printing press, telephone, radio, television), widespread fears of cognitive harm proved largely unfounded."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "In past adoption of major communication technologies (printing press, telephone, radio, television), widespread fears of cognitive harm proved largely unfounded.",
+                  "Those cases are relevant evidence about whether technology-induced “stupidity” panics tend to be correct."
+                ],
+                "weak_negation": [
+                  "unless the Internet’s effects are uniquely different from those prior cases in a way that blocks the analogy."
+                ]
+              },
+              "consequent": "This historical pattern undercuts the move from “new information tool” to “lower intelligence.”"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "This historical pattern undercuts the move from “new information tool” to “lower intelligence.”",
+                  "So, without strong independent evidence, the “making us stupid” claim does not get established by prediction/analogy alone."
+                ],
+                "weak_negation": [
+                  "unless proponents provide compelling causal evidence of a genuine, population-level intelligence decline attributable to the Internet."
+                ]
+              },
+              "consequent": "The claim that the Internet is making us stupid is not supported by the sort of reasoning it typically relies on (tech-panic analogy)."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The claim that the Internet is making us stupid is not supported by the sort of reasoning it typically relies on (tech-panic analogy)."
+                ],
+                "weak_negation": [
+                  "unless strong independent evidence shows the Internet causes a real intelligence decline."
+                ]
+              },
+              "consequent": "No—on the available reasoning, the Internet is not making us stupid; today’s “stupidity” fears follow a repeat historical pattern that usually turns out mistaken."
+            }
+          ],
+          "Conc": [
+            "In past adoption of major communication technologies (printing press, telephone, radio, television), widespread fears of cognitive harm proved largely unfounded.",
+            "This historical pattern undercuts the move from “new information tool” to “lower intelligence.”",
+            "The claim that the Internet is making us stupid is not supported by the sort of reasoning it typically relies on (tech-panic analogy).",
+            "No—on the available reasoning, the Internet is not making us stupid; today’s “stupidity” fears follow a repeat historical pattern that usually turns out mistaken."
+          ],
+          "Ass": [
+            "unless the Internet is uniquely different in a way that makes those prior expectations non-informative.",
+            "unless the Internet’s effects are uniquely different from those prior cases in a way that blocks the analogy.",
+            "unless proponents provide compelling causal evidence of a genuine, population-level intelligence decline attributable to the Internet.",
+            "unless strong independent evidence shows the Internet causes a real intelligence decline."
+          ]
+        }
+      },
+      "status": "justified"
+    },
+    {
+      "id": "arg-2ae441459c",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s historical-premise step asserts that “widespread fears of cognitive harm [from printing press/telephone/radio/TV] proved largely unfounded,” but it does not show comparable population-level measures of intelligence/cognition for those technologies.",
+                  "The target also does not rule out that what counted as “proved unfounded” might ignore subtler harms like slower skill acquisition/attention or partial skill atrophy rather than total intelligence decline."
+                ],
+                "weak_negation": [
+                  "unless the target supplies evidence that those panics were actually tested against population-level cognitive/intelligence outcomes and that any relevant harms would have been detected and counted as “cognitive harm.”"
+                ]
+              },
+              "consequent": "The target’s historical-premise (“tech-panic fears proved largely unfounded”) is not established as a reliable, population-level cognitive/intelligence finding."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s historical-premise (“tech-panic fears proved largely unfounded”) is not established as a reliable, population-level cognitive/intelligence finding.",
+                  "The target then uses that premise as the main underwriting for undercutting the move from “new information tool” to “lower intelligence.”"
+                ],
+                "weak_negation": [
+                  "unless the analogy can still be justified even without reliable population-level cognitive/intelligence evidence from those historical cases."
+                ]
+              },
+              "consequent": "Therefore, the target’s historical analogy does not warrant concluding the Internet is not making us stupid."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Therefore, the target’s historical analogy does not warrant concluding the Internet is not making us stupid.",
+                  "The target’s final “No—... Internet is not making us stupid” conclusion depends on that analogy/underwriting rather than on independent causal evidence in its argument."
+                ],
+                "weak_negation": [
+                  "unless the target provides independent causal support that the Internet does not lower intelligence."
+                ]
+              },
+              "consequent": "The target’s conclusion (“the Internet is not making us stupid”) fails to be supported by the argument it gives."
+            }
+          ],
+          "Conc": [
+            "The target’s historical-premise (“tech-panic fears proved largely unfounded”) is not established as a reliable, population-level cognitive/intelligence finding.",
+            "Therefore, the target’s historical analogy does not warrant concluding the Internet is not making us stupid.",
+            "The target’s conclusion (“the Internet is not making us stupid”) fails to be supported by the argument it gives."
+          ],
+          "Ass": [
+            "unless the target supplies evidence that those panics were actually tested against population-level cognitive/intelligence outcomes and that any relevant harms would have been detected and counted as “cognitive harm.”",
+            "unless the analogy can still be justified even without reliable population-level cognitive/intelligence evidence from those historical cases.",
+            "unless the target provides independent causal support that the Internet does not lower intelligence."
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-22c6ab2ed7",
+      "target_field": "Conc",
+      "target_statement": "No—on the available reasoning, the Internet is not making us stupid; today’s “stupidity” fears follow a repeat historical pattern that usually turns out mistaken."
+    },
+    {
+      "id": "arg-81d98b3c5c",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s undercut relies on the assumption that, to count historical “tech-panic fears” as “proved largely unfounded,” we would need comparable population-level intelligence/cognition measurement (e.g., IQ-testing) and exhaustive detection of every subtler cognitive harm mechanism."
+                ],
+                "weak_negation": [
+                  "unless those historical panics can still function as evidence against a later “new tech makes us stupid” prediction even when the later test yardsticks (like IQ) aren’t identical."
+                ]
+              },
+              "consequent": "AG1’s “comparable IQ / exhaustive detection” evidentiary standard is too strict to invalidate using earlier ‘proved largely unfounded’ tech-panics as undercutting evidence for an intelligence-decline prediction."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s “comparable IQ / exhaustive detection” evidentiary standard is too strict to invalidate using earlier ‘proved largely unfounded’ tech-panics as undercutting evidence for an intelligence-decline prediction.",
+                  "Historically, major communication-technology introductions produced widespread fears of cognitive harm but those fears did not materialize as a sustained, population-level intelligence decline attributable to the technologies."
+                ],
+                "weak_negation": [
+                  "unless those historical fears were actually vindicated by later, clearly population-wide cognitive-intelligence deterioration that would support the same ‘making us stupid’ mechanism."
+                ]
+              },
+              "consequent": "So the historical record being “largely unfounded” is informative against the Internet-stupidity mechanism even without identical IQ metrics across eras."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "So the historical record being “largely unfounded” is informative against the Internet-stupidity mechanism even without identical IQ metrics across eras.",
+                  "AG1’s argument that AG2’s historical analogy fails depends on that overly strict comparability/exhaustiveness assumption."
+                ],
+                "weak_negation": [
+                  "unless AG1 supplies a different, non-evidentiary reason why the analogy still cannot rationally support rejecting the ‘Internet makes us stupid’ claim."
+                ]
+              },
+              "consequent": "Therefore, AG1’s undercutting argument does not succeed as a rebuttal to AG2’s historical-analogy rationale against ‘the Internet is making us stupid.’"
+            }
+          ],
+          "Conc": [
+            "AG1’s “comparable IQ / exhaustive detection” evidentiary standard is too strict to invalidate using earlier ‘proved largely unfounded’ tech-panics as undercutting evidence for an intelligence-decline prediction.",
+            "So the historical record being “largely unfounded” is informative against the Internet-stupidity mechanism even without identical IQ metrics across eras.",
+            "Therefore, AG1’s undercutting argument does not succeed as a rebuttal to AG2’s historical-analogy rationale against ‘the Internet is making us stupid.’"
+          ],
+          "Ass": [
+            "unless those historical panics can still function as evidence against a later “new tech makes us stupid” prediction even when the later test yardsticks (like IQ) aren’t identical.",
+            "unless those historical fears were actually vindicated by later, clearly population-wide cognitive-intelligence deterioration that would support the same ‘making us stupid’ mechanism.",
+            "unless AG1 supplies a different, non-evidentiary reason why the analogy still cannot rationally support rejecting the ‘Internet makes us stupid’ claim."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-2ae441459c",
+      "target_field": "Ass"
+    },
+    {
+      "id": "arg-1a192e2f49",
+      "agent": "AG1",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Measurable cognitive ability shows a real decline: average IQ-type scores drop by about 7 points per generation since the mid-1970s.",
+                  "Internet expansion increased persistent widespread access starting around that period."
+                ],
+                "weak_negation": [
+                  "unless the observed decline is not actually cognitive/intelligence decline but mainly measurement artifact."
+                ]
+              },
+              "consequent": "There is a real, IQ-type cognitive decline temporally associated with Internet expansion (mid-1970s onward)."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Internet-connected device use subverts patience and concentration (it promotes constant distraction and shallow, rapidly switching attention).",
+                  "Reliance on digital tools replaces traditional skill-building and leads to atrophy of everyday competencies."
+                ],
+                "weak_negation": [
+                  "unless these effects are too small, too temporary, or not causally linked to lower intelligence (rather than merely changing behavior)."
+                ]
+              },
+              "consequent": "Internet use provides strong independent causal indicators (degraded patience/concentration and atrophy of everyday competencies) relevant to intelligence."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "There is a real, IQ-type cognitive decline temporally associated with Internet expansion (mid-1970s onward).",
+                  "Internet use provides strong independent causal indicators (degraded patience/concentration and atrophy of everyday competencies) relevant to intelligence."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Therefore, the Internet is making people less intelligent—i.e., “making us stupid.”"
+            }
+          ],
+          "Conc": [
+            "There is a real, IQ-type cognitive decline temporally associated with Internet expansion (mid-1970s onward).",
+            "Internet use provides strong independent causal indicators (degraded patience/concentration and atrophy of everyday competencies) relevant to intelligence.",
+            "Therefore, the Internet is making people less intelligent—i.e., “making us stupid.”"
+          ],
+          "Ass": [
+            "unless the observed decline is not actually cognitive/intelligence decline but mainly measurement artifact.",
+            "unless these effects are too small, too temporary, or not causally linked to lower intelligence (rather than merely changing behavior)."
+          ]
+        }
+      },
+      "status": "defensible"
+    },
+    {
+      "id": "arg-263299d310",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s core causal move treats the “about 7 points per generation” IQ-type drop since the mid-1970s as a real cognitive/intelligence decline, but IQ-type trends can be substantially altered by measurement/construct shifts (e.g., changing test composition/norming, demographic composition, education/lifestyle differences) that affect what the tests are actually capturing.",
+                  "Because the target does not provide robust evidence ruling out those measurement/construct-shift explanations, the step from “IQ-type scores decline” to “intelligence declines” is not established in its argument."
+                ],
+                "weak_negation": [
+                  "unless the target supplies independent justification that the trend reflects a genuine, stable intelligence decline rather than shifts in how intelligence is operationalized across cohorts."
+                ]
+              },
+              "consequent": "The target does not establish that the IQ-type trend reflects a genuine intelligence decline rather than measurement/construct shifts."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "If the target has not established that the IQ-type decline is a genuine intelligence decline, then the target’s later inference from that unvalidated decline (plus internet timing) to “internet causes lower intelligence” lacks the required causal premise.",
+                  "The target also does not show that the attention/patience and “atrophy” indicators they cite translate into a population-level drop in underlying intelligence rather than merely changing skills or behaviors."
+                ],
+                "weak_negation": [
+                  "unless the target independently demonstrates that internet use causes the unvalidated intelligence decline (not just related behavioral changes)."
+                ]
+              },
+              "consequent": "The target’s argument fails to provide the needed causal support for a real, intelligence-level decline attributable to the Internet."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s final conclusion (“Internet is making people less intelligent”) depends on the previously unsupported causal support.",
+                  "Therefore, the target’s conclusion does not follow from its premises."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Therefore, the Internet is not established as making us stupid by the target’s argument."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s causal story depends on the unproven inference that IQ-type declines are genuine intelligence declines and that internet use causes them at population level."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Therefore, the target’s conclusion is not supported."
+            }
+          ],
+          "Conc": [
+            "The target does not establish that the IQ-type trend reflects a genuine intelligence decline rather than measurement/construct shifts.",
+            "The target’s argument fails to provide the needed causal support for a real, intelligence-level decline attributable to the Internet.",
+            "Therefore, the Internet is not established as making us stupid by the target’s argument.",
+            "Therefore, the target’s conclusion is not supported."
+          ],
+          "Ass": [
+            "unless the target supplies independent justification that the trend reflects a genuine, stable intelligence decline rather than shifts in how intelligence is operationalized across cohorts.",
+            "unless the target independently demonstrates that internet use causes the unvalidated intelligence decline (not just related behavioral changes)."
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-1a192e2f49",
+      "target_field": "Conc",
+      "target_statement": "Therefore, the Internet is making people less intelligent—i.e., “making us stupid.”"
+    },
+    {
+      "id": "arg-4c0c7cb876",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s rebuttal assumes AG1 did not supply independent causal support linking internet use to an intelligence-level decline (it invokes weak_negation conditions like “unless the target independently demonstrates…”).",
+                  "AG1’s Round-2 main argument explicitly supplies causal mechanisms: internet-connected device use degrades patience and concentration, and reliance on digital tools replaces traditional skill-building causing atrophy of everyday competencies (stated as intelligence-relevant indicators).",
+                  "AG1’s Round-2 main argument also asserts the premise that an IQ-type decline (~7 points per generation since the mid-1970s) is real and temporally associated with internet expansion."
+                ],
+                "weak_negation": [
+                  "unless these patience/concentration and competency-atrophy mechanisms are irrelevant to intelligence decline rather than indicators of it."
+                ]
+              },
+              "consequent": "AG1’s argument already provides the independent causal indicators (and real-IQ-type premise) that the target’s “unless…” conditions require."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s argument already provides the independent causal indicators (and real-IQ-type premise) that the target’s “unless…” conditions require.",
+                  "Therefore, the target’s claim that AG1 lacks the needed causal premise (i.e., that the causal link is merely behavioral or unshown) does not apply to AG1’s stated evidence."
+                ],
+                "weak_negation": [
+                  "unless the target is stipulating away these mechanisms by definition as non-cognitive, in a way that prevents any such causal indicators from counting."
+                ]
+              },
+              "consequent": "The target’s assumption that AG1 fails to demonstrate an internet-caused intelligence-level decline is undermined."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s assumption that AG1 fails to demonstrate an internet-caused intelligence-level decline is undermined.",
+                  "Since the target’s rebuttal relies on that missing-causal-support premise, its bottom-line undermining conclusion does not follow from its own structure."
+                ],
+                "weak_negation": [
+                  "unless the target rebuttal has additional, unstated defeaters not dependent on this missing-causal-support assumption."
+                ]
+              },
+              "consequent": "The target argument does not successfully defeat AG1’s claim that the Internet is making people less intelligent."
+            }
+          ],
+          "Conc": [
+            "AG1’s argument already provides the independent causal indicators (and real-IQ-type premise) that the target’s “unless…” conditions require.",
+            "The target’s assumption that AG1 fails to demonstrate an internet-caused intelligence-level decline is undermined.",
+            "The target argument does not successfully defeat AG1’s claim that the Internet is making people less intelligent."
+          ],
+          "Ass": [
+            "unless these patience/concentration and competency-atrophy mechanisms are irrelevant to intelligence decline rather than indicators of it.",
+            "unless the target is stipulating away these mechanisms by definition as non-cognitive, in a way that prevents any such causal indicators from counting.",
+            "unless the target rebuttal has additional, unstated defeaters not dependent on this missing-causal-support assumption."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-263299d310",
+      "target_field": "Ass"
+    },
+    {
+      "id": "arg-da37580508",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s key causal step treats “degraded patience/concentration” and “atrophy of everyday competencies” from Internet use as *strong independent causal indicators* of lower IQ-type intelligence.",
+                  "But the target does not justify why those behavioral/skill-displacement effects must translate into an underlying, IQ-type intelligence decline rather than reflecting a change in task preferences, attention allocation, or which skills are trained."
+                ],
+                "weak_negation": [
+                  "unless the target provides additional justification that these behavioral/competency changes causally reduce underlying IQ-type cognitive ability."
+                ]
+              },
+              "consequent": "Behavioral/competency changes alone are not established as evidence of lower IQ-type intelligence."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Behavioral/competency changes alone are not established as evidence of lower IQ-type intelligence.",
+                  "The target’s final conclusion depends on that “strong independent causal indicator” bridge from Internet-caused behavior/skills to an IQ-type decline."
+                ],
+                "weak_negation": [
+                  "unless the target supplies evidence that the purported indicators reflect a real, measurable IQ-type drop rather than reallocation of skills."
+                ]
+              },
+              "consequent": "The target does not establish the needed causal bridge from Internet-induced behavioral/competency changes to an IQ-type decline."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target does not establish the needed causal bridge from Internet-induced behavioral/competency changes to an IQ-type decline.",
+                  "So the target’s inference to a population-level intelligence decline attributable to the Internet is not supported by its own premises."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Therefore, the Internet is not established as making people less intelligent (i.e., “making us stupid”) by the target’s argument."
+            }
+          ],
+          "Conc": [
+            "Behavioral/competency changes alone are not established as evidence of lower IQ-type intelligence.",
+            "The target does not establish the needed causal bridge from Internet-induced behavioral/competency changes to an IQ-type decline.",
+            "Therefore, the Internet is not established as making people less intelligent (i.e., “making us stupid”) by the target’s argument."
+          ],
+          "Ass": [
+            "unless the target provides additional justification that these behavioral/competency changes causally reduce underlying IQ-type cognitive ability.",
+            "unless the target supplies evidence that the purported indicators reflect a real, measurable IQ-type drop rather than reallocation of skills."
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-1a192e2f49",
+      "target_field": "Conc",
+      "target_statement": "Therefore, the Internet is making people less intelligent—i.e., “making us stupid.”"
+    },
+    {
+      "id": "arg-f4ce1f3a7b",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s rebuttal relies on the assumption that the target still needs *extra justification* to treat “degraded patience/concentration” and “atrophy of everyday competencies” from Internet-connected device reliance as evidence of lower, IQ-type intelligence.",
+                  "The integrated rules for this debate explicitly treat those very indicators (degraded patience/concentration and/or loss/atrophy of everyday competencies due to replacement by digital tools) as examples of the “strong independent evidence” needed to conclude the Internet is making people less intelligent."
+                ],
+                "weak_negation": [
+                  "unless those integrated-rules indicators are ruled out as relevant to intelligence evidence in this debate."
+                ]
+              },
+              "consequent": "AG2’s assumption that these indicators require additional causal-bridge proof is unwarranted under the integrated rules."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s assumption that these indicators require additional causal-bridge proof is unwarranted under the integrated rules.",
+                  "Given that, AG2’s intermediate complaint that “behavioral/competency changes alone are not established as evidence of lower IQ-type intelligence” lacks support for defeating the target."
+                ],
+                "weak_negation": [
+                  "unless AG2 can show why the integrated-rules standard for “strong independent causal indicators” does not apply to the target’s stated indicators."
+                ]
+              },
+              "consequent": "AG2’s bridge/indicator objection fails to defeat the target’s support."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s bridge/indicator objection fails to defeat the target’s support.",
+                  "So the target’s combination of (i) a real IQ-type decline temporally associated with Internet expansion and (ii) those intelligence-relevant causal indicators suffices to conclude “making us stupid” under the integrated rules."
+                ],
+                "weak_negation": [
+                  "unless the target’s IQ-type decline premise or its temporal association premise is rejected in this debate."
+                ]
+              },
+              "consequent": "Therefore, AG2’s argument does not successfully defeat the target conclusion that the Internet is making people less intelligent."
+            }
+          ],
+          "Conc": [
+            "AG2’s assumption that these indicators require additional causal-bridge proof is unwarranted under the integrated rules.",
+            "AG2’s bridge/indicator objection fails to defeat the target’s support.",
+            "Therefore, AG2’s argument does not successfully defeat the target conclusion that the Internet is making people less intelligent."
+          ],
+          "Ass": [
+            "unless those integrated-rules indicators are ruled out as relevant to intelligence evidence in this debate.",
+            "unless AG2 can show why the integrated-rules standard for “strong independent causal indicators” does not apply to the target’s stated indicators.",
+            "unless the target’s IQ-type decline premise or its temporal association premise is rejected in this debate."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-da37580508",
+      "target_field": "Ass"
+    },
+    {
+      "id": "arg-2feb5d6980",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s last step relies on a causal leap: it treats temporal association (mid-1970s onward) plus “indicators” (degraded patience/concentration and atrophy of everyday competencies) as *strong independent causal evidence* that the Internet reduces underlying IQ-type intelligence in the population.",
+                  "But those cited indicators are essentially contemporaneous behavioral/skill effects; the target does not show they are (i) developmentally formative during childhood/adolescence (when IQ-type abilities are shaped), (ii) persistent/irreversible over years (not just short-term attention effects), and (iii) specifically reflected in the IQ-type constructs measured across cohorts."
+                ],
+                "weak_negation": [
+                  "unless the target provides evidence that these indicators are persistent, developmentally relevant, and map onto the IQ-type abilities that the generational score trend is supposed to measure."
+                ]
+              },
+              "consequent": "The target does not establish that its attention/competency indicators are strong, generationally relevant causal evidence of an IQ-type intelligence decline."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target does not establish that its attention/competency indicators are strong, generationally relevant causal evidence of an IQ-type intelligence decline.",
+                  "Therefore, its inference from “temporal association + indicators” to “Internet causes people to be less intelligent” lacks the needed causal support."
+                ],
+                "weak_negation": [
+                  "unless the missing developmental/persistence/mapping evidence is supplied."
+                ]
+              },
+              "consequent": "The target’s causal leap to “Internet makes us stupid” is unsupported by its own premises."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s causal leap to “Internet makes us stupid” is unsupported by its own premises.",
+                  "So the target’s argument does not establish the conclusion that the Internet is making people less intelligent."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Therefore, the target’s conclusion (“the Internet is making people less intelligent—i.e., making us stupid”) is not established by its argument."
+            }
+          ],
+          "Conc": [
+            "The target does not establish that its attention/competency indicators are strong, generationally relevant causal evidence of an IQ-type intelligence decline.",
+            "The target’s causal leap to “Internet makes us stupid” is unsupported by its own premises.",
+            "Therefore, the target’s conclusion (“the Internet is making people less intelligent—i.e., making us stupid”) is not established by its argument."
+          ],
+          "Ass": [
+            "unless the target provides evidence that these indicators are persistent, developmentally relevant, and map onto the IQ-type abilities that the generational score trend is supposed to measure.",
+            "unless the missing developmental/persistence/mapping evidence is supplied."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-1a192e2f49",
+      "target_field": "Ass",
+      "target_statement": "Therefore, the Internet is making people less intelligent—i.e., “making us stupid.”"
+    },
+    {
+      "id": "arg-e6faac01cc",
+      "agent": "AG1",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target attack claims my causal step needs extra proof that the attention/competency indicators are (i) developmentally formative in childhood/adolescence, (ii) persistent/irreversible over years, and (iii) specifically map onto IQ-type constructs.",
+                  "My premises already include (a) Internet expansion increasing *persistent* widespread access since around the mid-1970s, and (b) ongoing device use that subverts patience/concentration plus (c) digital-tool replacement that produces atrophy of everyday competencies."
+                ],
+                "weak_negation": [
+                  "unless those ongoing, competence-replacing effects do not causally affect the kinds of cognitive operations IQ-type tests reflect."
+                ]
+              },
+              "consequent": "The target’s “missing developmental/persistence/mapping evidence” objection sets an overly strict requirement, because my premises already supply persistence (via sustained access/use) and intelligence-relevant targets (patience/concentration and competence atrophy)."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s “missing developmental/persistence/mapping evidence” objection sets an overly strict requirement, because my premises already supply persistence (via sustained access/use) and intelligence-relevant targets (patience/concentration and competence atrophy).",
+                  "IQ-type performance is shaped by sustained attention/executive control and the efficiency of everyday cognitive skills that tests are meant to correlate with, so indicators of degraded attention and skill atrophy can serve as the needed intelligence-relevant causal bridge."
+                ],
+                "weak_negation": [
+                  "unless the attention/competency indicators fail to reduce the underlying cognitive abilities that IQ-type measures track."
+                ]
+              },
+              "consequent": "So the attention/competency indicators are sufficient to function as the causal bridge to lower IQ-type cognitive performance, without requiring a separate proof that they were developmentally formative or irreversible in every case."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "So the attention/competency indicators are sufficient to function as the causal bridge to lower IQ-type cognitive performance, without requiring a separate proof that they were developmentally formative or irreversible in every case.",
+                  "There is an observed real IQ-type decline of about 7 points per generation since the mid-1970s, temporally associated with Internet expansion."
+                ],
+                "weak_negation": [
+                  "unless the observed IQ-type decline is primarily a measurement artifact, or the Internet-linked attention/competence effects are too small to matter for IQ-type cognition."
+                ]
+              },
+              "consequent": "Therefore, the Internet is causally contributing to the observed IQ-type cognitive decline."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Therefore, the Internet is causally contributing to the observed IQ-type cognitive decline."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Therefore, the Internet is making people less intelligent—i.e., “making us stupid.”"
+            }
+          ],
+          "Conc": [
+            "The target’s “missing developmental/persistence/mapping evidence” objection sets an overly strict requirement, because my premises already supply persistence (via sustained access/use) and intelligence-relevant targets (patience/concentration and competence atrophy).",
+            "So the attention/competency indicators are sufficient to function as the causal bridge to lower IQ-type cognitive performance, without requiring a separate proof that they were developmentally formative or irreversible in every case.",
+            "Therefore, the Internet is causally contributing to the observed IQ-type cognitive decline.",
+            "Therefore, the Internet is making people less intelligent—i.e., “making us stupid.”"
+          ],
+          "Ass": [
+            "unless those ongoing, competence-replacing effects do not causally affect the kinds of cognitive operations IQ-type tests reflect.",
+            "unless the attention/competency indicators fail to reduce the underlying cognitive abilities that IQ-type measures track.",
+            "unless the observed IQ-type decline is primarily a measurement artifact, or the Internet-linked attention/competence effects are too small to matter for IQ-type cognition."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-46c05f1326",
+      "target_field": "Ass",
+      "target_statement": "unless the target provides evidence that these indicators are persistent, developmentally relevant, and map onto the IQ-type abilities that the generational score trend is supposed to measure."
+    },
+    {
+      "id": "arg-46c05f1326",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s step 2 calls degraded patience/concentration and atrophy of everyday competencies “strong independent causal indicators … relevant to intelligence.”",
+                  "However, the argument does not establish that these indicators are (i) *net* causally negative for IQ-type performance rather than partly offset by compensation (e.g., learning to work around distraction) or by scaffolding from digital tools (external aids that support reasoning/search), nor that (ii) they specifically measure the underlying reasoning abilities IQ-type tests are intended to capture rather than mainly reflecting short-term task engagement/interference effects."
+                ],
+                "weak_negation": [
+                  "unless the target provides evidence that the net effect of these internet-mediated changes is reliably negative for IQ-type cognition and that they map onto the same underlying cognitive abilities measured by IQ-type tests (not just behavioral/task interference)."
+                ]
+              },
+              "consequent": "The target has not shown that its cited indicators are strong, intelligence-relevant causal indicators rather than ambiguous (possibly compensated/scaffolded) performance/interference signals."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target has not shown that its cited indicators are strong, intelligence-relevant causal indicators rather than ambiguous (possibly compensated/scaffolded) performance/interference signals.",
+                  "Its step 3 then infers an IQ-type intelligence decline from (step 1 real IQ-type decline) plus these indicators as causal support."
+                ],
+                "weak_negation": [
+                  "unless the indicators still justify the inference even if their net effect on underlying IQ-type abilities is not established."
+                ]
+              },
+              "consequent": "Without evidence that the indicators are net-negative and intelligence-relevant (not merely compensable or task-interference), the target’s inference to “internet causes people to be less intelligent” is unsupported."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Without evidence that the indicators are net-negative and intelligence-relevant (not merely compensable or task-interference), the target’s inference to “internet causes people to be less intelligent” is unsupported.",
+                  "Therefore, the conclusion does not follow from the argument’s own premises."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Therefore, the Internet is not established as making people less intelligent by the target’s argument."
+            }
+          ],
+          "Conc": [
+            "The target has not shown that its cited indicators are strong, intelligence-relevant causal indicators rather than ambiguous (possibly compensated/scaffolded) performance/interference signals.",
+            "Without evidence that the indicators are net-negative and intelligence-relevant (not merely compensable or task-interference), the target’s inference to “internet causes people to be less intelligent” is unsupported.",
+            "Therefore, the Internet is not established as making people less intelligent by the target’s argument."
+          ],
+          "Ass": [
+            "unless the target provides evidence that the net effect of these internet-mediated changes is reliably negative for IQ-type cognition and that they map onto the same underlying cognitive abilities measured by IQ-type tests (not just behavioral/task interference).",
+            "unless the indicators still justify the inference even if their net effect on underlying IQ-type abilities is not established."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-1a192e2f49",
+      "target_field": "Ass",
+      "target_statement": "Therefore, the Internet is making people less intelligent—i.e., “making us stupid.”"
+    }
+  ],
+  "final_answer": "The claim that the Internet is “making us stupid” is **not established by the available evidence**—at least not in the strong, population-level sense implied by “degrading average intelligence.”\n\n### Why this conclusion is best supported\n1. **The key “intelligence decline” premise is disputed**\n   - The pro-stupidity argument leans heavily on an alleged **~7-point-per-generation IQ-type decline since the mid-1970s**, coinciding with Internet expansion.\n   - A major objection raised in the discussion is that **IQ-type trends can be strongly affected by measurement/construct issues** (what the tests effectively measure across cohorts, changes in testing/normalization, differences in education and environment, etc.).\n   - Because the debate did not resolve whether the IQ decline reflects a **genuine decline in underlying intelligence** rather than shifts in what IQ tests capture, the core empirical foundation remains uncertain.\n\n2. **The causal link from Internet use to “lower intelligence” is not firmly shown**\n   - The pro-stupidity side also argues that heavy Internet/device use:\n     - **degrades patience and concentration**, and\n     - causes **atrophy of everyday competencies** because digital tools replace traditional skill-building.\n   - Even if those behavioral/skill effects are real, the remaining burden is to show they translate into a **measurable, underlying intelligence decrement** at the population level (not merely changed performance style, task preferences, or reliance on external aids).\n   - The discussion highlighted that the causal bridge from “attention/competence changes” to “IQ-type intelligence decline” is not conclusively established.\n\n3. **The opposing side’s evidence concerns (tech-panic analogies) don’t prove “no harm,” but they do support skepticism**\n   - The anti-stupidity side notes that societies have repeatedly feared cognitive harm from major media/communication technologies (printing press, telephone, radio, television) and that those fears often turned out overblown.\n   - This historical point alone doesn’t refute the Internet-specific mechanisms, but it reinforces that **prediction-by-analogy is not enough** without strong causal proof—especially when the empirical “IQ decline” premise itself is contested.\n\n4. **There are plausible neutral or beneficial cognitive effects that undercut a “stupid by default” framing**\n   - The anti-stupidity side emphasizes that the Internet can provide major cognitive benefits through:\n     - improved **information access** for marginalized groups (including disabled people and older adults),\n     - and **external fact-storage/offloading**, which can free mental resources for other tasks rather than simply eroding capacity.\n   - This doesn’t automatically show the Internet improves intelligence, but it matters because it weakens the idea that Internet use inevitably causes generalized cognitive decline.\n\n### Bottom line\nEven though it’s plausible that some forms of Internet use can harm **attention, patience, or certain everyday skills**, the debate did not adequately settle two crucial questions required to conclude “the Internet is making us stupid” in the strong sense of a real, population-wide intelligence decline caused by Internet use:\n- whether the alleged **IQ-type generational decline** is truly a real intelligence decline (not measurement/construct shifts), and\n- whether the Internet’s attention/skill effects reliably produce that kind of measured intelligence drop.\n\nGiven those unresolved points, the most defensible answer is: **No—the Internet making people less intelligent is not established by the available evidence.**",
+  "integrated_rules": [
+    "If (1) measurable cognitive ability shows a real decline over time (e.g., large, sustained IQ-type decreases or closely related intelligence measures) that is temporally associated with Internet expansion, AND (2) there is strong independent evidence that Internet use is a causal contributor to that decline (not just correlation), including supporting indicators such as degraded patience/concentration and/or loss/atrophy of everyday competencies due to replacement by digital tools—then conclude the Internet is making people less intelligent (“making us stupid”).\n\nOR, if (3) the “Internet makes us stupid” argument is primarily based on historical tech-panic reasoning (the claim that current fears follow a repeat pattern that often proves unfounded) and/or lacks strong independent causal evidence of a real intelligence decline attributable to Internet use—potentially reinforced by evidence that Internet-based information access and external fact-storage/offloading produce neutral or beneficial cognitive outcomes—then conclude the Internet is not established as making people less intelligent (the stupidity fears are not supported by the available evidence).",
+    "[Unintegrated, one-sided position from AG1's final round] If There is a real, IQ-type cognitive decline temporally associated with Internet expansion (mid-1970s onward).; Internet use provides strong independent causal indicators (degraded patience/concentration and atrophy of everyday competencies) relevant to intelligence., then Therefore, the Internet is making people less intelligent—i.e., “making us stupid.”"
+  ]
+}

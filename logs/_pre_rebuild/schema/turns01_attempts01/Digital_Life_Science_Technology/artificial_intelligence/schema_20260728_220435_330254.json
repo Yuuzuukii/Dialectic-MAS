@@ -1,0 +1,442 @@
+{
+  "method": "schema",
+  "question": "Is Artificial Intelligence Good for Society?",
+  "agent1_stance": "Your stance:\nYou support artificial intelligence.\nYou believe AI can make everyday life more enjoyable and convenient, while improving our health and standard of living.\nYou believe AI makes work easier for students and professionals alike.\nYou believe AI helps marginalized groups by offering accessibility for people with disabilities.\nYou believe AI can improve workplace safety.",
+  "agent2_stance": "Your stance:\nYou oppose artificial intelligence.\nYou believe AI is harming the economic well-being of many people and businesses.\nYou believe AI undermines critical thinking skills for students and adults alike.\nYou believe AI hurts racial minorities by repeating and exacerbating racism.\nYou believe AI poses dangerous privacy risks.",
+  "metrics": {
+    "elapsed_seconds": 235.657,
+    "model": "gpt-5.4-nano",
+    "prompt_tokens": 97743,
+    "cached_tokens": 24064,
+    "completion_tokens": 31238,
+    "total_tokens": 128981,
+    "total_cost_usd": 0.054265
+  },
+  "dialogue_history": [
+    {
+      "id": "arg-b485dc2eb7",
+      "agent": "AG1",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AI can function as an intelligent assistant that helps with daily routines and can support health-related tasks (e.g., guidance, triage, or access to accurate information)."
+                ],
+                "weak_negation": [
+                  "These AI capabilities do not fail to improve outcomes for the many people who use or benefit from them."
+                ]
+              },
+              "consequent": "AI can make everyday life more convenient and can improve health outcomes for many people."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI can make everyday life more convenient and can improve health outcomes for many people.",
+                  "Society’s overall standard of living and well-being rise when many people experience better health and greater day-to-day convenience."
+                ],
+                "weak_negation": [
+                  "Any negative impacts do not overwhelm these benefits at the societal level."
+                ]
+              },
+              "consequent": "AI therefore raises the standard of living and well-being that society experiences."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI therefore raises the standard of living and well-being that society experiences.",
+                  "If a technology improves a society’s standard of living and well-being, then that technology is good for society."
+                ],
+                "weak_negation": [
+                  "There is not a decisive moral reason to reject AI despite these broad social benefits."
+                ]
+              },
+              "consequent": "Yes—artificial intelligence is good for society."
+            }
+          ],
+          "Conc": [
+            "AI can make everyday life more convenient and can improve health outcomes for many people.",
+            "AI therefore raises the standard of living and well-being that society experiences.",
+            "Yes—artificial intelligence is good for society."
+          ],
+          "Ass": [
+            "These AI capabilities do not fail to improve outcomes for the many people who use or benefit from them.",
+            "Any negative impacts do not overwhelm these benefits at the societal level.",
+            "There is not a decisive moral reason to reject AI despite these broad social benefits."
+          ]
+        }
+      },
+      "status": "overruled"
+    },
+    {
+      "id": "arg-3d0149a68c",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target explicitly assumes: “Any negative impacts do not overwhelm these benefits at the societal level.”",
+                  "The target provides no concrete mechanism or evidence showing that, in aggregate, AI’s harms (e.g., economic disruption, privacy risks, biased outputs) are outweighed by its benefits."
+                ],
+                "weak_negation": [
+                  "The target’s balancing claim is not otherwise established elsewhere in the argument."
+                ]
+              },
+              "consequent": "It is not established that “Any negative impacts do not overwhelm these benefits at the societal level.”"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "It is not established that “Any negative impacts do not overwhelm these benefits at the societal level.”",
+                  "The target’s final conclusion depends on that balancing assumption supporting that AI’s net effect is good for society."
+                ],
+                "weak_negation": [
+                  "There is no independent support in the target argument for concluding AI is good for society without the unestablished balancing claim."
+                ]
+              },
+              "consequent": "Therefore, the target argument does not successfully establish that AI is good for society."
+            }
+          ],
+          "Conc": [
+            "It is not established that “Any negative impacts do not overwhelm these benefits at the societal level.”",
+            "Therefore, the target argument does not successfully establish that AI is good for society."
+          ],
+          "Ass": [
+            "The target’s balancing claim is not otherwise established elsewhere in the argument.",
+            "There is no independent support in the target argument for concluding AI is good for society without the unestablished balancing claim."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-b485dc2eb7",
+      "target_field": "Ass",
+      "target_statement": "Any negative impacts do not overwhelm these benefits at the societal level."
+    },
+    {
+      "id": "arg-25698bf2fe",
+      "agent": "AG1",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2 attacks the target by claiming that its “AI is good for society” conclusion depends *only* on the separate balancing assumption “Any negative impacts do not overwhelm these benefits at the societal level.”",
+                  "But the target argument also includes an independent internal step: “Society’s overall standard of living and well-being rise when many people experience better health and greater day-to-day convenience.”",
+                  "Given that step, the target’s pro-society conclusion follows from the claimed widespread benefits plus its stated balancing assumption; it is not exclusively dependent on proving a full empirical “no-overwhelm” comparison as AG2 treats it."
+                ],
+                "weak_negation": [
+                  "AG2 does not provide a reason that widespread benefits to health and convenience would not translate into societal well-being in the target argument’s stated conditional step."
+                ]
+              },
+              "consequent": "AG2’s premise that the target depends *only* on an unestablished “no-overwhelm” comparison is false."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s premise that the target depends *only* on an unestablished “no-overwhelm” comparison is false.",
+                  "The target argument’s conclusion “AI is good for society” is supported by its other stated internal route from benefits (convenience and health) to societal well-being to goodness of technology, together with its explicit balancing assumption."
+                ],
+                "weak_negation": [
+                  "AG2 has not shown the target’s balancing assumption is actually negated (i.e., that negative impacts *do* overwhelm the benefits at the societal level)."
+                ]
+              },
+              "consequent": "AG2’s attack does not defeat the target argument that AI is good for society."
+            }
+          ],
+          "Conc": [
+            "AG2’s premise that the target depends *only* on an unestablished “no-overwhelm” comparison is false.",
+            "AG2’s attack does not defeat the target argument that AI is good for society."
+          ],
+          "Ass": [
+            "AG2 does not provide a reason that widespread benefits to health and convenience would not translate into societal well-being in the target argument’s stated conditional step.",
+            "AG2 has not shown the target’s balancing assumption is actually negated (i.e., that negative impacts *do* overwhelm the benefits at the societal level)."
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-3d0149a68c",
+      "target_field": "Conc",
+      "target_statement": "Therefore, the target argument does not successfully establish that AI is good for society."
+    },
+    {
+      "id": "arg-6b49e6bcf5",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s counterargument relies on the idea that the target argument has an independent internal step: “Society’s overall standard of living and well-being rise when many people experience better health and greater day-to-day convenience.”",
+                  "Whether “society’s overall” well-being rises from “many people” gaining convenience/health is not entailed unless we assume the *other* effects of AI (harms that affect society as a whole) do not more than cancel these gains.",
+                  "The target argument provides that needed offset condition only in the balancing claim AG2 attacked: “Any negative impacts do not overwhelm these benefits at the societal level.”"
+                ],
+                "weak_negation": [
+                  "The target argument does not add any further premise that would let the “society-wide well-being rises” inference go through without presupposing that negative impacts don’t overwhelm the benefits."
+                ]
+              },
+              "consequent": "The target’s “society-wide well-being rises” step implicitly presupposes the same no-overwhelm balancing assumption AG2 targeted."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s “society-wide well-being rises” step implicitly presupposes the same no-overwhelm balancing assumption AG2 targeted.",
+                  "So AG1’s move claiming AG2’s “depends only on the balancing assumption” premise is false depends on an independent step that isn’t actually independent."
+                ],
+                "weak_negation": [
+                  "AG1’s attempt to isolate a separate justification for the final pro-society conclusion fails if the inference already relies on the balancing assumption."
+                ]
+              },
+              "consequent": "AG2’s key structural undercut premise is correct: the target’s pro-society conclusion effectively depends on the unestablished no-overwhelm balancing claim."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s key structural undercut premise is correct: the target’s pro-society conclusion effectively depends on the unestablished no-overwhelm balancing claim.",
+                  "Therefore, AG1’s conclusion that AG2’s attack “does not defeat” the target rests on the false assumption that AG2’s dependency charge was wrong."
+                ],
+                "weak_negation": [
+                  "AG1’s alternative complaint that AG2 hasn’t shown the balancing claim is “actually negated” does not remove the undercut, because AG2 attacked the lack of justification for the balancing step the argument relies on."
+                ]
+              },
+              "consequent": "AG1’s counterargument should be rejected because it leaves in place the unestablished balancing dependence that supports AG2’s undercut."
+            }
+          ],
+          "Conc": [
+            "The target’s “society-wide well-being rises” step implicitly presupposes the same no-overwhelm balancing assumption AG2 targeted.",
+            "AG2’s key structural undercut premise is correct: the target’s pro-society conclusion effectively depends on the unestablished no-overwhelm balancing claim.",
+            "AG1’s counterargument should be rejected because it leaves in place the unestablished balancing dependence that supports AG2’s undercut."
+          ],
+          "Ass": [
+            "The target argument does not add any further premise that would let the “society-wide well-being rises” inference go through without presupposing that negative impacts don’t overwhelm the benefits.",
+            "AG1’s attempt to isolate a separate justification for the final pro-society conclusion fails if the inference already relies on the balancing assumption.",
+            "AG1’s alternative complaint that AG2 hasn’t shown the balancing claim is “actually negated” does not remove the undercut, because AG2 attacked the lack of justification for the balancing step the argument relies on."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-25698bf2fe",
+      "target_field": "Ass"
+    },
+    {
+      "id": "arg-813793b0d6",
+      "agent": "AG2",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AI systems are commonly deployed in ways that collect and process users’ interactions, inferences, and related profiles rather than operating only on fully non-personal inputs."
+                ],
+                "weak_negation": [
+                  "These deployments do not typically succeed in completely avoiding collection/processing of personal data."
+                ]
+              },
+              "consequent": "AI deployments typically expose and process large amounts of personal data."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI deployments typically expose and process large amounts of personal data.",
+                  "Processing large amounts of personal data predictably increases the likelihood of disclosure, misuse, surveillance, and reidentification errors."
+                ],
+                "weak_negation": [
+                  "These privacy failure modes do not reliably disappear in real-world use (e.g., after model updates, integration with other datasets, or user-side data leaks)."
+                ]
+              },
+              "consequent": "AI predictably creates dangerous privacy risks that harm societal well-being."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI predictably creates dangerous privacy risks that harm societal well-being.",
+                  "If a technology predictably undermines societal well-being through dangerous privacy risks, then that technology is not good for society."
+                ],
+                "weak_negation": [
+                  "There is no sufficiently general, decisive justification that cancels out predictable privacy harms to societal well-being."
+                ]
+              },
+              "consequent": "A technology that predictably creates dangerous privacy risks that harm societal well-being is not good for society."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "A technology that predictably creates dangerous privacy risks that harm societal well-being is not good for society.",
+                  "AI predictably creates dangerous privacy risks that harm societal well-being."
+                ],
+                "weak_negation": [
+                  "There is no countervailing basis in this argument that would overturn the general link between privacy-harm and “not good for society.”"
+                ]
+              },
+              "consequent": "Therefore, artificial intelligence is not good for society."
+            }
+          ],
+          "Conc": [
+            "AI deployments typically expose and process large amounts of personal data.",
+            "AI predictably creates dangerous privacy risks that harm societal well-being.",
+            "A technology that predictably creates dangerous privacy risks that harm societal well-being is not good for society.",
+            "Therefore, artificial intelligence is not good for society."
+          ],
+          "Ass": [
+            "These deployments do not typically succeed in completely avoiding collection/processing of personal data.",
+            "These privacy failure modes do not reliably disappear in real-world use (e.g., after model updates, integration with other datasets, or user-side data leaks).",
+            "There is no sufficiently general, decisive justification that cancels out predictable privacy harms to societal well-being.",
+            "There is no countervailing basis in this argument that would overturn the general link between privacy-harm and “not good for society.”"
+          ]
+        }
+      },
+      "status": "defensible"
+    },
+    {
+      "id": "arg-9cabaed09b",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s argument depends on the assumption: “There is no sufficiently general, decisive justification that cancels out predictable privacy harms to societal well-being.”",
+                  "AI can improve many people’s everyday convenience and health-related outcomes, and when this happens society’s well-being and standard of living rise.",
+                  "Predictable privacy harms are not automatically decisive against a technology’s social value because they can be reduced in practice by safeguards (e.g., data minimization/limits on retention, access controls, encryption, and other privacy-preserving design choices)."
+                ],
+                "weak_negation": [
+                  "The target provides no basis that these types of mitigations are impossible or guaranteed to fail in general across real deployments."
+                ]
+              },
+              "consequent": "A countervailing basis exists: AI’s broad benefits to health/convenience can be paired with safeguards that reduce privacy harms enough to block the “no decisive justification” claim."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "A countervailing basis exists: AI’s broad benefits to health/convenience can be paired with safeguards that reduce privacy harms enough to block the “no decisive justification” claim.",
+                  "If a countervailing basis exists that undermines the premise that privacy harms are decisive, then the inference from “privacy harms” to “not good for society” is not warranted as a general conclusion."
+                ],
+                "weak_negation": [
+                  "The target does not establish that privacy harms necessarily remain decisive despite safeguards and tradeoffs."
+                ]
+              },
+              "consequent": "The target’s move from “predictable privacy risks harm well-being” to “AI is not good for society” does not follow."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s move from “predictable privacy risks harm well-being” to “AI is not good for society” does not follow.",
+                  "AI improves everyday convenience and health outcomes for many, which can raise society’s overall well-being and living standards."
+                ],
+                "weak_negation": [
+                  "Given the argument defect (no justified basis to treat privacy harms as socially decisive), there is no reason within the target’s own framework to reject AI’s social value."
+                ]
+              },
+              "consequent": "Therefore, artificial intelligence is good for society."
+            }
+          ],
+          "Conc": [
+            "A countervailing basis exists: AI’s broad benefits to health/convenience can be paired with safeguards that reduce privacy harms enough to block the “no decisive justification” claim.",
+            "The target’s move from “predictable privacy risks harm well-being” to “AI is not good for society” does not follow.",
+            "Therefore, artificial intelligence is good for society."
+          ],
+          "Ass": [
+            "The target provides no basis that these types of mitigations are impossible or guaranteed to fail in general across real deployments.",
+            "The target does not establish that privacy harms necessarily remain decisive despite safeguards and tradeoffs.",
+            "Given the argument defect (no justified basis to treat privacy harms as socially decisive), there is no reason within the target’s own framework to reject AI’s social value."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-813793b0d6",
+      "target_field": "Ass",
+      "target_statement": "There is no sufficiently general, decisive justification that cancels out predictable privacy harms to societal well-being."
+    },
+    {
+      "id": "arg-7eff6da5dd",
+      "agent": "AG2",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target attack’s countervailing basis depends on the idea that safeguards can “reduce privacy harms enough” to block the claim that privacy harms are socially decisive.",
+                  "The target does not establish that safeguards reliably prevent AI’s predictable privacy failure modes across real-world deployments (it only argues mitigations are not shown to be impossible or guaranteed to fail)."
+                ],
+                "weak_negation": [
+                  "Listing example safeguards is not enough to show they *generally* cancel predictable privacy harms at the societal level."
+                ]
+              },
+              "consequent": "The target does not establish that safeguards can generally prevent AI’s predictable privacy harms at the societal level."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target does not establish that safeguards can generally prevent AI’s predictable privacy harms at the societal level.",
+                  "The target’s “countervailing basis” is required to undercut the premise that privacy harms can have decisive weight for the social “goodness” judgment."
+                ],
+                "weak_negation": [
+                  "If the countervailing basis is not established, then the target cannot override the privacy-based case on its own terms."
+                ]
+              },
+              "consequent": "Therefore the target attack lacks the countervailing basis needed to cancel the decisive weight of privacy harms."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Therefore the target attack lacks the countervailing basis needed to cancel the decisive weight of privacy harms.",
+                  "The target’s final pro-AI conclusion depends on treating privacy harms as non-decisive once mitigations exist."
+                ],
+                "weak_negation": [
+                  "With that dependency unmet, the target’s inference to “AI is good for society” fails to rebut the privacy-based conclusion."
+                ]
+              },
+              "consequent": "Therefore the target’s step from “privacy can be mitigated” to “AI is good for society” does not defeat the privacy-based case."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Therefore the target’s step from “privacy can be mitigated” to “AI is good for society” does not defeat the privacy-based case.",
+                  "My prior main argument concludes that a technology that predictably creates dangerous privacy risks that harm societal well-being is not good for society."
+                ],
+                "weak_negation": [
+                  "The target attack introduces no new premise that overturns that conditional link once its alleged countervailing basis is unsupported."
+                ]
+              },
+              "consequent": "Artificial intelligence is not good for society."
+            }
+          ],
+          "Conc": [
+            "The target does not establish that safeguards can generally prevent AI’s predictable privacy harms at the societal level.",
+            "Therefore the target attack lacks the countervailing basis needed to cancel the decisive weight of privacy harms.",
+            "Therefore the target’s step from “privacy can be mitigated” to “AI is good for society” does not defeat the privacy-based case.",
+            "Artificial intelligence is not good for society."
+          ],
+          "Ass": [
+            "Listing example safeguards is not enough to show they *generally* cancel predictable privacy harms at the societal level.",
+            "If the countervailing basis is not established, then the target cannot override the privacy-based case on its own terms.",
+            "With that dependency unmet, the target’s inference to “AI is good for society” fails to rebut the privacy-based conclusion.",
+            "The target attack introduces no new premise that overturns that conditional link once its alleged countervailing basis is unsupported."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-9cabaed09b",
+      "target_field": "Ass",
+      "target_statement": "Predictable privacy harms are not automatically decisive against a technology’s social value because they can be reduced in practice by safeguards (data minimization/limits on retention, access controls, encryption, etc.)."
+    }
+  ],
+  "final_answer": "**Artificial intelligence is, on balance, *not good for society***—at least in the way it is typically deployed—because it **predictably creates serious privacy risks that harm societal well-being**, and the arguments for “it’s good” did not provide a sufficiently general, decisive basis for overriding that privacy-harm link.\n\n### Rationale (and how the key claimed benefits/harms were handled)\n\n#### 1) Privacy risk is a decisive “not good” condition\n- The strongest, most developed concern is that AI deployments **commonly collect and process personal data** and therefore **predictably increase** risks like disclosure, misuse/surveillance, and re-identification errors.\n- Under the evaluation framework used here, if a technology **predictably** creates **serious privacy risks harming societal well-being**, and there is **no articulated countervailing basis** that overturns that privacy→harm connection, the conclusion must be **NOT good for society**.\n- The pro-AI reply that privacy harms could be reduced by safeguards (e.g., data minimization, retention limits, encryption/access controls) **did not establish** that such safeguards **generally** succeed across real deployments in a way that would reliably cancel the predictable privacy harms at the societal level. In other words, it did not meet the “decisive countervailing basis” bar.\n\n**So even if AI brings real benefits, the privacy defeat condition stands.**\n\n#### 2) Claimed benefits from the pro side are real but not decisive against the privacy problem\nThe arguments supporting AI’s societal value included:\n- **More enjoyable/convenient everyday life and improved health/standard of living**\n- **Making work easier for students and professionals**\n- **Improving accessibility for marginalized groups (especially people with disabilities)**\n- **Improving workplace/everyday safety**\n\nThose benefits matter. However, given the privacy harm analysis is treated as decisive, the pro side’s case does **not** fully defeat the conclusion under the framework—because it did not show that, in typical real-world deployment, privacy harms are sufficiently eliminated or outweighed in the relevant sense.\n\n#### 3) Other harms mentioned on the opposing side further motivate the “not good” conclusion, even though privacy already suffices\nThe opposing view also asserted that AI can:\n- **Undermine economic well-being** of many people/businesses\n- **Undermine critical thinking** for students and adults\n- **Hurt racial minorities** by repeating/exacerbating racism\n- **Pose dangerous privacy risks**\n\nIn the debate record, **privacy risks were the best-supported and most developed**. Even so, the additional harms—economic disruption, cognitive/civic effects, and biased outputs—are consistent with the broader reasons someone might judge AI negatively. Crucially, **you don’t need** those additional harms to reach “not good” once the privacy defeat condition is met.\n\n---\n\n## Bottom line\n**AI is not good for society when its deployments predictably involve serious privacy harms without a demonstrated, generally effective countermeasure at the societal level.** The strongest available resolution points to privacy risk as the decisive factor, which the pro case did not fully neutralize.\n\nIf future AI deployment practices can be shown to **reliably prevent** (rather than merely mitigate) the predictable privacy failures at scale, then the conclusion could change—but based on what was actually established here, **the overall judgment is NOT good for society.**",
+  "integrated_rules": [
+    "Reusable decision rule for evaluating whether a proposed AI technology is good for society:\n\nEvaluate the technology by considering whether it predictably produces each of the following outcomes.\n\n1) Privacy-welfare defeat condition (NOT good):\n- If the technology predictably creates serious privacy risks that harm societal well-being, and within the argument there is no articulated countervailing basis to overturn that privacy-harm link, then conclude: NOT good for society.\n\n2) Large-scale welfare/autonomy/justice defeat conditions (NOT good):\n- Otherwise, if the technology predictably causes any of the following—(i) undermines the economic well-being of many people and businesses, OR (ii) predictably harms intellectual/civic capacities (e.g., undermining critical thinking), OR (iii) predictably worsens social-justice outcomes (e.g., repeats/exacerbates racial bias and discrimination)—in a way that is treated as outweighing the technology’s benefits in that argument, then conclude: NOT good for society.\n\n3) Net beneficial flourishing condition (GOOD, absent decisive rebuttal):\n- Otherwise, if the technology predictably improves overall human well-being and everyday practical quality of life (e.g., health, standard of living, convenience/enjoyment) OR predictably makes education/work more effective/easier OR predictably increases accessibility for marginalized groups with improved lived outcomes OR predictably improves workplace/everyday safety outcomes, then conclude: GOOD for society, unless the argument provides a decisive moral reason to reject the technology despite those benefits.\n\n(Conclusion mapping: the specific harm conditions above map to “not good”; the positive net-flourishing condition maps to “good” only when none of the harm defeat conditions apply and no decisive moral rebuttal is given.)"
+  ]
+}

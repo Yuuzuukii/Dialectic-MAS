@@ -1,0 +1,501 @@
+{
+  "method": "schema",
+  "question": "Is Social Media Good for Society?",
+  "agent1_stance": "Your stance:\nYou support social media.\nYou believe social media promotes community, security, and safety, both online and off, facilitating connection among people with shared interests across distances.\nYou believe social media encourages civic and political responsibility, as young people use these platforms to develop civic identities and participate in political activism with low-barrier-to-entry opportunities.\nYou believe social media bolsters inclusivity and diversity, both online and off, enabling marginalized groups—particularly LGBTQ+ youth—to explore identities and connect with peers.",
+  "agent2_stance": "Your stance:\nYou oppose social media.\nYou believe social media spurs digital addiction, cyberbullying, and mental health issues, creating dependency patterns and psychological harms particularly among adolescents and teens.\nYou believe social media encourages the spread of misinformation and dangerous fads, some of them lethal, as false information spreads rapidly and harmful challenges endanger users.\nYou believe social media increases privacy risks across the Internet, as user data collection and unauthorized data sharing compromise personal security and safety.",
+  "metrics": {
+    "elapsed_seconds": 258.506,
+    "model": "gpt-5.4-nano",
+    "prompt_tokens": 113918,
+    "cached_tokens": 52480,
+    "completion_tokens": 33618,
+    "total_tokens": 147536,
+    "total_cost_usd": 0.05536
+  },
+  "dialogue_history": [
+    {
+      "id": "arg-1f8ab73ab6",
+      "agent": "AG1",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Social media platforms enable people to discover, follow, and communicate with others who share interests even when they live far apart.",
+                  "Interactions on social media can support ongoing relationship-building rather than being limited to one-time contact."
+                ],
+                "weak_negation": [
+                  "It is not the case that social media interaction is always only superficial and never contributes to real community formation."
+                ]
+              },
+              "consequent": "Social media helps people form communities with shared interests across distance."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "If people can form communities with shared interests across distance (from the previous step), they can coordinate support and share safety-relevant information more effectively.",
+                  "Such community coordination can improve both online and offline safety and security outcomes (e.g., through peer support, alerts, and mutual help)."
+                ],
+                "weak_negation": [
+                  "It is not the case that safety and security benefits from community support are always absent where social media is used."
+                ]
+              },
+              "consequent": "Social media can enhance safety and security through community support and information sharing."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Social media helps people form communities with shared interests across distance (previous step).",
+                  "Social media can enhance safety and security through community support and information sharing (previous step)."
+                ],
+                "weak_negation": [
+                  "It is not the case that the societal downsides of social media fully cancel out these community and safety/security benefits in general."
+                ]
+              },
+              "consequent": "Social media is good for society because it strengthens community connection and improves safety and security both online and off."
+            }
+          ],
+          "Conc": [
+            "Social media helps people form communities with shared interests across distance.",
+            "Social media can enhance safety and security through community support and information sharing.",
+            "Social media is good for society because it strengthens community connection and improves safety and security both online and off."
+          ],
+          "Ass": [
+            "It is not the case that social media interaction is always only superficial and never contributes to real community formation.",
+            "It is not the case that safety and security benefits from community support are always absent where social media is used.",
+            "It is not the case that the societal downsides of social media fully cancel out these community and safety/security benefits in general."
+          ]
+        }
+      },
+      "status": "overruled"
+    },
+    {
+      "id": "arg-b6186fe0c4",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Social media creates or incentivizes digital addiction, cyberbullying, the rapid spread of misinformation/dangerous fads, and privacy risks through extensive data collection and sharing.",
+                  "These harms are systemic platform effects (e.g., attention-grabbing engagement and virality incentives), so they occur broadly rather than being confined to rare edge cases."
+                ],
+                "weak_negation": [
+                  "It is not the case that these harms are always negligible at the societal level."
+                ]
+              },
+              "consequent": "Social media’s societal downsides can fully cancel out its community-connection and safety/security benefits in general."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s net claim that social media is good for society depends on the balancing assumption that the societal downsides do not fully cancel out these benefits in general.",
+                  "The previous rule concludes that the downsides can fully cancel out the benefits in general."
+                ],
+                "weak_negation": [
+                  "It is not the case that the target supplies independent justification that the “full cancellation” possibility is false."
+                ]
+              },
+              "consequent": "The target argument fails to justify its conclusion that social media is good for society on balance."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Social media’s societal downsides can fully cancel out its community-connection and safety/security benefits in general.",
+                  "Because that full-cancellation possibility is compatible with the facts, social media overall need not be good for society—at best, the target shows it can help in some ways."
+                ],
+                "weak_negation": [
+                  "It is not the case that “can help” implies “is good for society overall” when major harms can fully outweigh benefits in general."
+                ]
+              },
+              "consequent": "Social media is not good for society overall."
+            }
+          ],
+          "Conc": [
+            "Social media’s societal downsides can fully cancel out its community-connection and safety/security benefits in general.",
+            "The target argument fails to justify its conclusion that social media is good for society on balance.",
+            "Social media is not good for society overall."
+          ],
+          "Ass": [
+            "It is not the case that these harms are always negligible at the societal level.",
+            "It is not the case that the target supplies independent justification that the “full cancellation” possibility is false.",
+            "It is not the case that “can help” implies “is good for society overall” when major harms can fully outweigh benefits in general."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-1f8ab73ab6",
+      "target_field": "Ass",
+      "target_statement": "It is not the case that the societal downsides of social media fully cancel out these community and safety/security benefits in general."
+    },
+    {
+      "id": "arg-8f345932c0",
+      "agent": "AG1",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target attack’s key step (“societal downsides can fully cancel out its community-connection and safety/security benefits in general”) is inferred from the existence of broad harms without providing justification about comparative magnitude and whether they actually erase the benefits at the societal level.",
+                  "The target premises do not establish that harms are large enough to reach “full cancellation” (i.e., complete erasure of the relevant benefits) “in general.”"
+                ],
+                "weak_negation": [
+                  "It is not the case that an unquantified possibility of full cancellation is sufficient to overturn a net-good societal conclusion supported by countervailing benefits."
+                ]
+              },
+              "consequent": "The target attack’s “full cancellation in general” claim lacks sufficient justification to defeat a net-good conclusion."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target attack’s “full cancellation in general” claim lacks sufficient justification to defeat a net-good conclusion.",
+                  "The main argument already establishes that social media’s community-connection and safety/security benefits are present (i.e., not always absent), so overturning it would require more than a non-justified “full cancellation” possibility."
+                ],
+                "weak_negation": [
+                  "It is not the case that the target provided independent justification that the benefits are fully erased in general."
+                ]
+              },
+              "consequent": "The target attack does not defeat the conclusion that social media is good for society overall."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target attack does not defeat the conclusion that social media is good for society overall.",
+                  "Absent a justified showing of “full cancellation in general,” the positive societal role asserted by the main argument remains intact."
+                ],
+                "weak_negation": [
+                  "It is not the case that the target demonstrated that the harms fully cancel the benefits in general."
+                ]
+              },
+              "consequent": "Social media is good for society overall."
+            }
+          ],
+          "Conc": [
+            "The target attack’s “full cancellation in general” claim lacks sufficient justification to defeat a net-good conclusion.",
+            "The target attack does not defeat the conclusion that social media is good for society overall.",
+            "Social media is good for society overall."
+          ],
+          "Ass": [
+            "It is not the case that an unquantified possibility of full cancellation is sufficient to overturn a net-good societal conclusion supported by countervailing benefits.",
+            "It is not the case that the target provided independent justification that the benefits are fully erased in general.",
+            "It is not the case that the target demonstrated that the harms fully cancel the benefits in general."
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-b6186fe0c4",
+      "target_field": "Conc",
+      "target_statement": "Social media is not good for society overall."
+    },
+    {
+      "id": "arg-128e354a94",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s counterargument relies on the assumption that the target attack’s ‘full cancellation in general’ is merely an unquantified speculation and therefore cannot defeat a net-good conclusion.",
+                  "AG1’s main argument (as defended) only establishes that community-connection/safety benefits are present and sometimes not absent (e.g., ‘not always absent’)—it does not establish that these benefits are large enough to dominate addiction, cyberbullying, misinformation/dangerous fads, and privacy risks at the societal level."
+                ],
+                "weak_negation": [
+                  "It is not the case that a lack of quantification automatically makes a ‘harms can outweigh benefits’ rebuttal insufficient when the pro argument itself does not quantify net effects."
+                ]
+              },
+              "consequent": "AG1’s assumption that unquantified ‘full cancellation in general’ is too speculative to defeat the pro (‘good for society overall’) claim is invalid."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s assumption that unquantified ‘full cancellation in general’ is too speculative to defeat the pro (‘good for society overall’) claim is invalid.",
+                  "The harms AG2 listed are systemic platform effects (digital addiction incentives, cyberbullying dynamics, virality-driven misinformation/dangerous fads, and extensive data collection/privacy risks), so they are plausibly pervasive rather than confined to rare edge cases."
+                ],
+                "weak_negation": [
+                  "It is not the case that these systemic harms are inherently limited to insignificant proportions just because AG1 did not quantify them."
+                ]
+              },
+              "consequent": "Systemic, pervasive harms can provide sufficient justification for a general ‘harms can cancel/outweigh benefits’ challenge even without precise numerical quantification."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Systemic, pervasive harms can provide sufficient justification for a general ‘harms can cancel/outweigh benefits’ challenge even without precise numerical quantification.",
+                  "AG1’s further move—requiring ‘more than a non-justified full-cancellation possibility’ because benefits are present—fails once that premise is rejected."
+                ],
+                "weak_negation": [
+                  "It is not the case that ‘benefits exist’ entails ‘overall societal good’ when systemic harms can plausibly outweigh them in general."
+                ]
+              },
+              "consequent": "AG1’s counterargument does not defeat the target attack, so the conclusion that social media is good for society overall is not supported. "
+            }
+          ],
+          "Conc": [
+            "AG1’s assumption that unquantified ‘full cancellation in general’ is too speculative to defeat the pro (‘good for society overall’) claim is invalid.",
+            "Systemic, pervasive harms can provide sufficient justification for a general ‘harms can cancel/outweigh benefits’ challenge even without precise numerical quantification.",
+            "AG1’s counterargument does not defeat the target attack, so the conclusion that social media is good for society overall is not supported."
+          ],
+          "Ass": [
+            "It is not the case that a lack of quantification automatically makes a ‘harms can outweigh benefits’ rebuttal insufficient when the pro argument itself does not quantify net effects.",
+            "It is not the case that these systemic harms are inherently limited to insignificant proportions just because AG1 did not quantify them.",
+            "It is not the case that ‘benefits exist’ entails ‘overall societal good’ when systemic harms can plausibly outweigh them in general."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-8f345932c0",
+      "target_field": "Ass"
+    },
+    {
+      "id": "arg-4886ad706c",
+      "agent": "AG2",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Social media platforms commonly collect extensive personal data about users’ behavior, contacts, and preferences and use it to personalize content and advertising.",
+                  "Social media data flows across networks and often to third parties, expanding the number of parties who can access or infer user information."
+                ],
+                "weak_negation": [
+                  "It is not the case that users retain full effective control over how their data is collected, shared, or secured."
+                ]
+              },
+              "consequent": "Social media substantially increases privacy and data-security risks for users."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Social media substantially increases privacy and data-security risks for users.",
+                  "When privacy and data security are undermined (e.g., unauthorized sharing, breaches, doxxing, or targeted scams), those harms can compromise people’s personal security and safety in real-world contexts."
+                ],
+                "weak_negation": [
+                  "It is not the case that privacy-linked incidents are harmless to safety and security."
+                ]
+              },
+              "consequent": "Those privacy/data-security risks create threats to personal security and safety."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Those privacy/data-security risks create threats to personal security and safety.",
+                  "If a widely used social system increases threats to personal security and safety, then it is not good for society overall."
+                ],
+                "weak_negation": [
+                  "It is not the case that such safety threats are societally negligible or fully offset in general by social benefits."
+                ]
+              },
+              "consequent": "Social media is not good for society because it increases privacy-linked threats to personal security and safety."
+            }
+          ],
+          "Conc": [
+            "Social media substantially increases privacy and data-security risks for users.",
+            "Those privacy/data-security risks create threats to personal security and safety.",
+            "Social media is not good for society because it increases privacy-linked threats to personal security and safety."
+          ],
+          "Ass": [
+            "It is not the case that users retain full effective control over how their data is collected, shared, or secured.",
+            "It is not the case that privacy-linked incidents are harmless to safety and security.",
+            "It is not the case that such safety threats are societally negligible or fully offset in general by social benefits."
+          ]
+        }
+      },
+      "status": "overruled"
+    },
+    {
+      "id": "arg-e6ea1df3b9",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Social media helps people form communities with shared interests across distance.",
+                  "Those communities can coordinate support and share safety-relevant information (e.g., alerts and mutual help) that helps people respond to real-world harms."
+                ],
+                "weak_negation": [
+                  "It is not the case that this community coordination can meaningfully mitigate privacy-linked harms such as scams or doxxing."
+                ]
+              },
+              "consequent": "Social media can mitigate privacy-linked real-world harms through community coordination and safety-oriented information sharing."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Social media can mitigate privacy-linked real-world harms through community coordination and safety-oriented information sharing.",
+                  "The target’s final step relies on assuming that these privacy-linked safety threats are not fully offset in general by social benefits."
+                ],
+                "weak_negation": [
+                  "It is not the case that the existence of plausible mitigation mechanisms is sufficient to rule out 'full offset' in general."
+                ]
+              },
+              "consequent": "The target’s assumption that privacy-linked safety threats are not fully offset in general by social benefits is undermined."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s final step relies on the assumption that privacy-linked safety threats are not fully offset in general by social benefits.",
+                  "The target’s assumption that privacy-linked safety threats are not fully offset in general by social benefits is undermined."
+                ],
+                "weak_negation": [
+                  "It is not the case that the target otherwise provides independent justification for 'not offset in general' beyond that assumption."
+                ]
+              },
+              "consequent": "Therefore, the target argument does not successfully establish that social media is not good for society overall."
+            }
+          ],
+          "Conc": [
+            "Social media can mitigate privacy-linked real-world harms through community coordination and safety-oriented information sharing.",
+            "The target’s assumption that privacy-linked safety threats are not fully offset in general by social benefits is undermined.",
+            "Therefore, the target argument does not successfully establish that social media is not good for society overall."
+          ],
+          "Ass": [
+            "It is not the case that this community coordination can meaningfully mitigate privacy-linked harms such as scams or doxxing.",
+            "It is not the case that the existence of plausible mitigation mechanisms is sufficient to rule out 'full offset' in general.",
+            "It is not the case that the target otherwise provides independent justification for 'not offset in general' beyond that assumption."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-4886ad706c",
+      "target_field": "Ass",
+      "target_statement": "It is not the case that such safety threats are societally negligible or fully offset in general by social benefits."
+    },
+    {
+      "id": "arg-7ee98959d9",
+      "agent": "AG2",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Community coordination on social media (e.g., alerts, peer support, mutual help) is primarily a way for people to respond to harms after they occur.",
+                  "Your target attack treats this as if it could eliminate the underlying source of privacy-linked risks (data collection/personal-data sharing that enables scams/doxxing)."
+                ],
+                "weak_negation": [
+                  "It is not the case that after-the-fact community help can fully neutralize the ongoing privacy/data-security risk production in general."
+                ]
+              },
+              "consequent": "Social-media-based community coordination is at best a partial, after-the-fact mitigation rather than a general 'full offset' of privacy-linked threats."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Social-media-based community coordination is at best a partial, after-the-fact mitigation rather than a general 'full offset' of privacy-linked threats.",
+                  "Your target attack’s key move is to undermine the balancing assumption only by pointing to plausible mitigation mechanisms."
+                ],
+                "weak_negation": [
+                  "It is not the case that partial after-the-fact mitigation is sufficient to rule out 'not fully offset in general' for privacy-linked harms."
+                ]
+              },
+              "consequent": "The target attack does not justify ruling out the “not fully offset in general” assumption."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target attack does not justify ruling out the “not fully offset in general” assumption.",
+                  "Your target conclusion that it fails to establish social media is not good for society overall depends on undermining that assumption."
+                ],
+                "weak_negation": [
+                  "It is not the case that the target provides an independent justification for why the privacy-linked safety threats are fully offset in general."
+                ]
+              },
+              "consequent": "Therefore, the target attack fails to defeat the main conclusion that social media is not good for society overall."
+            }
+          ],
+          "Conc": [
+            "Social-media-based community coordination is at best a partial, after-the-fact mitigation rather than a general 'full offset' of privacy-linked threats.",
+            "The target attack does not justify ruling out the “not fully offset in general” assumption.",
+            "Therefore, the target attack fails to defeat the main conclusion that social media is not good for society overall."
+          ],
+          "Ass": [
+            "It is not the case that after-the-fact community help can fully neutralize the ongoing privacy/data-security risk production in general.",
+            "It is not the case that partial after-the-fact mitigation is sufficient to rule out 'not fully offset in general' for privacy-linked harms.",
+            "It is not the case that the target provides an independent justification for why the privacy-linked safety threats are fully offset in general."
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-e6ea1df3b9",
+      "target_field": "Conc",
+      "target_statement": "Therefore, the target argument does not successfully establish that social media is not good for society overall."
+    },
+    {
+      "id": "arg-f182610b29",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "On social media, communities can share timely scam/doxxing warnings, reporting links, and practical security steps (e.g., how to lock accounts, avoid phishing, and remove/obscure leaked info) in time to prevent or reduce the harm from occurring.",
+                  "Because these actions can occur in real time, social-media-based coordination is not “primarily” limited to after-the-fact response to harms already completed."
+                ],
+                "weak_negation": [
+                  "It is not the case that social-media-based coordination must be mainly after-the-fact rather than including prevention/reduction before or as harms begin."
+                ]
+              },
+              "consequent": "Social-media-based community coordination can be meaningfully preventative/reducing of privacy-linked harms, not merely after-the-fact mitigation."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Social-media-based community coordination can be meaningfully preventative/reducing of privacy-linked harms, not merely after-the-fact mitigation.",
+                  "The target argument’s first step assumes coordination is at best partial, after-the-fact mitigation and then uses that to block ruling out “not fully offset in general.”"
+                ],
+                "weak_negation": [
+                  "It is not the case that prevention/reduction possibilities are sufficient to undermine the target’s “at best after-the-fact” characterization."
+                ]
+              },
+              "consequent": "The target argument’s “at best partial, after-the-fact mitigation” characterization is undermined."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target argument’s “at best partial, after-the-fact mitigation” characterization is undermined.",
+                  "The target’s subsequent claims that this does not justify rejecting the “not fully offset in general” assumption depend on that characterization."
+                ],
+                "weak_negation": [
+                  "It is not the case that the target otherwise independently justifies rejecting the balancing step without relying on the “after-the-fact only” framing."
+                ]
+              },
+              "consequent": "Therefore, the target attack-rebuttal no longer defeats the privacy-safety “not fully offset in general” balancing assumption."
+            }
+          ],
+          "Conc": [
+            "Social-media-based community coordination can be meaningfully preventative/reducing of privacy-linked harms, not merely after-the-fact mitigation.",
+            "The target argument’s “at best partial, after-the-fact mitigation” characterization is undermined.",
+            "Therefore, the target attack-rebuttal no longer defeats the privacy-safety “not fully offset in general” balancing assumption."
+          ],
+          "Ass": [
+            "It is not the case that social-media-based coordination must be mainly after-the-fact rather than including prevention/reduction before or as harms begin.",
+            "It is not the case that prevention/reduction possibilities are sufficient to undermine the target’s “at best after-the-fact” characterization.",
+            "It is not the case that the target otherwise independently justifies rejecting the balancing step without relying on the “after-the-fact only” framing."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-7ee98959d9",
+      "target_field": "Ass"
+    }
+  ],
+  "final_answer": "**On balance, social media is not good for society overall.** It has real social benefits (community-building, civic engagement, and inclusion), but the dominant “harm pathway” question under current incentives and practices—especially **privacy/data-security risks that can translate into real personal safety threats**—is not plausibly resolved by those benefits.\n\n### Why the harms outweigh the benefits (the decisive pathway)\n**Privacy → personal safety threat (not fully mitigated):**  \nSocial media platforms typically **collect extensive personal data**, use it to personalize content and advertising, and create complex data flows that increase the chance that information can be misused, leaked, or used for targeting. When privacy and data security are undermined, the consequences can include **doxxing, scams, targeted harassment, and other real-world safety risks**.\n\nYou can have some protective countermeasures—e.g., community members sharing warnings, reporting mechanisms, and practical steps to lock accounts or remove leaked info—but the key issue is whether these measures **fully offset** the underlying risk. The discussion did not establish that community coordination meaningfully neutralizes the *ongoing* production of privacy risk at scale. At best, it tends to be **partial and reactive** (even if sometimes timely), whereas the harms stem from systemic data practices and platform dynamics.\n\nUnder the balancing standard, this means the platform’s presence is **not socially beneficial** once a major harm pathway is present at a non-negligible level and is not plausibly outweighed by the positives.\n\n### Other harms were not adequately “cancelled out” either\nThe concerns about:\n- **digital addiction/compulsion dynamics, cyberbullying, and mental-health degradation (especially for adolescents/teens)**, and\n- **rapid spread of misinformation and dangerous fads/challenges that can cause real-world endangerment**, and\n- **privacy risks** (already decisive above)\n\nwere not shown to be fully mitigated in the way the balancing standard requires. Even without precise numbers, the debate never produced a strong case that these harms are prevented to a degree that makes them societally negligible or plausibly outweighed by the positive mechanisms for the affected populations.\n\n### What about the benefits to society?\nThese are real and should be credited:\n\n1. **Community and mutual support across distance (including safety/security value):**  \n   Social media can help people form communities and exchange safety-relevant information, sometimes even in time to reduce harm.\n\n2. **Low-barrier civic engagement and political activism, including identity formation among young people:**  \n   It can lower participation costs and help some young people build civic identity.\n\n3. **Inclusivity and diversity, including identity exploration and peer connection (notably for LGBTQ+ youth):**  \n   This can reduce isolation and provide supportive belonging.\n\nHowever, under the balancing framework, these positives **do not change the conclusion** if at least one major harm pathway (here, privacy-to-safety threats) is sufficiently significant and **not fully mitigated** or plausibly offset.\n\n### Confidence level\n**Moderate confidence.** The debate supports the *direction* clearly (benefits exist, but the decisive privacy-to-safety harm pathway is not plausibly cancelled out). What remains less settled is the precise magnitude of each harm and the degree to which modern platform policies can reliably eliminate them at scale. Still, the unresolved concern that **privacy/data-security risks can translate into real personal safety threats and aren’t shown to be fully offset** is enough to justify the “not good overall” conclusion.",
+  "integrated_rules": [
+    "Reusable decision rule (net societal impact):\n\n1) Identify any major harm pathway that is present at a non-negligible level and that is not fully mitigated and not plausibly outweighed/offset by the platform’s positive social benefits:\n- (Privacy-to-safety) If the platform’s data/privacy practices or security failures create meaningful threats to individuals’ personal security/safety, and those privacy-linked safety threats are not societally negligible and not fully offset by countervailing social benefits → the platform is NOT socially beneficial.\n- (Adolescent/teen psychological harm) If effects such as addiction/compulsion dynamics, cyberbullying, and mental-health degradation generate significant psychological/behavioral harms (especially for adolescents/teens), and these harms are not plausibly outweighed by benefits given affected populations’ vulnerabilities → the platform is NOT socially beneficial.\n- (Rapid misinformation-to-real-world harm) If the platform structurally increases the speed/reach of misinformation and harmful fads/challenges, and those dynamics translate into real-world user endangerment, and the misinformation-driven risks are not fully mitigated and not offset by benefits → the platform is NOT socially beneficial.\n\n2) If none of the above harm pathways meets the “significant + not fully mitigated and not plausibly outweighed/offset” threshold, then evaluate positive social benefits:\n- (Community-enabled safety externalities) If the platform enables people to form/sustain communities based on shared interests across geographic distance, and those connections provide safety/security value via mutual support and timely information sharing (online and offline) → the platform IS socially beneficial.\n- (Low-barrier civic engagement) If the platform supports especially young people’s civic identity formation and low-barrier political participation/activism that increases the likelihood of constructive civic involvement → the platform IS socially beneficial.\n- (Identity-supporting inclusion) If the platform enables marginalized groups to explore identity and connect with peers in supportive ways, plausibly increasing inclusivity/diversity beyond the screen (e.g., empowerment/belonging/reduced isolation) → the platform IS socially beneficial.\n\n3) If both positive and negative elements are present, the negative outcome governs exactly when at least one harm pathway satisfies the “not fully mitigated and not plausibly outweighed/offset by benefits” condition; if that condition is not met for any harm pathway, the platform’s presence of the positive benefit mechanisms supports a socially beneficial evaluation."
+  ]
+}

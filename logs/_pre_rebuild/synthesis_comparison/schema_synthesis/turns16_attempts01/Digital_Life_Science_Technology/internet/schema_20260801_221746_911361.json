@@ -1,0 +1,932 @@
+{
+  "method": "schema",
+  "question": "Is the Internet \"Making Us Stupid\"?",
+  "agent1_stance": "Your stance:\nYou support the view that the Internet is making us stupid.\nYou believe the Internet degrades human intelligence by subverting patience and concentration.\nYou believe IQ measurements have dropped approximately 7 points per generation since the mid-1970s, coinciding with Internet expansion, indicating that people are getting dumber.\nYou believe reliance on Internet-connected devices causes atrophy of everyday abilities, and that young adults increasingly lack knowledge of basic tasks because digital tools have replaced traditional skill-building.",
+  "agent2_stance": "Your stance:\nYou oppose the view that the Internet is making us stupid.\nYou believe society has repeatedly feared new technologies such as the printing press, telephone, radio, and television, yet these fears proved largely unfounded, suggesting current Internet concerns follow a predictable but ultimately mistaken pattern.\nYou believe the Internet provides invaluable information access for marginalized populations, including disabled individuals and older adults who benefit from remote communication and resource availability previously unavailable.\nYou believe shifting how we access and process information isn't inherently harmful, and that leveraging external resources for fact-storage allows mental capacity for more important problems.",
+  "metrics": {
+    "elapsed_seconds": 341.071,
+    "model": "gpt-5.4-nano",
+    "prompt_tokens": 315930,
+    "cached_tokens": 141824,
+    "completion_tokens": 54687,
+    "total_tokens": 370617,
+    "total_cost_usd": 0.106016
+  },
+  "dialogue_history": [
+    {
+      "id": "arg-cb66e24de1",
+      "agent": "AG1",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Modern Internet use typically involves rapid, fragmentary content, frequent notifications, and easy context switching (multitasking), which makes prolonged effort feel less rewarding moment-to-moment."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Internet-driven media consumption tends to reduce users' patience and sustained concentration for tasks requiring prolonged effort."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Internet-driven media consumption tends to reduce users' patience and sustained concentration for tasks requiring prolonged effort."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "When patience and sustained concentration drop, users persist in deep learning/effortful reasoning less often."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "When patience and sustained concentration drop, users persist in deep learning/effortful reasoning less often."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Less practice of deep learning and effortful reasoning weakens the development/maintenance of higher-cognition skills that intelligence depends on."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Less practice of deep learning and effortful reasoning weakens the development/maintenance of higher-cognition skills that intelligence depends on."
+                ],
+                "weak_negation": [
+                  "For most people, compensating practices (consistent intentional study and offline cognitive training) do not fully offset the attention-and-effort harms from typical Internet use."
+                ]
+              },
+              "consequent": "Therefore, the Internet is making us stupid by degrading the attention and deep-reasoning habits that support intelligence."
+            }
+          ],
+          "Conc": [
+            "Internet-driven media consumption tends to reduce users' patience and sustained concentration for tasks requiring prolonged effort.",
+            "When patience and sustained concentration drop, users persist in deep learning/effortful reasoning less often.",
+            "Less practice of deep learning and effortful reasoning weakens the development/maintenance of higher-cognition skills that intelligence depends on.",
+            "Therefore, the Internet is making us stupid by degrading the attention and deep-reasoning habits that support intelligence."
+          ],
+          "Ass": [
+            "For most people, compensating practices (consistent intentional study and offline cognitive training) do not fully offset the attention-and-effort harms from typical Internet use."
+          ]
+        }
+      },
+      "status": "defensible"
+    },
+    {
+      "id": "arg-a093989090",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target argument assumes: \"For most people, compensating practices (consistent intentional study and offline cognitive training) do not fully offset the attention-and-effort harms from typical Internet use.\"",
+                  "The target argument’s premises do not supply evidence that this \"for most people\" non-offset claim is true (i.e., it’s an unsupported population-level generalization)."
+                ],
+                "weak_negation": [
+                  "Population-level conclusions require justified grounds for the relevant quantifier (\"for most people\") rather than an unproven assumption."
+                ]
+              },
+              "consequent": "The target argument fails to establish that, for most people, any attention/effort harms persist even when people use compensating practices."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target argument fails to establish that, for most people, any attention/effort harms persist even when people use compensating practices."
+                ],
+                "weak_negation": [
+                  "If that \"for most people\" net-harm premise is not established, then the target cannot validly infer a general conclusion that \"the Internet is making us stupid.\""
+                ]
+              },
+              "consequent": "Therefore, the target argument does not succeed in proving that the Internet is making us stupid."
+            }
+          ],
+          "Conc": [
+            "The target argument fails to establish that, for most people, any attention/effort harms persist even when people use compensating practices.",
+            "Therefore, the target argument does not succeed in proving that the Internet is making us stupid."
+          ],
+          "Ass": [
+            "Population-level conclusions require justified grounds for the relevant quantifier (\"for most people\") rather than an unproven assumption.",
+            "If that \"for most people\" net-harm premise is not established, then the target cannot validly infer a general conclusion that \"the Internet is making us stupid.\""
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-cb66e24de1",
+      "target_field": "Ass",
+      "target_statement": "For most people, compensating practices (consistent intentional study and offline cognitive training) do not fully offset the attention-and-effort harms from typical Internet use."
+    },
+    {
+      "id": "arg-5afcb869a9",
+      "agent": "AG1",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s attack treats AG1’s final step as if it required proof that harms persist even for people who actively compensate well (“even when people use compensating practices”).",
+                  "But AG1’s argument is about the Internet’s typical/overall effect via a mechanism chain (fragmentation reduces sustained attention, which reduces deep-reasoning practice) plus a net-effect bridge stated as: for most people, compensation does not fully offset the attention-and-effort harms."
+                ],
+                "weak_negation": [
+                  "If an opponent attacks a stronger ‘universal/near-universal’ standard than the one actually used in the inference, then the attack does not straightforwardly undermine the inference."
+                ]
+              },
+              "consequent": "The target attack relies on a stronger standard than AG1's inference requires (it treats AG1 as needing a near-universal ‘even with compensation’ harm proof)."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target attack relies on a stronger standard than AG1's inference requires (it treats AG1 as needing a near-universal ‘even with compensation’ harm proof)."
+                ],
+                "weak_negation": [
+                  "If the objection targets a requirement stronger than what AG1 needs, then AG2’s ‘unsupported for most’ framing does not defeat AG1’s reasoning."
+                ]
+              },
+              "consequent": "Because it targets a stronger claim than AG1 uses, the target argument’s ‘unsupported for most’ objection does not undermine AG1’s conditional inference."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Because it targets a stronger claim than AG1 uses, the target argument’s ‘unsupported for most’ objection does not undermine AG1’s conditional inference.",
+                  "AG1’s earlier premises supply the mechanism link from typical Internet use to reduced sustained concentration and from reduced sustained concentration to less deep learning/effortful reasoning practice."
+                ],
+                "weak_negation": [
+                  "Given a supplied mechanism link, it is coherent to use the ‘for most people’ premise as the missing net-effect bridge rather than as an additional universal claim requiring independent refutation of every compensator strategy."
+                ]
+              },
+              "consequent": "AG1’s premises already justify the harm mechanism, so the 'for most people' premise acts as the net-effect bridge rather than an extra independent empirical burden."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s premises already justify the harm mechanism, so the 'for most people' premise acts as the net-effect bridge rather than an extra independent empirical burden."
+                ],
+                "weak_negation": [
+                  "If the mechanism chain holds and the stated net-effect bridge for most people is granted (as AG1 explicitly does), then AG1’s conclusion follows and AG2’s attack fails."
+                ]
+              },
+              "consequent": "Therefore, the target attack fails to defeat AG1’s conclusion that the Internet is making us stupid."
+            }
+          ],
+          "Conc": [
+            "The target attack relies on a stronger standard than AG1's inference requires (it treats AG1 as needing a near-universal ‘even with compensation’ harm proof).",
+            "Because it targets a stronger claim than AG1 uses, the target argument’s ‘unsupported for most’ objection does not undermine AG1’s conditional inference.",
+            "AG1’s premises already justify the harm mechanism, so the 'for most people' premise acts as the net-effect bridge rather than an extra independent empirical burden.",
+            "Therefore, the target attack fails to defeat AG1’s conclusion that the Internet is making us stupid."
+          ],
+          "Ass": [
+            "If an opponent attacks a stronger ‘universal/near-universal’ standard than the one actually used in the inference, then the attack does not straightforwardly undermine the inference.",
+            "If the objection targets a requirement stronger than what AG1 needs, then AG2’s ‘unsupported for most’ framing does not defeat AG1’s reasoning.",
+            "Given a supplied mechanism link, it is coherent to use the ‘for most people’ premise as the missing net-effect bridge rather than as an additional universal claim requiring independent refutation of every compensator strategy.",
+            "If the mechanism chain holds and the stated net-effect bridge for most people is granted (as AG1 explicitly does), then AG1’s conclusion follows and AG2’s attack fails."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-a093989090",
+      "target_field": "Ass",
+      "target_statement": "Population-level conclusions require justified grounds for the relevant quantifier (\"for most people\") rather than an unproven assumption."
+    },
+    {
+      "id": "arg-cdec084822",
+      "agent": "AG2",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Society has repeatedly feared broad cognitive decline from major new information/communication technologies (e.g., printing press, telephone, radio, television).",
+                  "Those fears proved largely unfounded in historical retrospect."
+                ],
+                "weak_negation": [
+                  "This historical track record doesn’t prove every future case will be harmless, but it does justify skepticism about sweeping ‘it will make us stupid’ claims."
+                ]
+              },
+              "consequent": "Recurring historical pattern: predictions of broad cognitive decline triggered by new information/communication technologies have often been largely mistaken."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Recurring historical pattern: predictions of broad cognitive decline triggered by new information/communication technologies have often been largely mistaken.",
+                  "When a current claim mirrors a past, repeatedly mistaken tech-fear pattern, we should treat it as low-confidence rather than established fact."
+                ],
+                "weak_negation": [
+                  "Unless the present Internet case is shown to break the historical pattern, the burden of proof for a sweeping ‘making us stupid’ verdict is not discharged."
+                ]
+              },
+              "consequent": "Therefore, the claim that the Internet is making us stupid is low-confidence as a sweeping general conclusion and should be treated as part of a predictable but mistaken tech-fear pattern rather than as established fact."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Therefore, the claim that the Internet is making us stupid is low-confidence as a sweeping general conclusion and should be treated as part of a predictable but mistaken tech-fear pattern rather than as established fact."
+                ],
+                "weak_negation": [
+                  "A low-confidence, pattern-based fear is not enough to conclude that the Internet is actually making people stupid in a demonstrable way."
+                ]
+              },
+              "consequent": "No: the Internet is not established to be making us stupid; the ‘making us stupid’ conclusion follows a predictable but historically mistaken tech-fear pattern unless stronger direct evidence is provided."
+            }
+          ],
+          "Conc": [
+            "Recurring historical pattern: predictions of broad cognitive decline triggered by new information/communication technologies have often been largely mistaken.",
+            "Therefore, the claim that the Internet is making us stupid is low-confidence as a sweeping general conclusion and should be treated as part of a predictable but mistaken tech-fear pattern rather than as established fact.",
+            "No: the Internet is not established to be making us stupid; the ‘making us stupid’ conclusion follows a predictable but historically mistaken tech-fear pattern unless stronger direct evidence is provided."
+          ],
+          "Ass": [
+            "This historical track record doesn’t prove every future case will be harmless, but it does justify skepticism about sweeping ‘it will make us stupid’ claims.",
+            "Unless the present Internet case is shown to break the historical pattern, the burden of proof for a sweeping ‘making us stupid’ verdict is not discharged.",
+            "A low-confidence, pattern-based fear is not enough to conclude that the Internet is actually making people stupid in a demonstrable way."
+          ]
+        }
+      },
+      "status": "defensible"
+    },
+    {
+      "id": "arg-111c58c6b5",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target argues that the Internet “making us stupid” claim should be treated as low-confidence mainly because earlier tech-fear predictions (printing press, TV, etc.) were often wrong.",
+                  "But that historical analogy does not itself evaluate Internet-specific empirical/measurement claims (e.g., attention fragmentation effects, IQ score changes, or other cognition indicators)."
+                ],
+                "weak_negation": [
+                  "A general track record of mistaken tech-fears is not sufficient to override Internet-specific evidence (or Internet-specific plausible mechanisms tied to cognition) when such evidence is actually provided."
+                ]
+              },
+              "consequent": "Therefore, the target’s move to downgrade confidence primarily by analogy is not warranted as a logical substitute for assessing Internet-specific cognitive evidence."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Therefore, the target’s move to downgrade confidence primarily by analogy is not warranted as a logical substitute for assessing Internet-specific cognitive evidence.",
+                  "The stance holds that IQ measurements have dropped approximately 7 points per generation since the mid-1970s, coinciding with Internet expansion, indicating that people are getting dumber.",
+                  "The stance also holds that reliance on Internet-connected devices subverts patience and concentration via fragmentation/context-switching, degrading everyday cognition-relevant habits."
+                ],
+                "weak_negation": [
+                  "The timing coincidence (mid-1970s onward) and the attention/concentration degradation mechanisms are not fully explained by alternative non-Internet causes."
+                ]
+              },
+              "consequent": "So, there is Internet-specific support (both measurement trends and an attention/deep-reasoning mechanism) that makes the “making us stupid” claim more than merely a historically repeating tech-fear."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "So, there is Internet-specific support (both measurement trends and an attention/deep-reasoning mechanism) that makes the “making us stupid” claim more than merely a historically repeating tech-fear.",
+                  "If the Internet-specific support is real and not fully offset by other factors, then the appropriate verdict is not ‘not established / only low-confidence.’"
+                ],
+                "weak_negation": [
+                  "The relevant cognitive harms are durable enough to matter for intelligence and not just short-lived distractions."
+                ]
+              },
+              "consequent": "Therefore, the target’s conclusion that the Internet is not established to be making us stupid (or should be treated only as low-confidence) is defeated."
+            }
+          ],
+          "Conc": [
+            "Therefore, the target’s move to downgrade confidence primarily by analogy is not warranted as a logical substitute for assessing Internet-specific cognitive evidence.",
+            "So, there is Internet-specific support (both measurement trends and an attention/deep-reasoning mechanism) that makes the “making us stupid” claim more than merely a historically repeating tech-fear.",
+            "Therefore, the target’s conclusion that the Internet is not established to be making us stupid (or should be treated only as low-confidence) is defeated."
+          ],
+          "Ass": [
+            "A general track record of mistaken tech-fears is not sufficient to override Internet-specific evidence (or Internet-specific plausible mechanisms tied to cognition) when such evidence is actually provided.",
+            "The timing coincidence (mid-1970s onward) and the attention/concentration degradation mechanisms are not fully explained by alternative non-Internet causes.",
+            "The relevant cognitive harms are durable enough to matter for intelligence and not just short-lived distractions."
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-cdec084822",
+      "target_field": "Conc",
+      "target_statement": "No: the Internet is not established to be making us stupid; the ‘making us stupid’ conclusion follows a predictable but historically mistaken tech-fear pattern unless stronger direct evidence is provided."
+    },
+    {
+      "id": "arg-a655570fa5",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s counterargument depends on the assumption that the “timing coincidence (mid-1970s onward) and the attention/concentration degradation mechanisms are not fully explained by alternative non-Internet causes.”",
+                  "AG1 does not actually supply evidence within its premises that alternative (non-Internet) explanations are ruled out or insufficient to explain the relevant cognitive/measurement trends."
+                ],
+                "weak_negation": [
+                  "If alternative causes are not adequately ruled out, then the argument cannot justify treating the Internet as the causal driver of the “making us stupid” conclusion."
+                ]
+              },
+              "consequent": "AG1’s inference to “Internet-specific support” is not supported because it relies on an unestablished causal attribution (Internet vs. other societal factors)."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s inference to “Internet-specific support” is not supported because it relies on an unestablished causal attribution (Internet vs. other societal factors).",
+                  "AG1’s later step uses that purported Internet-specific support to move from “low-confidence/pattern” to “not only low-confidence.”"
+                ],
+                "weak_negation": [
+                  "When the causal link is unestablished, the appropriate inference is not that the Internet-specific claim is well-supported rather than merely speculative."
+                ]
+              },
+              "consequent": "Therefore, AG1’s argument does not validly defeat the target’s low-confidence/pattern-based assessment."
+            }
+          ],
+          "Conc": [
+            "AG1’s inference to “Internet-specific support” is not supported because it relies on an unestablished causal attribution (Internet vs. other societal factors).",
+            "Therefore, AG1’s argument does not validly defeat the target’s low-confidence/pattern-based assessment."
+          ],
+          "Ass": [
+            "If alternative causes are not adequately ruled out, then the argument cannot justify treating the Internet as the causal driver of the “making us stupid” conclusion.",
+            "When the causal link is unestablished, the appropriate inference is not that the Internet-specific claim is well-supported rather than merely speculative."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-111c58c6b5",
+      "target_field": "Ass"
+    },
+    {
+      "id": "arg-9a57ea60b5",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s target argument treats the historical-tech-fear precedent as controlling: it says the Internet “is low-confidence” and “not established” unless the Internet case breaks that mistaken tech-fear pattern.",
+                  "But AG1’s stance provides Internet-specific, observable implications: reliance on Internet-connected devices replaces traditional skill-building and causes atrophy of everyday abilities, so young adults increasingly lack knowledge of basic tasks."
+                ],
+                "weak_negation": [
+                  "The target’s “unless stronger direct evidence is provided” standard is met when the effect shows up as degraded everyday competencies in an affected group, not merely as a renewed historical analogy claim."
+                ]
+              },
+              "consequent": "AG2’s precedent-based move to treat the claim as merely low-confidence is unjustified because the stance supplies Internet-specific “direct” grounds (everyday-skill atrophy in young adults), not just a renewed generalized fear."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s precedent-based move to treat the claim as merely low-confidence is unjustified because the stance supplies Internet-specific “direct” grounds (everyday-skill atrophy in young adults), not just a renewed generalized fear.",
+                  "If reliance on digital/Internet tools increasingly replaces how young adults build basic competencies, then their real-world cognitive competence (practical intelligence) declines."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The “making us stupid” claim is at least established in the practical-cognition sense relevant to intelligence: people lose everyday cognitive/skill competence."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The “making us stupid” claim is at least established in the practical-cognition sense relevant to intelligence: people lose everyday cognitive/skill competence.",
+                  "Therefore, it is not correct to conclude that the Internet is “not established” making us stupid and should be treated only as a predictable historically mistaken tech-fear unless it breaks the analogy."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AG2’s target conclusion is defeated: the Internet is making us stupid rather than remaining merely low-confidence/unestablished."
+            }
+          ],
+          "Conc": [
+            "AG2’s precedent-based move to treat the claim as merely low-confidence is unjustified because the stance supplies Internet-specific “direct” grounds (everyday-skill atrophy in young adults), not just a renewed generalized fear.",
+            "The “making us stupid” claim is at least established in the practical-cognition sense relevant to intelligence: people lose everyday cognitive/skill competence.",
+            "AG2’s target conclusion is defeated: the Internet is making us stupid rather than remaining merely low-confidence/unestablished."
+          ],
+          "Ass": [
+            "The target’s “unless stronger direct evidence is provided” standard is met when the effect shows up as degraded everyday competencies in an affected group, not merely as a renewed historical analogy claim."
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-cdec084822",
+      "target_field": "Conc",
+      "target_statement": "No: the Internet is not established to be making us stupid; the ‘making us stupid’ conclusion follows a predictable but historically mistaken tech-fear pattern unless stronger direct evidence is provided."
+    },
+    {
+      "id": "arg-512ba35188",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s rebut assumes that the standard “unless stronger direct evidence is provided” is met whenever we observe degraded everyday competencies in an affected group (e.g., young adults lacking basic tasks).",
+                  "AG1 does not actually supply evidence in its premises that (i) those competencies are truly degrading and (ii) the degradation is specifically caused by Internet reliance rather than by other cohort, education, socioeconomic, or substitution effects."
+                ],
+                "weak_negation": [
+                  "For a claim to count as ‘stronger direct evidence’ against the historical-tech-fear skepticism, the case must show Internet-specific causal impact or robust measurement—not just an un-sourced correlation or generic competence talk."
+                ]
+              },
+              "consequent": "AG1 has not established that the “stronger direct evidence” threshold is met."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1 has not established that the “stronger direct evidence” threshold is met.",
+                  "AG2’s target conclusion is that the Internet is not established to be making us stupid (beyond low-confidence/pattern-level reasoning) unless such stronger direct evidence is provided."
+                ],
+                "weak_negation": [
+                  "If the threshold for ‘stronger direct evidence’ is not met, then AG2’s ‘not established / low-confidence’ conclusion is not overturned."
+                ]
+              },
+              "consequent": "Therefore, AG1’s attempt to defeat AG2’s target conclusion fails."
+            }
+          ],
+          "Conc": [
+            "AG1 has not established that the “stronger direct evidence” threshold is met.",
+            "Therefore, AG1’s attempt to defeat AG2’s target conclusion fails."
+          ],
+          "Ass": [
+            "For a claim to count as ‘stronger direct evidence’ against the historical-tech-fear skepticism, the case must show Internet-specific causal impact or robust measurement—not just an un-sourced correlation or generic competence talk.",
+            "If the threshold for ‘stronger direct evidence’ is not met, then AG2’s ‘not established / low-confidence’ conclusion is not overturned."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-9a57ea60b5",
+      "target_field": "Ass"
+    },
+    {
+      "id": "arg-063a019b7f",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s argument downgrades the Internet claim by treating it as “mirroring” prior tech-fear patterns that were “largely unfounded,” which presupposes that the relevant causal route from the technology to cognitive harm is sufficiently similar across cases.",
+                  "But AG1’s stance is that the Internet’s harm (if any) comes mainly through distinctive user experiences—fragmentary feeds, frequent notifications, and easy context switching—that erode sustained concentration and deep reasoning habits, with effects persisting into everyday competence."
+                ],
+                "weak_negation": [
+                  "If the causal mechanisms differ in a way that matters for cognition, then “mirroring” earlier mistaken tech-fears does not justify treating the current claim as automatically low-confidence."
+                ]
+              },
+              "consequent": "AG2’s historical-analogy step is undermined because it assumes mechanistic comparability that doesn’t hold for the Internet’s attention-fragmentation pathway."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s historical-analogy step is undermined because it assumes mechanistic comparability that doesn’t hold for the Internet’s attention-fragmentation pathway.",
+                  "AG2’s conclusion that the Internet claim remains merely “low-confidence” (and thus “not established”) is derived from that analogy step."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Therefore, AG2’s “low-confidence / not established” epistemic downgrade does not follow from the historical pattern it cites."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Therefore, AG2’s “low-confidence / not established” epistemic downgrade does not follow from the historical pattern it cites.",
+                  "AG1’s stance further asserts a specific broad indicator: IQ scores have dropped by ~7 points per generation since the mid-1970s, coinciding with Internet expansion."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "So, the Internet is making us stupid (in the broad, measurable sense of declining cognitive performance since the mid-1970s coinciding with Internet expansion), and AG2’s “No: not established” conclusion is rebutted."
+            }
+          ],
+          "Conc": [
+            "AG2’s historical-analogy step is undermined because it assumes mechanistic comparability that doesn’t hold for the Internet’s attention-fragmentation pathway.",
+            "Therefore, AG2’s “low-confidence / not established” epistemic downgrade does not follow from the historical pattern it cites.",
+            "So, the Internet is making us stupid (in the broad, measurable sense of declining cognitive performance since the mid-1970s coinciding with Internet expansion), and AG2’s “No: not established” conclusion is rebutted."
+          ],
+          "Ass": [
+            "If the causal mechanisms differ in a way that matters for cognition, then “mirroring” earlier mistaken tech-fears does not justify treating the current claim as automatically low-confidence."
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-cdec084822",
+      "target_field": "Conc",
+      "target_statement": "No: the Internet is not established to be making us stupid; the ‘making us stupid’ conclusion follows a predictable but historically mistaken tech-fear pattern unless stronger direct evidence is provided."
+    },
+    {
+      "id": "arg-6591e8ad5f",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s argument treats AG2’s epistemic downgrade as presupposing that the Internet’s cognitive-harm mechanism is sufficiently similar to earlier tech-fear mechanisms (i.e., it’s a mechanistic-comparability inference).",
+                  "AG2’s actual reasoning is about a recurring historical pattern: broad cognitive-decline predictions tied to major information/communication technologies have often been largely mistaken, which supports treating today’s sweeping verdict as low-confidence unless stronger direct evidence is provided."
+                ],
+                "weak_negation": [
+                  "If AG2 is not committed to mechanistic comparability across cases, then AG1’s criticism based on lack of such comparability cannot specifically undermine AG2’s inference."
+                ]
+              },
+              "consequent": "AG2’s argument does not specifically depend on mechanistic comparability; it justifies skepticism about a sweeping ‘making us stupid’ claim via the historical pattern and a ‘needs stronger direct evidence’ standard."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s argument does not specifically depend on mechanistic comparability; it justifies skepticism about a sweeping ‘making us stupid’ claim via the historical pattern and a ‘needs stronger direct evidence’ standard.",
+                  "AG1’s first step claims the analogy is undermined because comparability fails and that this makes AG2’s ‘low-confidence’ conclusion non-sequitur."
+                ],
+                "weak_negation": [
+                  "If AG1 attributes to AG2 a presupposition (mechanistic comparability) that AG2 does not require, then AG1’s undercutting of AG2’s analogy step fails to follow."
+                ]
+              },
+              "consequent": "Therefore, AG1’s claim that AG2’s analogy-based epistemic caution is undermined by non-comparable mechanisms does not follow."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s later step asserts a broad empirical indicator: IQ has dropped by ~7 points per generation since the mid-1970s and that this coincides with Internet expansion.",
+                  "That step uses mere coincidence to support the stronger conclusion that the Internet is making us stupid (i.e., it treats coincidence as evidence of Internet-caused decline)."
+                ],
+                "weak_negation": [
+                  "If correlation/coincidence does not establish causal attribution to the Internet, then the IQ-coincidence point cannot rebut AG2’s ‘not established / needs direct evidence’ standard."
+                ]
+              },
+              "consequent": "AG1’s IQ-drop claim, as presented, does not establish that the Internet (rather than other factors) is the cause of the cognitive decline."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Therefore, AG1’s claim that AG2’s analogy-based epistemic caution is undermined by non-comparable mechanisms does not follow.",
+                  "AG1’s IQ-drop claim, as presented, does not establish that the Internet (rather than other factors) is the cause of the cognitive decline."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "So AG1 does not successfully defeat AG2’s conclusion that the ‘Internet is making us stupid’ verdict is not established and should be treated as low-confidence without stronger direct evidence."
+            }
+          ],
+          "Conc": [
+            "AG2’s argument does not specifically depend on mechanistic comparability; it justifies skepticism about a sweeping ‘making us stupid’ claim via the historical pattern and a ‘needs stronger direct evidence’ standard.",
+            "Therefore, AG1’s claim that AG2’s analogy-based epistemic caution is undermined by non-comparable mechanisms does not follow.",
+            "AG1’s IQ-drop claim, as presented, does not establish that the Internet (rather than other factors) is the cause of the cognitive decline.",
+            "So AG1 does not successfully defeat AG2’s conclusion that the ‘Internet is making us stupid’ verdict is not established and should be treated as low-confidence without stronger direct evidence."
+          ],
+          "Ass": [
+            "If AG2 is not committed to mechanistic comparability across cases, then AG1’s criticism based on lack of such comparability cannot specifically undermine AG2’s inference.",
+            "If AG1 attributes to AG2 a presupposition (mechanistic comparability) that AG2 does not require, then AG1’s undercutting of AG2’s analogy step fails to follow.",
+            "If correlation/coincidence does not establish causal attribution to the Internet, then the IQ-coincidence point cannot rebut AG2’s ‘not established / needs direct evidence’ standard."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-063a019b7f",
+      "target_field": "Ass"
+    },
+    {
+      "id": "arg-9b7292cd75",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s target argument uses the historical fact that prior tech-fear predictions were “largely unfounded” to license a stringent epistemic rule: “Unless the present Internet case is shown to break the historical pattern, the burden of proof…is not discharged.”"
+                ],
+                "weak_negation": [
+                  "Even if tech-fears were often wrong in the past, that does not by itself justify requiring the present case to “break the pattern” before any judgment can rise above low-confidence; past error rates weaken priors but do not automatically enforce that extreme condition on burden discharge."
+                ]
+              },
+              "consequent": "AG2’s “unless it breaks the pattern, burden not discharged” standard is an unjustified strengthening of what the historical premise actually supports."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s “unless it breaks the pattern, burden not discharged” standard is an unjustified strengthening of what the historical premise actually supports.",
+                  "AG2’s argument offers no Internet-specific evidence evaluation—its conclusion is driven mainly by the pattern-based standard."
+                ],
+                "weak_negation": [
+                  "If the burden-discharge standard is not supported and the argument does not assess Internet-specific grounds, then the argument cannot validly conclude “not established” or “only low-confidence.”"
+                ]
+              },
+              "consequent": "Therefore, AG2 has not provided a sufficient basis to conclude that the Internet is not established to be making us stupid."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Therefore, AG2 has not provided a sufficient basis to conclude that the Internet is not established to be making us stupid."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AG2’s final “No: the Internet is not established to be making us stupid…” conclusion is defeated."
+            }
+          ],
+          "Conc": [
+            "AG2’s “unless it breaks the pattern, burden not discharged” standard is an unjustified strengthening of what the historical premise actually supports.",
+            "Therefore, AG2 has not provided a sufficient basis to conclude that the Internet is not established to be making us stupid.",
+            "AG2’s final “No: the Internet is not established to be making us stupid…” conclusion is defeated."
+          ],
+          "Ass": [
+            "Even if tech-fears were often wrong in the past, that does not by itself justify requiring the present case to “break the pattern” before any judgment can rise above low-confidence; past error rates weaken priors but do not automatically enforce that extreme condition on burden discharge.",
+            "If the burden-discharge standard is not supported and the argument does not assess Internet-specific grounds, then the argument cannot validly conclude “not established” or “only low-confidence.”"
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-cdec084822",
+      "target_field": "Ass",
+      "target_statement": "Unless the present Internet case is shown to break the historical pattern, the burden of proof for a sweeping ‘making us stupid’ verdict is not discharged."
+    },
+    {
+      "id": "arg-94a405346c",
+      "agent": "AG2",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1 characterizes AG2’s epistemic rule as requiring a literal “break the pattern” before any judgment rises above low-confidence.",
+                  "But AG2’s own formulation ties the upgrade condition to “stronger direct evidence” (i.e., evidence that directly undermines the historical-prior expectation for this specific technology)."
+                ],
+                "weak_negation": [
+                  "If AG2’s threshold is evidence-based (strong direct evidence) rather than an absolute “literally break the pattern” prerequisite, then AG1’s “extreme requirement” framing is a misread."
+                ]
+              },
+              "consequent": "AG1’s “extreme/literal threshold” interpretation misreads AG2’s burden rule; AG2 does not forbid higher-confidence judgments across the board, it demands sufficiently strong Internet-relevant evidence."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s “extreme/literal threshold” interpretation misreads AG2’s burden rule; AG2 does not forbid higher-confidence judgments across the board, it demands sufficiently strong Internet-relevant evidence.",
+                  "Given tech-fear predictions (printing press/telephone/radio/TV, etc.) repeatedly proved largely unfounded, a well-grounded prior skeptical stance is justified when evaluating sweeping cognitive-harm claims."
+                ],
+                "weak_negation": [
+                  "Unless evidence is strong enough to overcome a justified skeptical prior, it is rational to keep confidence at “low” rather than declare the harm claim established."
+                ]
+              },
+              "consequent": "Therefore, AG2’s “not discharged unless strong direct evidence is provided” burden standard is epistemically justified, not arbitrary or extreme."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Therefore, AG2’s “not discharged unless strong direct evidence is provided” burden standard is epistemically justified, not arbitrary or extreme.",
+                  "So AG1’s attack—which says AG2 has not provided sufficient basis due to an unjustified extreme burden rule—does not undermine AG2’s core inference from (a) historical priors to (b) current skepticism about “making us stupid” as an established fact."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AG1’s target conclusion is defeated: AG2’s argument still supports that “the Internet is making us stupid” is not established and is best treated as low-confidence without stronger direct evidence."
+            }
+          ],
+          "Conc": [
+            "AG1’s “extreme/literal threshold” interpretation misreads AG2’s burden rule; AG2 does not forbid higher-confidence judgments across the board, it demands sufficiently strong Internet-relevant evidence.",
+            "Therefore, AG2’s “not discharged unless strong direct evidence is provided” burden standard is epistemically justified, not arbitrary or extreme.",
+            "AG1’s target conclusion is defeated: AG2’s argument still supports that “the Internet is making us stupid” is not established and is best treated as low-confidence without stronger direct evidence."
+          ],
+          "Ass": [
+            "If AG2’s threshold is evidence-based (strong direct evidence) rather than an absolute “literally break the pattern” prerequisite, then AG1’s “extreme requirement” framing is a misread.",
+            "Unless evidence is strong enough to overcome a justified skeptical prior, it is rational to keep confidence at “low” rather than declare the harm claim established."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-9b7292cd75",
+      "target_field": "Ass",
+      "target_statement": "Even if tech-fears were often wrong in the past, that does not by itself justify requiring the present case to “break the pattern” before any judgment can rise above low-confidence; past error rates weaken priors but do not automatically enforce that extreme condition on burden discharge."
+    },
+    {
+      "id": "arg-4873d34246",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s core move uses the historical tech-fear track record to keep the Internet “making us stupid” claim at “low-confidence” for a *sweeping general conclusion* unless it breaks the pattern.",
+                  "AG2 then concludes an absolute verdict: “No: the Internet is not established to be making us stupid.”"
+                ],
+                "weak_negation": [
+                  "That inference requires the additional (unstated) assumption that “making us stupid” means an *all-people / broadly universal / sweeping* effect—so if the sweeping generalization is not established, then the Internet is not established to make anyone stupid at all."
+                ]
+              },
+              "consequent": "AG2’s “No/not established” conclusion relies on an unlicensed assumption about the required scope (sweeping generality/universality) of what counts as “making us stupid.”"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s “No/not established” conclusion relies on an unlicensed assumption about the required scope (sweeping generality/universality) of what counts as “making us stupid.”",
+                  "If the Issue allows “making us stupid” to be supported by demonstrable cognitive/skill decline in relevant populations (not necessarily a universal effect across most people), then failure to establish a sweeping generalization does not entail an absolute “not established” verdict."
+                ],
+                "weak_negation": [
+                  "Unless AG2 justifies universality/sweeping scope as a condition for “making us stupid,” AG2’s leap from “low-confidence sweeping general conclusion” to “not established at all” is invalid."
+                ]
+              },
+              "consequent": "AG2’s conclusion does not follow: even if the historical-pattern argument supports skepticism about a sweeping *general* claim, it does not entail that the Internet is not demonstrably harming cognition/competence in any relevant sense."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s conclusion does not follow: even if the historical-pattern argument supports skepticism about a sweeping *general* claim, it does not entail that the Internet is not demonstrably harming cognition/competence in any relevant sense.",
+                  "AG1’s stance specifies demonstrable cognition/competence harms attributable to Internet-connected reliance (e.g., reduced sustained concentration/deep reasoning practice; IQ drop of ~7 points per generation since the mid-1970s coinciding with Internet expansion; young adults increasingly lacking basic tasks)."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Therefore, AG2’s “No: the Internet is not established to be making us stupid” conclusion is defeated."
+            }
+          ],
+          "Conc": [
+            "AG2’s “No/not established” conclusion relies on an unlicensed assumption about the required scope (sweeping generality/universality) of what counts as “making us stupid.”",
+            "AG2’s conclusion does not follow: even if the historical-pattern argument supports skepticism about a sweeping *general* claim, it does not entail that the Internet is not demonstrably harming cognition/competence in any relevant sense.",
+            "Therefore, AG2’s “No: the Internet is not established to be making us stupid” conclusion is defeated."
+          ],
+          "Ass": [
+            "That inference requires the additional (unstated) assumption that “making us stupid” means an *all-people / broadly universal / sweeping* effect—so if the sweeping generalization is not established, then the Internet is not established to make anyone stupid at all.",
+            "Unless AG2 justifies universality/sweeping scope as a condition for “making us stupid,” AG2’s leap from “low-confidence sweeping general conclusion” to “not established at all” is invalid."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-cdec084822",
+      "target_field": "Ass",
+      "target_statement": "No: the Internet is not established to be making us stupid; the ‘making us stupid’ conclusion follows a predictable but historically mistaken tech-fear pattern unless stronger direct evidence is provided."
+    },
+    {
+      "id": "arg-db9a700355",
+      "agent": "AG2",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1 attacks AG2’s “No/not established” conclusion by claiming it assumes “making us stupid” requires a universal/sweeping effect.",
+                  "But AG2’s argument’s structure is epistemic: it downgrades confidence in *a sweeping general verdict* because the cited historical tech-fear pattern has often been mistaken, and it says the “making us stupid” conclusion is not established without stronger direct evidence."
+                ],
+                "weak_negation": [
+                  "So AG1’s universal-scope reading is a misinterpretation of what AG2’s “not established” step is doing (it is not denying all possible subgroup effects)."
+                ]
+              },
+              "consequent": "AG2’s “No/not established” conclusion is about the failure to establish the *sweeping general* ‘making us stupid’ verdict, not an all-or-nothing claim that no harm could occur for any subgroup."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s “No/not established” conclusion is about the failure to establish the *sweeping general* ‘making us stupid’ verdict, not an all-or-nothing claim that no harm could occur for any subgroup.",
+                  "AG1’s counter-reasoning pivots to “it could be true for some” (i.e., shifting away from the sweeping claim) rather than providing the “stronger direct evidence” needed to raise confidence in a broad verdict."
+                ],
+                "weak_negation": [
+                  "If the task is assessing whether the Internet makes *us* (broadly) stupid as a general claim, then supplying merely narrower/underspecified harm possibilities does not defeat AG2’s epistemic downgrade."
+                ]
+              },
+              "consequent": "AG1’s scope-shift does not defeat AG2, because AG1 does not answer AG2’s demand for stronger direct evidence supporting a broad ‘making us stupid’ conclusion."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s scope-shift does not defeat AG2, because AG1 does not answer AG2’s demand for stronger direct evidence supporting a broad ‘making us stupid’ conclusion.",
+                  "AG2’s historical-premise supports skepticism specifically about sweeping cognitive-decline predictions from major communication technologies, making the “not established/low-confidence for the broad verdict” stance warranted absent stronger direct evidence."
+                ],
+                "weak_negation": [
+                  "If the broad verdict remains unsupported by stronger direct evidence, then the appropriate response is to keep it low-confidence rather than to treat it as established."
+                ]
+              },
+              "consequent": "Therefore, AG2’s main conclusion—that the Internet is not established as “making us stupid” in a sweeping general sense without stronger direct evidence—stands against AG1’s attack."
+            }
+          ],
+          "Conc": [
+            "AG2’s “No/not established” conclusion is about the failure to establish the *sweeping general* ‘making us stupid’ verdict, not an all-or-nothing claim that no harm could occur for any subgroup.",
+            "AG1’s scope-shift does not defeat AG2, because AG1 does not answer AG2’s demand for stronger direct evidence supporting a broad ‘making us stupid’ conclusion.",
+            "Therefore, AG2’s main conclusion—that the Internet is not established as “making us stupid” in a sweeping general sense without stronger direct evidence—stands against AG1’s attack."
+          ],
+          "Ass": [
+            "So AG1’s universal-scope reading is a misinterpretation of what AG2’s “not established” step is doing (it is not denying all possible subgroup effects).",
+            "If the task is assessing whether the Internet makes *us* (broadly) stupid as a general claim, then supplying merely narrower/underspecified harm possibilities does not defeat AG2’s epistemic downgrade.",
+            "If the broad verdict remains unsupported by stronger direct evidence, then the appropriate response is to keep it low-confidence rather than to treat it as established."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-4873d34246",
+      "target_field": "Ass",
+      "target_statement": "Therefore, AG2’s “No: the Internet is not established to be making us stupid” conclusion is defeated."
+    },
+    {
+      "id": "arg-ddd59009d7",
+      "agent": "AG1",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Internet-connected reliance increasingly replaces traditional skill-building, and young adults increasingly lack knowledge of basic tasks because digital tools have replaced traditional skill-building."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Such replacement causes atrophy of intelligence-relevant everyday cognitive/competence skills."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Such replacement causes atrophy of intelligence-relevant everyday cognitive/competence skills.",
+                  "Higher intelligence depends on maintaining these everyday cognitive/skill competencies through practice and use, not merely on access to information."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Atrophy of these everyday competencies contributes directly to lower intelligence/overall cognitive performance."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "IQ measurements have dropped approximately 7 points per generation since the mid-1970s, coinciding with Internet expansion."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "There is a population-level indicator of net cognitive decline temporally linked to Internet expansion."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Atrophy of these everyday competencies contributes directly to lower intelligence/overall cognitive performance.",
+                  "There is a population-level indicator of net cognitive decline temporally linked to Internet expansion."
+                ],
+                "weak_negation": [
+                  "For most people, compensating practices (consistent intentional study and offline cognitive training) do not fully offset the attention/effort-and-skill harms from typical Internet-connected reliance."
+                ]
+              },
+              "consequent": "Therefore, the Internet is making us stupid by producing a net decline in intelligence-relevant everyday competencies, reflected in population-level cognitive/IQ trends, without being fully offset for most people."
+            }
+          ],
+          "Conc": [
+            "Such replacement causes atrophy of intelligence-relevant everyday cognitive/competence skills.",
+            "Atrophy of these everyday competencies contributes directly to lower intelligence/overall cognitive performance.",
+            "There is a population-level indicator of net cognitive decline temporally linked to Internet expansion.",
+            "Therefore, the Internet is making us stupid by producing a net decline in intelligence-relevant everyday competencies, reflected in population-level cognitive/IQ trends, without being fully offset for most people."
+          ],
+          "Ass": [
+            "For most people, compensating practices (consistent intentional study and offline cognitive training) do not fully offset the attention/effort-and-skill harms from typical Internet-connected reliance."
+          ]
+        }
+      },
+      "status": "defensible"
+    },
+    {
+      "id": "arg-c39b701601",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s causal leap treats “IQ measurements have dropped approximately 7 points per generation since the mid-1970s, coinciding with Internet expansion” as if that temporal coincidence provides evidence that the Internet (via Internet-connected reliance) is producing a net intelligence loss."
+                ],
+                "weak_negation": [
+                  "Temporal coincidence by itself does not establish that Internet-connected reliance is a causal dominant driver of IQ/test-score changes; it leaves open multiple confounds and mechanisms unrelated to the Internet."
+                ]
+              },
+              "consequent": "The target has not established a causal link from Internet-connected reliance to the population IQ decline."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target has not established a causal link from Internet-connected reliance to the population IQ decline.",
+                  "AG1’s final conclusion (“Therefore, the Internet is making us stupid…”) depends on that causal link connecting Internet-mediated skill atrophy to net intelligence loss at the population level."
+                ],
+                "weak_negation": [
+                  "If the causal attribution is unestablished, then the argument cannot validly infer that the Internet is making us stupid rather than some other factor(s) being responsible for the observed IQ trend."
+                ]
+              },
+              "consequent": "Therefore, AG1’s argument does not support the conclusion that the Internet is making us stupid."
+            }
+          ],
+          "Conc": [
+            "The target has not established a causal link from Internet-connected reliance to the population IQ decline.",
+            "Therefore, AG1’s argument does not support the conclusion that the Internet is making us stupid."
+          ],
+          "Ass": [
+            "Temporal coincidence by itself does not establish that Internet-connected reliance is a causal dominant driver of IQ/test-score changes; it leaves open multiple confounds and mechanisms unrelated to the Internet.",
+            "If the causal attribution is unestablished, then the argument cannot validly infer that the Internet is making us stupid rather than some other factor(s) being responsible for the observed IQ trend."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-ddd59009d7",
+      "target_field": "Ass",
+      "target_statement": "Implicit assumption that an IQ decline that coincides with Internet expansion (and is tied to Internet skill-replacement) is causally attributable to the Internet, rather than merely correlated with it."
+    }
+  ],
+  "final_answer": "**No—the Internet is not established to be making us “stupid” in the strong, net-negative, population-level sense.**  \n\n### Why this is the best-supported conclusion\n1. **The “stupid” claim needs strong direct evidence of net harm, and that’s missing.**  \n   The case for harm relies on plausible mechanisms—e.g., that rapid, fragmentary content, notifications, and context switching reduce patience and sustained concentration, and that this reduces practice of deep reasoning. But the debate did not establish **strong direct findings** showing that *typical* Internet use reliably causes durable declines in intelligence-relevant cognition (not just short-term distraction) across the population.\n\n2. **The population-level IQ/cognitive trend evidence doesn’t establish Internet causation.**  \n   The argument that IQ scores fell by ~7 points per generation since the mid-1970s and that this coincides with Internet expansion treats a temporal correlation as if it were causal. A major unresolved issue is whether the Internet-connected reliance is actually the driver of the trend rather than other confounds (changes in schooling, test norms, health/SES factors, cohort effects, measurement issues, etc.). Without demonstrating that causal link, the “net cognitive decline attributable to the Internet” requirement isn’t satisfied.\n\n3. **The “for most people” part is not adequately supported.**  \n   The strongest version of the pro-harm view depends on the idea that compensating practices (offline study/training and intentional effort) **do not fully offset** the harms “for most people.” But the debate did not provide robust evidence that this “for most people” net-negative conclusion holds after adaptation, selection effects, and varying usage patterns are taken into account.\n\n4. **Countervailing benefits are relevant and point away from a simple “net stupidity” story.**  \n   The pro side emphasizes attention/deep reasoning erosion; the opposing view highlights that the Internet improves information access and communication—especially for marginalized groups (e.g., disabled people and older adults) who benefit from remote access—and that using external memory/fact storage can free up mental resources for higher-level tasks. Even if these benefits don’t prove “no harm,” they matter because the “making us stupid” claim requires demonstrating a **net** negative effect, not just a plausible tradeoff.\n\n### The key unresolved point\nThe decisive gap is **causal attribution + net effect**: we do not have strong, well-substantiated evidence that (a) typical Internet use produces durable reductions in intelligence-relevant competencies at scale, and (b) any such reductions outweigh compensating behaviors and countervailing benefits across most people.\n\n**So the claim that the Internet is making us broadly stupid is not established.**",
+  "integrated_rules": [
+    "Apply this evidence-and-net-effect criterion: \n\n1) Conclude **“Internet is making us stupid”** when (a) the proposed mechanism is supported by strong direct findings that typical usage reduces attention/patience for effortful/deep reasoning or causes atrophy of intelligence-relevant everyday abilities, and (b) population-level indicators (e.g., longitudinal cognitive/IQ trends temporally linked to Internet expansion, and/or measurable declines in the relevant skills) point to a net decline, and (c) compensating practices (intentional offline learning/training) are demonstrated not to fully offset the harm for most people.\n\n2) Conclude **“Internet is not established to be making us stupid”** when (a) the argument is primarily a low-confidence, pattern-based “tech-fear” claim (based on historical fear cycles like printing press/telephone/radio/TV) rather than strong direct causal evidence, and (b) the available evidence does not show robust net-negative effects once reasonable adaptation/compensation and countervailing benefits (e.g., improved access/communication and cognitively useful externalization for fact-storage) are considered.\n\n3) If the evidence is mixed or insufficient to meet the “strong direct, net-negative effect” threshold in (1) or the “primarily pattern-based / no robust net-negative effect” condition in (2), treat the question as unresolved rather than settling it by fear-pattern analogy alone.",
+    "[Unintegrated, one-sided position from AG1's final round] If Atrophy of these everyday competencies contributes directly to lower intelligence/overall cognitive performance.; There is a population-level indicator of net cognitive decline temporally linked to Internet expansion. (unless: For most people, compensating practices (consistent intentional study and offline cognitive training) do not fully offset the attention/effort-and-skill harms from typical Internet-connected reliance.), then Therefore, the Internet is making us stupid by producing a net decline in intelligence-relevant everyday competencies, reflected in population-level cognitive/IQ trends, without being fully offset for most people."
+  ]
+}

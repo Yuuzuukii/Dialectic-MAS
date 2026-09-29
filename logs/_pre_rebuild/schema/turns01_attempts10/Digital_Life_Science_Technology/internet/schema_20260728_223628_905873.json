@@ -1,0 +1,489 @@
+{
+  "method": "schema",
+  "question": "Is the Internet \"Making Us Stupid\"?",
+  "agent1_stance": "Your stance:\nYou support the view that the Internet is making us stupid.\nYou believe the Internet degrades human intelligence by subverting patience and concentration.\nYou believe IQ measurements have dropped approximately 7 points per generation since the mid-1970s, coinciding with Internet expansion, indicating that people are getting dumber.\nYou believe reliance on Internet-connected devices causes atrophy of everyday abilities, and that young adults increasingly lack knowledge of basic tasks because digital tools have replaced traditional skill-building.",
+  "agent2_stance": "Your stance:\nYou oppose the view that the Internet is making us stupid.\nYou believe society has repeatedly feared new technologies such as the printing press, telephone, radio, and television, yet these fears proved largely unfounded, suggesting current Internet concerns follow a predictable but ultimately mistaken pattern.\nYou believe the Internet provides invaluable information access for marginalized populations, including disabled individuals and older adults who benefit from remote communication and resource availability previously unavailable.\nYou believe shifting how we access and process information isn't inherently harmful, and that leveraging external resources for fact-storage allows mental capacity for more important problems.",
+  "metrics": {
+    "elapsed_seconds": 291.224,
+    "model": "gpt-5.4-nano",
+    "prompt_tokens": 129427,
+    "cached_tokens": 43520,
+    "completion_tokens": 36112,
+    "total_tokens": 165539,
+    "total_cost_usd": 0.063192
+  },
+  "dialogue_history": [
+    {
+      "id": "arg-b89b9aee95",
+      "agent": "AG1",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "IQ test performance is an appropriate population-level proxy for general cognitive ability.",
+                  "Empirical findings show that IQ (or equivalent population cognitive-test performance) has declined by roughly 7 points per generation since the mid-1970s."
+                ],
+                "weak_negation": [
+                  "There is no systematic measurement artifact that entirely reverses this apparent multi-generation decline."
+                ]
+              },
+              "consequent": "Population-level cognitive performance (IQ) has declined about 7 points per generation since the mid-1970s."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Population-level cognitive performance (IQ) has declined about 7 points per generation since the mid-1970s.",
+                  "Rapid Internet expansion and rising Internet exposure began and accelerated in the same mid-1970s-to-later period.",
+                  "The temporal co-occurrence means Internet exposure could be contributing to the decline rather than being merely coincident."
+                ],
+                "weak_negation": [
+                  "Other contemporaneous factors do not fully account for the observed magnitude of the IQ decline on their own."
+                ]
+              },
+              "consequent": "This temporal co-occurrence makes Internet exposure a plausible contributor to the IQ/cognitive decline."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "This temporal co-occurrence makes Internet exposure a plausible contributor to the IQ/cognitive decline.",
+                  "“Making us stupid” in the question is about reducing human cognitive ability (e.g., measured by IQ/cognitive-test performance) at the population level.",
+                  "If Internet exposure is a plausible contributor to population cognitive decline, then it fits the question’s sense of the Internet degrading intelligence."
+                ],
+                "weak_negation": [
+                  "The question does not require Internet to be the sole cause; a contributing mechanism is enough to count as “making us stupid.”"
+                ]
+              },
+              "consequent": "Yes—the Internet is “making us stupid” by plausibly contributing to a population-level decline in cognitive ability."
+            }
+          ],
+          "Conc": [
+            "Population-level cognitive performance (IQ) has declined about 7 points per generation since the mid-1970s.",
+            "This temporal co-occurrence makes Internet exposure a plausible contributor to the IQ/cognitive decline.",
+            "Yes—the Internet is “making us stupid” by plausibly contributing to a population-level decline in cognitive ability."
+          ],
+          "Ass": [
+            "There is no systematic measurement artifact that entirely reverses this apparent multi-generation decline.",
+            "Other contemporaneous factors do not fully account for the observed magnitude of the IQ decline on their own.",
+            "The question does not require Internet to be the sole cause; a contributing mechanism is enough to count as “making us stupid.”"
+          ]
+        }
+      },
+      "status": "defensible"
+    },
+    {
+      "id": "arg-4082c29f15",
+      "agent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s key step infers that Internet exposure is a “plausible contributor” mainly from temporal co-occurrence with IQ decline.",
+                  "Internet access/adoption in the early period was limited and uneven, so timing alone cannot show that Internet exposure was sufficiently widespread and temporally aligned with the measured decline."
+                ],
+                "weak_negation": [
+                  "There is additional evidence in the target argument that specifically links early, uneven Internet exposure to the magnitude of the IQ decline beyond mere timing."
+                ]
+              },
+              "consequent": "Temporal co-occurrence (especially with initially uneven adoption) is not sufficient to warrant the target’s causal plausibility claim about Internet exposure."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Temporal co-occurrence (especially with initially uneven adoption) is not sufficient to warrant the target’s causal plausibility claim about Internet exposure.",
+                  "The target’s intermediate support for its final conclusion depends on treating that temporal-co-occurrence inference as warranted."
+                ],
+                "weak_negation": [
+                  "The target supplies independent evidence to replace the missing causal support for its “plausible contributor” step."
+                ]
+              },
+              "consequent": "The target does not establish that Internet exposure is a plausible contributor to the IQ/cognitive decline."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target does not establish that Internet exposure is a plausible contributor to the IQ/cognitive decline.",
+                  "The target’s final conclusion (“Yes—the Internet is ‘making us stupid’...”) follows only if Internet exposure plausibly contributed to population-level cognitive decline."
+                ],
+                "weak_negation": [
+                  "Any support for “making us stupid” in the target argument is independent of the failed temporal-co-occurrence inference."
+                ]
+              },
+              "consequent": "Therefore, the target argument fails to show that the Internet is making us stupid."
+            }
+          ],
+          "Conc": [
+            "Temporal co-occurrence (especially with initially uneven adoption) is not sufficient to warrant the target’s causal plausibility claim about Internet exposure.",
+            "The target does not establish that Internet exposure is a plausible contributor to the IQ/cognitive decline.",
+            "Therefore, the target argument fails to show that the Internet is making us stupid."
+          ],
+          "Ass": [
+            "There is additional evidence in the target argument that specifically links early, uneven Internet exposure to the magnitude of the IQ decline beyond mere timing.",
+            "The target supplies independent evidence to replace the missing causal support for its “plausible contributor” step.",
+            "Any support for “making us stupid” in the target argument is independent of the failed temporal-co-occurrence inference."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-b89b9aee95",
+      "target_field": "Ass",
+      "target_statement": "The temporal co-occurrence means Internet exposure could be contributing to the decline rather than being merely coincident."
+    },
+    {
+      "id": "arg-4f7c4bf824",
+      "agent": "AG1",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2 attacks AG1 on the premise that AG1’s “plausible contributor” inference is inferred mainly from temporal co-occurrence with IQ decline, i.e., a timing-only argument.",
+                  "AG1’s support for that inference also includes (i) the empirical decline figure and (ii) the added premise that contemporaneous alternatives do not fully account for the magnitude of decline and that no measurement artifact entirely reverses the decline."
+                ],
+                "weak_negation": [
+                  "AG2 does not show that AG1’s conclusion depends only on timing, rather than on timing plus those additional premises."
+                ]
+              },
+              "consequent": "AG2’s “timing-only” characterization of AG1 is incorrect."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s “timing-only” characterization of AG1 is incorrect.",
+                  "AG2’s “timing isn’t sufficient (especially with initially uneven adoption)” critique is explicitly keyed to a timing-only inference."
+                ],
+                "weak_negation": [
+                  "AG2’s standard would refute only a narrower argument than AG1 actually offered."
+                ]
+              },
+              "consequent": "AG2’s “timing isn’t sufficient” objection is misapplied to AG1’s actual evidential structure."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s “timing isn’t sufficient” objection is misapplied to AG1’s actual evidential structure.",
+                  "AG1 argues plausibility/contribution (not a demonstration that Internet adoption early was ubiquitous), and the question’s framing allows “a contributing mechanism” rather than proof of sole causation."
+                ],
+                "weak_negation": [
+                  "Requiring early, widespread, perfectly aligned exposure is stronger than what AG1’s plausibility claim requires."
+                ]
+              },
+              "consequent": "AG2 applies an excessively strong requirement for what co-occurrence must establish."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2 applies an excessively strong requirement for what co-occurrence must establish.",
+                  "AG1’s argument includes additional premises beyond timing: the multi-generation cognitive decline (~7 points per generation since the mid-1970s), the lack of a complete measurement-artifact explanation, and the claim that other contemporaneous factors do not fully account for the observed magnitude."
+                ],
+                "weak_negation": [
+                  "AG2 does not directly refute those added premises; it mainly challenges the sufficiency of the timing step under a stronger standard."
+                ]
+              },
+              "consequent": "So AG2 does not defeat AG1’s claim that the Internet is plausibly contributing to population cognitive decline (i.e., “making us stupid”)."
+            }
+          ],
+          "Conc": [
+            "AG2’s “timing-only” characterization of AG1 is incorrect.",
+            "AG2’s “timing isn’t sufficient” objection is misapplied to AG1’s actual evidential structure.",
+            "AG2 applies an excessively strong requirement for what co-occurrence must establish.",
+            "So AG2 does not defeat AG1’s claim that the Internet is plausibly contributing to population cognitive decline (i.e., “making us stupid”)."
+          ],
+          "Ass": [
+            "AG2 does not show that AG1’s conclusion depends only on timing, rather than on timing plus those additional premises.",
+            "AG2’s standard would refute only a narrower argument than AG1 actually offered.",
+            "Requiring early, widespread, perfectly aligned exposure is stronger than what AG1’s plausibility claim requires.",
+            "AG2 does not directly refute those added premises; it mainly challenges the sufficiency of the timing step under a stronger standard."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-4082c29f15",
+      "target_field": "Ass",
+      "target_statement": "AG1’s “plausible contributor” step is inferred mainly from temporal co-occurrence with IQ decline (a timing-only inference), so timing (especially with uneven early adoption) is not sufficient."
+    },
+    {
+      "id": "arg-e7a39164bd",
+      "agent": "AG2",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "People’s cognitive performance depends on limited working memory/resources, and offloading information retrieval/storage externally can reduce cognitive load.",
+                  "The Internet makes external retrieval and storage easy and scalable (e.g., searching, bookmarking, notes, reference material)."
+                ],
+                "weak_negation": [
+                  "Externalization of information is not inherently harmful; it can reallocate attention to higher-value thinking rather than degrade cognition."
+                ]
+              },
+              "consequent": "Using the Internet to retrieve and store information externally can support cognition by reallocating mental resources to higher-value tasks."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Using the Internet to retrieve and store information externally can support cognition by reallocating mental resources to higher-value tasks.",
+                  "Disabled people and older adults can gain substantial benefits from remote communication and from having useful resources readily available online."
+                ],
+                "weak_negation": [
+                  "A claim that the Internet is “making us stupid” would need to show net cognitive harm, not merely that it changes how information is accessed."
+                ]
+              },
+              "consequent": "Because the Internet helps people access information and supports cognition via retrieval/externalization—especially for disabled people and older adults—it does not warrant the conclusion that it is making society stupid."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Because the Internet helps people access information and supports cognition via retrieval/externalization—especially for disabled people and older adults—it does not warrant the conclusion that it is making society stupid.",
+                  "If a technology can support cognition and improve access in ways that reduce harmful cognitive load, then the conclusion “it is making society stupid” is not supported by necessity from the mere existence of Internet use."
+                ],
+                "weak_negation": [
+                  "The issue is about whether the Internet makes us stupid as a general societal effect; absent evidence of net harm, that conclusion does not follow."
+                ]
+              },
+              "consequent": "No—the Internet is not making us stupid; its external-information support and access benefits (notably for disabled people and older adults) point away from that conclusion."
+            }
+          ],
+          "Conc": [
+            "Using the Internet to retrieve and store information externally can support cognition by reallocating mental resources to higher-value tasks.",
+            "Because the Internet helps people access information and supports cognition via retrieval/externalization—especially for disabled people and older adults—it does not warrant the conclusion that it is making society stupid.",
+            "No—the Internet is not making us stupid; its external-information support and access benefits (notably for disabled people and older adults) point away from that conclusion."
+          ],
+          "Ass": [
+            "Externalization of information is not inherently harmful; it can reallocate attention to higher-value thinking rather than degrade cognition.",
+            "A claim that the Internet is “making us stupid” would need to show net cognitive harm, not merely that it changes how information is accessed.",
+            "The issue is about whether the Internet makes us stupid as a general societal effect; absent evidence of net harm, that conclusion does not follow."
+          ]
+        }
+      },
+      "status": "overruled"
+    },
+    {
+      "id": "arg-b60657fbc6",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s reasoning treats “externalization can support cognition / is not inherently harmful” plus access benefits (especially for disabled people and older adults) as sufficient to conclude that concluding “making society dumber” is not warranted.",
+                  "But the inference “some cognitive-supportive benefits exist ⇒ net cognitive degradation from Internet use is negated” does not follow logically; benefits do not automatically rule out an opposing degradation mechanism."
+                ],
+                "weak_negation": [
+                  "A technology can simultaneously provide some benefits while still contributing to a net negative cognitive outcome at the population level."
+                ]
+              },
+              "consequent": "Benefits and “not inherently harmful” externalization do not logically negate net cognitive degradation from Internet use."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Benefits and “not inherently harmful” externalization do not logically negate net cognitive degradation from Internet use.",
+                  "Empirical findings show population cognitive-test performance (IQ or equivalent measures) declined by roughly 7 points per generation since the mid-1970s.",
+                  "Rapid Internet expansion and rising Internet exposure began and accelerated in the same mid-1970s-to-later period, making Internet exposure a plausible contributor to that decline rather than merely coincident.",
+                  "Other contemporaneous factors do not fully account for the observed magnitude of the IQ decline on their own."
+                ],
+                "weak_negation": [
+                  "There is no systematic measurement artifact that entirely reverses the apparent multi-generation IQ decline."
+                ]
+              },
+              "consequent": "Internet expansion is consistent with (and plausibly contributes to) multi-generation population cognitive decline, i.e., net harm despite access benefits."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Internet expansion is consistent with (and plausibly contributes to) multi-generation population cognitive decline, i.e., net harm despite access benefits.",
+                  "The target’s “No” conclusion depends on the idea that making us stupid requires net cognitive harm evidence (or that benefits rule it out); once net cognitive decline is at least plausibly supported, the “no” conclusion is not warranted."
+                ],
+                "weak_negation": [
+                  "The issue is satisfied by plausible population-level net harm; it does not require proving the Internet is the sole cause."
+                ]
+              },
+              "consequent": "Yes—the Internet is plausibly making us stupid by contributing to population-level cognitive decline."
+            }
+          ],
+          "Conc": [
+            "Benefits and “not inherently harmful” externalization do not logically negate net cognitive degradation from Internet use.",
+            "Internet expansion is consistent with (and plausibly contributes to) multi-generation population cognitive decline, i.e., net harm despite access benefits.",
+            "Yes—the Internet is plausibly making us stupid by contributing to population-level cognitive decline."
+          ],
+          "Ass": [
+            "A technology can simultaneously provide some benefits while still contributing to a net negative cognitive outcome at the population level.",
+            "There is no systematic measurement artifact that entirely reverses the apparent multi-generation IQ decline.",
+            "The issue is satisfied by plausible population-level net harm; it does not require proving the Internet is the sole cause."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-e7a39164bd",
+      "target_field": "Ass",
+      "target_statement": "A claim that the Internet is “making us stupid” would need to show net cognitive harm, not merely that it changes how information is accessed."
+    },
+    {
+      "id": "arg-8bf055a823",
+      "agent": "AG2",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s step treats temporal correlation (IQ decline + rising Internet exposure) plus “other factors don’t fully account” as enough to infer Internet-specific plausible contribution to net cognitive decline.",
+                  "Attributing population-level net harm to a specific technology requires more than co-occurrence; it needs ruling out plausible alternative explanations/confounds and/or showing an internet-specific mechanism that would drive the measured decline."
+                ],
+                "weak_negation": [
+                  "AG1 has not provided evidence (within its argument) that isolates Internet exposure as the relevant causal lever or that rules out key alternative confounds."
+                ]
+              },
+              "consequent": "AG1’s correlation-based inference is underdetermined for establishing Internet-specific net cognitive harm."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s correlation-based inference is underdetermined for establishing Internet-specific net cognitive harm.",
+                  "Our main argument provides a countervailing cognitive mechanism: offloading/retrieving/storing information externally via the Internet can reduce harmful cognitive load and reallocate mental resources to higher-value tasks.",
+                  "Those cognitive-supportive uses are especially relevant for disabled people and older adults, for whom remote access can be substantively beneficial."
+                ],
+                "weak_negation": [
+                  "A claim of “plausible net harm” is not warranted when plausible counter-mechanisms exist but the net-outcome attribution remains uncertain."
+                ]
+              },
+              "consequent": "Given plausible countervailing mechanisms, AG1’s argument does not establish the net-harm conclusion it needs to get from correlation to “making us stupid.”"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Given plausible countervailing mechanisms, AG1’s argument does not establish the net-harm conclusion it needs to get from correlation to “making us stupid.”",
+                  "AG1’s final “Yes—the Internet is plausibly making us stupid” depends on that missing step (that net cognitive harm attributable to Internet use is supported)."
+                ],
+                "weak_negation": [
+                  "Even if some negative effects exist, AG1’s argument does not show they outweigh the relevant cognitive-supportive effects to yield a net negative outcome."
+                ]
+              },
+              "consequent": "AG1’s conclusion that the Internet is plausibly making us stupid is not warranted by its evidence."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG1’s conclusion that the Internet is plausibly making us stupid is not warranted by its evidence.",
+                  "Our main argument shows Internet externalization can support cognition and improves access (notably for disabled people and older adults), so “making society stupid” is not supported by necessity from Internet use."
+                ],
+                "weak_negation": [
+                  "Uncertainty about net harm prevents concluding that the Internet is making us stupid as a general societal effect."
+                ]
+              },
+              "consequent": "No—the Internet is not making us stupid (AG1 has not established net Internet-specific cognitive harm)."
+            }
+          ],
+          "Conc": [
+            "AG1’s correlation-based inference is underdetermined for establishing Internet-specific net cognitive harm.",
+            "Given plausible countervailing mechanisms, AG1’s argument does not establish the net-harm conclusion it needs to get from correlation to “making us stupid.”",
+            "AG1’s conclusion that the Internet is plausibly making us stupid is not warranted by its evidence.",
+            "No—the Internet is not making us stupid (AG1 has not established net Internet-specific cognitive harm)."
+          ],
+          "Ass": [
+            "AG1 has not provided evidence (within its argument) that isolates Internet exposure as the relevant causal lever or that rules out key alternative confounds.",
+            "A claim of “plausible net harm” is not warranted when plausible counter-mechanisms exist but the net-outcome attribution remains uncertain.",
+            "Even if some negative effects exist, AG1’s argument does not show they outweigh the relevant cognitive-supportive effects to yield a net negative outcome.",
+            "Uncertainty about net harm prevents concluding that the Internet is making us stupid as a general societal effect."
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-b60657fbc6",
+      "target_field": "Conc",
+      "target_statement": "Yes—the Internet is plausibly making us stupid by contributing to population-level cognitive decline."
+    },
+    {
+      "id": "arg-31f1be1490",
+      "agent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s argument treats it as necessary to rule out confounds / isolate an Internet-specific causal lever before we can claim that Internet use is “plausibly” contributing to net cognitive decline.",
+                  "AG2 then uses that necessity to infer the conclusion that AG1’s “making us stupid” claim is not warranted."
+                ],
+                "weak_negation": [
+                  "AG1’s own conclusion is explicitly about plausibility (a contributing effect), not a proof that Internet is the sole or fully isolated cause."
+                ]
+              },
+              "consequent": "AG2’s evidential requirement (confound ruling-out/isolation) is stronger than what is needed to warrant AG1’s weaker, plausibility-based “Internet contributes to cognitive decline” inference."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2’s evidential requirement (confound ruling-out/isolation) is stronger than what is needed to warrant AG1’s weaker, plausibility-based “Internet contributes to cognitive decline” inference.",
+                  "AG1 also adds beyond mere co-occurrence that other contemporaneous factors do not fully account for the observed IQ decline magnitude and that no measurement artifact entirely reverses the decline."
+                ],
+                "weak_negation": [
+                  "AG2 does not actually refute those extra premises in AG1; it mainly attacks sufficiency under its stronger requirement."
+                ]
+              },
+              "consequent": "Given AG1’s additional premises, AG1’s IQ-decline + Internet-exposure co-occurrence package is sufficient for a plausibility claim about Internet contribution."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AG2 assumes that because there are plausible cognitive-supportive benefits of Internet externalization (especially access benefits), a net cognitive-decline conclusion is not warranted.",
+                  "AG2 therefore treats the existence of countervailing mechanisms as defeating the net-harm inference."
+                ],
+                "weak_negation": [
+                  "The presence of benefits does not logically entail that the negative pathway is absent or outweighed."
+                ]
+              },
+              "consequent": "The existence of cognitive-supportive mechanisms does not entail that net cognitive harm (or net-negative plausibility) is unwarranted."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Given AG1’s additional premises, AG1’s IQ-decline + Internet-exposure co-occurrence package is sufficient for a plausibility claim about Internet contribution.",
+                  "The existence of cognitive-supportive mechanisms does not entail that net cognitive harm (or net-negative plausibility) is unwarranted.",
+                  "AG2’s final “No—the Internet is not making us stupid” conclusion depends on both its overly strong evidential standard and its counter-mechanism-as-defeater move."
+                ],
+                "weak_negation": [
+                  "If the required evidential standard is not that high, and benefits don’t logically negate net harm, then AG2’s warrant for “No” collapses."
+                ]
+              },
+              "consequent": "So AG2’s target conclusion (“No—the Internet is not making us stupid”) does not follow from AG2’s evidence and underlying assumptions."
+            }
+          ],
+          "Conc": [
+            "AG2’s evidential requirement (confound ruling-out/isolation) is stronger than what is needed to warrant AG1’s weaker, plausibility-based “Internet contributes to cognitive decline” inference.",
+            "Given AG1’s additional premises, AG1’s IQ-decline + Internet-exposure co-occurrence package is sufficient for a plausibility claim about Internet contribution.",
+            "The existence of cognitive-supportive mechanisms does not entail that net cognitive harm (or net-negative plausibility) is unwarranted.",
+            "So AG2’s target conclusion (“No—the Internet is not making us stupid”) does not follow from AG2’s evidence and underlying assumptions."
+          ],
+          "Ass": [
+            "AG1’s own conclusion is explicitly about plausibility (a contributing effect), not a proof that Internet is the sole or fully isolated cause.",
+            "AG2 does not actually refute those extra premises in AG1; it mainly attacks sufficiency under its stronger requirement.",
+            "The presence of benefits does not logically entail that the negative pathway is absent or outweighed.",
+            "If the required evidential standard is not that high, and benefits don’t logically negate net harm, then AG2’s warrant for “No” collapses."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-8bf055a823",
+      "target_field": "Ass"
+    }
+  ],
+  "final_answer": "No—there isn’t enough well-supported evidence to conclude that the Internet is “making us stupid” as an overall societal effect.\n\n### Why the “making us stupid” conclusion isn’t warranted\n1. **The strongest pro case relies mainly on correlation, not demonstrated net harm.**  \n   The argument that IQ/cognitive-test performance has fallen by about **7 points per generation since the mid-1970s**, with timing that roughly overlaps with Internet expansion, gives only *plausibility* that Internet exposure could be involved. But under the key standard for this question, plausibility of a harm pathway is not enough: the claim needs **evidence that the net effect on society is harmful**, not just that IQ scores moved downward while Internet use increased.\n\n2. **A concrete “net harmful effect attributable to the Internet” isn’t established.**  \n   Even if some negative cognitive mechanisms exist in principle (e.g., reduced patience or sustained attention due to device-driven habits), the pro argument as presented does not supply the crucial missing step: that **Internet use produces a net societal cognitive decline after accounting for offsetting benefits and alternative explanations**.\n\n3. **Pro “everyday skill atrophy” claims weren’t backed with decisive evidence here.**  \n   The stance that young adults increasingly lack knowledge of basic tasks because digital tools displace traditional skill-building is plausible, but the discussion above did not provide strong, specific evidence that this displacement is widespread and that it produces **measurable population-level cognitive decline** rather than just skill substitution in certain domains.\n\n### Why the opposing considerations matter\n1. **Countervailing cognitive-support mechanisms are plausible and directly relevant.**  \n   The Internet can improve cognition by making **external retrieval and storage** easy (searching, saving notes, quick access to reference material). If externalization reduces harmful cognitive load and lets people allocate mental effort to higher-value thinking, then Internet use is not inherently cognitively degrading.\n\n2. **Access benefits—especially for marginalized groups—argue against a simple “makes us stupid” verdict.**  \n   Remote communication and ready access to resources can be especially valuable for **disabled individuals** and **older adults**, who may otherwise face substantial barriers. A claim of “making us stupid” should overcome these access-related cognitive and functional benefits, not ignore them.\n\n3. **Tech-panics history suggests we should demand strong evidence for broad cognitive harm claims.**  \n   The concern that societies repeatedly fear new technologies (printing press, telephone, radio, TV, etc.) and later find many of those fears exaggerated is a reason to treat broad claims about cognitive decline from a single technology with extra caution—again matching the need for **net harm evidence**, not just worries.\n\n### The most important unresolved point\nThe central unresolved issue is that the “Internet is making us stupid” case does **not** demonstrate:\n- **Internet-specific causal impact** on population cognitive decline (beyond temporal co-occurrence), and\n- **net societal harm** after considering that the Internet also enables external memory/retrieval and provides major access benefits.\n\nBecause that net-harm step is not established, the best-supported conclusion is that the Internet’s overall effect on intelligence/cognition is **at least not demonstrated to be reliably negative**, even if some individual patterns of use could be detrimental in particular ways.\n\n**Bottom line:** We should treat claims that the Internet is “making us stupid” as an open empirical question—not a settled fact—because the evidence presented here supports only *plausibility*, not the required showing of **net, Internet-attributable cognitive harm at the societal level**.",
+  "integrated_rules": [
+    "Use the following higher-order decision rule:\n\nIF the argument provides (a) a plausible connection between Internet exposure and population-level cognitive decline (e.g., temporal co-occurrence with cognitive decline plus an intelligible mechanism such as reduced cognitive ability via use), AND/OR (b) that Internet-connected device use structurally degrades prerequisite traits for learning (e.g., patience, sustained concentration/attention) in ways expected to reduce cognition, AND/OR (c) that reliance on digital tools increasingly displaces practice of everyday skills so that competence/knowledge atrophy follows,\n\nTHEN the claim has prima facie support that the Internet is “making us stupid” *only if* the overall evidence also supports a net harmful societal effect rather than mere conjecture—i.e., the argument overcomes the absence of demonstrated net harm.\n\nELSE IF (i) the argument instead (or additionally) shows that Internet/Internet-based systems demonstrably improve cognition and functioning by enabling easier information access and external memory/retrieval (reducing harmful cognitive load rather than increasing it), including benefits for groups disadvantaged in access (e.g., disabled individuals and older adults), AND (ii) there is no demonstrated net harmful effect at the societal level beyond plausible concerns (with historical techno-panic patterns treated as raising the evidential bar),\n\nTHEN do *not* infer that the Internet is making society stupid solely from Internet use.\n\nWhen harm-pathway plausibility and offsetting access/cognitive benefits both appear, adjudicate by whether the argument supplies evidence of *net* societal cognitive harm beyond conjecture; if it does not, the net-harm inference is weakened/unsupported in light of the evidential-burden and offset considerations above."
+  ]
+}
