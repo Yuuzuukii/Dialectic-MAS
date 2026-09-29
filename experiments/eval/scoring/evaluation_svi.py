@@ -219,11 +219,12 @@ def _judge_one(
 
 
 def score_svi(responses: list[dict[str, Any]] | None) -> dict[str, float | None]:
-    """Calculate original SVI subscales from one agent's 16 item responses.
+    """Aggregate raw SVI responses without reverse scoring.
 
-    Items 3 and 5 are reverse-scored (8 - raw score). Each four-item subscale is the
-    equal-weight mean of available responses. Global is the equal-weight mean of the four
-    available subscale scores; Rapport is the equal-weight mean of Process and Relationship.
+    The evaluator preserves the model's original 1-7 response for every item, including
+    items 3 and 5. Each four-item subscale is the equal-weight mean of the raw available
+    responses. Any reverse scoring required for later statistical analysis is intentionally
+    left to the downstream analysis step.
     """
     if not responses:
         return {
@@ -238,18 +239,9 @@ def score_svi(responses: list[dict[str, Any]] | None) -> dict[str, float | None]
     raw_by_item: dict[int, int | None] = {
         int(response["item"]): response.get("score") for response in responses
     }
-    scored: dict[int, float | None] = {}
-    for item in range(1, 17):
-        value = raw_by_item.get(item)
-        if value is None:
-            scored[item] = None
-        elif item in (3, 5):
-            scored[item] = float(8 - value)
-        else:
-            scored[item] = float(value)
 
     def _mean_items(item_numbers: range) -> float | None:
-        values = [scored[item] for item in item_numbers if scored[item] is not None]
+        values = [raw_by_item[item] for item in item_numbers if raw_by_item.get(item) is not None]
         return mean(values) if values else None
 
     instrumental = _mean_items(range(1, 5))
