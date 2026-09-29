@@ -1,16 +1,19 @@
-"""logs/final_gpt54nano_turns10 配下の全120ログを再評価する.
+"""Evaluate debate logs with atomic stance coverage.
 
-細分化(atomic)カバレッジで再評価し、既存(final_comparison.json)のスタンス行
-ベースのカバレッジと比較する。
+An optional overlay directory can replace matching base logs. This is useful after
+re-finalizing schema/no_schema while keeping free_debate and mad unchanged.
 
-- 新項目抽出: stance_decomposition.extract_stance_items_atomic（spaCy依存構造解析、LLM不要・決定論的）
-- 判定: evaluation_coverage_atomic.evaluate_stance_coverage_atomic（項目ごと独立LLM呼び出し、既存と同じ判定ロジック）
-- 旧カバレッジは再評価せず、logs/final_gpt54nano_turns10/final_comparison.json の値をそのまま再利用する
-  （コスト削減、かつ「評価をまるっと変えない」という方針に合わせ、旧指標はそのまま比較対象として保持）。
+The legacy coverage columns, when loaded, remain historical values from the original
+final_comparison.json. The atomic coverage values are computed from the merged current logs.
 
-Usage:
-    python -m experiments.eval.runners.eval_atomic_coverage_final
+Examples:
     python -m experiments.eval.runners.eval_atomic_coverage_final --workers 8
+    python -m experiments.eval.runners.eval_atomic_coverage_final \
+      --base-dir logs/final_gpt54nano_turns10 \
+      --overlay-dir logs/final_gpt54nano_turns10_two_path \
+      --out logs/final_gpt54nano_turns10_two_path/atomic_coverage_comparison.json \
+      --csv-out docs/results/atomic_coverage_comparison_two_path.csv \
+      --workers 8
 """
 
 # ruff: noqa: T201, E402, I001
@@ -19,6 +22,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -37,10 +41,11 @@ load_dotenv(ROOT / ".env")
 from experiments.eval.runners.run_eval import resolve_evaluator_model
 from experiments.eval.scoring.evaluation_coverage_atomic import evaluate_stance_coverage_atomic
 
-LOGS_DIR = ROOT / "logs" / "final_gpt54nano_turns10"
-OLD_COMPARISON_PATH = LOGS_DIR / "final_comparison.json"
-OUT_PATH = LOGS_DIR / "atomic_coverage_comparison.json"
-OUT_CSV_PATH = ROOT / "docs" / "results" / "atomic_coverage_comparison.csv"
+DEFAULT_BASE_DIR = ROOT / "logs" / "final_gpt54nano_turns10"
+DEFAULT_OLD_COMPARISON = DEFAULT_BASE_DIR / "final_comparison.json"
+DEFAULT_OUT = DEFAULT_BASE_DIR / "atomic_coverage_comparison.json"
+DEFAULT_CSV_OUT = ROOT / "docs" / "results" / "atomic_coverage_comparison.csv"
+_FILENAME_RE = re.compile(r"^\d+_(?P<method>.+)_\d{8}_\d{6}_\d+$")
 
 
 class _EvaluatorModel:
@@ -54,16 +59,35 @@ class _EvaluatorModel:
         return content if isinstance(content, str) else "\n".join(str(p) for p in content)
 
 
-def _load_old_ratios() -> dict[str, dict[str, Any]]:
-    data = json.loads(OLD_COMPARISON_PATH.read_text(encoding="utf-8"))
-    return {entry["file"]: entry for entry in data["detail"]}
+def _load_old_ratios(path: Path | None) -> dict[str, dict[str, Any]]:
+    if path is None or not path.exists():
+        return {}
+    data = json.loads(path.read_text(encoding="utf-8"))
+    return {entry["file"]: entry for entry in data.get("detail", [])}
 
 
-def _collect_logs() -> list[Path]:
-    return sorted(LOGS_DIR.glob("*/*/*.json"))
+def _relative_log_map(root: Path) -> dict[Path, Path]:
+    return {
+        path.relative_to(root): path
+        for path in sorted(root.glob("*/*/*.json"))
+        if _FILENAME_RE.match(path.stem)
+    }
 
 
-def _evaluate_one(log_path: Path, model_name: str, old_by_file: dict[str, dict[str, Any]]) -> dict[str, Any]:
+def _collect_logs(base_dir: Path, overlay_dir: Path | None) -> list[Path]:
+    merged = _relative_log_map(base_dir)
+    if overlay_dir is not None:
+        if not overlay_dir.exists():
+            raise FileNotFoundError(f"Overlay directory does not exist: {overlay_dir}")
+        merged.update(_relative_log_map(overlay_dir))
+    return [path for _, path in sorted(merged.items())]
+
+
+def _evaluate_one(
+    log_path: Path,
+    model_name: str,
+    old_by_file: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
     log = json.loads(log_path.read_text(encoding="utf-8"))
     evaluator = _EvaluatorModel(model_name)
     result = evaluate_stance_coverage_atomic(log, evaluator)
@@ -84,19 +108,37 @@ def _evaluate_one(log_path: Path, model_name: str, old_by_file: dict[str, dict[s
 
 def _aggregate(results: list[dict[str, Any]]) -> dict[str, Any]:
     by_method: dict[str, list[dict[str, Any]]] = {}
-    for r in results:
-        by_method.setdefault(r["method"], []).append(r)
+    for row in results:
+        by_method.setdefault(row["method"], []).append(row)
 
     summary: dict[str, Any] = {}
     for method, rows in sorted(by_method.items()):
-        old_valid = [r["old_ratio"] for r in rows if isinstance(r.get("old_ratio"), (int, float))]
-        new_valid = [r["atomic_ratio"] for r in rows if isinstance(r.get("atomic_ratio"), (int, float))]
-        new_totals = [r["atomic_total"] for r in rows if isinstance(r.get("atomic_total"), (int, float))]
+        old_valid = [
+            row["old_ratio"]
+            for row in rows
+            if isinstance(row.get("old_ratio"), (int, float))
+        ]
+        new_valid = [
+            row["atomic_ratio"]
+            for row in rows
+            if isinstance(row.get("atomic_ratio"), (int, float))
+        ]
+        new_totals = [
+            row["atomic_total"]
+            for row in rows
+            if isinstance(row.get("atomic_total"), (int, float))
+        ]
         summary[method] = {
             "n": len(rows),
-            "old_coverage_mean": round(sum(old_valid) / len(old_valid), 4) if old_valid else None,
-            "atomic_coverage_mean": round(sum(new_valid) / len(new_valid), 4) if new_valid else None,
-            "atomic_items_mean": round(sum(new_totals) / len(new_totals), 2) if new_totals else None,
+            "old_coverage_mean": (
+                round(sum(old_valid) / len(old_valid), 4) if old_valid else None
+            ),
+            "atomic_coverage_mean": (
+                round(sum(new_valid) / len(new_valid), 4) if new_valid else None
+            ),
+            "atomic_items_mean": (
+                round(sum(new_totals) / len(new_totals), 2) if new_totals else None
+            ),
         }
     return summary
 
@@ -106,12 +148,53 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", default=None)
     parser.add_argument("--workers", type=int, default=8)
+    parser.add_argument("--base-dir", type=Path, default=DEFAULT_BASE_DIR)
+    parser.add_argument(
+        "--overlay-dir",
+        type=Path,
+        default=None,
+        help="Optional log root whose matching relative paths replace base logs.",
+    )
+    parser.add_argument(
+        "--old-comparison",
+        type=Path,
+        default=DEFAULT_OLD_COMPARISON,
+        help="Historical final_comparison.json used only for legacy coverage columns.",
+    )
+    parser.add_argument("--out", type=Path, default=None)
+    parser.add_argument("--csv-out", type=Path, default=None)
     args = parser.parse_args()
 
+    base_dir = args.base_dir.resolve()
+    overlay_dir = args.overlay_dir.resolve() if args.overlay_dir is not None else None
+    out_path = (
+        args.out.resolve()
+        if args.out is not None
+        else (
+            overlay_dir / "atomic_coverage_comparison.json"
+            if overlay_dir is not None
+            else DEFAULT_OUT
+        )
+    )
+    csv_out_path = (
+        args.csv_out.resolve()
+        if args.csv_out is not None
+        else DEFAULT_CSV_OUT
+    )
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    csv_out_path.parent.mkdir(parents=True, exist_ok=True)
+
     model_name = resolve_evaluator_model(args.model)
-    old_by_file = _load_old_ratios()
-    log_paths = _collect_logs()
-    print(f"Evaluating {len(log_paths)} logs with atomic coverage ({model_name}, workers={args.workers}) ...")
+    old_by_file = _load_old_ratios(args.old_comparison.resolve())
+    log_paths = _collect_logs(base_dir, overlay_dir)
+    print(
+        f"Evaluating {len(log_paths)} logs with atomic coverage "
+        f"({model_name}, workers={args.workers}) ..."
+    )
+    print(f"base:    {base_dir}")
+    if overlay_dir is not None:
+        print(f"overlay: {overlay_dir}")
+        print("note: old_ratio columns are historical; atomic_ratio uses overlayed current finals")
 
     results: list[dict[str, Any]] = []
     lock = threading.Lock()
@@ -123,47 +206,50 @@ def main() -> None:
             for log_path in log_paths
         }
         for future in as_completed(futures):
-            r = future.result()
+            row = future.result()
             with lock:
                 counter[0] += 1
                 print(
-                    f"[{counter[0]:03d}/{len(log_paths)}] {r['topic']}/{r['file']} "
-                    f"old={r['old_ratio']} atomic={r['atomic_ratio']} "
-                    f"({r['atomic_covered']}/{r['atomic_total']})",
+                    f"[{counter[0]:03d}/{len(log_paths)}] {row['topic']}/{row['file']} "
+                    f"old={row['old_ratio']} atomic={row['atomic_ratio']} "
+                    f"({row['atomic_covered']}/{row['atomic_total']})",
                     flush=True,
                 )
-            results.append(r)
+            results.append(row)
 
-    results.sort(key=lambda r: (r["topic"], r["file"]))
+    results.sort(key=lambda row: (row["topic"], row["file"]))
     summary = _aggregate(results)
 
     print()
     print("=" * 70)
-    print("ATOMIC COVERAGE vs OLD COVERAGE — SUMMARY BY METHOD")
+    print("ATOMIC COVERAGE — SUMMARY BY METHOD")
     print("=" * 70)
     print(f"{'method':<14}{'n':>4}{'old_mean':>12}{'atomic_mean':>14}{'atomic_items':>15}")
     for method, agg in summary.items():
         print(
-            f"{method:<14}{agg['n']:>4}{agg['old_coverage_mean']:>12}"
-            f"{agg['atomic_coverage_mean']:>14}{agg['atomic_items_mean']:>15}"
+            f"{method:<14}{agg['n']:>4}{str(agg['old_coverage_mean']):>12}"
+            f"{str(agg['atomic_coverage_mean']):>14}{str(agg['atomic_items_mean']):>15}"
         )
 
-    OUT_PATH.write_text(
-        json.dumps({"summary_by_method": summary, "detail": results}, ensure_ascii=False, indent=2),
+    out_path.write_text(
+        json.dumps(
+            {"summary_by_method": summary, "detail": results},
+            ensure_ascii=False,
+            indent=2,
+        ),
         encoding="utf-8",
     )
-    print(f"\nSaved: {OUT_PATH}")
+    print(f"\nSaved: {out_path}")
 
-    OUT_CSV_PATH.parent.mkdir(parents=True, exist_ok=True)
     header = "topic,category,method,old_ratio,atomic_ratio,atomic_covered,atomic_total\n"
     lines = [header]
-    for r in results:
+    for row in results:
         lines.append(
-            f"{r['topic']},{r['category']},{r['method']},{r['old_ratio']},"
-            f"{r['atomic_ratio']},{r['atomic_covered']},{r['atomic_total']}\n"
+            f"{row['topic']},{row['category']},{row['method']},{row['old_ratio']},"
+            f"{row['atomic_ratio']},{row['atomic_covered']},{row['atomic_total']}\n"
         )
-    OUT_CSV_PATH.write_text("".join(lines), encoding="utf-8")
-    print(f"Saved: {OUT_CSV_PATH}")
+    csv_out_path.write_text("".join(lines), encoding="utf-8")
+    print(f"Saved: {csv_out_path}")
 
 
 if __name__ == "__main__":
