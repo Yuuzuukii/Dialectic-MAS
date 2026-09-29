@@ -1,15 +1,12 @@
 """Run first-person SVI evaluation over existing debate logs.
 
 This module only defines the runner. It does not execute on import.
-The 16 questionnaire items must be supplied from an external JSON file so the evaluation
-logic remains separate from the instrument text.
-
-Expected items file format:
-    ["item 1 text", "item 2 text", ..., "item 16 text"]
+The official 16 SVI items are embedded in evaluation_svi.py for this non-commercial
+research use, so no external questionnaire file is required.
 
 Usage (when ready to run):
-    python -m experiments.eval.runners.eval_svi_final --items-file path/to/svi_items.json
-    python -m experiments.eval.runners.eval_svi_final --items-file path/to/svi_items.json --workers 8
+    python -m experiments.eval.runners.eval_svi_final
+    python -m experiments.eval.runners.eval_svi_final --workers 8
 """
 
 # ruff: noqa: T201, E402, I001
@@ -43,13 +40,6 @@ OUT_PATH = LOGS_DIR / "svi_comparison.json"
 _FILENAME_RE = re.compile(r"^\d+_(?P<method>.+)_\d{8}_\d{6}_\d+$")
 
 
-def _load_items(path: Path) -> list[str]:
-    raw = json.loads(path.read_text(encoding="utf-8"))
-    if not isinstance(raw, list) or len(raw) != 16 or not all(isinstance(x, str) for x in raw):
-        raise ValueError("SVI items file must be a JSON array containing exactly 16 strings")
-    return [x.strip() for x in raw]
-
-
 def _collect_logs(trials_per_method: int) -> list[Path]:
     all_paths = sorted(LOGS_DIR.glob("*/*/*.json"))
     by_group: dict[tuple[str, str], list[Path]] = {}
@@ -64,14 +54,10 @@ def _collect_logs(trials_per_method: int) -> list[Path]:
     return sorted(selected)
 
 
-def _evaluate_one(
-    log_path: Path,
-    model_name: str,
-    items: list[str],
-) -> dict[str, Any]:
+def _evaluate_one(log_path: Path, model_name: str) -> dict[str, Any]:
     log = json.loads(log_path.read_text(encoding="utf-8"))
     judge_model = ChatOpenAI(model=model_name)
-    result = evaluate_svi(log, judge_model, items)
+    result = evaluate_svi(log, judge_model)
     return {
         "file": log_path.name,
         "topic": log_path.parent.name,
@@ -79,12 +65,13 @@ def _evaluate_one(
         "method": log.get("method") or log.get("mode"),
         "agent1": result["agent1"],
         "agent2": result["agent2"],
+        "agent1_scores": result["agent1_scores"],
+        "agent2_scores": result["agent2_scores"],
     }
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--items-file", type=Path, required=True)
     parser.add_argument("--model", default=None)
     parser.add_argument("--workers", type=int, default=8)
     parser.add_argument(
@@ -95,7 +82,6 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    items = _load_items(args.items_file)
     model_name = resolve_evaluator_model(args.model)
     log_paths = _collect_logs(args.trials)
     print(
@@ -109,7 +95,7 @@ def main() -> None:
 
     with ThreadPoolExecutor(max_workers=args.workers) as pool:
         futures = {
-            pool.submit(_evaluate_one, log_path, model_name, items): log_path
+            pool.submit(_evaluate_one, log_path, model_name): log_path
             for log_path in log_paths
         }
         for future in as_completed(futures):
