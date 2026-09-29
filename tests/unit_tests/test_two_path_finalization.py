@@ -8,13 +8,16 @@ from src.agent import two_path_finalization as finalization
 
 
 @pytest.mark.asyncio
-async def test_justified_path_keeps_existing_answer(monkeypatch: pytest.MonkeyPatch) -> None:
+@pytest.mark.parametrize("method", ["schema", "no_schema"])
+async def test_justified_path_keeps_existing_answer(
+    monkeypatch: pytest.MonkeyPatch, method: str
+) -> None:
     async def fail_chat_text(*args: Any, **kwargs: Any) -> str:
         raise AssertionError("LLM must not be called for an already justified result")
 
     monkeypatch.setattr(finalization, "chat_text", fail_chat_text)
     log = {
-        "method": "schema",
+        "method": method,
         "question": "Q?",
         "agent1_stance": "A",
         "agent2_stance": "B",
@@ -32,7 +35,10 @@ async def test_justified_path_keeps_existing_answer(monkeypatch: pytest.MonkeyPa
 
 
 @pytest.mark.asyncio
-async def test_unresolved_path_synthesizes_then_answers(monkeypatch: pytest.MonkeyPatch) -> None:
+@pytest.mark.parametrize("method", ["schema", "no_schema"])
+async def test_unresolved_path_synthesizes_then_answers(
+    monkeypatch: pytest.MonkeyPatch, method: str
+) -> None:
     calls: list[str] = []
 
     async def fake_chat_text(messages: list[Any], **kwargs: Any) -> str:
@@ -47,11 +53,14 @@ async def test_unresolved_path_synthesizes_then_answers(monkeypatch: pytest.Monk
 
     monkeypatch.setattr(finalization, "chat_text", fake_chat_text)
     log = {
-        "method": "schema",
+        "method": method,
         "question": "Q?",
         "agent1_stance": "A",
         "agent2_stance": "B",
-        "dialogue_history": [{"agent": "AG1", "argument": "a"}, {"agent": "AG2", "argument": "b"}],
+        "dialogue_history": [
+            {"agent": "AG1", "argument": "a"},
+            {"agent": "AG2", "argument": "b"},
+        ],
         "consensus_reached": False,
         "justification_status": "fallback_no_consensus",
         "final_answer": "old best-supported answer",
@@ -66,3 +75,9 @@ async def test_unresolved_path_synthesizes_then_answers(monkeypatch: pytest.Monk
     assert result["final_answer"] == "answer from synthesis"
     assert result["finalization_path"] == "fallback_full_dialogue_synthesis"
     assert result["consensus_reached"] is False
+
+
+@pytest.mark.asyncio
+async def test_other_methods_are_rejected() -> None:
+    with pytest.raises(ValueError, match="schema and no_schema"):
+        await finalization.refinalize_unresolved_log({"method": "mad"})
