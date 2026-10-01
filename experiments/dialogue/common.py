@@ -463,23 +463,9 @@ def _speech_log(history: list[dict[str, Any]]) -> list[dict[str, Any]]:
     Argument スキーマ（rules/Conc/Ass）自体は変更せず、その1つ上のレイヤーである
     ログエントリにメタ情報を残す。
     """
-    keys = (
-        "id",
-        "agent",
-        "proponent",
-        "type",
-        "argument",
-        "attack",
-        "target_id",
-        "target_field",
-        "target_statement",
-        "status",
-        "closed_by_budget",
-    )
-    return [
-        {k: record.get(k) for k in keys if record.get(k) is not None}
-        for record in history
-    ]
+    from src.agent.two_path_finalization import speech_log
+
+    return speech_log(history)
 
 
 async def _run_topic_once(
@@ -553,6 +539,11 @@ async def _run_topic_once(
     # justified はしていない（docs/argumentation_model_rebuild_plan.md §9 #2/#8 参照）。
     log["consensus_reached"] = final_state.get("consensus_reached")
     log["justification_status"] = final_state.get("justification_status")
+    # 最終回答の作り方（justified_argument / fallback_full_dialogue_synthesis）と、決着しなかった
+    # ときに議論全体から作った統合文。
+    log["finalization_path"] = final_state.get("finalization_path")
+    if final_state.get("fallback_synthesis"):
+        log["fallback_synthesis"] = final_state["fallback_synthesis"]
     # agent 別の「新しい main を出せなかった理由」（出せた場合は空）。
     log["main_unavailable_reasons"] = final_state.get("main_unavailable_reasons") or {}
     # 「出せなかった／認められなかった」試行（反論なし・ブロッカーなし・攻撃不成立など）と理由。

@@ -6,8 +6,9 @@ import pytest
 
 from src.agent import two_path_finalization as finalization
 
+pytestmark = pytest.mark.anyio
 
-@pytest.mark.asyncio
+
 @pytest.mark.parametrize("method", ["schema", "no_schema"])
 async def test_justified_path_keeps_existing_answer(
     monkeypatch: pytest.MonkeyPatch, method: str
@@ -34,7 +35,6 @@ async def test_justified_path_keeps_existing_answer(
     assert "previous_final_answer" not in result
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("method", ["schema", "no_schema"])
 async def test_unresolved_path_synthesizes_then_answers(
     monkeypatch: pytest.MonkeyPatch, method: str
@@ -77,7 +77,66 @@ async def test_unresolved_path_synthesizes_then_answers(
     assert result["consensus_reached"] is False
 
 
-@pytest.mark.asyncio
 async def test_other_methods_are_rejected() -> None:
     with pytest.raises(ValueError, match="schema and no_schema"):
         await finalization.refinalize_unresolved_log({"method": "mad"})
+
+
+async def test_generate_final_answer_node_justified_path_skips_synthesis(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import agent.nodes as nodes_module
+    from agent.workflow import State
+
+    async def fail_synthesis(**kwargs: Any) -> str:
+        raise AssertionError("synthesis must not run for a justified result")
+
+    async def fake_final_answer(state: Any) -> str:
+        return "justified answer"
+
+    monkeypatch.setattr(nodes_module, "synthesize_unresolved_dialogue", fail_synthesis)
+    monkeypatch.setattr(nodes_module.arguments, "generate_final_answer", fake_final_answer)
+    state = State(question="Q?", agent1_stance="A", agent2_stance="B")
+    state.consensus_reached = True
+    state.justified_argument = "arg"
+
+    update = await nodes_module.generate_final_answer(state)
+
+    assert update["final_answer"] == "justified answer"
+    assert update["finalization_path"] == "justified_argument"
+
+
+async def test_generate_final_answer_node_unresolved_path_uses_full_dialogue(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import agent.nodes as nodes_module
+    from agent.workflow import State
+
+    seen: dict[str, Any] = {}
+
+    async def fake_synthesis(**kwargs: Any) -> str:
+        seen["history"] = kwargs["dialogue_history"]
+        return "balanced synthesis"
+
+    async def fake_answer(**kwargs: Any) -> str:
+        assert kwargs["synthesis"] == "balanced synthesis"
+        return "answer from synthesis"
+
+    async def fail_old_path(state: Any) -> str:
+        raise AssertionError("the single-argument final answer must not run when unresolved")
+
+    monkeypatch.setattr(nodes_module, "synthesize_unresolved_dialogue", fake_synthesis)
+    monkeypatch.setattr(nodes_module, "answer_from_fallback_synthesis", fake_answer)
+    monkeypatch.setattr(nodes_module.arguments, "generate_final_answer", fail_old_path)
+    state = State(question="Q?", agent1_stance="A", agent2_stance="B")
+    state.consensus_reached = False
+    state.justified_argument = "last main only"
+
+    update = await nodes_module.generate_final_answer(state)
+
+    assert update["final_answer"] == "answer from synthesis"
+    assert update["finalization_path"] == "fallback_full_dialogue_synthesis"
+    assert update["justification_status"] == "fallback_full_dialogue_synthesis"
+    assert update["consensus_reached"] is False
+    assert update["fallback_synthesis"] == "balanced synthesis"
+    assert seen["history"] == []

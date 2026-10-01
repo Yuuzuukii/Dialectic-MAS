@@ -145,6 +145,9 @@ class State:
 
     justified_argument: str | None = None
     justification_status: str | None = None
+    # 最終回答の作り方。決着（justified）した議論はその主張から、しなかった議論は議論全体の統合から作る。
+    finalization_path: str | None = None
+    fallback_synthesis: str | None = None
     final_answer: str | None = None
     error: str | None = None
 

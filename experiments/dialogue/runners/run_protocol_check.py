@@ -53,6 +53,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--turns", default="20", help="max_dialogue_turns を ',' 区切りで（例: 10,20,30）。")
     parser.add_argument("--runs", type=int, default=1, help="各条件の実行回数。")
     parser.add_argument("--max-turns", type=int, default=DEFAULT_MAX_TURNS, help="ラウンド上限。")
+    parser.add_argument(
+        "--experiment-dir",
+        type=Path,
+        default=None,
+        help="既存の実験フォルダ（logs/experiment_<日時>）に追加で保存する。未指定なら新しく作る。",
+    )
     parser.add_argument("--concurrency", type=int, default=8, help="同時に実行する run 数の上限（API のレート制限対策）。")
     return parser.parse_args()
 
@@ -61,7 +67,7 @@ async def main() -> None:
     args = parse_args()
     methods = [m.strip() for m in args.methods.split(",") if m.strip()]
     turns_list = [int(t) for t in args.turns.split(",") if t.strip()]
-    root = LOGS_DIR / f"experiment_{datetime.now():%Y%m%d_%H%M%S}"
+    root = args.experiment_dir or LOGS_DIR / f"experiment_{datetime.now():%Y%m%d_%H%M%S}"
     print(f"logs -> {root}", flush=True)
 
     semaphore = asyncio.Semaphore(max(1, args.concurrency))

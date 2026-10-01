@@ -28,6 +28,11 @@ from .arguments import (
 )
 from .prompts import attack_instruction, main_instruction
 from .schema.state import ArgumentRecord, DialogueNode, parse_serialized_payload
+from .two_path_finalization import (
+    answer_from_fallback_synthesis,
+    speech_log,
+    synthesize_unresolved_dialogue,
+)
 
 # ============================================================================
 # 簿記ヘルパ
@@ -902,15 +907,43 @@ async def finalize_fallback(state: Any) -> dict[str, Any]:
 
 
 async def generate_final_answer(state: Any) -> dict[str, Any]:
-    """対話履歴を踏まえて自然文回答を生成する.
+    """最終回答を生成する（決着した議論 / 決着しなかった議論の2経路）.
 
-    通常は justified な主張から作る。合意に至らず暫定回答を作る場合
-    (consensus_reached is False) は、合意なしであることを明示する専用プロンプトを使う。
+    A) justified: 勝った主張（justified_argument）から最終回答を作る。
+    B) 決着しなかった（ターン予算切れ・どちらの main も勝たない等）: 直近の main や統合ルール
+       1つに頼らず、議論全体を中立に1つの統合文へまとめ、その統合文だけを土台に回答する。
+       schema / no_schema で同じ方針を使うので、両者の差は議論の表現だけに由来する。
     """
-    if not state.justified_argument:
-        return {"final_answer": None, "consensus_reached": state.consensus_reached}
-    answer = await arguments.generate_final_answer(state)
-    return {"final_answer": answer, "consensus_reached": state.consensus_reached}
+    if state.consensus_reached:
+        if not state.justified_argument:
+            return {"final_answer": None, "consensus_reached": state.consensus_reached}
+        answer = await arguments.generate_final_answer(state)
+        return {
+            "final_answer": answer,
+            "consensus_reached": state.consensus_reached,
+            "finalization_path": "justified_argument",
+        }
+
+    history = speech_log(dialogue_history(_records(state)))
+    synthesis = await synthesize_unresolved_dialogue(
+        question=state.question,
+        agent1_stance=state.agent1_stance,
+        agent2_stance=state.agent2_stance,
+        dialogue_history=history,
+    )
+    answer = await answer_from_fallback_synthesis(
+        question=state.question,
+        agent1_stance=state.agent1_stance,
+        agent2_stance=state.agent2_stance,
+        synthesis=synthesis,
+    )
+    return {
+        "final_answer": answer,
+        "consensus_reached": False,
+        "justification_status": "fallback_full_dialogue_synthesis",
+        "finalization_path": "fallback_full_dialogue_synthesis",
+        "fallback_synthesis": synthesis,
+    }
 
 
 async def finish(state: Any) -> dict[str, Any]:
@@ -919,6 +952,8 @@ async def finish(state: Any) -> dict[str, Any]:
         "dialogue_history": dialogue_history(_records(state)),
         "justified_argument": state.justified_argument,
         "justification_status": state.justification_status,
+        "finalization_path": state.finalization_path,
+        "fallback_synthesis": state.fallback_synthesis,
         "consensus_reached": state.consensus_reached,
         "final_rebuttal": state.final_rebuttal,
         "final_answer": state.final_answer,

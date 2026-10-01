@@ -308,41 +308,17 @@ def validate_argument_body(body: ArgumentBody) -> list[str]:
     return violations
 
 
-def _repair_instruction(violations: list[str]) -> str:
-    """検証で見つかった連鎖違反を、再生成時に添える矯正指示へ整形する."""
-    bullet = "\n".join(f"- {violation}" for violation in violations)
-    return (
-        "<repair>\n"
-        "Your previous Argument violated the rule-structure contract:\n"
-        f"{bullet}\n"
-        "Regenerate the Argument so every rule has a non-empty consequent and at least "
-        "one meaningful strong or weak_negation antecedent, every non-final consequent "
-        "is reused as a strong antecedent of a later rule, and no two rules share the "
-        "same consequent. Never add placeholder rules such as 'No additional rule "
-        "needed.' Keep the substance of your reasoning; only fix the structure.\n"
-        "</repair>"
-    )
-
-
 async def _generate_structured_argument(
     messages: list[BaseMessage], schema: Any
 ) -> Any:
-    """構造化 Argument を生成し、形式的不変条件に違反した場合のみ1回だけ再生成する.
+    """構造化出力で Argument を1回だけ生成して返す.
 
-    schema 系のみ矯正メッセージを添えて再生成する。
-    no_schema（Argument が自由記述文字列）や Argument を含まない出力はそのまま返す。
-    再生成後は結果の可否によらずそのまま採用し、無限ループや hard fail は避ける。
+    形式の検証（`validate_argument_body`）に違反しても、再生成（修復）は行わない。
+    修復は schema にだけ追加の LLM 呼び出しを与え、no_schema との比較を不公平にするうえ、
+    修復の応答が本来の判断（反論の可否など）を歪めうるため。違反は診断用に
+    `validate_argument_body` で事後に数えられる。
     """
-    output = await chat_structured(messages, schema)
-    body = getattr(output, "Argument", None)
-    if isinstance(body, ArgumentBody):
-        violations = validate_argument_body(body)
-        if violations:
-            output = await chat_structured(
-                [*messages, HumanMessage(content=_repair_instruction(violations))],
-                schema,
-            )
-    return output
+    return await chat_structured(messages, schema)
 
 
 async def generate_main(state: Any, agent: AgentName) -> MainGeneration:

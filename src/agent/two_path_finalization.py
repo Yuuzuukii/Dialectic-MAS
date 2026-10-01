@@ -19,6 +19,30 @@ from .llm import chat_text
 
 SUPPORTED_METHODS = {"schema", "no_schema"}
 
+# ログ（dialogue_history）に残す発話のフィールド。最終化の入力もこの形に揃える
+# （生成中の finalize と、ログからの後付け refinalize で同じ入力になるように）。
+SPEECH_LOG_KEYS = (
+    "id",
+    "agent",
+    "proponent",
+    "type",
+    "argument",
+    "attack",
+    "target_id",
+    "target_field",
+    "target_statement",
+    "status",
+    "closed_by_budget",
+)
+
+
+def speech_log(history: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """対話履歴から、評価・分析・最終化に必要なフィールドだけを抜き出す."""
+    return [
+        {k: record.get(k) for k in SPEECH_LOG_KEYS if record.get(k) is not None}
+        for record in history
+    ]
+
 _FALLBACK_SYNTHESIS_SYSTEM = """<role>
 You are a neutral synthesis operator.
 </role>
