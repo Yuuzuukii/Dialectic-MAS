@@ -42,7 +42,8 @@ EXPERIMENT_DIR = ROOT / "logs" / "experiment_20260916_020350"
 DEFAULT_BASE_DIR = EXPERIMENT_DIR / "raw_dialogue"
 DEFAULT_OLD_COMPARISON: Path | None = None
 DEFAULT_OUT = EXPERIMENT_DIR / "eval_result" / "atomic_coverage" / "atomic_coverage_comparison.json"
-_FILENAME_RE = re.compile(r"^\d+_(?P<method>.+)_\d{8}_\d{6}_\d+$")
+# run 番号の接頭辞 NN_ は任意（--runs 1 のログには付かない）。
+_FILENAME_RE = re.compile(r"^(?:\d+_)?(?P<method>.+)_\d{8}_\d{6}_\d+$")
 
 
 class _EvaluatorModel:

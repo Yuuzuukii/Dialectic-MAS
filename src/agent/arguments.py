@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import json
 import os
+from contextvars import ContextVar
 from dataclasses import dataclass
 from typing import Any, cast
 
@@ -370,6 +371,18 @@ async def generate_main(state: Any, agent: AgentName) -> MainGeneration:
     return MainGeneration(available=True, reason=None, argument=argument)
 
 
+# 直近の generate_attack / generate_undercut / ask_attack_extends が「出せない」と答えたときの
+# 理由。戻り値は None のままにして既存の呼び出し側を変えないため、タスクごとの ContextVar で渡す。
+_decline_reason: ContextVar[str | None] = ContextVar("decline_reason", default=None)
+
+
+def take_decline_reason() -> str | None:
+    """直近の「出せない」理由を取り出して消す（無ければ None）."""
+    reason = _decline_reason.get()
+    _decline_reason.set(None)
+    return reason
+
+
 async def generate_attack(
     state: Any,
     attacker: AgentName,
@@ -396,7 +409,9 @@ async def generate_attack(
         await _generate_structured_argument(messages, schema),
     )
     if output.can_defeat != "YES" or output.Argument is None or output.Attack is None:
+        _decline_reason.set(output.reason or "(no reason given)")
         return None
+    _decline_reason.set(None)
     return ArgumentRecord(
         type="counter" if purpose == "counter" else "defeat",
         argument=_serialize_argument(state, output.Argument),
@@ -417,6 +432,7 @@ async def generate_undercut(
 ) -> ArgumentRecord | None:
     """対象の仮定（Ass）を狙う undercut 主張を LLM 生成し、ArgumentRecord 化する."""
     if _output_mode(state) == "schema" and not target.assumptions:
+        _decline_reason.set("target has no assumptions (Ass) to undercut")
         return None
     messages = build_undercut_messages(state, attacker, target)
     schema = (
@@ -427,7 +443,9 @@ async def generate_undercut(
         await _generate_structured_argument(messages, schema),
     )
     if output.can_undercut != "YES" or output.Argument is None:
+        _decline_reason.set(output.reason or "(no reason given)")
         return None
+    _decline_reason.set(None)
     return ArgumentRecord(
         type="defeat",
         argument=_serialize_argument(state, output.Argument),
@@ -466,7 +484,9 @@ async def ask_attack_extends(
     ]
     output = await chat_structured(messages, AttackExtendsOutput)
     if output.attack_extends != "YES" or output.Attack is None:
+        _decline_reason.set(output.reason or "(no reason given)")
         return None
+    _decline_reason.set(None)
     return AttackMatch(
         method=output.Attack.method,
         field=output.Attack.target.field,

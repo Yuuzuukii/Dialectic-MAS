@@ -38,7 +38,8 @@ from experiments.eval.scoring.evaluation_svi import evaluate_svi
 EXPERIMENT_DIR = ROOT / "logs" / "experiment_20260916_020350"
 DEFAULT_BASE_DIR = EXPERIMENT_DIR / "raw_dialogue"
 DEFAULT_OUT = EXPERIMENT_DIR / "eval_result" / "svi" / "questionnaire_result" / "svi_comparison.json"
-_FILENAME_RE = re.compile(r"^\d+_(?P<method>.+)_\d{8}_\d{6}_\d+$")
+# run 番号の接頭辞 NN_ は任意（--runs 1 のログには付かない）。
+_FILENAME_RE = re.compile(r"^(?:\d+_)?(?P<method>.+)_\d{8}_\d{6}_\d+$")
 
 
 def _relative_log_map(root: Path) -> dict[Path, Path]:

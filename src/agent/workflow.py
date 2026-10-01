@@ -125,6 +125,8 @@ class State:
     main_argument_unavailable_reason: str | None = None
     # agent 別の「新しい main を出せなかった理由」（ログ出力用。上の単一値は最後の判定で上書きされる）
     main_unavailable_reasons: dict[str, str] = field(default_factory=dict)
+    # 攻撃・反論・ブロッカー等を「出せなかった／認められなかった」試行の記録（ログ出力用、追記のみ）。
+    attempt_log: list[dict[str, Any]] = field(default_factory=list)
     ag1_thread_status: str | None = None
     ag2_thread_status: str | None = None
 

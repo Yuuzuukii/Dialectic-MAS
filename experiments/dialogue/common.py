@@ -555,6 +555,8 @@ async def _run_topic_once(
     log["justification_status"] = final_state.get("justification_status")
     # agent 別の「新しい main を出せなかった理由」（出せた場合は空）。
     log["main_unavailable_reasons"] = final_state.get("main_unavailable_reasons") or {}
+    # 「出せなかった／認められなかった」試行（反論なし・ブロッカーなし・攻撃不成立など）と理由。
+    log["attempt_log"] = final_state.get("attempt_log") or []
     error = final_state.get("error")
     if error is not None:
         log["error"] = error

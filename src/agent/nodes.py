@@ -24,6 +24,7 @@ from .arguments import (
     ask_attack_extends,
     generate_attack,
     generate_undercut,
+    take_decline_reason,
 )
 from .prompts import attack_instruction, main_instruction
 from .schema.state import ArgumentRecord, DialogueNode, parse_serialized_payload
@@ -326,7 +327,14 @@ async def opponent_move(state: Any) -> dict[str, Any]:
         # Opponent がこの argument への新しい攻撃を1つも思いつけなかった
         # （真の手詰まり）。dialogue tree の "O が手を出せない" 終端条件。
         nodes_ = _replace_node(state.dialogue_nodes, frame.id, outcome="won_by_p")
-        return {"dialogue_nodes": nodes_, "pending_attacker_argument": None}
+        event = _attempt_event(
+            "no_attack", state.current_opponent, target.id, take_decline_reason(), "defeat"
+        )
+        return {
+            "dialogue_nodes": nodes_,
+            "pending_attacker_argument": None,
+            "attempt_log": [*state.attempt_log, event],
+        }
 
     argument = argument.model_copy(update={"proponent": state.current_proponent})
     instruction = attack_instruction("defeat", target, state=state)
@@ -342,6 +350,46 @@ async def opponent_move(state: Any) -> dict[str, Any]:
     }
 
 
+
+def _with_blockers(
+    state: Any, blockers: list[ArgumentRecord]
+) -> dict[str, Any]:
+    """ブロッカー（undercut）を履歴に追記する state 更新を作る（proponent は現在の proponent）."""
+    stamped = [b.model_copy(update={"proponent": state.current_proponent}) for b in blockers]
+    records = [*_records(state), *stamped]
+    return {
+        "last_generated_argument": stamped[-1],
+        "argument_records": records,
+        "dialogue_history": dialogue_history(records),
+    }
+
+
+def _attempt_event(
+    kind: str, agent: str, target_id: str | None, reason: str | None, phase: str
+) -> dict[str, Any]:
+    """「出せなかった／認められなかった」試行1件のログ項目を作る."""
+    return {
+        "kind": kind,
+        "phase": phase,
+        "agent": agent,
+        "target_id": target_id,
+        "reason": reason or "(no reason given)",
+    }
+
+
+def _rejection_reason(result: Any) -> str:
+    """攻撃が defeat と認められなかった理由（evaluate_attack の relation.reason）を返す."""
+    for rel in reversed(result.relations):
+        if not rel.valid and rel.reason:
+            return str(rel.reason)
+    return ""
+
+
+def _blocker_attempt_failed(result: Any, tried: bool) -> bool:
+    """Rebut に対するブロッカー（undercut）を試して、作れなかったか."""
+    return tried and result.attack == "rebut" and result.blocker is None and result.defeats
+
+
 async def validate_opponent_move(state: Any) -> dict[str, Any]:
     """B が現フレームの argument を defeat するか検証する。防御側の undercut があれば阻止."""
     frame = _top_frame(state)
@@ -350,17 +398,24 @@ async def validate_opponent_move(state: Any) -> dict[str, Any]:
     if attacker is None:
         return {"error": "No pending attacker argument to validate."}
 
+    tried_blocker = not _dialogue_turn_budget_exceeded(state)
+    take_decline_reason()
     result = await evaluate_attack(
         state,
         attacker,
         target,
         state.current_proponent,
         relation_context=f"{attacker.id} defeats {target.id}",
-        blocker_generator=None
-        if _dialogue_turn_budget_exceeded(state)
-        else generate_undercut,
+        blocker_generator=generate_undercut if tried_blocker else None,
     )
     relations = [*state.defeat_relations, *result.relations]
+    events: list[dict[str, Any]] = []
+    if _blocker_attempt_failed(result, tried_blocker):
+        events.append(
+            _attempt_event(
+                "no_blocker", state.current_proponent, attacker.id, take_decline_reason(), "defeat"
+            )
+        )
     if not result.defeats:
         # B は target を defeat できなかった。このフレームで別の攻撃 B' を試させる。
         # 阻止に使った undercut（blocker）は、続くか終わるかに関わらず履歴に残す。
@@ -374,13 +429,19 @@ async def validate_opponent_move(state: Any) -> dict[str, Any]:
             "last_attack_defeated": False,
         }
         if result.blocker is not None:
-            blocker = result.blocker.model_copy(
-                update={"proponent": state.current_proponent}
+            update.update(_with_blockers(state, [result.blocker]))
+        else:
+            events.append(
+                _attempt_event(
+                    "attack_rejected",
+                    state.current_opponent,
+                    attacker.id,
+                    _rejection_reason(result),
+                    "defeat",
+                )
             )
-            records = [*_records(state), blocker]
-            update["last_generated_argument"] = blocker
-            update["argument_records"] = records
-            update["dialogue_history"] = dialogue_history(records)
+        if events:
+            update["attempt_log"] = [*state.attempt_log, *events]
         return update
 
     nodes_ = _replace_node(
@@ -389,12 +450,15 @@ async def validate_opponent_move(state: Any) -> dict[str, Any]:
         current_attacker_id=attacker.id,
         counter_attempts=0,
     )
-    return {
+    update = {
         "dialogue_nodes": nodes_,
         "defeat_relations": relations,
         "pending_attacker_argument": None,
         "last_attack_defeated": True,
     }
+    if events:
+        update["attempt_log"] = [*state.attempt_log, *events]
+    return update
 
 
 async def proponent_move(state: Any) -> dict[str, Any]:
@@ -422,7 +486,14 @@ async def proponent_move(state: Any) -> dict[str, Any]:
     if argument is None:
         # Proponent がこの B に反論する論証を1つも思いつけなかった（真の手詰まり）。
         nodes_ = _replace_node(state.dialogue_nodes, frame.id, outcome="lost_by_p")
-        return {"dialogue_nodes": nodes_, "pending_counter_argument": None}
+        event = _attempt_event(
+            "no_counter", state.current_proponent, attacker.id, take_decline_reason(), "counter"
+        )
+        return {
+            "dialogue_nodes": nodes_,
+            "pending_counter_argument": None,
+            "attempt_log": [*state.attempt_log, event],
+        }
 
     argument = argument.model_copy(update={"proponent": state.current_proponent})
     instruction = attack_instruction(
@@ -446,6 +517,7 @@ async def validate_proponent_move(state: Any) -> dict[str, Any]:
     strictly defeat していれば、C を argument_id とする子フレームを push して
     探索を1段深くする（Definition 4.6: Pの手番の子は、その論証に対する
     Oの defeater 全て。つまり C 自身も次の攻撃対象になる）。
+    判定中に作られたブロッカー（undercut）は、成否にかかわらず履歴に残す。
     """
     frame = _top_frame(state)
     if frame.current_attacker_id is None:
@@ -455,27 +527,57 @@ async def validate_proponent_move(state: Any) -> dict[str, Any]:
     if c_argument is None:
         return {"error": "No pending counter argument to validate."}
 
+    tried_blocker = not _dialogue_turn_budget_exceeded(state)
+    take_decline_reason()
     result = await evaluate_attack(
         state,
         c_argument,
         b_argument,
         state.current_opponent,
         relation_context=f"{c_argument.id} defeats {b_argument.id}",
-        blocker_generator=None
-        if _dialogue_turn_budget_exceeded(state)
-        else generate_undercut,
+        blocker_generator=generate_undercut if tried_blocker else None,
     )
     relations = [*state.defeat_relations, *result.relations]
+    blockers: list[ArgumentRecord] = []
+    events: list[dict[str, Any]] = []
+    if result.blocker is not None:
+        blockers.append(result.blocker)
+    if _blocker_attempt_failed(result, tried_blocker):
+        events.append(
+            _attempt_event(
+                "no_blocker", state.current_opponent, c_argument.id, take_decline_reason(), "counter"
+            )
+        )
+
+    def _finish(update: dict[str, Any]) -> dict[str, Any]:
+        if blockers:
+            update.update(_with_blockers(state, blockers))
+        if events:
+            update["attempt_log"] = [*state.attempt_log, *events]
+        return update
+
     if not result.defeats:
+        if result.blocker is None:
+            events.append(
+                _attempt_event(
+                    "attack_rejected",
+                    state.current_proponent,
+                    c_argument.id,
+                    _rejection_reason(result),
+                    "counter",
+                )
+            )
         nodes_ = _replace_node(
             state.dialogue_nodes, frame.id, counter_attempts=frame.counter_attempts + 1
         )
-        return {
-            "dialogue_nodes": nodes_,
-            "defeat_relations": relations,
-            "pending_counter_argument": None,
-            "last_counter_strictly_defeated": False,
-        }
+        return _finish(
+            {
+                "dialogue_nodes": nodes_,
+                "defeat_relations": relations,
+                "pending_counter_argument": None,
+                "last_counter_strictly_defeated": False,
+            }
+        )
 
     # B はもともと別の対象（A、またはこのフレームの argument）を狙って宣言された
     # 攻撃なので、その .attack/target_statement を C にそのまま使い回さない
@@ -483,10 +585,21 @@ async def validate_proponent_move(state: Any) -> dict[str, Any]:
     # に対して定義される関係。B が A に対して undercut だったからといって、C に
     # 対しても undercut として無条件に勝てるとは限らない）。ask_attack_extends が
     # B-C 間の攻撃関係を C の中身を見た上で改めて宣言し、それだけを判定に使う。
+    take_decline_reason()
     reverse_match = await ask_attack_extends(
         state, state.current_opponent, b_argument, c_argument
     )
-    if reverse_match is not None:
+    if reverse_match is None:
+        events.append(
+            _attempt_event(
+                "no_reverse_attack",
+                state.current_opponent,
+                c_argument.id,
+                take_decline_reason(),
+                "counter",
+            )
+        )
+    else:
         b_for_reverse = b_argument.model_copy(
             update={
                 "attack": reverse_match.method,
@@ -494,20 +607,32 @@ async def validate_proponent_move(state: Any) -> dict[str, Any]:
                 "target_statement": reverse_match.statement,
             }
         )
+        tried_reverse_blocker = not _dialogue_turn_budget_exceeded(state)
+        take_decline_reason()
         reverse = await evaluate_attack(
             state,
             b_for_reverse,
             c_argument,
             state.current_proponent,
             relation_context=f"{b_argument.id} defeats {c_argument.id}",
-            blocker_generator=None
-            if _dialogue_turn_budget_exceeded(state)
-            else generate_undercut,
+            blocker_generator=generate_undercut if tried_reverse_blocker else None,
             # b_for_reverse は B-C 間専用に作った一時コピー。判定結果として B の
             # 本来（A向け）の attack 宣言を上書きしてはならない。
             persist_metadata=False,
         )
         relations = [*relations, *reverse.relations]
+        if reverse.blocker is not None:
+            blockers.append(reverse.blocker)
+        if _blocker_attempt_failed(reverse, tried_reverse_blocker):
+            events.append(
+                _attempt_event(
+                    "no_blocker",
+                    state.current_proponent,
+                    b_argument.id,
+                    take_decline_reason(),
+                    "reverse",
+                )
+            )
         if reverse.defeats:
             # B が C にも反撃できる＝相互 defeat＝C は B を strictly defeat していない。
             nodes_ = _replace_node(
@@ -515,12 +640,14 @@ async def validate_proponent_move(state: Any) -> dict[str, Any]:
                 frame.id,
                 counter_attempts=frame.counter_attempts + 1,
             )
-            return {
-                "dialogue_nodes": nodes_,
-                "defeat_relations": relations,
-                "pending_counter_argument": None,
-                "last_counter_strictly_defeated": False,
-            }
+            return _finish(
+                {
+                    "dialogue_nodes": nodes_,
+                    "defeat_relations": relations,
+                    "pending_counter_argument": None,
+                    "last_counter_strictly_defeated": False,
+                }
+            )
 
     # C が B を strictly defeat した。C を新しいフレームとして push し、
     # 探索を1段深くする（C 自身が次の攻撃対象になる）。
@@ -528,13 +655,15 @@ async def validate_proponent_move(state: Any) -> dict[str, Any]:
         parent_id=frame.id, argument_id=c_argument.id, depth=frame.depth + 1
     )
     nodes_ = [*state.dialogue_nodes, child]
-    return {
-        "dialogue_nodes": nodes_,
-        "node_stack": [*state.node_stack, child.id],
-        "defeat_relations": relations,
-        "pending_counter_argument": None,
-        "last_counter_strictly_defeated": True,
-    }
+    return _finish(
+        {
+            "dialogue_nodes": nodes_,
+            "node_stack": [*state.node_stack, child.id],
+            "defeat_relations": relations,
+            "pending_counter_argument": None,
+            "last_counter_strictly_defeated": True,
+        }
+    )
 
 
 async def pop_and_propagate(state: Any) -> dict[str, Any]:

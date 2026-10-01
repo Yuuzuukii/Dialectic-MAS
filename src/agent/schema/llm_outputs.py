@@ -32,6 +32,10 @@ class DefeatingArgumentOutput(BaseModel):
     can_defeat: Literal["YES", "NO"] = Field(
         description="YES only if a valid rebut or undercut is available."
     )
+    reason: str = Field(
+        default="",
+        description="Brief reason for the decision: why NO (what blocks you), or what the argument rests on if YES.",
+    )
     Argument: ArgumentBody | None = Field(
         default=None, description="Defeating argument body, omitted when NO."
     )
@@ -47,6 +51,10 @@ class UndercutOutput(BaseModel):
 
     can_undercut: Literal["YES", "NO"] = Field(
         description="YES only if a target Ass can be invalidated."
+    )
+    reason: str = Field(
+        default="",
+        description="Brief reason for the decision: why NO (what blocks you), or what the argument rests on if YES.",
     )
     Argument: ArgumentBody | None = Field(
         default=None, description="Undercutting argument body, omitted when NO."
@@ -71,6 +79,10 @@ class AttackExtendsOutput(BaseModel):
             "the new counterargument has moved past what your original argument addresses, "
             "so it no longer applies."
         )
+    )
+    reason: str = Field(
+        default="",
+        description="Brief reason for the decision: why NO (what blocks you), or what the argument rests on if YES.",
     )
     Attack: AttackMetadata | None = Field(
         default=None,
@@ -115,6 +127,10 @@ class DefeatingArgumentOutputFree(BaseModel):
     can_defeat: Literal["YES", "NO"] = Field(
         description="YES only if a valid rebut or undercut is available."
     )
+    reason: str = Field(
+        default="",
+        description="Brief reason for the decision: why NO (what blocks you), or what the argument rests on if YES.",
+    )
     Argument: str | None = Field(
         default=None, description="Free natural-language defeating argument, omitted when NO."
     )
@@ -130,6 +146,10 @@ class UndercutOutputFree(BaseModel):
 
     can_undercut: Literal["YES", "NO"] = Field(
         description="YES only if a target assumption can be invalidated."
+    )
+    reason: str = Field(
+        default="",
+        description="Brief reason for the decision: why NO (what blocks you), or what the argument rests on if YES.",
     )
     Argument: str | None = Field(
         default=None, description="Free natural-language undercutting argument, omitted when NO."

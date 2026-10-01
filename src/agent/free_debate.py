@@ -74,9 +74,12 @@ def _stance(state: FreeDebateState, agent: AgentName) -> str:
 
 # ラウンド2以降の指示に付ける early-stop の逃げ道（escape hatch）。
 _NOVELTY_HINT = (
-    " If you still have a genuinely new argument or rebuttal, make it and set has_new_point=true."
-    " If you have nothing substantively new to add beyond the dialogue so far, say so briefly and"
-    " set has_new_point=false."
+    " Before answering, compare what you plan to say against everything your side has already"
+    " said earlier in this debate (earlier arguments and rebuttals alike). If the only thing you"
+    " can say substantially restates it — the same facts or reasoning, even if reworded or"
+    " reframed — do not resubmit it: say briefly that you have nothing new and set"
+    " has_new_point=false. Otherwise, make your new argument or rebuttal and set"
+    " has_new_point=true."
 )
 
 def _round_instruction(state: FreeDebateState, agent: AgentName) -> str:

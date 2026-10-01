@@ -31,8 +31,13 @@ STATUS_BORDER = {
     "overruled": "#888888",
 }
 FILE_RE = re.compile(
-    r"^(\d+)_(schema|no_schema|free_debate|mad)_\d{8}_\d{6}_\d+\.json$"
+    r"^(?:(\d+)_)?(schema|no_schema|free_debate|mad)_\d{8}_\d{6}_\d+\.json$"
 )
+
+ATTEMPT_LABELS = {
+    "no_attack": "攻撃なし",
+    "no_counter": "反論なし",
+}
 
 METRIC_KEYS = [
     "total_dialogue_turns",
@@ -93,10 +98,10 @@ const cy = cytoscape({container:document.getElementById('cy'), wheelSensitivity:
   {selector:'edge[inferred]',style:{'line-color':'#aaa','target-arrow-color':'#aaa',width:1.5}},
   {selector:'node.note',style:{shape:'round-rectangle','background-color':'#fff7d6','background-opacity':1,width:'label',
     height:'label',padding:6,'border-width':1,'border-color':'#e6b800','color':'#333','font-size':11,
-    'text-valign':'center','text-margin-y':0,'text-wrap':'wrap','text-max-width':260}},
+    'text-valign':'center','text-margin-y':0,'text-wrap':'wrap','text-max-width':320}},
   {selector:':selected',style:{'overlay-color':'#2563eb','overlay-opacity':0.25}},
  ]});
-cy.on('tap','node,edge',e=>{document.getElementById('detail').textContent=e.target.data('detail');});
+cy.on('tap','node,edge',e=>{document.getElementById('detail').textContent=e.target.data('detail')||'';});
 
 function btn(parent,label,on,fn){const b=document.createElement('button');b.textContent=label;
   if(on)b.className='on';b.onclick=fn;parent.appendChild(b);}
@@ -255,20 +260,47 @@ def build_run(method: str, log: dict[str, Any]) -> tuple[list[dict[str, Any]], b
                         }
                     }
                 )
+        # 各木の終了理由メモ（＋反論／攻撃を出せなかった理由）。他の要素と重ならないよう、
+        # 全体の下に木ごとに縦へ積み、最後の葉へ点線でつなぐ。
+        stop_events: dict[str, dict[str, Any]] = {}
+        for ev in log.get("attempt_log") or []:
+            if ev.get("kind") in {"no_attack", "no_counter"} and ev.get("target_id") in root_of:
+                stop_events[root_of[ev["target_id"]]] = ev
+        bottom = max((p["y"] for p in pos.values()), default=0) + TREE_DY * 0.9
+        k = 0
         for root_id, leaf_id in last_leaf.items():
             root = by_id[root_id]
             if root.get("type") != "main":
                 continue
-            lp = pos[leaf_id]
+            label = _end_reason(root)
+            detail = label
+            ev = stop_events.get(root_id)
+            if ev:
+                reason = str(ev.get("reason") or "")
+                who = f"{ev['agent']} {ATTEMPT_LABELS.get(ev['kind'], ev['kind'])}"
+                short = reason if len(reason) <= 200 else reason[:200] + "…"
+                label += f"\n{who}: {short}"
+                detail += f"\n{who}: {reason}"
             elements.append(
                 {
-                    "data": {"id": f"end-{root_id}", "label": _end_reason(root)},
-                    "position": {"x": lp["x"], "y": lp["y"] + TREE_DY * 0.75},
+                    "data": {"id": f"end-{root_id}", "label": label, "detail": detail},
+                    "position": {"x": pos[leaf_id]["x"], "y": bottom + k * 150},
                     "classes": "note",
-                    "selectable": False,
                     "grabbable": False,
                 }
             )
+            elements.append(
+                {
+                    "data": {
+                        "id": f"end-e-{root_id}",
+                        "source": f"end-{root_id}",
+                        "target": leaf_id,
+                        "ls": "dotted",
+                        "inferred": 1,
+                    }
+                }
+            )
+            k += 1
         reasons = log.get("main_unavailable_reasons") or {}
         right = max((p["x"] for p in pos.values()), default=0) + TREE_DX
         for i, (agent, reason) in enumerate(reasons.items()):
@@ -334,7 +366,7 @@ def collect(root: Path) -> dict[str, dict[str, list[dict[str, Any]]]]:
         mt = FILE_RE.match(path.name)
         if not mt:
             continue
-        run, method = int(mt.group(1)), mt.group(2)
+        run, method = int(mt.group(1) or 1), mt.group(2)
         log = json.loads(path.read_text(encoding="utf-8"))
         if not log.get("dialogue_history"):
             continue
@@ -367,6 +399,7 @@ def main() -> None:
         "__DATA__", json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
     )
     page = page.replace("__METHODS__", json.dumps(METHODS))
+    out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(page, encoding="utf-8")
     n = sum(len(r) for m in data.values() for r in m.values())
     print(f"{out} ({len(data)} topics, {n} runs)")

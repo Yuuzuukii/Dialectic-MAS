@@ -309,3 +309,32 @@ Exit excessively long running processes and optimize your code to run faster.
 | 既存規約順守 | `<code_editing_rules>` | コードベースのパターンに合わせる |
 | 一発生成の品質 | `<self_reflection>` | 内部ルーブリックで反復 |
 | 矛盾の除去 | （プロンプト見直し） | 優先順位の明示・例外条項・prompt optimizer |
+
+---
+
+## 11. 実験の実行ルール（必ず守ること）
+
+- **実装を修正しても、実験・議論の実行を勝手に始めない。** 動作確認の試運転も含め、
+  ユーザーが明示的に頼んだときだけ実行する。
+- **実行はユーザーがターミナルで行う。** Claude が Bash でバックグラウンド実行したり、
+  代わりに回したりしない。実行が必要なときは、そのままターミナルに貼れるコマンドを提示して止まる
+  （実行は LLM API 費用が発生するため、コスト見込みも添える）。
+- ログの整形・可視化など、費用のかからないスクリプトの実行は対象外。
+
+### ログの保存先・ディレクトリ構成
+
+実験ログは `logs/experiment_<YYYYMMDD_HHMMSS>/` 配下に、次の構成で保存する。
+
+```
+logs/experiment_<日時>/
+├── turns<N>/                      # max_dialogue_turns ごとに分ける（例: turns10, turns20, turns30）
+│   ├── raw_dialogue/<カテゴリ>/<トピック>/
+│   │   └── [NN_]<method>_<日時>.json   # NN は複数回実行時の run 番号（--runs > 1 のとき付く）
+│   └── eval_result/
+│       └── dialogue_tree/argument_network.html   # 可視化（plot_argument_network）
+```
+
+- フォルダ名は必ず `experiment_<日時>`（実行開始時刻）にする。独自の名前にしない。
+- ログ本体は `experiments/dialogue/common.py` の `output_path` に任せる（ファイル名を自前で作らない）。
+- ターン数を1つしか使わない実行でも `turns<N>/` の階層は省略しない。
+- 評価結果（atomic_coverage / svi など）は同じ `turns<N>/eval_result/` 配下に置く。
