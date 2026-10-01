@@ -19,7 +19,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-DEFAULT_ROOT = Path("logs/final_gpt54nano_turns10")
+DEFAULT_ROOT = Path("logs/final_gpt54nano_turns10_merged")
 METHODS = ["schema", "no_schema", "free_debate", "mad"]
 EDGE_METHODS = {"schema", "no_schema"}
 TREE_DX, TREE_DY = 170, 140
