@@ -93,7 +93,7 @@ def _find(nodes: list[DialogueNode], node_id: str) -> DialogueNode:
 async def test_opponent_move_treats_dialogue_budget_as_undetermined() -> None:
     """絶対ターン数上限（max_dialogue_turns）は「この論証が守り切れたか」とは無関係な
     実験全体のリソース都合の打ち切りなので、justified に倒す won_by_p ではなく、
-    max_tree_depth 到達と同じ undetermined（→ resolve_tree_status で defensible）にする。"""
+    undetermined（→ resolve_tree_status で defensible）にする。"""
     main = _main_record("AG1")
     root = DialogueNode(argument_id=main.id)
     state = State(

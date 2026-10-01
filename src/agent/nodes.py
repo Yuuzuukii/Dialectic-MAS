@@ -304,17 +304,14 @@ async def opponent_move(state: Any) -> dict[str, Any]:
     """現フレームで防御中の argument に対し、Opponent が新しい攻撃 (B) を試みる.
 
     このフレームで O が試せる攻撃の回数に個別の上限は設けない。リソース制約は
-    `max_dialogue_turns`（対話全体の絶対予算）だけで課す。これが尽きた場合は
-    「この論証が守り切れたか」とは無関係な、実験全体のリソース都合の打ち切りなので、
-    won_by_p（→justified）にするのは正当化の水準として強すぎる。`max_tree_depth`
-    到達と同じ「undetermined」（→defensible）として閉じる。
+    `max_dialogue_turns`（対話全体の絶対予算）だけで課す（木の深さにも上限は設けない）。
+    これが尽きた場合は「この論証が守り切れたか」とは無関係な、実験全体のリソース都合の
+    打ち切りなので、won_by_p（→justified）にするのは正当化の水準として強すぎる。
+    「undetermined」（→defensible）として閉じる。
     """
     frame = _top_frame(state)
     target = _find_argument(state, frame.argument_id)
 
-    if frame.depth >= state.max_tree_depth:
-        nodes_ = _replace_node(state.dialogue_nodes, frame.id, outcome="undetermined")
-        return {"dialogue_nodes": nodes_, "pending_attacker_argument": None}
     if _dialogue_turn_budget_exceeded(state):
         nodes_ = _replace_node(state.dialogue_nodes, frame.id, outcome="undetermined")
         return {"dialogue_nodes": nodes_, "pending_attacker_argument": None}

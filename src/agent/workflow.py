@@ -57,10 +57,7 @@ class State:
     # dialogue tree の1フレームで、Opponent が攻撃 (B) を再生成できる回数に個別の
     # 上限は設けない。Proponent が同じ B に対して反論 (C) を再生成できる回数にも
     # 個別の上限は設けない。リソース制約は max_dialogue_turns（対話全体の絶対予算）だけで課す。
-    # dialogue tree の最大深さ（根を 0 とする）。原論文は有限のルール集合を前提に
-    # 探索が必ず停止することを保証するが（Section 8）、LLM は都度論証を生成するため
-    # 停止保証がない。深さの安全装置として導入する。
-    max_tree_depth: int = _int_env("MAX_TREE_DEPTH", 6)
+    # dialogue tree の深さにも上限は設けない（リソース制約は max_dialogue_turns のみ）。
     # 全手法（schema/no_schema/mad/free_debate）で共通の、対話ターン数そのものの絶対上限。
     # None（既定）なら無効で、上記の max_turns だけで従来通り動く。
     # 設定すると、mainやattackを新たに生成する直前でこの上限を優先チェックし、達していれば
