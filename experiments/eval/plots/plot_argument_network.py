@@ -19,7 +19,8 @@ import re
 from pathlib import Path
 from typing import Any
 
-DEFAULT_ROOT = Path("logs/final_gpt54nano_turns10_merged")
+DEFAULT_ROOT = Path("logs/experiment_20260916_020350/raw_dialogue")
+DEFAULT_OUT = Path("logs/experiment_20260916_020350/eval_result/dialogue_tree/argument_network.html")
 METHODS = ["schema", "no_schema", "free_debate", "mad"]
 EDGE_METHODS = {"schema", "no_schema"}
 TREE_DX, TREE_DY = 170, 140
@@ -290,7 +291,7 @@ def main() -> None:
     args = ap.parse_args()
 
     data = collect(args.root)
-    out = args.out or args.root / "argument_network.html"
+    out = args.out or DEFAULT_OUT
     page = HTML.replace(
         "__DATA__", json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
     )

@@ -10,12 +10,12 @@ Q3 and Q5 are transformed as 8 - score.
 
 Example:
     python -m experiments.eval.plots.plot_svi_item_breakdown \
-      --input logs/final_gpt54nano_turns10_two_path/svi_comparison.json \
-      --out-dir logs/final_gpt54nano_turns10_two_path/svi_item_analysis
+      --input logs/experiment_20260916_020350/eval_result/svi/questionnaire_result/svi_comparison.json \
+      --out-dir logs/experiment_20260916_020350/eval_result/svi/questionnaire_result/svi_item_analysis
 
     python -m experiments.eval.plots.plot_svi_item_breakdown \
-      --input logs/final_gpt54nano_turns10_two_path/svi_comparison.json \
-      --out-dir logs/final_gpt54nano_turns10_two_path/svi_item_analysis_corrected \
+      --input logs/experiment_20260916_020350/eval_result/svi/questionnaire_result/svi_comparison.json \
+      --out-dir logs/experiment_20260916_020350/eval_result/svi/questionnaire_result/svi_item_analysis_corrected \
       --correct-reversed
 """
 
@@ -36,8 +36,8 @@ import matplotlib.pyplot as plt
 
 plt.rcParams["font.family"] = ["Hiragino Sans", "sans-serif"]
 
-DEFAULT_INPUT = Path("logs/final_gpt54nano_turns10_two_path/svi_comparison.json")
-DEFAULT_OUT_DIR = Path("logs/final_gpt54nano_turns10_two_path/svi_item_analysis")
+DEFAULT_INPUT = Path("logs/experiment_20260916_020350/eval_result/svi/questionnaire_result/svi_comparison.json")
+DEFAULT_OUT_DIR = Path("logs/experiment_20260916_020350/eval_result/svi/questionnaire_result/svi_item_analysis")
 
 METHOD_ORDER = ("free_debate", "mad", "no_schema", "schema")
 DISPLAY_NAMES = {

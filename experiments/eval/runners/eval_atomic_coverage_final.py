@@ -3,17 +3,14 @@
 An optional overlay directory can replace matching base logs. This is useful after
 re-finalizing schema/no_schema while keeping free_debate and mad unchanged.
 
-The legacy coverage columns, when loaded, remain historical values from the original
-final_comparison.json. The atomic coverage values are computed from the merged current logs.
+The legacy coverage columns are filled only when --old-comparison (a historical
+final_comparison.json) is given; otherwise they stay empty.
 
 Examples:
     python -m experiments.eval.runners.eval_atomic_coverage_final --workers 8
     python -m experiments.eval.runners.eval_atomic_coverage_final \
-      --base-dir logs/final_gpt54nano_turns10 \
-      --overlay-dir logs/final_gpt54nano_turns10_two_path \
-      --out logs/final_gpt54nano_turns10_two_path/atomic_coverage_comparison.json \
-      --csv-out docs/results/atomic_coverage_comparison_two_path.csv \
-      --workers 8
+      --base-dir logs/experiment_20260916_020350/raw_dialogue \
+      --out logs/experiment_20260916_020350/eval_result/atomic_coverage/atomic_coverage_comparison.json
 """
 
 # ruff: noqa: T201, E402, I001
@@ -41,10 +38,10 @@ load_dotenv(ROOT / ".env")
 from experiments.eval.runners.run_eval import resolve_evaluator_model
 from experiments.eval.scoring.evaluation_coverage_atomic import evaluate_stance_coverage_atomic
 
-DEFAULT_BASE_DIR = ROOT / "logs" / "final_gpt54nano_turns10"
-DEFAULT_OLD_COMPARISON = DEFAULT_BASE_DIR / "final_comparison.json"
-DEFAULT_OUT = DEFAULT_BASE_DIR / "atomic_coverage_comparison.json"
-DEFAULT_CSV_OUT = ROOT / "docs" / "results" / "atomic_coverage_comparison.csv"
+EXPERIMENT_DIR = ROOT / "logs" / "experiment_20260916_020350"
+DEFAULT_BASE_DIR = EXPERIMENT_DIR / "raw_dialogue"
+DEFAULT_OLD_COMPARISON: Path | None = None
+DEFAULT_OUT = EXPERIMENT_DIR / "eval_result" / "atomic_coverage" / "atomic_coverage_comparison.json"
 _FILENAME_RE = re.compile(r"^\d+_(?P<method>.+)_\d{8}_\d{6}_\d+$")
 
 
@@ -179,13 +176,15 @@ def main() -> None:
     csv_out_path = (
         args.csv_out.resolve()
         if args.csv_out is not None
-        else DEFAULT_CSV_OUT
+        else out_path.with_suffix(".csv")
     )
     out_path.parent.mkdir(parents=True, exist_ok=True)
     csv_out_path.parent.mkdir(parents=True, exist_ok=True)
 
     model_name = resolve_evaluator_model(args.model)
-    old_by_file = _load_old_ratios(args.old_comparison.resolve())
+    old_by_file = _load_old_ratios(
+        args.old_comparison.resolve() if args.old_comparison is not None else None
+    )
     log_paths = _collect_logs(base_dir, overlay_dir)
     print(
         f"Evaluating {len(log_paths)} logs with atomic coverage "
