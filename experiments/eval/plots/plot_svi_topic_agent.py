@@ -15,8 +15,8 @@ Usage:
     python -m experiments.eval.plots.plot_svi_topic_agent
 
     python -m experiments.eval.plots.plot_svi_topic_agent \
-      --input logs/final_gpt54nano_turns10/svi_comparison.json \
-      --out-dir logs/final_gpt54nano_turns10/svi_analysis \
+      --input logs/experiment_20260916_020350/eval_result/svi/questionnaire_result/svi_comparison.json \
+      --out-dir logs/experiment_20260916_020350/eval_result/svi/questionnaire_result/svi_analysis \
       --metrics instrumental
 
     python -m experiments.eval.plots.plot_svi_topic_agent \
@@ -40,8 +40,8 @@ import matplotlib.pyplot as plt
 
 plt.rcParams["font.family"] = ["Hiragino Sans", "sans-serif"]
 
-DEFAULT_INPUT = Path("logs/final_gpt54nano_turns10/svi_comparison.json")
-DEFAULT_OUT_DIR = Path("logs/final_gpt54nano_turns10/svi_analysis")
+DEFAULT_INPUT = Path("logs/experiment_20260916_020350/eval_result/svi/questionnaire_result/svi_comparison.json")
+DEFAULT_OUT_DIR = Path("logs/experiment_20260916_020350/eval_result/svi/questionnaire_result/svi_analysis")
 
 METHOD_ORDER = ("free_debate", "mad", "no_schema", "schema")
 DISPLAY_NAMES = {

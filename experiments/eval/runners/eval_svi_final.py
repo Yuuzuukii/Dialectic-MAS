@@ -6,10 +6,8 @@ original log root while re-finalized schema/no_schema logs replace matching file
 Examples:
     python -m experiments.eval.runners.eval_svi_final --trials 5 --workers 8
     python -m experiments.eval.runners.eval_svi_final \
-      --base-dir logs/final_gpt54nano_turns10 \
-      --overlay-dir logs/final_gpt54nano_turns10_two_path \
-      --out logs/final_gpt54nano_turns10_two_path/svi_comparison.json \
-      --trials 5 --workers 8
+      --base-dir logs/experiment_20260916_020350/raw_dialogue \
+      --out logs/experiment_20260916_020350/eval_result/svi/questionnaire_result/svi_comparison.json --trials 5
 """
 
 # ruff: noqa: T201, E402, I001
@@ -37,8 +35,9 @@ load_dotenv(ROOT / ".env")
 from experiments.eval.runners.run_eval import resolve_evaluator_model
 from experiments.eval.scoring.evaluation_svi import evaluate_svi
 
-DEFAULT_BASE_DIR = ROOT / "logs" / "final_gpt54nano_turns10"
-DEFAULT_OUT = DEFAULT_BASE_DIR / "svi_comparison.json"
+EXPERIMENT_DIR = ROOT / "logs" / "experiment_20260916_020350"
+DEFAULT_BASE_DIR = EXPERIMENT_DIR / "raw_dialogue"
+DEFAULT_OUT = EXPERIMENT_DIR / "eval_result" / "svi" / "questionnaire_result" / "svi_comparison.json"
 _FILENAME_RE = re.compile(r"^\d+_(?P<method>.+)_\d{8}_\d{6}_\d+$")
 
 
@@ -131,7 +130,11 @@ def main() -> None:
     out_path = (
         args.out.resolve()
         if args.out is not None
-        else (overlay_dir / "svi_comparison.json" if overlay_dir is not None else base_dir / "svi_comparison.json")
+        else (
+            overlay_dir / "svi_comparison.json"
+            if overlay_dir is not None
+            else DEFAULT_OUT
+        )
     )
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
