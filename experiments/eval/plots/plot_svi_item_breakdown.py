@@ -302,6 +302,7 @@ def _plot_topic_method(
 
 
 def main() -> None:
+    """Load SVI detail results and write the item-level breakdown plots."""
     args = _parse_args()
     args.out_dir.mkdir(parents=True, exist_ok=True)
 
