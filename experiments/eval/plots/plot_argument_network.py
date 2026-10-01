@@ -86,11 +86,17 @@ const cy = cytoscape({container:document.getElementById('cy'), wheelSensitivity:
     'color':getComputedStyle(document.body).color,'background-color':'data(color)',shape:'data(shape)',
     width:34,height:34,'text-valign':'bottom','text-margin-y':4,'border-width':'data(bw)','border-color':'data(bc)'}},
   {selector:'edge',style:{'curve-style':'bezier','target-arrow-shape':'triangle',width:2,'line-color':'#666',
-    'target-arrow-color':'#666','line-style':'data(ls)'}},
+    'target-arrow-color':'#666','line-style':'data(ls)',label:'data(label)','font-size':9,'text-wrap':'wrap',
+    'text-max-width':140,'text-rotation':'autorotate','color':getComputedStyle(document.body).color,
+    'text-background-color':getComputedStyle(document.body).backgroundColor,'text-background-opacity':0.85,
+    'text-background-padding':2}},
   {selector:'edge[inferred]',style:{'line-color':'#aaa','target-arrow-color':'#aaa',width:1.5}},
+  {selector:'node.note',style:{shape:'round-rectangle','background-color':'#fff7d6','background-opacity':1,width:'label',
+    height:'label',padding:6,'border-width':1,'border-color':'#e6b800','color':'#333','font-size':11,
+    'text-valign':'center','text-margin-y':0,'text-wrap':'wrap','text-max-width':260}},
   {selector:':selected',style:{'overlay-color':'#2563eb','overlay-opacity':0.25}},
  ]});
-cy.on('tap','node',e=>{document.getElementById('detail').textContent=e.target.data('detail');});
+cy.on('tap','node,edge',e=>{document.getElementById('detail').textContent=e.target.data('detail');});
 
 function btn(parent,label,on,fn){const b=document.createElement('button');b.textContent=label;
   if(on)b.className='on';b.onclick=fn;parent.appendChild(b);}
@@ -142,6 +148,32 @@ def _detail(rec: dict[str, Any]) -> str:
         else str(arg)
     )
     return json.dumps(out, ensure_ascii=False, indent=2) + "\n\n" + body
+
+
+def _edge_label(rec: dict[str, Any]) -> str:
+    """辺の上に出す攻撃名（rebut / undercut）."""
+    return str(rec.get("attack") or "?")
+
+
+def _edge_detail(rec: dict[str, Any]) -> str:
+    return (
+        f"{rec['id']} ({rec['agent']} {rec.get('type')}) → {rec.get('target_id')}\n"
+        f"attack: {rec.get('attack')}\n"
+        f"target_field: {rec.get('target_field')}\n"
+        f"target_statement: {rec.get('target_statement')}"
+    )
+
+
+def _end_reason(main: dict[str, Any]) -> str:
+    """木が終わった理由（status / closed_by_budget から決める日本語の文言）."""
+    status = main.get("status") or ""
+    if status.startswith("justified"):
+        return "終了: justified（全ての攻撃を撃退）"
+    if status.startswith("overruled"):
+        return "終了: overruled（反論できず敗北）"
+    if main.get("closed_by_budget"):
+        return "終了: ターン上限到達 → defensible"
+    return f"終了: {status or '不明'}"
 
 
 def _node(
@@ -197,6 +229,14 @@ def build_run(method: str, log: dict[str, Any]) -> tuple[list[dict[str, Any]], b
 
         for r in roots:
             place(r, 0)
+        root_of: dict[str, str] = {}
+        by_id = {r["id"]: r for r in hist}
+        for rec in hist:
+            cur = rec
+            while cur.get("target_id") in ids:
+                cur = by_id[cur["target_id"]]
+            root_of[rec["id"]] = cur["id"]
+        last_leaf = {root_of[r["id"]]: r["id"] for r in hist}
         for rec in hist:
             label = f"{rec['agent']} {rec['type']}\n{_text(rec.get('argument'))[:40]}"
             elements.append(_node(rec, rec["id"], label, pos[rec["id"]]))
@@ -210,9 +250,40 @@ def build_run(method: str, log: dict[str, Any]) -> tuple[list[dict[str, Any]], b
                             "ls": "dashed"
                             if rec.get("attack") == "undercut"
                             else "solid",
+                            "label": _edge_label(rec),
+                            "detail": _edge_detail(rec),
                         }
                     }
                 )
+        for root_id, leaf_id in last_leaf.items():
+            root = by_id[root_id]
+            if root.get("type") != "main":
+                continue
+            lp = pos[leaf_id]
+            elements.append(
+                {
+                    "data": {"id": f"end-{root_id}", "label": _end_reason(root)},
+                    "position": {"x": lp["x"], "y": lp["y"] + TREE_DY * 0.75},
+                    "classes": "note",
+                    "selectable": False,
+                    "grabbable": False,
+                }
+            )
+        reasons = log.get("main_unavailable_reasons") or {}
+        right = max((p["x"] for p in pos.values()), default=0) + TREE_DX
+        for i, (agent, reason) in enumerate(reasons.items()):
+            elements.append(
+                {
+                    "data": {
+                        "id": f"nomain-{agent}",
+                        "label": f"{agent}: 新しい main を出せず\n{reason[:120]}",
+                    },
+                    "position": {"x": right, "y": i * TREE_DY * 0.6},
+                    "classes": "note",
+                    "selectable": False,
+                    "grabbable": False,
+                }
+            )
         return elements, False
     # free_debate / mad: 2 レーンに並べ、直前の相手発話への応答を推定の辺にする
     last_by_agent: dict[str, str] = {}

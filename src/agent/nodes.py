@@ -207,15 +207,15 @@ _TREE_RESET_FIELDS: dict[str, Any] = {
 
 async def can_generate_main(state: Any) -> dict[str, Any]:
     """Proponent が新しい主張 (A) を生成できるか判定し、可能なら生成して返す."""
+    agent = state.current_proponent
     if _dialogue_turn_budget_exceeded(state):
+        reason = "Dialogue turn budget (max_dialogue_turns) reached."
         return {
             "main_argument_available": False,
-            "main_argument_unavailable_reason": (
-                "Dialogue turn budget (max_dialogue_turns) reached."
-            ),
+            "main_argument_unavailable_reason": reason,
+            "main_unavailable_reasons": {**state.main_unavailable_reasons, agent: reason},
             "justification_status": "no_new_main_argument",
         }
-    agent = state.current_proponent
     result = await arguments.generate_main(state, agent)
     update: dict[str, Any] = {
         "main_argument_available": result.available,
@@ -223,6 +223,10 @@ async def can_generate_main(state: Any) -> dict[str, Any]:
     }
     if not result.available:
         update["justification_status"] = "no_new_main_argument"
+        update["main_unavailable_reasons"] = {
+            **state.main_unavailable_reasons,
+            agent: result.reason or "(no reason given)",
+        }
         return update
 
     if result.argument is None:
@@ -399,11 +403,8 @@ async def validate_opponent_move(state: Any) -> dict[str, Any]:
 async def proponent_move(state: Any) -> dict[str, Any]:
     """現フレームの攻撃者 (B) に対し、Proponent が反論 (C) を試みる.
 
-    `max_counter_attempts`（同じ B に対して P が試せる反論の回数）も
-    Prakken & Sartor の理論には存在しない実装上の拡張である。理論上は
-    「B を strictly defeat する C が存在するか」を無限に探索してよいが、
-    LLM が都度生成する以上、有限回で打ち切る安全装置が要る。予算切れは
-    「見つからなかった」という弱い意味の lost_by_p（closed_by_budget=True）とする。
+    同じ B に対して P が試せる反論の回数に個別の上限は設けない（opponent_move と同様）。
+    リソース制約は `max_dialogue_turns`（対話全体の絶対予算）だけで課す。
 
     `max_dialogue_turns`（対話全体の絶対予算）が尽きた場合はこのフレーム固有の
     話ではないので、opponent_move と同様 undetermined（→defensible）として扱う。
@@ -414,11 +415,6 @@ async def proponent_move(state: Any) -> dict[str, Any]:
     attacker = _find_argument(state, frame.current_attacker_id)
     main_argument = _find_argument(state, frame.argument_id)
 
-    if frame.counter_attempts >= state.max_counter_attempts:
-        nodes_ = _replace_node(
-            state.dialogue_nodes, frame.id, outcome="lost_by_p", closed_by_budget=True
-        )
-        return {"dialogue_nodes": nodes_, "pending_counter_argument": None}
     if _dialogue_turn_budget_exceeded(state):
         nodes_ = _replace_node(state.dialogue_nodes, frame.id, outcome="undetermined")
         return {"dialogue_nodes": nodes_, "pending_counter_argument": None}

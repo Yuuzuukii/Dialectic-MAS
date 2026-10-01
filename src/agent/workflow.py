@@ -55,11 +55,8 @@ class State:
     # 議論ラウンド（debate_round）の上限。環境変数 MAX_TURNS で上書きできる。
     max_turns: int = _int_env("MAX_TURNS", 5)
     # dialogue tree の1フレームで、Opponent が攻撃 (B) を再生成できる回数に個別の
-    # 上限は設けない。リソース制約は max_dialogue_turns（対話全体の絶対予算）だけで課す。
-    # dialogue tree の1フレームで、Proponent が同じ B に対して反論 (C) を
-    # 再生成できる回数の上限（安全装置）。Prakken & Sartor の理論には存在しない
-    # 実装上の拡張で、「strictly defeat する C が存在するか」を有限回で打ち切る。
-    max_counter_attempts: int = _int_env("MAX_COUNTER_ATTEMPTS", 3)
+    # 上限は設けない。Proponent が同じ B に対して反論 (C) を再生成できる回数にも
+    # 個別の上限は設けない。リソース制約は max_dialogue_turns（対話全体の絶対予算）だけで課す。
     # dialogue tree の最大深さ（根を 0 とする）。原論文は有限のルール集合を前提に
     # 探索が必ず停止することを保証するが（Section 8）、LLM は都度論証を生成するため
     # 停止保証がない。深さの安全装置として導入する。
@@ -129,6 +126,8 @@ class State:
     ag2_current_main_id: str | None = None
     main_argument_available: bool | None = None
     main_argument_unavailable_reason: str | None = None
+    # agent 別の「新しい main を出せなかった理由」（ログ出力用。上の単一値は最後の判定で上書きされる）
+    main_unavailable_reasons: dict[str, str] = field(default_factory=dict)
     ag1_thread_status: str | None = None
     ag2_thread_status: str | None = None
 

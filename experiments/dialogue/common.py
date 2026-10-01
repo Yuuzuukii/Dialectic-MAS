@@ -553,6 +553,8 @@ async def _run_topic_once(
     # justified はしていない（docs/argumentation_model_rebuild_plan.md §9 #2/#8 参照）。
     log["consensus_reached"] = final_state.get("consensus_reached")
     log["justification_status"] = final_state.get("justification_status")
+    # agent 別の「新しい main を出せなかった理由」（出せた場合は空）。
+    log["main_unavailable_reasons"] = final_state.get("main_unavailable_reasons") or {}
     error = final_state.get("error")
     if error is not None:
         log["error"] = error

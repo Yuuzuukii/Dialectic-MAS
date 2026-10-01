@@ -227,10 +227,11 @@ async def test_reinstatement_after_strict_defeat_is_justified() -> None:
     assert result.tree_root_closed_by_budget is False
 
 
-async def test_mutual_defeat_is_defensible() -> None:
-    """B が A を defeat、C が B を defeat するが B も C に反撃できる ＝ defensible.
+async def test_mutual_defeat_without_other_counter_is_overruled() -> None:
+    """B が A を defeat、C が B を defeat するが B も C に反撃できる ＝ C は不採用.
 
-    (mutual defeat: C は B を strictly defeat していない)
+    (mutual defeat: C は B を strictly defeat していない。他に反論も出せないので、
+    P の真の手詰まりとして overruled。反論回数の上限は無いので予算切れ扱いにならない)
     """
     main = _record("AG1", "we should choose a")
     b_argument = ArgumentRecord(
@@ -248,7 +249,6 @@ async def test_mutual_defeat_is_defensible() -> None:
         attack="rebut",  # type: ignore[arg-type]
     )
     state = _fresh_state(main)
-    state = replace(state, max_counter_attempts=1)
 
     result = await _run_tree(
         state,
@@ -258,8 +258,8 @@ async def test_mutual_defeat_is_defensible() -> None:
         reverse_defeats=[True],  # B も C に反撃できる ＝ mutual defeat
     )
 
-    assert result.tree_root_status == "defensible"
-    assert result.tree_root_closed_by_budget is True
+    assert result.tree_root_status == "overruled"
+    assert result.tree_root_closed_by_budget is False
 
 
 async def test_depth_four_recursion_reaches_justified() -> None:
