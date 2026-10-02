@@ -8,6 +8,10 @@
 
 Usage:
     python -m experiments.eval.plots.plot_argument_network [LOG_ROOT] [-o OUT.html]
+
+LOG_ROOT が実験フォルダ（logs/experiment_<日時>、turns<N>/raw_dialogue を持つ）なら、
+設定ターン数のタブを足して 1 枚にまとめ、実験フォルダ直下に argument_network.html を出す。
+LOG_ROOT が単一の raw_dialogue なら、従来どおりその 1 設定だけを出す。
 """
 
 # ruff: noqa: T201
@@ -70,6 +74,7 @@ pre{white-space:pre-wrap;word-break:break-word;background:var(--mut);padding:8px
 .lg span{margin-right:12px;white-space:nowrap}
 details{margin:6px 0}
 </style></head><body>
+<div class="tabs" id="turns"><b>Turns</b></div>
 <div class="tabs" id="topics"><b>Topic</b></div>
 <div class="tabs" id="methods"><b>Method</b></div>
 <div class="tabs" id="runs"><b>Run</b></div>
@@ -84,7 +89,8 @@ details{margin:6px 0}
 <script>
 const DATA = __DATA__;
 const METHODS = __METHODS__;
-const st = {topic:null, method:null, run:0};
+const st = {turns:null, topic:null, method:null, run:0};
+const D = ()=>DATA[st.turns];
 const cy = cytoscape({container:document.getElementById('cy'), wheelSensitivity:0.3,
  style:[
   {selector:'node',style:{label:'data(label)','text-wrap':'wrap','text-max-width':150,'font-size':10,
@@ -105,17 +111,28 @@ cy.on('tap','node,edge',e=>{document.getElementById('detail').textContent=e.targ
 
 function btn(parent,label,on,fn){const b=document.createElement('button');b.textContent=label;
   if(on)b.className='on';b.onclick=fn;parent.appendChild(b);}
+function fit(){ // 切り替え後も、できるだけ同じ topic / method を保つ
+  const d=D();
+  if(!d[st.topic])st.topic=Object.keys(d)[0];
+  if(!d[st.topic][st.method])st.method=METHODS.find(m=>d[st.topic][m]);
+  if(st.run>=d[st.topic][st.method].length)st.run=0;
+}
 function renderTabs(){
-  const T=document.getElementById('topics'),M=document.getElementById('methods'),R=document.getElementById('runs');
-  for(const el of [T,M,R]){while(el.children.length>1)el.removeChild(el.lastChild);}
-  Object.keys(DATA).forEach(t=>btn(T,t,t===st.topic,()=>{st.topic=t;st.run=0;
-    if(!DATA[t][st.method])st.method=METHODS.find(m=>DATA[t][m]);show();}));
-  METHODS.filter(m=>DATA[st.topic][m]).forEach(m=>btn(M,m,m===st.method,()=>{st.method=m;st.run=0;show();}));
-  DATA[st.topic][st.method].forEach((r,i)=>btn(R,'#'+r.run,i===st.run,()=>{st.run=i;show();}));
+  const U=document.getElementById('turns'),T=document.getElementById('topics'),
+        M=document.getElementById('methods'),R=document.getElementById('runs');
+  for(const el of [U,T,M,R]){while(el.children.length>1)el.removeChild(el.lastChild);}
+  const keys=Object.keys(DATA);
+  U.style.display=(keys.length===1&&keys[0]==='')?'none':'';
+  keys.forEach(k=>btn(U,k,k===st.turns,()=>{st.turns=k;fit();show();}));
+  const d=D();
+  Object.keys(d).forEach(t=>btn(T,t,t===st.topic,()=>{st.topic=t;st.run=0;
+    if(!d[t][st.method])st.method=METHODS.find(m=>d[t][m]);show();}));
+  METHODS.filter(m=>d[st.topic][m]).forEach(m=>btn(M,m,m===st.method,()=>{st.method=m;st.run=0;show();}));
+  d[st.topic][st.method].forEach((r,i)=>btn(R,'#'+r.run,i===st.run,()=>{st.run=i;show();}));
 }
 function show(){
   renderTabs();
-  const r=DATA[st.topic][st.method][st.run];
+  const r=D()[st.topic][st.method][st.run];
   document.getElementById('q').textContent=r.question;
   document.getElementById('legend2').textContent=r.lane
     ?'点線: 発話順からの推定（直前の相手発話への応答）'
@@ -125,7 +142,7 @@ function show(){
   cy.elements().remove(); cy.add(r.elements);
   cy.layout({name:'preset',fit:true,padding:40}).run();
 }
-st.topic=Object.keys(DATA)[0];st.method=METHODS.find(m=>DATA[st.topic][m]);show();
+st.turns=Object.keys(DATA)[0];st.topic=Object.keys(D())[0];st.method=METHODS.find(m=>D()[st.topic][m]);show();
 </script></body></html>
 """
 
@@ -386,6 +403,21 @@ def collect(root: Path) -> dict[str, dict[str, list[dict[str, Any]]]]:
     return data
 
 
+def collect_all(root: Path) -> tuple[dict[str, dict[str, dict[str, list[dict[str, Any]]]]], bool]:
+    """実験フォルダ（turns<N>/raw_dialogue を持つ）か、単一の raw_dialogue かを判別して集める.
+
+    戻り値は ({ターン数: {topic: {method: [run, ...]}}}, 実験フォルダか)。単一の raw_dialogue
+    のときはターン数のキーを "" にして、ビューア側でターン数のタブを隠す。
+    """
+    turns_dirs = sorted(
+        (d for d in root.glob("turns*") if (d / "raw_dialogue").is_dir()),
+        key=lambda d: int(re.sub(r"\D", "", d.name) or 0),
+    )
+    if not turns_dirs:
+        return {"": collect(root)}, False
+    return {re.sub(r"\D", "", d.name): collect(d / "raw_dialogue") for d in turns_dirs}, True
+
+
 def main() -> None:
     """CLI エントリポイント."""
     ap = argparse.ArgumentParser(description=__doc__)
@@ -393,16 +425,16 @@ def main() -> None:
     ap.add_argument("-o", "--out", type=Path, default=None)
     args = ap.parse_args()
 
-    data = collect(args.root)
-    out = args.out or DEFAULT_OUT
+    data, is_experiment = collect_all(args.root)
+    out = args.out or (args.root / "argument_network.html" if is_experiment else DEFAULT_OUT)
     page = HTML.replace(
         "__DATA__", json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
     )
     page = page.replace("__METHODS__", json.dumps(METHODS))
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(page, encoding="utf-8")
-    n = sum(len(r) for m in data.values() for r in m.values())
-    print(f"{out} ({len(data)} topics, {n} runs)")
+    n = sum(len(r) for per in data.values() for m in per.values() for r in m.values())
+    print(f"{out} ({len(data)} turn settings, {n} runs)")
 
 
 if __name__ == "__main__":
