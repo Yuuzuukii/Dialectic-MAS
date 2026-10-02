@@ -16,6 +16,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from .argumentation_model import target_items
 from .schema.types import AgentName
 
 # ---- 共有ブロック（複数テンプレートで再利用） ----
@@ -516,6 +517,42 @@ def _target_block(target: Any) -> str:
     )
 
 
+def _items_block(target: Any, *, owner: str = "target") -> list[str]:
+    """攻撃対象の Conc / Ass を id（C1.. / A1..）付きで並べたブロックを返す（構造化されていなければ空）.
+
+    攻撃側は文の引用ではなく、この id で攻撃対象を選ぶ（言い換えによる不一致を避ける）。
+    """
+    items = target_items(target)
+    if not items:
+        return []
+    conclusions = [f"{key}: {text}" for key, text in items.items() if key.startswith("C")]
+    assumptions = [f"{key}: {text}" for key, text in items.items() if key.startswith("A")]
+    return [
+        "<target_items>",
+        f"Items of the {owner} argument, by id:",
+        "Conclusions (Conc):",
+        *(conclusions or ["(none)"]),
+        "Assumptions (Ass):",
+        *(assumptions or ["(none)"]),
+        "</target_items>",
+    ]
+
+
+def _item_id_rule(target: Any) -> list[str]:
+    """攻撃対象を id で宣言させる指示（対象が id 付きの一覧を持つときだけ）."""
+    if not target_items(target):
+        return []
+    return [
+        "- In Attack.target, set item_id to the id of the item in <target_items> that you attack: "
+        "a Conc item (C<n>) for rebut, an Ass item (A<n>) for undercut."
+    ]
+
+
+def _target_section(target: Any) -> str:
+    """<target> に、id 付きの項目一覧（あれば）を続けたブロックを返す."""
+    return "\n".join([_target_block(target), *_items_block(target)])
+
+
 _CONTENT_REQUIREMENT_BLOCK = "\n".join(
     [
         "<content_requirement>",
@@ -564,7 +601,7 @@ def attack_instruction(
                 "",
             ]
         blocks += [
-            _target_block(target),
+            _target_section(target),
             "",
             _CONTENT_REQUIREMENT_BLOCK,
             "",
@@ -577,6 +614,7 @@ def attack_instruction(
             "Merely asserting the opposite of the target's conclusion, or arguing that the target's "
             "framing/scope is inappropriate, does not qualify — your reasoning must establish X.",
             "- Do not attack a claim or assumption that is not present in the target argument.",
+            *_item_id_rule(target),
             "</attack_conditions>",
             "",
             "<non_repetition>",
@@ -614,7 +652,7 @@ def attack_instruction(
             issue,
             "</issue>",
             "",
-            _target_block(target),
+            _target_section(target),
             "",
             _CONTENT_REQUIREMENT_BLOCK,
             "",
@@ -626,6 +664,7 @@ def attack_instruction(
             "Merely asserting the opposite of the target's conclusion, or arguing that the target's "
             "framing/scope is inappropriate, does not qualify — your reasoning must establish X.",
             "- Do not attack a claim or assumption that is not present in the target argument.",
+            *_item_id_rule(target),
             "- Supporting a different option does not by itself count as negating the target.",
             "</attack_conditions>",
             "",
@@ -711,6 +750,7 @@ def attack_extends_instruction(
             "argument:",
             c_argument.argument,
             "</new_counter>",
+            *_items_block(c_argument, owner="new_counter"),
             "",
             "<response_contract>",
             "Set attack_extends=YES if <new_counter> leaves any premise or inferential "
@@ -737,6 +777,7 @@ def attack_extends_instruction(
             "if your argument does not genuinely negate any of <new_counter>'s stated "
             "conclusions or assumptions, set attack_extends=NO instead, even if you "
             "initially leaned YES above.",
+            *_item_id_rule(c_argument),
             "</response_contract>",
         ]
     )

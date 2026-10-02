@@ -6,7 +6,11 @@ from types import SimpleNamespace
 import pytest
 
 from agent import arguments
-from agent.argumentation_model import evaluate_attack
+from agent.argumentation_model import (
+    attack_from_metadata,
+    evaluate_attack,
+    target_statement_exists,
+)
 from agent.arguments import argument_body_json, validate_argument_body
 from agent.schema.llm_outputs import (
     Antecedent,
@@ -147,7 +151,7 @@ async def test_llm_schema_does_not_request_generated_identifiers() -> None:
 async def test_defeating_output_requests_declared_attack_target() -> None:
     assert "Attack" in DefeatingArgumentOutput.model_fields
     assert set(AttackMetadata.model_fields) == {"method", "target"}
-    assert set(TargetReference.model_fields) == {"field", "statement"}
+    assert set(TargetReference.model_fields) == {"field", "statement", "item_id"}
 
 
 async def test_generate_attack_infers_rebut_and_target_metadata(monkeypatch) -> None:
@@ -374,3 +378,131 @@ async def test_ask_attack_extends_does_not_reuse_bs_original_attack_metadata(
     # B 自身の元の（A向けの）宣言は変更されない。
     assert b_argument.attack == "undercut"
     assert b_argument.target_statement == "a's old assumption"
+
+
+def _rebut_output(statement: str, item_id: str | None) -> DefeatingArgumentOutput:
+    return DefeatingArgumentOutput(
+        can_defeat="YES",
+        Argument=ArgumentBody(
+            rules=[
+                Rule(
+                    antecedent=Antecedent(strong=["a exceeds the budget"]),
+                    consequent="We should not buy a",
+                )
+            ]
+        ),
+        Attack=AttackMetadata(
+            method="rebut",
+            target=TargetReference(field="Conc", statement=statement, item_id=item_id),
+        ),
+    )
+
+
+async def test_generate_attack_uses_exact_text_of_the_item_chosen_by_id(monkeypatch) -> None:
+    """item_id で選ばれた項目の正確な文が記録される。言い換えた statement は使われない."""
+
+    async def paraphrased(*args, **kwargs):
+        return _rebut_output("we ought to buy a", item_id="C1")
+
+    monkeypatch.setattr(arguments, "chat_structured", paraphrased)
+    monkeypatch.setattr(arguments, "chat_text", paraphrased)
+    target = argument("AG1", ["We should buy a"], ["a is available"])
+    state = SimpleNamespace(current_proponent="AG1", history=[], agent1_stance="", agent2_stance="")
+
+    generated = await arguments.generate_attack(state, "AG2", target, purpose="defeat")
+
+    assert generated is not None
+    assert generated.target_field == "Conc"
+    assert generated.target_statement == "We should buy a"
+    # 厳密な一致検証にそのまま通る（言い換えによる却下が起きない）。
+    match = attack_from_metadata(generated)
+    assert match is not None and target_statement_exists(match, target)
+
+
+async def test_generate_attack_falls_back_to_declared_statement_without_valid_id(
+    monkeypatch,
+) -> None:
+    async def no_id(*args, **kwargs):
+        return _rebut_output("We should buy a", item_id=None)
+
+    async def wrong_kind_id(*args, **kwargs):
+        # rebut なのに Ass の id（A1）を選んだ: 方法と食い違うので id は使われない。
+        return _rebut_output("We should buy a", item_id="A1")
+
+    target = argument("AG1", ["We should buy a"], ["a is available"])
+    state = SimpleNamespace(current_proponent="AG1", history=[], agent1_stance="", agent2_stance="")
+    for fake in (no_id, wrong_kind_id):
+        monkeypatch.setattr(arguments, "chat_structured", fake)
+        monkeypatch.setattr(arguments, "chat_text", fake)
+        generated = await arguments.generate_attack(state, "AG2", target, purpose="defeat")
+        assert generated is not None
+        assert generated.target_statement == "We should buy a"
+
+
+async def test_generate_attack_resolves_item_id_from_the_assumption_list(monkeypatch) -> None:
+    async def undercut(*args, **kwargs):
+        out = _rebut_output("a is probably there", item_id="a1")
+        assert out.Attack is not None
+        out.Attack.method = "undercut"
+        out.Attack.target.field = "Ass"
+        return out
+
+    monkeypatch.setattr(arguments, "chat_structured", undercut)
+    monkeypatch.setattr(arguments, "chat_text", undercut)
+    target = argument("AG1", ["We should buy a"], ["a is available", "a is cheap"])
+    state = SimpleNamespace(current_proponent="AG1", history=[], agent1_stance="", agent2_stance="")
+
+    generated = await arguments.generate_attack(state, "AG2", target, purpose="defeat")
+
+    assert generated is not None
+    assert generated.target_field == "Ass"
+    assert generated.target_statement == "a is available"
+
+
+async def test_ask_attack_extends_resolves_item_id_against_the_counter(monkeypatch) -> None:
+    async def by_id(*args, **kwargs):
+        return AttackExtendsOutput(
+            attack_extends="YES",
+            Attack=AttackMetadata(
+                method="rebut",
+                target=TargetReference(field="Conc", statement="paraphrase", item_id="C2"),
+            ),
+        )
+
+    monkeypatch.setattr(arguments, "chat_structured", by_id)
+    b_argument = argument("AG2", ["b"], attack="rebut")
+    c_argument = argument("AG1", ["first conclusion", "second conclusion"])
+    state = SimpleNamespace(
+        current_proponent="AG2", history=[], agent1_stance="", agent2_stance="", question="Q?"
+    )
+
+    result = await arguments.ask_attack_extends(state, "AG2", b_argument, c_argument)
+
+    assert result is not None
+    assert result.statement == "second conclusion"
+
+
+async def test_attack_prompts_list_numbered_items_only_for_structured_targets() -> None:
+    from agent.prompts import attack_extends_instruction, attack_instruction
+
+    structured = argument("AG1", ["We should buy a"], ["a is available"])
+    free_text = ArgumentRecord(
+        type="defeat", argument="We should buy a.", support=[], agent="AG1"  # type: ignore[arg-type]
+    )
+
+    for text in (
+        attack_instruction("defeat", structured),
+        attack_instruction("counter", structured),
+        attack_extends_instruction(structured, structured),
+    ):
+        assert "<target_items>" in text
+        assert "C1: We should buy a" in text
+        assert "A1: a is available" in text
+        assert "item_id" in text
+    for text in (
+        attack_instruction("defeat", free_text),
+        attack_instruction("counter", free_text),
+        attack_extends_instruction(free_text, free_text),
+    ):
+        assert "<target_items>" not in text
+        assert "item_id" not in text

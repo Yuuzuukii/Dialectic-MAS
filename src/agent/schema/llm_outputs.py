@@ -251,6 +251,15 @@ class TargetReference(BaseModel):
     statement: str = Field(
         description="Exact conclusion or assumption in the target argument attacked by this argument."
     )
+    item_id: str | None = Field(
+        default=None,
+        description=(
+            "Id of the attacked item, copied from the target's <target_items> list: 'C<n>' for a "
+            "conclusion (rebut), 'A<n>' for an assumption (undercut). Give it whenever the target "
+            "lists its items with ids; the system then uses that item's exact text, so a "
+            "paraphrased statement cannot cause a mismatch. Omit when no ids are listed."
+        ),
+    )
 
 
 # 統合出力の要素（汎化+統合を1ステップで行い、統合済みルールのみを保持する）
