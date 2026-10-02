@@ -50,40 +50,6 @@ def attack_from_metadata(attacker: ArgumentRecord) -> AttackMatch | None:
     return AttackMatch(attacker.attack, field, attacker.target_statement)
 
 
-def target_items(target: Any) -> dict[str, str]:
-    """対象論証の Conc（C1..）と Ass（A1..）に id を振った {id: 文} を返す.
-
-    攻撃側にはこの一覧を見せ、攻撃対象を id で選ばせる（文の言い換えによる不一致を避ける）。
-    Argument が構造化されていない（no_schema など、body が空）場合は空 dict を返す。
-    """
-    if not getattr(target, "body", None):
-        return {}
-    items = {f"C{i}": text for i, text in enumerate(target.conclusions, start=1)}
-    items.update({f"A{i}": text for i, text in enumerate(target.assumptions, start=1)})
-    return items
-
-
-def resolve_declared_target(
-    target: Any,
-    method: AttackType,
-    declared_field: TargetField,
-    declared_statement: str,
-    item_id: str | None,
-) -> tuple[TargetField, str]:
-    """攻撃側が宣言した対象を、(field, 文) に解決する.
-
-    id が対象の一覧にあり、攻撃方法と整合する（rebut なら C、undercut なら A）ときは、
-    その項目の正確な文を使う。id が無い／一覧に無い／方法と食い違うときは、宣言された
-    field と文をそのまま返す（従来どおり `target_statement_exists` が一致を検証する）。
-    """
-    wanted = "C" if method == "rebut" else "A"
-    key = (item_id or "").strip().upper()
-    items = target_items(target)
-    if key in items and key.startswith(wanted):
-        return ("Conc" if wanted == "C" else "Ass"), items[key]
-    return declared_field, declared_statement
-
-
 def target_statement_exists(match: AttackMatch, target: ArgumentRecord) -> bool:
     """LLM が宣言した target_statement が、対象の実際の Conc/Ass に存在するか検証する.
 

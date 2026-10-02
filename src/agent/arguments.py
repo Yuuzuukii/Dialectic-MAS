@@ -21,7 +21,7 @@ from typing import Any, cast
 
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
 
-from .argumentation_model import AttackMatch, resolve_declared_target
+from .argumentation_model import AttackMatch
 from .llm import chat_structured, chat_text
 from .prompts import (
     PromptTemplates,
@@ -388,13 +388,6 @@ async def generate_attack(
         _decline_reason.set(output.reason or "(no reason given)")
         return None
     _decline_reason.set(None)
-    field, statement = resolve_declared_target(
-        target,
-        output.Attack.method,
-        output.Attack.target.field,
-        output.Attack.target.statement,
-        output.Attack.target.item_id,
-    )
     return ArgumentRecord(
         type="counter" if purpose == "counter" else "defeat",
         argument=_serialize_argument(state, output.Argument),
@@ -402,8 +395,8 @@ async def generate_attack(
         agent=attacker,
         attack=output.Attack.method,
         target_id=target.id,
-        target_field=field,
-        target_statement=statement,
+        target_field=output.Attack.target.field,
+        target_statement=output.Attack.target.statement,
         round=getattr(state, "debate_round", 1),
     )
 
@@ -470,14 +463,11 @@ async def ask_attack_extends(
         _decline_reason.set(output.reason or "(no reason given)")
         return None
     _decline_reason.set(None)
-    field, statement = resolve_declared_target(
-        c_argument,
-        output.Attack.method,
-        output.Attack.target.field,
-        output.Attack.target.statement,
-        output.Attack.target.item_id,
+    return AttackMatch(
+        method=output.Attack.method,
+        field=output.Attack.target.field,
+        statement=output.Attack.target.statement,
     )
-    return AttackMatch(method=output.Attack.method, field=field, statement=statement)
 
 
 async def generate_integration(state: Any) -> IntegrationOutput | IntegrationOutputFree:
