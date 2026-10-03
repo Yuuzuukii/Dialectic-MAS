@@ -52,6 +52,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--methods", default="schema,no_schema", help="',' 区切り（schema / no_schema / free_debate / mad）。")
     parser.add_argument("--turns", default="20", help="max_dialogue_turns を ',' 区切りで（例: 10,20,30）。")
     parser.add_argument("--runs", type=int, default=1, help="各条件の実行回数。")
+    parser.add_argument(
+        "--run-start",
+        type=int,
+        default=1,
+        help="run 番号の開始値（欠けた run だけを足すとき用。例: 2 なら 02_ から始まる）。",
+    )
     parser.add_argument("--max-turns", type=int, default=DEFAULT_MAX_TURNS, help="ラウンド上限。")
     parser.add_argument(
         "--experiment-dir",
@@ -88,12 +94,16 @@ async def main() -> None:
         for turns in turns_list
         for topic_file in args.topic_files
         for method in methods
-        for index in range(1, args.runs + 1)
+        for index in range(args.run_start, args.run_start + args.runs)
     ]
     print(f"=== {len(jobs)} runs（同時 {args.concurrency}）===", flush=True)
     results = await asyncio.gather(*jobs, return_exceptions=True)
     for result in results:
         print("ERROR" if isinstance(result, Exception) else "saved", result, flush=True)
+    failed = sum(isinstance(result, Exception) for result in results)
+    if failed:
+        print(f"=== {failed} / {len(jobs)} runs が失敗 ===", flush=True)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

@@ -211,14 +211,17 @@ class Antecedent(BaseModel):
 
     strong: list[str] = Field(
         default_factory=list,
-        description="Established assumptions necessary to lead to a conclusion",
+        description=(
+            "Strong premises: claims that must be established (given facts, or "
+            "consequents of earlier rules) for the rule to apply. Not assumptions."
+        ),
     )
     weak_negation: list[str] = Field(
         default_factory=list,
         description=(
-            "Defeasible assumptions of the form 'X is not the case', held only in the "
-            "absence of evidence to the contrary. An undercutting attack defeats one of "
-            "these by proving that X actually holds."
+            "Exception clauses ('unless X'): defeasible assumptions of the form 'X is not "
+            "the case', held only in the absence of evidence to the contrary. An "
+            "undercutting attack defeats one of these by proving that X actually holds."
         ),
     )
 
