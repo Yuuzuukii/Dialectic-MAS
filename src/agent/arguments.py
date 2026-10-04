@@ -99,11 +99,18 @@ def argument_message_content(record: ArgumentRecord) -> str:
 def render_history(history: list[Any]) -> list[BaseMessage]:
     """state.history を読み取り専用で受け取り、LLM 用メッセージ列に変換する.
 
+    state.history には、発話の AIMessage と、その発話を引き出した指示の HumanMessage が
+    交互に入っている。ここでは指示を除いて発話だけを返す（指示は手番ごとに最後に1つだけ付ける）。
     新設計では state.history は BaseMessage のリスト。古いテストや移行中の呼び出しで
     ArgumentRecord が渡された場合だけ、Argument 本体のみの AIMessage として互換変換する。
     """
     messages: list[BaseMessage] = []
     for item in history:
+        if isinstance(item, HumanMessage):
+            # 過去の手番に出した指示（主張を作れ・can_generate=NO など）は、その手番の
+            # エージェント宛てのもの。履歴に残すと、別の手番で自分宛ての指示と取り違えたり、
+            # 反論側が proponent 用の非反復の制約を引き継いだりするため、発話だけを残す。
+            continue
         if isinstance(item, BaseMessage):
             messages.append(item)
         elif isinstance(item, ArgumentRecord):

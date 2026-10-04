@@ -49,7 +49,7 @@ Represent Argument as a structured object consisting of rules, Conc, and Ass.
 - Each rule has an antecedent and a consequent.
 - Antecedents may contain strong premises and weak_negation assumptions (strong and weak literals in Prakken & Sartor's terms).
 - A strong premise is a claim that must be established for the rule to apply: it is given in your stance, the dialogue history, or the integrated rules, supported by general knowledge, or derived as the consequent of an earlier rule in this Argument. It says that something definitely holds (or definitely does not hold). A rule whose strong premise is not established does not fire. Strong premises are not assumptions: never list them in Ass.
-- A weak_negation entry is an exception clause ("unless X", "as long as there is no evidence that X"): the rule applies by default and stops applying only if X is shown to hold; it needs no support of its own. Write it as the presumption "X is not the case" (e.g. "no evidence that Y fails here", "Z does not occur in this case"). It must be a specific claim that could in principle be proven false by evidence that X actually holds — an attacker undercuts the Argument by proving X. Use weak_negation wherever your reasoning genuinely rests on such a default (an exception you presume absent, a risk you presume not to occur, a condition you presume to hold). Do not put scope stipulations, definitions, or framing choices ("we are evaluating only Y") in weak_negation — those are not defeasible assumptions and cannot be coherently undercut; state them as strong premises or fold them into the reasoning directly instead.
+- A weak_negation entry is an exception clause ("unless X", "as long as there is no evidence that X"): the rule applies by default and stops applying only if X is shown to hold; it needs no support of its own. Write it as the presumption "X is not the case" (e.g. "no evidence that Y fails here", "Z does not occur in this case"). It must be a specific claim that could in principle be proven false by evidence that X actually holds — an attacker undercuts the Argument by proving X. Use weak_negation wherever your reasoning genuinely rests on the absence of something that would block it (an exception you presume absent, a risk you presume not to occur, an obstacle you presume is not present): when a step of your reasoning holds only as long as nothing blocks it, state that as "X is not the case" rather than silently treating it as given. A weak_negation entry is always a negation; never write a positive assumption ("X is the case") there — a positive claim is a strong premise and must be established as such. Do not put scope stipulations, definitions, or framing choices ("we are evaluating only Y") in weak_negation — those are not defeasible assumptions and cannot be coherently undercut; state them as strong premises or fold them into the reasoning directly instead.
 - Every rule must have at least one explicit strong or weak_negation antecedent; never derive a consequent from an empty antecedent.
 - Conc contains the conclusions derived by the rules.
 - Ass contains the weak_negation assumptions used by the rules.
@@ -606,8 +606,9 @@ def attack_instruction(
     return "\n".join(
         [
             "<task>",
-            f"Round {debate_round}. State what you hold to be true about the issue that challenges "
-            "the target argument's specific claim below — a substantive claim about the issue, not a "
+            f"Round {debate_round}. Attack the target argument below (rebut or undercut). Build your "
+            "attack from your own stance: state what you hold to be true about the issue that negates "
+            "the target argument's specific claim — a substantive claim about the issue, not a "
             "verdict about whether the target argument is defeated.",
             "</task>",
             "",
@@ -714,18 +715,15 @@ def attack_extends_instruction(
             "</new_counter>",
             "",
             "<response_contract>",
-            "Set attack_extends=YES if <new_counter> leaves any premise or inferential "
-            "step your attack relies on unaddressed, or merely asserts — without "
-            "substantively refuting it — that its own conclusion survives despite your "
-            "attack.",
-            "Set attack_extends=NO only if <new_counter> explicitly and substantively "
-            "refutes the specific premise or step your attack relies on, not merely "
-            "restates or reasserts its original conclusion.",
+            "Set attack_extends=YES only if you can name a specific premise or inferential "
+            "step that your attack relies on and that <new_counter> leaves unaddressed (or "
+            "merely re-asserts its own conclusion over, without substantively refuting it).",
+            "Set attack_extends=NO if <new_counter> explicitly and substantively refutes the "
+            "specific premise or step your attack relies on, or if you cannot name any such "
+            "unaddressed premise or step.",
             "Merely sharing the same wording or topic as your attack's target is not "
-            "enough by itself to set YES — but conversely, <new_counter> sounding "
-            "confident or well-argued is not enough by itself to set NO either.",
-            "When genuinely uncertain, prefer YES: the burden is on <new_counter> to "
-            "clearly defeat your attack, not on you to prove your attack still applies.",
+            "enough by itself to set YES, and <new_counter> sounding confident or well-argued "
+            "is not enough by itself to set NO.",
             "",
             "If attack_extends=YES, you must ALSO declare how your argument attacks "
             "<new_counter> SPECIFICALLY — do not copy the method/target you used against "
