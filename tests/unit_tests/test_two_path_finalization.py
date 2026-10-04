@@ -35,7 +35,7 @@ async def test_justified_path_keeps_existing_answer(
     assert "previous_final_answer" not in result
 
 
-@pytest.mark.parametrize("method", ["schema", "no_schema"])
+@pytest.mark.parametrize("method", ["schema", "no_schema", "free_debate"])
 async def test_unresolved_path_synthesizes_then_answers(
     monkeypatch: pytest.MonkeyPatch, method: str
 ) -> None:
@@ -44,10 +44,11 @@ async def test_unresolved_path_synthesizes_then_answers(
     async def fake_chat_text(messages: list[Any], **kwargs: Any) -> str:
         system = messages[0].content
         calls.append(system)
-        if "neutral synthesis operator" in system:
-            assert "Full dialogue history" in messages[1].content
+        if "Synthesize the entire debate" in system:
+            assert "Dialogue:" in messages[1].content
+            assert "[Turn 2] AG2 (responding to [Turn 1])" in messages[1].content
             return "balanced synthesis"
-        assert "neutral answer writer" in system
+        assert "integrated synthesis" in system
         assert "balanced synthesis" in messages[1].content
         return "answer from synthesis"
 
@@ -58,8 +59,13 @@ async def test_unresolved_path_synthesizes_then_answers(
         "agent1_stance": "A",
         "agent2_stance": "B",
         "dialogue_history": [
-            {"agent": "AG1", "argument": "a"},
-            {"agent": "AG2", "argument": "b"},
+            {"agent": "AG1", "type": "main", "id": "x1", "argument": "a"},
+            {"agent": "AG2", "type": "defeat", "id": "x2", "target_id": "x1", "argument": "b"},
+        ]
+        if method != "free_debate"
+        else [
+            {"agent": "AG1", "round": 1, "argument": "a", "has_new_point": True},
+            {"agent": "AG2", "round": 1, "argument": "b", "has_new_point": True},
         ],
         "consensus_reached": False,
         "justification_status": "fallback_no_consensus",
@@ -78,7 +84,7 @@ async def test_unresolved_path_synthesizes_then_answers(
 
 
 async def test_other_methods_are_rejected() -> None:
-    with pytest.raises(ValueError, match="schema and no_schema"):
+    with pytest.raises(ValueError, match="supports only"):
         await finalization.refinalize_unresolved_log({"method": "mad"})
 
 

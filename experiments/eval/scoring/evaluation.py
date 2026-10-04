@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from typing import Any
 
 
@@ -211,6 +212,11 @@ def build_eval_input(
     偶数番目（2本目・4本目…）の決着ごとに、未使用の integrated_rules を1つずつ
     順番に対応させればよい。
     """
+    # 環境変数 EVAL_INCLUDE_INTEGRATED_RULES=0 で、引数に関わらず統合ルールを記録に入れない。
+    # 最終回答が議論全体の統合（統合ルールを使わない経路）で作られる実験では、統合ルールを
+    # 持つ手法（schema / no_schema）だけ記録が長くなる非対称を避けるために使う。
+    if os.getenv("EVAL_INCLUDE_INTEGRATED_RULES") == "0":
+        include_integrated_rules = False
     dialogue_history: list[dict[str, Any]] = log.get("dialogue_history") or []
     integrated_rules: list[str] = log.get("integrated_rules") or []
 

@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 import threading
@@ -64,11 +65,24 @@ def _load_old_ratios(path: Path | None) -> dict[str, dict[str, Any]]:
     return {entry["file"]: entry for entry in data.get("detail", [])}
 
 
+def method_allowed(stem: str) -> bool:
+    """Return True when the log's method (from its file name) is selected by ``EVAL_METHODS``.
+
+    ``EVAL_METHODS=schema,no_schema`` limits every evaluation runner to those methods, so logs that
+    were only copied (and already evaluated before) are not paid for twice. Unset means all methods.
+    """
+    selected = {m.strip() for m in os.getenv("EVAL_METHODS", "").split(",") if m.strip()}
+    if not selected:
+        return True
+    match = _FILENAME_RE.match(stem)
+    return match is not None and match.group("method") in selected
+
+
 def _relative_log_map(root: Path) -> dict[Path, Path]:
     return {
         path.relative_to(root): path
         for path in sorted(root.glob("*/*/*.json"))
-        if _FILENAME_RE.match(path.stem)
+        if _FILENAME_RE.match(path.stem) and method_allowed(path.stem)
     }
 
 

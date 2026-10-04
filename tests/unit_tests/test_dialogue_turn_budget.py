@@ -200,7 +200,7 @@ def test_free_debate_route_after_ag1_turn_cuts_off_mid_round_when_budget_set() -
         max_dialogue_turns=1,
         dialogue_history=[{"agent": "AG1", "round": 1, "argument": "x", "has_new_point": True}],
     )
-    assert fd_route_after_ag1_turn(state) == "integrate"
+    assert fd_route_after_ag1_turn(state) == "generate_final_answer"
 
 
 def test_free_debate_route_after_ag2_turn_respects_budget_over_max_turns() -> None:
@@ -218,7 +218,7 @@ def test_free_debate_route_after_ag2_turn_respects_budget_over_max_turns() -> No
         ag1_has_new=True,
         ag2_has_new=True,
     )
-    assert fd_route_after_ag2_turn(state) == "integrate"
+    assert fd_route_after_ag2_turn(state) == "generate_final_answer"
 
 
 def test_mad_route_after_ag2_turn_uses_integrate_when_synthesis_enabled() -> None:

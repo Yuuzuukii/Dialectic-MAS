@@ -8,6 +8,8 @@
 #   plot_summary / plot_atomic_coverage / plot_svi_consensus_score / plot_argument_network
 # を実行する（費用はかからない）。
 #
+# EVAL_METHODS=schema,no_schema,free_debate のように付けると、その手法のログだけを評価する
+# （既に評価済みでコピーしただけのログ、例: mad を、もう一度払って評価しないため）。
 # SKIP_DIALOGUE_COVERAGE=1 を付けると、3 の議論全体のカバレッジを省く（coverage と SVI だけ）。
 #
 # Usage: bash experiments/run_eval_all.sh logs/experiment_<日時> [trials]

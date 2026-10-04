@@ -1,23 +1,25 @@
-"""Two-path finalization shared by schema and no-schema Dialectic-MAS.
+"""Two-path finalization shared by schema, no-schema and free-debate.
 
-Path A: if a main argument is justified, keep the existing justified-argument finalization.
-Path B: if no main argument is justified, ignore partial intermediate synthesis state and
-freshly synthesize the entire dialogue, then generate the final answer from that synthesis.
+Path A: if a main argument is justified, keep the existing justified-argument finalization
+(schema / no_schema only: the other protocols have no notion of a justified argument).
+Path B: otherwise, ignore partial intermediate synthesis state and freshly synthesize the
+entire dialogue, then generate the final answer from that synthesis.
 
-The policy is deliberately identical for ``schema`` and ``no_schema`` so experiments differ
-only in argument representation, not in how unresolved debates are finalized.
+Path B is deliberately identical for every method, including the prompts and the way the
+dialogue is rendered (:mod:`src.agent.dialogue_transcript`), so experiments differ only in the
+debate itself, not in how an unresolved debate is finalized.
 """
 
 from __future__ import annotations
 
-import json
 from typing import Any
 
 from langchain_core.messages import HumanMessage, SystemMessage
 
+from .dialogue_transcript import TRANSCRIPT_DESCRIPTION, format_transcript
 from .llm import chat_text
 
-SUPPORTED_METHODS = {"schema", "no_schema"}
+SUPPORTED_METHODS = {"schema", "no_schema", "free_debate"}
 
 # ログ（dialogue_history）に残す発話のフィールド。最終化の入力もこの形に揃える
 # （生成中の finalize と、ログからの後付け refinalize で同じ入力になるように）。
@@ -43,18 +45,13 @@ def speech_log(history: list[dict[str, Any]]) -> list[dict[str, Any]]:
         for record in history
     ]
 
-_FALLBACK_SYNTHESIS_SYSTEM = """<role>
-You are a neutral synthesis operator.
-</role>
-
-<task>
-The debate did not reach a justified main argument within the available dialogue budget.
+_FALLBACK_SYNTHESIS_SYSTEM = """<task>
 Synthesize the entire debate into one integrated resolution that can serve as the sole basis
 for the final answer.
 </task>
 
 <principles>
-- Use the full dialogue, not only the latest main argument or a previously cached integrated rule.
+- Use the full dialogue, not only its latest turns.
 - Preserve every material requirement, value, condition, affected group, exception, threshold,
   and tradeoff from both original stances that remains relevant after the debate.
 - Do not choose a winner merely because one side appears better supported overall.
@@ -70,11 +67,7 @@ for the final answer.
 Return only the integrated synthesis that should govern the final answer.
 </output>"""
 
-_FALLBACK_FINAL_SYSTEM = """<role>
-You are a neutral answer writer.
-</role>
-
-<task>
+_FALLBACK_FINAL_SYSTEM = """<task>
 Answer the original question using the provided integrated synthesis as the primary and
 controlling basis. Do not re-judge the debate or independently select a winning side.
 </task>
@@ -82,16 +75,11 @@ controlling basis. Do not re-judge the debate or independently select a winning 
 <requirements>
 - Lead with a direct answer to the original question.
 - Preserve the synthesis's conditions, qualifications, unresolved points, and tradeoffs.
-- Do not mention agents, turns, the debate process, justification status, fallback logic, or
-  internal protocol terms.
+- Do not mention agents, turns, or the debate process.
 - Do not silently discard one side's material requirements simply to make the answer more decisive.
 - If the synthesis is conditional, the final answer may also be conditional rather than forcing an
   artificial unconditional yes/no conclusion.
 </requirements>"""
-
-
-def _dialogue_json(dialogue_history: list[dict[str, Any]]) -> str:
-    return json.dumps(dialogue_history, ensure_ascii=False, indent=2)
 
 
 def _is_justified_path(log: dict[str, Any]) -> bool:
@@ -110,7 +98,11 @@ async def synthesize_unresolved_dialogue(
     dialogue_history: list[dict[str, Any]],
     model: str | None = None,
 ) -> str:
-    """Freshly synthesize the full unresolved dialogue in one neutral pass."""
+    """Freshly synthesize the full dialogue in one neutral pass.
+
+    The dialogue is rendered the same way for every method (see ``format_transcript``): turn
+    number, speaker and what each turn responds to, with no method-specific labels.
+    """
     user = f"""Question:
 {question}
 
@@ -120,8 +112,10 @@ AG1 stance:
 AG2 stance:
 {agent2_stance}
 
-Full dialogue history:
-{_dialogue_json(dialogue_history)}
+Dialogue:
+{TRANSCRIPT_DESCRIPTION}
+
+{format_transcript(dialogue_history)}
 """.strip()
     return (
         await chat_text(
@@ -175,7 +169,7 @@ async def refinalize_unresolved_log(
     method = str(log.get("method") or "")
     if method not in SUPPORTED_METHODS:
         raise ValueError(
-            "two-path fallback re-finalization supports only schema and no_schema logs; "
+            f"two-path fallback re-finalization supports only {sorted(SUPPORTED_METHODS)} logs; "
             f"got {method!r}"
         )
 

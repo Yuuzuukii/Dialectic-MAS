@@ -5,6 +5,8 @@ from __future__ import annotations
 import importlib.util
 from pathlib import Path
 
+import pytest
+
 MODULE_PATH = Path(__file__).parents[2] / "experiments" / "eval" / "scoring" / "evaluation.py"
 spec = importlib.util.spec_from_file_location("eval_evaluation", MODULE_PATH)
 assert spec is not None and spec.loader is not None
@@ -280,3 +282,40 @@ def test_transition_note_is_neutral_and_omitted_at_end_without_shared_rule() -> 
     assert "withstood every objection" not in transcript
     assert "could not be defended" not in transcript
     assert not transcript.rstrip().endswith("A new argument follows.")
+
+
+def test_env_switch_removes_integrated_rules_from_the_transcript(monkeypatch: pytest.MonkeyPatch) -> None:
+    from experiments.eval.scoring.evaluation import build_eval_input
+
+    log = {
+        "question": "Q?",
+        "agent1_stance": "A",
+        "agent2_stance": "B",
+        "final_answer": "answer",
+        "integrated_rules": ["a shared rule"],
+        "dialogue_history": [
+            {"id": "m1", "agent": "AG1", "type": "main", "argument": "x", "status": "defensible"},
+            {"id": "m2", "agent": "AG2", "type": "main", "argument": "y", "status": "defensible"},
+        ],
+    }
+
+    monkeypatch.delenv("EVAL_INCLUDE_INTEGRATED_RULES", raising=False)
+    assert "a shared rule" in build_eval_input(log)["debate_transcript"]
+
+    monkeypatch.setenv("EVAL_INCLUDE_INTEGRATED_RULES", "0")
+    assert "a shared rule" not in build_eval_input(log)["debate_transcript"]
+
+
+def test_eval_methods_env_limits_which_logs_are_evaluated(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    from experiments.eval.runners.eval_atomic_coverage_final import _relative_log_map
+
+    for name in ("01_schema_20260101_000000_1", "01_no_schema_20260101_000000_2", "01_mad_20260101_000000_3"):
+        (tmp_path / "cat" / "topic").mkdir(parents=True, exist_ok=True)
+        (tmp_path / "cat" / "topic" / f"{name}.json").write_text("{}", encoding="utf-8")
+
+    monkeypatch.delenv("EVAL_METHODS", raising=False)
+    assert len(_relative_log_map(tmp_path)) == 3
+
+    monkeypatch.setenv("EVAL_METHODS", "schema,no_schema")
+    kept = {p.name for p in _relative_log_map(tmp_path)}
+    assert kept == {"01_schema_20260101_000000_1.json", "01_no_schema_20260101_000000_2.json"}

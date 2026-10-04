@@ -655,8 +655,8 @@ async def run_free_debate_topic_once(
     )
     log["dialogue_history"] = result.get("dialogue_history", [])
     log["final_answer"] = result.get("final_answer")
-    integrated_rule = result.get("integrated_rule")
-    log["integrated_rules"] = [integrated_rule] if integrated_rule else []
+    log["finalization_path"] = result.get("finalization_path")
+    log["fallback_synthesis"] = result.get("fallback_synthesis")
     path = save_log(log, output_path("free_debate", topic_path, output_root, run_index))
     print(f"[system] log saved -> {path}", flush=True)
     return path

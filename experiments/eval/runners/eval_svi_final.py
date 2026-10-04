@@ -32,6 +32,7 @@ from langchain_openai import ChatOpenAI
 
 load_dotenv(ROOT / ".env")
 
+from experiments.eval.runners.eval_atomic_coverage_final import method_allowed
 from experiments.eval.runners.run_eval import resolve_evaluator_model
 from experiments.eval.scoring.evaluation_svi import evaluate_svi
 
@@ -46,7 +47,7 @@ def _relative_log_map(root: Path) -> dict[Path, Path]:
     return {
         path.relative_to(root): path
         for path in sorted(root.glob("*/*/*.json"))
-        if _FILENAME_RE.match(path.stem)
+        if _FILENAME_RE.match(path.stem) and method_allowed(path.stem)
     }
 
 
