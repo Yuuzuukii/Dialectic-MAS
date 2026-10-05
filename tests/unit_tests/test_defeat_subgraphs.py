@@ -42,8 +42,8 @@ def argument(
     )
 
 
-async def test_rebut_defeats_when_target_side_cannot_undercut() -> None:
-    async def no_undercut(*args, **kwargs):
+async def test_rebut_defeats_when_target_side_does_not_undercut() -> None:
+    async def not_undercut(own, attack):
         return None
 
     attacker = argument("AG2", ["We should not buy a"], attack="rebut")
@@ -56,19 +56,21 @@ async def test_rebut_defeats_when_target_side_cannot_undercut() -> None:
         target,
         "AG1",
         relation_context="test",
-        blocker_generator=no_undercut,
+        undercut_check=not_undercut,
     )
 
     assert result.defeats is True
     assert result.attack == "rebut"
+    assert result.target_undercuts is None
     assert result.relations[-1].valid is True
 
 
-async def test_rebut_does_not_defeat_when_target_side_undercuts() -> None:
-    blocker = argument("AG1", ["attacker assumption is invalid"], attack="undercut")
+async def test_rebut_does_not_defeat_when_target_already_undercuts_it() -> None:
+    seen: list[tuple[str, str]] = []
 
-    async def has_undercut(*args, **kwargs):
-        return blocker
+    async def already_undercuts(own, attack):
+        seen.append((own.id, attack.id))
+        return "my argument already shows the stock exists"
 
     attacker = argument(
         "AG2", ["We should not buy a"], ["no evidence of stock"], attack="rebut"
@@ -82,12 +84,38 @@ async def test_rebut_does_not_defeat_when_target_side_undercuts() -> None:
         target,
         "AG1",
         relation_context="test",
-        blocker_generator=has_undercut,
+        undercut_check=already_undercuts,
     )
 
+    # 判定されるのは、すでにある対象側の論証（own）と攻撃（attack）の組。新しい論証は作らない。
+    assert seen == [(target.id, attacker.id)]
     assert result.defeats is False
-    assert result.blocker is blocker
-    assert result.relations[-1].attacker_id == blocker.id
+    assert result.target_undercuts == "my argument already shows the stock exists"
+    assert result.relations[-1].attacker_id == target.id
+    assert result.relations[-1].target_id == attacker.id
+    assert result.relations[-1].attack == "undercut"
+    assert result.relations[-1].valid is True
+    assert not hasattr(result, "blocker")
+
+
+async def test_undercut_attack_is_not_checked_for_target_side_undercut() -> None:
+    async def never_called(own, attack):
+        raise AssertionError("an undercut defeats without any further check")
+
+    attacker = argument("AG2", ["a is not available"], attack="undercut")
+    attacker.target_statement = "a is available"
+    target = argument("AG1", ["We should buy a"], ["a is available"])
+
+    result = await evaluate_attack(
+        SimpleNamespace(),
+        attacker,
+        target,
+        "AG1",
+        relation_context="test",
+        undercut_check=never_called,
+    )
+
+    assert result.defeats is True
 
 
 async def test_undercut_defeats_when_valid() -> None:

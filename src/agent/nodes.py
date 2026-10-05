@@ -22,8 +22,8 @@ from .argumentation_model import evaluate_attack
 from .arguments import (
     argument_message_content,
     ask_attack_extends,
+    ask_existing_undercut,
     generate_attack,
-    generate_undercut,
     take_decline_reason,
 )
 from .prompts import attack_instruction, main_instruction
@@ -76,8 +76,7 @@ def _per_proponent_dialogue_turn_budget(state: Any) -> int | None:
 def _dialogue_turn_budget_exceeded(state: Any) -> bool:
     """現在の proponent 用の絶対ターン数上限に既に達しているか（未設定なら常に False）.
 
-    `max_dialogue_turns` の対象は対話フェーズの発話数（main/defeat/counter/undercut
-    blocker）だけ。統合（integrate）や最終回答生成はここでは数えない — 統合ステップの
+    `max_dialogue_turns` の対象は対話フェーズの発話数（main/defeat/counter）だけ。統合（integrate）や最終回答生成はここでは数えない — 統合ステップの
     回数は手法ごとに構造的に異なり（schemaは持つがMAD/Free Debateは持たない）、これを
     共通予算に含めると手法間の対話量そのものの比較が歪むため。
 
@@ -356,19 +355,6 @@ async def opponent_move(state: Any) -> dict[str, Any]:
 
 
 
-def _with_blockers(
-    state: Any, blockers: list[ArgumentRecord]
-) -> dict[str, Any]:
-    """ブロッカー（undercut）を履歴に追記する state 更新を作る（proponent は現在の proponent）."""
-    stamped = [b.model_copy(update={"proponent": state.current_proponent}) for b in blockers]
-    records = [*_records(state), *stamped]
-    return {
-        "last_generated_argument": stamped[-1],
-        "argument_records": records,
-        "dialogue_history": dialogue_history(records),
-    }
-
-
 def _attempt_event(
     kind: str, agent: str, target_id: str | None, reason: str | None, phase: str
 ) -> dict[str, Any]:
@@ -390,40 +376,39 @@ def _rejection_reason(result: Any) -> str:
     return ""
 
 
-def _blocker_attempt_failed(result: Any, tried: bool) -> bool:
-    """Rebut に対するブロッカー（undercut）を試して、作れなかったか."""
-    return tried and result.attack == "rebut" and result.blocker is None and result.defeats
+def _undercut_check_for(state: Any, author: str) -> Any:
+    """すでにある論証が相手の rebut を undercut しているかの判定関数（author が答える）を返す."""
+
+    async def check(own: ArgumentRecord, attack: ArgumentRecord) -> str | None:
+        return await ask_existing_undercut(state, author, own, attack)  # type: ignore[arg-type]
+
+    return check
 
 
 async def validate_opponent_move(state: Any) -> dict[str, Any]:
-    """B が現フレームの argument を defeat するか検証する。防御側の undercut があれば阻止."""
+    """B が現フレームの argument を defeat するか検証する.
+
+    rebut は、対象側（proponent）のすでにある論証が B を undercut していなければ defeat になる
+    （Prakken & Sartor Def 2.16。新しい undercut の論証は作らない）。
+    """
     frame = _top_frame(state)
     target = _find_argument(state, frame.argument_id)
     attacker = state.pending_attacker_argument
     if attacker is None:
         return {"error": "No pending attacker argument to validate."}
 
-    tried_blocker = not _dialogue_turn_budget_exceeded(state)
-    take_decline_reason()
     result = await evaluate_attack(
         state,
         attacker,
         target,
         state.current_proponent,
         relation_context=f"{attacker.id} defeats {target.id}",
-        blocker_generator=generate_undercut if tried_blocker else None,
+        undercut_check=_undercut_check_for(state, state.current_proponent),
     )
     relations = [*state.defeat_relations, *result.relations]
     events: list[dict[str, Any]] = []
-    if _blocker_attempt_failed(result, tried_blocker):
-        events.append(
-            _attempt_event(
-                "no_blocker", state.current_proponent, attacker.id, take_decline_reason(), "defeat"
-            )
-        )
     if not result.defeats:
         # B は target を defeat できなかった。このフレームで別の攻撃 B' を試させる。
-        # 阻止に使った undercut（blocker）は、続くか終わるかに関わらず履歴に残す。
         nodes_ = _replace_node(
             state.dialogue_nodes, frame.id, attack_attempts=frame.attack_attempts + 1
         )
@@ -433,20 +418,16 @@ async def validate_opponent_move(state: Any) -> dict[str, Any]:
             "pending_attacker_argument": None,
             "last_attack_defeated": False,
         }
-        if result.blocker is not None:
-            update.update(_with_blockers(state, [result.blocker]))
-        else:
-            events.append(
-                _attempt_event(
-                    "attack_rejected",
-                    state.current_opponent,
-                    attacker.id,
-                    _rejection_reason(result),
-                    "defeat",
-                )
+        events.append(
+            _attempt_event(
+                "rebut_undercut_by_target" if result.target_undercuts is not None else "attack_rejected",
+                state.current_opponent,
+                attacker.id,
+                result.target_undercuts or _rejection_reason(result),
+                "defeat",
             )
-        if events:
-            update["attempt_log"] = [*state.attempt_log, *events]
+        )
+        update["attempt_log"] = [*state.attempt_log, *events]
         return update
 
     nodes_ = _replace_node(
@@ -455,15 +436,12 @@ async def validate_opponent_move(state: Any) -> dict[str, Any]:
         current_attacker_id=attacker.id,
         counter_attempts=0,
     )
-    update = {
+    return {
         "dialogue_nodes": nodes_,
         "defeat_relations": relations,
         "pending_attacker_argument": None,
         "last_attack_defeated": True,
     }
-    if events:
-        update["attempt_log"] = [*state.attempt_log, *events]
-    return update
 
 
 async def proponent_move(state: Any) -> dict[str, Any]:
@@ -522,7 +500,8 @@ async def validate_proponent_move(state: Any) -> dict[str, Any]:
     strictly defeat していれば、C を argument_id とする子フレームを push して
     探索を1段深くする（Definition 4.6: Pの手番の子は、その論証に対する
     Oの defeater 全て。つまり C 自身も次の攻撃対象になる）。
-    判定中に作られたブロッカー（undercut）は、成否にかかわらず履歴に残す。
+    rebut の defeat は、対象側のすでにある論証が攻撃を undercut していなければ成立する
+    （新しい undercut の論証は作らない）。
     """
     frame = _top_frame(state)
     if frame.current_attacker_id is None:
@@ -532,46 +511,42 @@ async def validate_proponent_move(state: Any) -> dict[str, Any]:
     if c_argument is None:
         return {"error": "No pending counter argument to validate."}
 
-    tried_blocker = not _dialogue_turn_budget_exceeded(state)
-    take_decline_reason()
     result = await evaluate_attack(
         state,
         c_argument,
         b_argument,
         state.current_opponent,
         relation_context=f"{c_argument.id} defeats {b_argument.id}",
-        blocker_generator=generate_undercut if tried_blocker else None,
+        undercut_check=_undercut_check_for(state, state.current_opponent),
     )
     relations = [*state.defeat_relations, *result.relations]
-    blockers: list[ArgumentRecord] = []
     events: list[dict[str, Any]] = []
-    if result.blocker is not None:
-        blockers.append(result.blocker)
-    if _blocker_attempt_failed(result, tried_blocker):
+    if c_argument.novelty_note:
         events.append(
             _attempt_event(
-                "no_blocker", state.current_opponent, c_argument.id, take_decline_reason(), "counter"
+                "novelty_declared",
+                state.current_proponent,
+                c_argument.id,
+                c_argument.novelty_note,
+                "counter",
             )
         )
 
     def _finish(update: dict[str, Any]) -> dict[str, Any]:
-        if blockers:
-            update.update(_with_blockers(state, blockers))
         if events:
             update["attempt_log"] = [*state.attempt_log, *events]
         return update
 
     if not result.defeats:
-        if result.blocker is None:
-            events.append(
-                _attempt_event(
-                    "attack_rejected",
-                    state.current_proponent,
-                    c_argument.id,
-                    _rejection_reason(result),
-                    "counter",
-                )
+        events.append(
+            _attempt_event(
+                "rebut_undercut_by_target" if result.target_undercuts is not None else "attack_rejected",
+                state.current_proponent,
+                c_argument.id,
+                result.target_undercuts or _rejection_reason(result),
+                "counter",
             )
+        )
         nodes_ = _replace_node(
             state.dialogue_nodes, frame.id, counter_attempts=frame.counter_attempts + 1
         )
@@ -612,32 +587,18 @@ async def validate_proponent_move(state: Any) -> dict[str, Any]:
                 "target_statement": reverse_match.statement,
             }
         )
-        tried_reverse_blocker = not _dialogue_turn_budget_exceeded(state)
-        take_decline_reason()
         reverse = await evaluate_attack(
             state,
             b_for_reverse,
             c_argument,
             state.current_proponent,
             relation_context=f"{b_argument.id} defeats {c_argument.id}",
-            blocker_generator=generate_undercut if tried_reverse_blocker else None,
+            undercut_check=_undercut_check_for(state, state.current_proponent),
             # b_for_reverse は B-C 間専用に作った一時コピー。判定結果として B の
             # 本来（A向け）の attack 宣言を上書きしてはならない。
             persist_metadata=False,
         )
         relations = [*relations, *reverse.relations]
-        if reverse.blocker is not None:
-            blockers.append(reverse.blocker)
-        if _blocker_attempt_failed(reverse, tried_reverse_blocker):
-            events.append(
-                _attempt_event(
-                    "no_blocker",
-                    state.current_proponent,
-                    b_argument.id,
-                    take_decline_reason(),
-                    "reverse",
-                )
-            )
         if reverse.defeats:
             # B が C にも反撃できる＝相互 defeat＝C は B を strictly defeat していない。
             nodes_ = _replace_node(

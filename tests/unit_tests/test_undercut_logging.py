@@ -9,7 +9,7 @@ import pytest
 
 from agent import arguments, nodes
 from agent.argumentation_model import AttackEvaluation
-from agent.schema.llm_outputs import Antecedent, ArgumentBody, Rule, UndercutOutput
+from agent.schema.llm_outputs import ExistingUndercutOutput
 from agent.schema.state import ArgumentRecord, DialogueNode
 
 pytestmark = pytest.mark.anyio
@@ -28,24 +28,23 @@ def argument(
     )
 
 
-async def test_validate_b_exposes_generated_undercut_in_history_and_update(
+async def test_validate_b_logs_when_the_target_already_undercuts_the_rebut(
     monkeypatch,
 ) -> None:
     main = argument("AG1", ["We should choose a"])
     rebut = argument(
         "AG2", ["We should not choose a"], ["a is available"], attack="rebut"
     )
-    undercut = argument("AG1", ["a is not available"], attack="undercut")
 
-    async def blocked_rebut(*args, **kwargs):
+    async def undercut_by_target(*args, **kwargs):
         return AttackEvaluation(
             defeats=False,
             attack="rebut",
             relations=[],
-            blocker=undercut,
+            target_undercuts="my argument already shows a is available",
         )
 
-    monkeypatch.setattr(nodes, "evaluate_attack", blocked_rebut)
+    monkeypatch.setattr(nodes, "evaluate_attack", undercut_by_target)
     root = DialogueNode(argument_id=main.id)
     state = SimpleNamespace(
         current_argument=main,
@@ -59,20 +58,20 @@ async def test_validate_b_exposes_generated_undercut_in_history_and_update(
         defeat_relations=[],
         dialogue_nodes=[root],
         node_stack=[root.id],
+        attempt_log=[],
         max_dialogue_turns=None,
     )
 
     update = await nodes.validate_opponent_move(state)
 
-    # B は defeat できず、undercut で阻止された。上限判定は opponent_move の入り口に
-    # あるため、ここではフレームを閉じず、無条件でリトライを指示する（同じフレームで
-    # 別の B' を試す）。ただし阻止に使った undercut はリトライ有無に関わらず履歴に残る
-    # （proponent タグが付け足されるので同一オブジェクトではなくコピーになる）。
-    assert update["last_generated_argument"].id == undercut.id
-    assert update["last_generated_argument"].proponent == "AG1"
-    assert update["dialogue_history"][-1]["attack"] == "undercut"
+    # B は defeat にならない。判定は既存の論証同士の関係で行うので、新しい発話（undercut の
+    # 論証）は履歴に追加されない。同じフレームで別の B' を試す。
+    assert "argument_records" not in update
+    assert "dialogue_history" not in update
     assert update["last_attack_defeated"] is False
     assert update["pending_attacker_argument"] is None
+    assert update["attempt_log"][-1]["kind"] == "rebut_undercut_by_target"
+    assert update["attempt_log"][-1]["reason"] == "my argument already shows a is available"
     updated_root = next(n for n in update["dialogue_nodes"] if n.id == root.id)
     assert updated_root.outcome == "open"
     assert updated_root.attack_attempts == 1
@@ -101,41 +100,87 @@ async def test_cli_payload_labels_undercut_and_keeps_it_in_finish_history() -> N
     assert finish_payload["dialogue_history"][-1]["attack"] == "undercut"
 
 
-async def test_undercut_output_does_not_request_attack_metadata() -> None:
-    assert "Attack" not in UndercutOutput.model_fields
+async def test_existing_undercut_output_does_not_request_a_new_argument() -> None:
+    assert set(ExistingUndercutOutput.model_fields) == {"undercuts", "reason"}
 
 
-async def test_generate_undercut_assigns_attack_metadata(monkeypatch) -> None:
-    async def available_undercut(*args, **kwargs):
-        return UndercutOutput(
-            can_undercut="YES",
-            Argument=ArgumentBody(
-                rules=[
-                    Rule(
-                        antecedent=Antecedent(strong=["a is not available"]),
-                        consequent="a is not available",
-                    )
-                ]
-            ),
-        )
+async def test_ask_existing_undercut_skips_the_llm_when_the_rebut_has_no_assumptions(
+    monkeypatch,
+) -> None:
+    async def must_not_be_called(*args, **kwargs):
+        raise AssertionError("a rebut without assumptions cannot be undercut")
 
-    monkeypatch.setattr(
-        arguments, "chat_structured", available_undercut
-    )
-    target = argument("AG2", ["We should eat a"], ["a is available"], attack="rebut")
+    monkeypatch.setattr(arguments, "chat_structured", must_not_be_called)
+    own = argument("AG1", ["We should eat a"])
+    rebut = argument("AG2", ["We should not eat a"], [], attack="rebut")
     state = SimpleNamespace(
-        current_proponent="AG1",
-        history=[],
-        agent1_stance="a is not available.",
-        agent2_stance="",
+        history=[], agent1_stance="stance 1", agent2_stance="stance 2", question="Q?"
     )
 
-    generated = await arguments.generate_undercut(state, "AG1", target)
+    assert await arguments.ask_existing_undercut(state, "AG1", own, rebut) is None
 
-    assert generated is not None
-    assert generated.attack == "undercut"
-    assert generated.target_id == target.id
-    assert generated.target_field == "Ass"
-    # 現実装は undercut の対象フィールド (Ass) までは設定するが、
-    # 具体的な target_statement は設定しない（None のまま）。
-    assert generated.target_statement is None
+
+async def test_ask_existing_undercut_returns_the_reason_when_the_argument_undercuts(
+    monkeypatch,
+) -> None:
+    async def says_yes(*args, **kwargs):
+        return ExistingUndercutOutput(undercuts="YES", reason="a is in fact available")
+
+    monkeypatch.setattr(arguments, "chat_structured", says_yes)
+    own = argument("AG1", ["a is available"])
+    rebut = argument(
+        "AG2", ["We should not eat a"], ["a is not available"], attack="rebut"
+    )
+    state = SimpleNamespace(
+        history=[], agent1_stance="stance 1", agent2_stance="stance 2", question="Q?"
+    )
+
+    reason = await arguments.ask_existing_undercut(state, "AG1", own, rebut)
+
+    assert reason == "a is in fact available"
+
+
+async def test_ask_existing_undercut_returns_none_when_the_argument_does_not_undercut(
+    monkeypatch,
+) -> None:
+    async def says_no(*args, **kwargs):
+        return ExistingUndercutOutput(undercuts="NO", reason="nothing negates it")
+
+    monkeypatch.setattr(arguments, "chat_structured", says_no)
+    own = argument("AG1", ["We should eat a"])
+    rebut = argument(
+        "AG2", ["We should not eat a"], ["a is not available"], attack="rebut"
+    )
+    state = SimpleNamespace(
+        history=[], agent1_stance="stance 1", agent2_stance="stance 2", question="Q?"
+    )
+
+    assert await arguments.ask_existing_undercut(state, "AG1", own, rebut) is None
+
+
+async def test_ask_existing_undercut_never_asks_in_no_schema_mode(
+    monkeypatch,
+) -> None:
+    async def must_not_be_called(*args, **kwargs):
+        raise AssertionError("no_schema declares no assumptions, so there is nothing to undercut")
+
+    monkeypatch.setattr(arguments, "chat_structured", must_not_be_called)
+    own = ArgumentRecord(
+        type="main", argument="a is available.", support=[], agent="AG1"
+    )
+    rebut = ArgumentRecord(
+        type="defeat",
+        argument="We should not eat a, unless a is available.",
+        support=[],
+        agent="AG2",
+        attack="rebut",
+    )
+    state = SimpleNamespace(
+        output_mode="no_schema",
+        history=[],
+        agent1_stance="stance 1",
+        agent2_stance="stance 2",
+        question="Q?",
+    )
+
+    assert await arguments.ask_existing_undercut(state, "AG1", own, rebut) is None

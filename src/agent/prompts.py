@@ -591,6 +591,14 @@ def attack_instruction(
             "preceding retries against this exact same target — even if only the wording, the cited "
             "specifics, or the framing differs. Same underlying conclusion via the same underlying "
             "reasoning counts as a repeat.",
+            "A ground is one of the distinct reasons your stance gives for your position (for "
+            "example a benefit, a fact about sourcing or evidence, a value). Elaborating a ground "
+            "you have already used — adding detail, an example, a more specific mechanism, or "
+            "aiming it at a different part of the attack — does not make a new reason.",
+            "Record this check in Novelty (filled in before you decide can_defeat): name the "
+            "closest of your earlier arguments by its id, and state the new reason your "
+            "counterargument adds. If it adds no new reason — only different wording, examples or "
+            "framing — set adds_new_reason=NO, and do not make the counterargument.",
             "If the only available counterargument would repeat any of those, set can_defeat=NO.",
             "When more than one distinct reason from your stance could answer this challenge, prefer "
             "the one you have not yet used in this debate — this is how the debate as a whole ends up "
@@ -639,31 +647,53 @@ def attack_instruction(
     )
 
 
-def undercut_instruction(target: Any, state: Any | None = None) -> str:
-    """Undercut の手番に渡す指示文を組む."""
-    debate_round = getattr(state, "debate_round", 1) if state is not None else 1
+def existing_undercut_instruction(
+    own: Any, attack: Any, assumptions: list[str] | None = None, state: Any | None = None
+) -> str:
+    """すでにある自分の論証が、相手の rebut を undercut しているかを問う指示文を組む.
+
+    新しい論証は作らせない。Prakken & Sartor の defeat（Def 2.16）の
+    「A は B を undercut しない」は、すでにある A と B の組の関係であり、
+    A の結論が B の仮定を否定しているかだけで決まる。
+    """
     issue = getattr(state, "question", "") if state is not None else ""
-    return "\n".join(
-        [
-            "<task>",
-            f"Round {debate_round}. Construct an undercutting argument against the target argument.",
-            "</task>",
-            "",
-            "<issue>",
-            issue,
-            "</issue>",
-            "",
-            _target_block(target),
-            "",
-            _CONTENT_REQUIREMENT_BLOCK,
-            "",
-            "<response_contract>",
-            "Identify a weak_negation assumption (of the form 'X is not the case') the target relies on. "
-            "If you can construct an argument that proves X actually holds, set can_undercut=YES and "
-            "include Argument. Otherwise, set can_undercut=NO and omit Argument.",
-            "</response_contract>",
-        ]
-    )
+    blocks = [
+        "<task>",
+        "The opponent has produced a rebuttal, labeled <their_attack>, against your argument "
+        "labeled <your_argument>.",
+        "Decide whether <your_argument>, exactly as it is already written, undercuts "
+        "<their_attack>: does it establish that one of the assumptions <their_attack> relies on "
+        "does not hold?",
+        "Judge only what <your_argument> already says. Do not write a new argument.",
+        "</task>",
+        "",
+        "<issue>",
+        issue,
+        "</issue>",
+        "",
+        "<your_argument>",
+        f"id: {own.id}",
+        own.argument,
+        "</your_argument>",
+        "",
+        "<their_attack>",
+        f"id: {attack.id}",
+        attack.argument,
+    ]
+    if assumptions:
+        blocks += ["assumptions it relies on:", *[f"- {item}" for item in assumptions]]
+    blocks += [
+        "</their_attack>",
+        "",
+        "<response_contract>",
+        "Set undercuts=YES only if you can name a specific assumption of <their_attack> (a "
+        "statement it takes to hold only because nothing contradicts it) and <your_argument> "
+        "already establishes the opposite.",
+        "Set undercuts=NO otherwise — in particular if answering would require a new argument, or "
+        "if <your_argument> merely reasserts its own conclusion.",
+        "</response_contract>",
+    ]
+    return "\n".join(blocks)
 
 
 def attack_extends_instruction(

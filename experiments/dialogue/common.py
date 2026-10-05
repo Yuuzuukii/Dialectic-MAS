@@ -340,9 +340,10 @@ def _reconstruct_depths(dialogue_history: list[dict[str, Any]]) -> dict[str, int
     - defeat が main を標的にする: フレームの根を攻撃しているので depth は変わらない。
     - defeat が counter を標的にする: その counter は strictly defeat に成功して
       新しいフレームになった、ということなので depth+1（新しいフレームへの最初の攻撃）。
-    - defeat が defeat を標的にする: rebut を防ぐ undercut ブロッカー
-      （`generate_undercut`。type は常に "defeat" になる）なので、ブロック対象と
-      同じフレーム＝depth は変わらない。
+    - defeat が defeat を標的にする: 旧実装が作っていた、rebut を防ぐ undercut ブロッカー
+      （type は常に "defeat"）。現在は新しい undercut の論証を作らないので、新しいログには
+      現れない。旧ログの再計算のために、ブロック対象と同じフレーム＝depth は変わらない、
+      という扱いを残している。
     """
     by_id = {t["id"]: t for t in dialogue_history if isinstance(t.get("id"), str)}
     memo: dict[str, int] = {}

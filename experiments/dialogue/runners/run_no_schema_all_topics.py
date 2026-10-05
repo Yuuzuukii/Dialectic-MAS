@@ -85,7 +85,7 @@ def parse_args() -> argparse.Namespace:
         type=int,
         default=None,
         help=(
-            "対話フェーズ（main/defeat/counter/blocker）の総発話数の絶対上限。"
+            "対話フェーズ（main/defeat/counter）の総発話数の絶対上限。"
             "mad/free_debateと発話数を揃えて比較する場合に指定する（未指定なら無効）。"
             "AG1/AG2でこの値を折半して使う。"
         ),

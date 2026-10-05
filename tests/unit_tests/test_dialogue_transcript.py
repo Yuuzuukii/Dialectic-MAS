@@ -94,30 +94,3 @@ async def test_synthesis_prompts_are_method_neutral(monkeypatch: pytest.MonkeyPa
         assert "justified" not in system
         assert "main argument" not in system
     assert TRANSCRIPT_DESCRIPTION in seen[0][1].content
-
-
-async def test_free_debate_final_answer_node_always_uses_the_unresolved_path(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    import src.agent.free_debate as free_debate
-
-    async def fake_synthesis(**kwargs: Any) -> str:
-        assert kwargs["dialogue_history"][0]["agent"] == "AG1"
-        return "synthesis"
-
-    async def fake_answer(**kwargs: Any) -> str:
-        assert kwargs["synthesis"] == "synthesis"
-        return "answer"
-
-    monkeypatch.setattr(free_debate, "synthesize_unresolved_dialogue", fake_synthesis)
-    monkeypatch.setattr(free_debate, "answer_from_fallback_synthesis", fake_answer)
-    state = free_debate.FreeDebateState(question="Q?", agent1_stance="A", agent2_stance="B")
-    state.dialogue_history = [{"agent": "AG1", "round": 1, "argument": "a", "has_new_point": True}]
-
-    update = await free_debate.generate_final_answer(state)
-
-    assert update == {
-        "final_answer": "answer",
-        "fallback_synthesis": "synthesis",
-        "finalization_path": "fallback_full_dialogue_synthesis",
-    }

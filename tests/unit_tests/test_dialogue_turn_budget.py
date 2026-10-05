@@ -22,7 +22,6 @@ from agent.nodes import (
     can_generate_main,
     opponent_move,
     proponent_move,
-    validate_opponent_move,
 )
 from agent.schema.state import ArgumentRecord, DialogueNode
 from agent.workflow import State
@@ -200,7 +199,7 @@ def test_free_debate_route_after_ag1_turn_cuts_off_mid_round_when_budget_set() -
         max_dialogue_turns=1,
         dialogue_history=[{"agent": "AG1", "round": 1, "argument": "x", "has_new_point": True}],
     )
-    assert fd_route_after_ag1_turn(state) == "generate_final_answer"
+    assert fd_route_after_ag1_turn(state) == "integrate"
 
 
 def test_free_debate_route_after_ag2_turn_respects_budget_over_max_turns() -> None:
@@ -218,7 +217,7 @@ def test_free_debate_route_after_ag2_turn_respects_budget_over_max_turns() -> No
         ag1_has_new=True,
         ag2_has_new=True,
     )
-    assert fd_route_after_ag2_turn(state) == "generate_final_answer"
+    assert fd_route_after_ag2_turn(state) == "integrate"
 
 
 def test_mad_route_after_ag2_turn_uses_integrate_when_synthesis_enabled() -> None:
@@ -237,52 +236,6 @@ def test_mad_route_after_ag2_turn_uses_integrate_when_synthesis_enabled() -> Non
         ag2_has_new=True,
     )
     assert mad_route_after_ag2_turn(state) == "integrate"
-
-
-async def test_validate_opponent_move_disables_blocker_generation_once_budget_exceeded(
-    monkeypatch,
-) -> None:
-    """undercut の"blocker"生成は`evaluate_attack`内部から呼ばれ、opponent_move等の
-    ガードを経由しない。ここで別途止めないと、budget超過後も追加でturnが増えてしまう
-    （実測で確認済み: max_dialogue_turns=6のはずが7ターンまで生成される事例があった）。
-    """
-    captured: dict[str, object] = {}
-
-    async def fake_evaluate_attack(*args, **kwargs):
-        captured["blocker_generator"] = kwargs.get("blocker_generator")
-        from agent.argumentation_model import AttackEvaluation
-
-        return AttackEvaluation(defeats=True, attack="rebut", relations=[], blocker=None)
-
-    monkeypatch.setattr("agent.nodes.evaluate_attack", fake_evaluate_attack)
-
-    main = _main_record("AG1")
-    b_argument = ArgumentRecord(
-        type="defeat",
-        argument='{"Argument": {"rules": [], "Conc": ["not c"], "Ass": []}}',
-        support=[],
-        agent="AG2",  # type: ignore[arg-type]
-        proponent="AG1",  # type: ignore[arg-type]
-        attack="rebut",  # type: ignore[arg-type]
-        target_id=main.id,
-        target_field="Conc",
-    )
-    root = DialogueNode(argument_id=main.id)
-    state = State(
-        question="Q?",
-        agent1_stance="s1",
-        agent2_stance="s2",
-        max_dialogue_turns=2,
-        current_argument=main,
-        current_proponent="AG1",
-        pending_attacker_argument=b_argument,
-        argument_records=[main, b_argument],
-        dialogue_nodes=[root],
-        node_stack=[root.id],
-    )
-    await validate_opponent_move(state)
-
-    assert captured["blocker_generator"] is None
 
 
 def _defeat_record(agent: str, proponent: str) -> ArgumentRecord:

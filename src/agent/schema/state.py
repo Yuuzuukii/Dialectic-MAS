@@ -89,7 +89,14 @@ class ArgumentRecord(BaseModel):
     round: int = Field(
         default=1, description="Debate round in which this argument was produced."
     )
-
+    novelty_note: str | None = Field(
+        default=None,
+        exclude=True,
+        description=(
+            "この反撃が、非反復の自己点検（Novelty）で申告した、最も近い過去の発話の id と新しい理由。"
+            "履歴の発話には入れず、観察のため attempt_log にだけ残す。"
+        ),
+    )
     @classmethod
     def from_generated_body(
         cls,

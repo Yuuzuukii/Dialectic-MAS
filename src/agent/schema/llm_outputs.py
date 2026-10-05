@@ -25,10 +25,52 @@ class MainArgumentAvailabilityOutput(BaseModel):
     )
 
 
+# LLM出力：反撃を作る前の、自分の過去の発言との比較（非反復の自己点検）
+class NoveltyCheck(BaseModel):
+    """反撃（counter）が、自分の過去の発言と同じ理由の繰り返しでないかの自己点検.
+
+    Prakken & Sartor の非反復（Def 4.5 条件2）は、P が同じ内容の手を、2度指せないという
+    規則で、有限性を保証する。判定は、P 自身が行う。指示文だけで「確認せよ」と言っても、
+    確認の結果が出力に残らないので、点検を出力の欄にして、先に（結論の前に）埋めさせる。
+    """
+
+    closest_earlier_id: str | None = Field(
+        default=None,
+        description=(
+            "The id of your own earlier argument in this debate (your main argument or an "
+            "earlier counterargument) that your planned counterargument is closest to. Null "
+            "only if there is none."
+        ),
+    )
+    adds_new_reason: Literal["YES", "NO"] = Field(
+        description=(
+            "YES only if your planned counterargument rests on a different ground (one of the "
+            "distinct reasons your stance gives for your position, or a genuinely different "
+            "consideration) than the grounds your earlier arguments used. NO if it only "
+            "elaborates a ground you already used: a further example, mechanism or detail, a "
+            "restatement, or the same ground aimed at a different part of the attack."
+        )
+    )
+    new_reason: str = Field(
+        default="",
+        description=(
+            "Name the new ground in one sentence, and which ground of your stance it is. Empty "
+            "when adds_new_reason is NO."
+        ),
+    )
+
+
 # LLM出力：反論（反論可能 + 攻撃側Argument + 攻撃宣言）
 class DefeatingArgumentOutput(BaseModel):
     """反論の可否と、攻撃側 Argument・攻撃宣言（Attack）出力."""
 
+    Novelty: NoveltyCheck | None = Field(
+        default=None,
+        description=(
+            "Counterarguments only: fill this in BEFORE deciding can_defeat. Compare your planned "
+            "counterargument with your own earlier arguments. Omit for attacks."
+        ),
+    )
     can_defeat: Literal["YES", "NO"] = Field(
         description="YES only if a valid rebut or undercut is available."
     )
@@ -45,19 +87,25 @@ class DefeatingArgumentOutput(BaseModel):
     )
 
 
-# LLM出力：defeat判定（rebutに対するundercut）（undercut可否 + Argumentのメイン出力）
-class UndercutOutput(BaseModel):
-    """undercut（仮定の無効化）の可否と Argument 出力."""
+# LLM出力：すでにある自分の論証が、相手の rebut の仮定（Ass）を undercut しているかの判定
+class ExistingUndercutOutput(BaseModel):
+    """自分の既存の論証が、相手の攻撃の仮定を undercut しているかの判定.
 
-    can_undercut: Literal["YES", "NO"] = Field(
-        description="YES only if a target Ass can be invalidated."
+    Prakken & Sartor（Def 2.16）では「B が A を rebut し、かつ A が B を undercut しない」と
+    きに B が A を defeat する。ここでの undercut は、すでにある A と B の2つの間の関係
+    （A の結論が B の仮定を否定しているか）であり、新しい論証を作る手番ではない。
+    """
+
+    undercuts: Literal["YES", "NO"] = Field(
+        description=(
+            "YES only if your argument, exactly as already stated, establishes that a "
+            "specific assumption of the attack does not hold. NO otherwise; do not write a "
+            "new argument."
+        )
     )
     reason: str = Field(
         default="",
-        description="Brief reason for the decision: why NO (what blocks you), or what the argument rests on if YES.",
-    )
-    Argument: ArgumentBody | None = Field(
-        default=None, description="Undercutting argument body, omitted when NO."
+        description="Brief reason: the assumption of the attack that your argument already negates if YES, or why no such assumption is negated if NO.",
     )
 
 
@@ -124,6 +172,13 @@ class MainArgumentAvailabilityOutputFree(BaseModel):
 class DefeatingArgumentOutputFree(BaseModel):
     """反論の可否と、攻撃側 Argument（自由記述）・攻撃宣言（Attack）出力."""
 
+    Novelty: NoveltyCheck | None = Field(
+        default=None,
+        description=(
+            "Fill this in BEFORE deciding can_defeat. Compare your planned argument with your own "
+            "earlier arguments in this debate."
+        ),
+    )
     can_defeat: Literal["YES", "NO"] = Field(
         description="YES only if a valid rebut or undercut is available."
     )
@@ -137,22 +192,6 @@ class DefeatingArgumentOutputFree(BaseModel):
     Attack: AttackMetadata | None = Field(
         default=None,
         description="Attack made by this argument against a specified part of the target argument, omitted when NO.",
-    )
-
-
-# LLM出力：undercut（no_schema）。can_undercut は構造化のまま、Argument は自由記述。
-class UndercutOutputFree(BaseModel):
-    """undercut（仮定の無効化）の可否と Argument（自由記述）出力."""
-
-    can_undercut: Literal["YES", "NO"] = Field(
-        description="YES only if a target assumption can be invalidated."
-    )
-    reason: str = Field(
-        default="",
-        description="Brief reason for the decision: why NO (what blocks you), or what the argument rests on if YES.",
-    )
-    Argument: str | None = Field(
-        default=None, description="Free natural-language undercutting argument, omitted when NO."
     )
 
 

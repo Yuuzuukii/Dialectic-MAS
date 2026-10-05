@@ -9,9 +9,9 @@ from typing import Any, Literal
 from .schema.state import ArgumentRecord, DefeatRelation
 from .schema.types import AgentName, AttackType
 
-BlockerGenerator = Callable[
-    [Any, AgentName, ArgumentRecord], Awaitable[ArgumentRecord | None]
-]
+# 防御側のすでにある論証（own）が、相手の rebut（attack）を undercut しているかの判定。
+# undercut しているならその理由を返し、していなければ None（新しい論証は作らない）。
+UndercutCheck = Callable[[ArgumentRecord, ArgumentRecord], Awaitable[str | None]]
 TargetField = Literal["Conc", "Ass"]
 
 
@@ -21,12 +21,14 @@ def _log(msg: str) -> None:
 
 @dataclass
 class AttackEvaluation:
-    """単一方向の攻撃判定結果（成否・攻撃種別・関係・生成ブロッカー）."""
+    """単一方向の攻撃判定結果（成否・攻撃種別・関係・対象側の undercut の理由）."""
 
     defeats: bool
     attack: AttackType | None
     relations: list[DefeatRelation]
-    blocker: ArgumentRecord | None = None
+    # rebut が defeat にならなかった理由が「対象側のすでにある論証が攻撃を undercut している」
+    # ことのとき、その理由。それ以外は None。
+    target_undercuts: str | None = None
 
 
 @dataclass(frozen=True)
@@ -93,11 +95,10 @@ async def evaluate_attack(
     defender: AgentName,
     *,
     relation_context: str,
-    blocker_generator: BlockerGenerator | None = None,
-    allow_generated_blocker: bool = True,
+    undercut_check: UndercutCheck | None = None,
     persist_metadata: bool = True,
 ) -> AttackEvaluation:
-    """攻撃者が対象を破れるか判定する。undercut なら防御側がブロッカーを生成可能."""
+    """攻撃者が対象を破れるか判定する。rebut は、対象側のすでにある論証が攻撃を undercut していなければ defeat."""
     _log(f"[argumentation_model] {relation_context}")
     match = attack_from_metadata(attacker)
     if match is None:
@@ -155,26 +156,26 @@ async def evaluate_attack(
             ],
         )
 
-    if allow_generated_blocker and blocker_generator is not None:
-        _log(f"  rebut detected — trying to generate blocker (undercut) by {defender}")
-        blocker = await blocker_generator(state, defender, attacker)
-        if blocker is not None:
-            _log("  → blocker generated: rebut blocked, not defeated")
+    if undercut_check is not None:
+        _log(f"  rebut detected — checking whether {target.id} already undercuts {attacker.id}")
+        reason = await undercut_check(target, attacker)
+        if reason is not None:
+            _log("  → target already undercuts the rebut: not defeated")
             return AttackEvaluation(
                 defeats=False,
                 attack=match.method,
-                blocker=blocker,
+                target_undercuts=reason,
                 relations=[
                     relation(
-                        blocker,
+                        target,
                         attacker,
-                        attack_from_metadata(blocker),
+                        AttackMatch("undercut", "Ass", None),
                         True,
-                        f"{relation_context}: rebut blocked by undercut",
+                        f"{relation_context}: rebut not defeating, the target undercuts it — {reason}",
                     )
                 ],
             )
-        _log("  → no blocker: rebut succeeds, defeated")
+        _log("  → target does not undercut the rebut: rebut succeeds, defeated")
 
     return AttackEvaluation(
         defeats=True,
@@ -185,7 +186,7 @@ async def evaluate_attack(
                 target,
                 match,
                 True,
-                f"{relation_context}: rebut not blocked by undercut",
+                f"{relation_context}: rebut not undercut by the target",
             )
         ],
     )

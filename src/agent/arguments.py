@@ -28,22 +28,21 @@ from .prompts import (
     agent_system,
     attack_extends_instruction,
     attack_instruction,
+    existing_undercut_instruction,
     integration_instruction,
     main_instruction,
     synthesis_system,
-    undercut_instruction,
 )
 from .schema.llm_outputs import (
     ArgumentBody,
     AttackExtendsOutput,
     DefeatingArgumentOutput,
     DefeatingArgumentOutputFree,
+    ExistingUndercutOutput,
     IntegrationOutput,
     IntegrationOutputFree,
     MainArgumentAvailabilityOutput,
     MainArgumentAvailabilityOutputFree,
-    UndercutOutput,
-    UndercutOutputFree,
 )
 from .schema.state import ArgumentRecord, parse_serialized_payload
 from .schema.types import AgentName
@@ -157,24 +156,6 @@ async def build_attack_messages(
                 main_argument=main_argument,
             )
         ),
-    ]
-
-
-def build_undercut_messages(
-    state: Any, attacker: AgentName, target: ArgumentRecord
-) -> list[BaseMessage]:
-    """Undercut 生成用のメッセージ列を組み立てる."""
-    template = (
-        PromptTemplates.ARGUMENT_SYSTEM_NO_SCHEMA
-        if _output_mode(state) == "no_schema"
-        else PromptTemplates.ARGUMENT_SYSTEM
-    )
-    return [
-        SystemMessage(
-            content=agent_system(_stance(state, attacker), attacker, template)
-        ),
-        *render_history(state.history),
-        HumanMessage(content=undercut_instruction(target, state=state)),
     ]
 
 
@@ -354,7 +335,7 @@ async def generate_main(state: Any, agent: AgentName) -> MainGeneration:
     return MainGeneration(available=True, reason=None, argument=argument)
 
 
-# 直近の generate_attack / generate_undercut / ask_attack_extends が「出せない」と答えたときの
+# 直近の generate_attack / ask_attack_extends が「出せない」と答えたときの
 # 理由。戻り値は None のままにして既存の呼び出し側を変えないため、タスクごとの ContextVar で渡す。
 _decline_reason: ContextVar[str | None] = ContextVar("decline_reason", default=None)
 
@@ -394,7 +375,24 @@ async def generate_attack(
     if output.can_defeat != "YES" or output.Argument is None or output.Attack is None:
         _decline_reason.set(output.reason or "(no reason given)")
         return None
+    # 非反復の自己点検（反撃だけ）。自分で「新しい理由を足さない」と申告したら、その反撃は
+    # 出さない（P は同じ内容の手を、2度指せない）。反論側は、論文でも繰り返してよいので対象外。
+    novelty = output.Novelty if purpose == "counter" else None
+    if novelty is not None and (
+        novelty.adds_new_reason != "YES" or not novelty.new_reason.strip()
+    ):
+        _decline_reason.set(
+            "Repeats a reason I already used"
+            + (f" (closest earlier argument: {novelty.closest_earlier_id})" if novelty.closest_earlier_id else "")
+            + "; there is no new reason to add."
+        )
+        return None
     _decline_reason.set(None)
+    novelty_note = (
+        f"[closest earlier: {novelty.closest_earlier_id}] {novelty.new_reason.strip()}"
+        if novelty is not None
+        else None
+    )
     return ArgumentRecord(
         type="counter" if purpose == "counter" else "defeat",
         argument=_serialize_argument(state, output.Argument),
@@ -405,40 +403,48 @@ async def generate_attack(
         target_field=output.Attack.target.field,
         target_statement=output.Attack.target.statement,
         round=getattr(state, "debate_round", 1),
+        novelty_note=novelty_note,
     )
 
 
-async def generate_undercut(
+async def ask_existing_undercut(
     state: Any,
-    attacker: AgentName,
-    target: ArgumentRecord,
-) -> ArgumentRecord | None:
-    """対象の仮定（Ass）を狙う undercut 主張を LLM 生成し、ArgumentRecord 化する."""
-    if _output_mode(state) == "schema" and not target.assumptions:
-        _decline_reason.set("target has no assumptions (Ass) to undercut")
+    author: AgentName,
+    own: ArgumentRecord,
+    attack: ArgumentRecord,
+) -> str | None:
+    """すでにある論証 own が、相手の rebut（attack）を undercut しているかを author に問う.
+
+    新しい論証は作らない（Prakken & Sartor の defeat は、すでにある2論証の組の関係）。
+    戻り値は undercut している場合の理由、していなければ None。
+    undercut は、相手が仮定（Ass）として明示した文を否定することなので、仮定が宣言されて
+    いなければ undercut しようがない。schema では、attack に仮定（weak_negation）が無ければ
+    LLM を呼ばずに None。no_schema は、論証の本文が自由記述で仮定を宣言する構造を持たない
+    ので、常に None（schema の構造が可能にする判定を、no_schema に持ち込まない。
+    仮定の有無を LLM に判断させると、作者が「自分の論証が undercut している」と答えやすく、
+    実測で O の rebut の93%が取り消された）。
+    """
+    if _output_mode(state) != "schema":
         return None
-    messages = build_undercut_messages(state, attacker, target)
-    schema = (
-        UndercutOutputFree if _output_mode(state) == "no_schema" else UndercutOutput
-    )
-    output = cast(
-        "UndercutOutputFree | UndercutOutput",
-        await _generate_structured_argument(messages, schema),
-    )
-    if output.can_undercut != "YES" or output.Argument is None:
-        _decline_reason.set(output.reason or "(no reason given)")
+    assumptions = attack.assumptions
+    if not assumptions:
         return None
-    _decline_reason.set(None)
-    return ArgumentRecord(
-        type="defeat",
-        argument=_serialize_argument(state, output.Argument),
-        support=[],
-        agent=attacker,
-        attack="undercut",
-        target_id=target.id,
-        target_field="Ass",
-        round=getattr(state, "debate_round", 1),
+    system = agent_system(
+        _stance(state, author), author, PromptTemplates.ATTACK_EXTENDS_SYSTEM
     )
+    messages = [
+        SystemMessage(content=system),
+        *render_history(state.history),
+        HumanMessage(
+            content=existing_undercut_instruction(
+                own, attack, assumptions=assumptions, state=state
+            )
+        ),
+    ]
+    output = await chat_structured(messages, ExistingUndercutOutput)
+    if output.undercuts != "YES":
+        return None
+    return output.reason or "(no reason given)"
 
 
 async def ask_attack_extends(
