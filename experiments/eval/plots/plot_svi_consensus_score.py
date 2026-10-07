@@ -45,16 +45,18 @@ DEFAULT_INPUT = Path(
 )
 DEFAULT_OUT_DIR = Path("logs/experiment_20260916_020350/eval_result/svi/consensus")
 
-METHOD_ORDER = ("free_debate", "mad", "no_schema", "schema")
+METHOD_ORDER = ("free_debate", "mad", "mad_synthesis", "no_schema", "schema")
 DISPLAY_NAMES = {
     "free_debate": "Free Debate",
     "mad": "MAD",
+    "mad_synthesis": "MAD + Synthesis",
     "no_schema": "No Schema",
     "schema": "Schema",
 }
 METHOD_COLORS = {
     "free_debate": "#7f7f7f",
     "mad": "#9467bd",
+    "mad_synthesis": "#c49c94",
     "no_schema": "#ff7f0e",
     "schema": "#1f77b4",
 }

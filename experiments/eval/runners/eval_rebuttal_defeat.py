@@ -35,9 +35,9 @@ from experiments.eval.runners.eval_atomic_coverage_final import (
     _collect_logs,
     _EvaluatorModel,
 )
-from experiments.eval.runners.eval_dialogue_coverage import build_transcript
 from experiments.eval.runners.run_eval import DEFAULT_EVALUATOR_MODEL
 from experiments.eval.scoring.evaluation_coverage import _parse_json_response
+from src.agent.dialogue_transcript import format_transcript
 
 from typesafe_sdk import AsyncTypeSafeClient, Noul, NoulAnswer, TypeSafeError
 
@@ -69,14 +69,15 @@ Respond ONLY with JSON:
 
 NOUL_QUESTIONS = {
     "addresses": (
-        "The final answer deals with the specific ground the rebuttal relies on (the fact or assumption behind the "
-        "objection), e.g. by taking it into account or choosing an option for which it does not hold. "
-        "Merely mentioning the topic in passing does not count."
+        "The final answer takes a position on the specific fact or assumption that the objection relies on."
+    ),
+    "accepts": (
+        "The final answer accepts the objection: its recommendation or conclusion is changed or limited because of "
+        "the objection."
     ),
     "rejects": (
-        "The rebuttal does not apply to the final answer: given what the final answer actually recommends or concludes, "
-        "the objection has no force. A final answer that only makes its position conditional on the objection being "
-        "false, or that concedes the objection, does not count."
+        "The final answer rejects the objection: it keeps a conclusion the objection argues against, and gives a "
+        "reason the objection does not hold."
     ),
     "still_valid": (
         "The rebuttal still applies to the final answer: the objection has force against what the final answer "
@@ -89,7 +90,7 @@ async def _extract_rebuttals(model: _EvaluatorModel, log: dict[str, Any]) -> lis
     prompt = EXTRACT_INSTRUCTION.format(
         stance1=log.get("agent1_stance") or "",
         stance2=log.get("agent2_stance") or "",
-        transcript=build_transcript(log),
+        transcript=format_transcript(log.get("dialogue_history") or []),
     )
     reply = await asyncio.to_thread(model.invoke, prompt)
     rebuttals = _parse_json_response(reply).get("rebuttals", [])
@@ -186,6 +187,7 @@ def _aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
             "still_valid_mean": _mean(probs["still_valid"]),
             "still_valid_ge_0.7_rate": _rate(probs["still_valid"], 0.7),
             "addresses_mean": _mean(probs["addresses"]),
+            "accepts_mean": _mean(probs["accepts"]),
             "rejects_mean": _mean(probs["rejects"]),
             "defeat_rate_micro": round(sum(r["defeated"] for r in group) / valid, 4) if valid else None,
             "defeat_rate_per_log_mean": round(sum(per_log) / len(per_log), 4) if per_log else None,

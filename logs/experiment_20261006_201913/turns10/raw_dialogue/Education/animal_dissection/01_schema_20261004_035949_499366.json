@@ -1,0 +1,648 @@
+{
+  "method": "schema",
+  "question": "Should students dissect animals?",
+  "agent1_stance": "Your stance:\nYou support animal dissection.\nYou believe dissecting real animals provides students with more learning opportunities, as dissection is a valuable part of teaching biology in schools, developing fine motor skills, hand-eye coordination, and critical thinking.\nYou believe dissection can encourage students to pursue careers in science by providing hands-on experience that inspires career interest and creates aha moments that spark enthusiasm for scientific fields.\nYou believe animal dissection is a productive and worthwhile use of dead animals, as over 98% of dissected animals were already deceased and fetal pigs are meat industry byproducts destined for landfills.",
+  "agent2_stance": "Your stance:\nYou oppose animal dissection.\nYou believe methods used to supply animals for dissections are inhumane and bad for the environment, as approximately 99% of dissection animals are caught in the wild and wild-catching decreases local populations and reduces biodiversity.\nYou believe medical studies do not require or benefit from animal dissection, as it is not required by College Board AP Biology or Next Generation Science Standards, and no U.S. or Canadian medical schools use animals for physician training.\nYou believe dissecting real animals is unnecessary because alternatives exist, as synthetic models and computer simulations teach equally well or better and students learn just as well or better with alternatives versus dead animals.",
+  "metrics": {
+    "elapsed_seconds": 148.113,
+    "model": "gpt-5.4-nano",
+    "prompt_tokens": 64662,
+    "cached_tokens": 17152,
+    "completion_tokens": 28237,
+    "total_tokens": 92899,
+    "total_cost_usd": 0.045141,
+    "total_dialogue_turns": 10,
+    "attack_turn_count": 8,
+    "meta_conclusion_count": 0,
+    "meta_conclusion_rate": 0.0,
+    "dialogue_tree_node_count": 3,
+    "dialogue_tree_max_depth": 1,
+    "main_argument_count": 2,
+    "justified_proven_count": 0,
+    "justified_by_budget_count": 0,
+    "overruled_count": 0,
+    "defensible_count": 2
+  },
+  "dialogue_history": [
+    {
+      "id": "arg-aab33e5e9b",
+      "agent": "AG1",
+      "proponent": "AG1",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Animal dissection is a valuable part of teaching biology in schools",
+                  "Dissection provides students with more learning opportunities",
+                  "Dissection develops students' fine motor skills, hand-eye coordination, and critical thinking"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Animal dissection provides significant educational benefits to students."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Hands-on experience from dissection can inspire students' career interest",
+                  "Dissection creates aha moments that spark enthusiasm for scientific fields"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Animal dissection can increase students' interest in pursuing careers in science."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Over 98% of dissected animals were already deceased",
+                  "Fetal pigs used for dissection are meat industry byproducts destined for landfills"
+                ],
+                "weak_negation": [
+                  "No evidence that the particular dissection involves live animals or causes additional animal suffering beyond the animals already being dead."
+                ]
+              },
+              "consequent": "Animal dissection can be a productive use of already-dead animals, minimizing additional ethical harm."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Animal dissection provides significant educational benefits to students.",
+                  "Animal dissection can increase students' interest in pursuing careers in science.",
+                  "Animal dissection can be a productive use of already-dead animals, minimizing additional ethical harm."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Students should dissect animals as part of biology education."
+            }
+          ],
+          "Conc": [
+            "Animal dissection provides significant educational benefits to students.",
+            "Animal dissection can increase students' interest in pursuing careers in science.",
+            "Animal dissection can be a productive use of already-dead animals, minimizing additional ethical harm.",
+            "Students should dissect animals as part of biology education."
+          ],
+          "Ass": [
+            "No evidence that the particular dissection involves live animals or causes additional animal suffering beyond the animals already being dead."
+          ]
+        }
+      },
+      "status": "defensible",
+      "closed_by_budget": true
+    },
+    {
+      "id": "arg-57deb64941",
+      "agent": "AG2",
+      "proponent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Approximately 99% of dissection animals are caught in the wild"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Most animals used for school dissections are obtained via wild-capture rather than exclusively from already-dead byproducts."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Methods used to supply animals for dissections are inhumane",
+                  "Wild-catching decreases local populations and reduces biodiversity",
+                  "Wild-capture and transport for use in dissections involve harm beyond the animals’ final death"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Animal dissection typically involves additional animal suffering and ecological harm beyond any single endpoint death of the specimen."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Animal dissection typically involves additional animal suffering beyond any single endpoint death of the specimen"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "There is evidence (in fact, typical conditions) that dissections involve additional animal suffering beyond the animals already being dead, so the target’s “no evidence” assumption is not justified."
+            }
+          ],
+          "Conc": [
+            "Most animals used for school dissections are obtained via wild-capture rather than exclusively from already-dead byproducts.",
+            "Animal dissection typically involves additional animal suffering and ecological harm beyond any single endpoint death of the specimen.",
+            "There is evidence (in fact, typical conditions) that dissections involve additional animal suffering beyond the animals already being dead, so the target’s “no evidence” assumption is not justified."
+          ],
+          "Ass": []
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-aab33e5e9b",
+      "target_field": "Ass",
+      "target_statement": "No evidence that the particular dissection involves live animals or causes additional animal suffering beyond the animals already being dead."
+    },
+    {
+      "id": "arg-570a06af8c",
+      "agent": "AG1",
+      "proponent": "AG1",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Fetal pigs used for dissection are meat industry byproducts destined for landfills",
+                  "Over 98% of dissected animals were already deceased"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "In standard school dissection programs using such specimens, the animals are already dead when they reach the classroom (i.e., they are not sourced by capturing live animals specifically for dissection)."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "When animals are already dead when they reach the classroom, dissection does not require capturing live animals for the classroom activity",
+                  "Capturing/transporting live animals for dissection would be a pathway for additional suffering"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "In that standard sourcing scenario, dissection itself does not add animal suffering beyond whatever suffering occurred earlier for meat production and slaughter."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "In that standard sourcing scenario, dissection itself does not add animal suffering beyond whatever suffering occurred earlier for meat production and slaughter"
+                ],
+                "weak_negation": [
+                  "There is no evidence that the particular classroom dissection used live-captured animals or introduced extra harm specifically for classroom use."
+                ]
+              },
+              "consequent": "So, for such classroom dissections, there is not justified support for the claim that typical dissection conditions involve additional animal suffering beyond the animals being already dead."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "So, for such classroom dissections, there is not justified support for the claim that typical dissection conditions involve additional animal suffering beyond the animals being already dead."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The basis for rejecting the “no evidence of additional suffering beyond already-dead specimens in the particular dissection” assumption is not established."
+            }
+          ],
+          "Conc": [
+            "In standard school dissection programs using such specimens, the animals are already dead when they reach the classroom (i.e., they are not sourced by capturing live animals specifically for dissection).",
+            "In that standard sourcing scenario, dissection itself does not add animal suffering beyond whatever suffering occurred earlier for meat production and slaughter.",
+            "So, for such classroom dissections, there is not justified support for the claim that typical dissection conditions involve additional animal suffering beyond the animals being already dead.",
+            "The basis for rejecting the “no evidence of additional suffering beyond already-dead specimens in the particular dissection” assumption is not established."
+          ],
+          "Ass": [
+            "There is no evidence that the particular classroom dissection used live-captured animals or introduced extra harm specifically for classroom use."
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-57deb64941",
+      "target_field": "Conc",
+      "target_statement": "There is evidence (in fact, typical conditions) that dissections involve additional animal suffering beyond the animals already being dead, so the target’s “no evidence” assumption is not justified."
+    },
+    {
+      "id": "arg-ae4f65a76f",
+      "agent": "AG2",
+      "proponent": "AG1",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Approximately 99% of dissection animals are caught in the wild"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Most school dissection specimens are obtained via wild-capture rather than exclusively from already-dead byproducts."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Methods used to supply animals for dissections are inhumane",
+                  "Wild-catching decreases local populations and reduces biodiversity",
+                  "Wild-capture and transport for use in dissections involve harm beyond the animals’ final death"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Using wild-caught specimens implies additional animal suffering (and ecological harm) beyond the animal’s endpoint death."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The weak-negation assumption in the target claims there is no evidence the particular classroom dissection used live-captured animals or introduced extra harm"
+                ],
+                "weak_negation": [
+                  "The classroom has verified documentation that its specimens came only from already-dead byproducts"
+                ]
+              },
+              "consequent": "Unless the classroom has verified byproduct-only documentation, the general sourcing data and harm profile provide evidence that the particular classroom dissection involved live-captured animals or additional harm."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "If there is evidence that the particular classroom dissection involved live-captured animals or additional harm, then the claim that there is no such evidence is not correct."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Therefore, the target’s assumption (“There is no evidence that the particular classroom dissection used live-captured animals or introduced extra harm”) is undermined."
+            }
+          ],
+          "Conc": [
+            "Most school dissection specimens are obtained via wild-capture rather than exclusively from already-dead byproducts.",
+            "Using wild-caught specimens implies additional animal suffering (and ecological harm) beyond the animal’s endpoint death.",
+            "Unless the classroom has verified byproduct-only documentation, the general sourcing data and harm profile provide evidence that the particular classroom dissection involved live-captured animals or additional harm.",
+            "Therefore, the target’s assumption (“There is no evidence that the particular classroom dissection used live-captured animals or introduced extra harm”) is undermined."
+          ],
+          "Ass": [
+            "The classroom has verified documentation that its specimens came only from already-dead byproducts"
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-570a06af8c",
+      "target_field": "Ass"
+    },
+    {
+      "id": "arg-4e005a6449",
+      "agent": "AG1",
+      "proponent": "AG1",
+      "type": "counter",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "The opponent’s evidence for extra suffering is framed as general statistics/typical conditions (e.g., “approximately 99%” caught in the wild; “typically involves additional suffering”).",
+                  "General background frequency/typicality does not, by itself, establish case-specific evidence about what happened in a particular classroom dissection unless it’s linked to that particular case."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The opponent has not established evidence that the particular classroom dissection used live-captured animals or added suffering beyond the specimen’s already-dead state."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "If there is no case-specific evidence that the particular classroom dissection used live animals or added suffering beyond the specimen’s already-dead state, then the ethical concern about “additional” harm from the dissection itself is not established for that particular dissection."
+                ],
+                "weak_negation": [
+                  "No additional case-specific facts about live-capture/extra suffering are introduced later."
+                ]
+              },
+              "consequent": "The specific ethical harm objection that targets dissection as involving additional suffering beyond already-dead specimens is not warranted for the particular dissection in question."
+            }
+          ],
+          "Conc": [
+            "The opponent has not established evidence that the particular classroom dissection used live-captured animals or added suffering beyond the specimen’s already-dead state.",
+            "The specific ethical harm objection that targets dissection as involving additional suffering beyond already-dead specimens is not warranted for the particular dissection in question."
+          ],
+          "Ass": [
+            "No additional case-specific facts about live-capture/extra suffering are introduced later."
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-57deb64941",
+      "target_field": "Conc",
+      "target_statement": "There is evidence (in fact, typical conditions) that dissections involve additional animal suffering beyond the animals already being dead, so the target’s “no evidence” assumption is not justified."
+    },
+    {
+      "id": "arg-6178c153eb",
+      "agent": "AG2",
+      "proponent": "AG2",
+      "type": "main",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AP Biology (College Board) and the Next Generation Science Standards do not require animal dissection and do not treat it as necessary for meeting required learning goals"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Animal dissection is not necessary to meet required biology learning objectives in those standards."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "No U.S. or Canadian medical schools use animals for physician training"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Animal dissection is not necessary for medical preparedness compared with established physician-training practices."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Synthetic models and computer simulations teach anatomy/biology learning objectives equally well or better than using dead animals"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Students can achieve the relevant learning outcomes without dissecting real animals."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Animal dissection is not necessary to meet required biology learning objectives",
+                  "Animal dissection is not necessary for medical preparedness",
+                  "Alternatives can teach the relevant outcomes equally well or better"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Students should not dissect animals."
+            }
+          ],
+          "Conc": [
+            "Animal dissection is not necessary to meet required biology learning objectives in those standards.",
+            "Animal dissection is not necessary for medical preparedness compared with established physician-training practices.",
+            "Students can achieve the relevant learning outcomes without dissecting real animals.",
+            "Students should not dissect animals."
+          ],
+          "Ass": []
+        }
+      },
+      "status": "defensible",
+      "closed_by_budget": true
+    },
+    {
+      "id": "arg-28dc0e52ac",
+      "agent": "AG1",
+      "proponent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Animal dissection is a valuable part of teaching biology in schools",
+                  "Dissection provides students with more learning opportunities and develops fine motor skills, hand-eye coordination, and critical thinking",
+                  "The presence of alternative methods does not make dissection educationally unwarranted when it provides additional learning benefits"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Animal dissection is educationally worthwhile even if some learning objectives can be met without it"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Hands-on dissection experience can inspire students' career interest",
+                  "Dissection creates aha moments that spark enthusiasm for scientific fields"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Dissection can increase students' interest in pursuing science careers"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Over 98% of dissected animals were already deceased",
+                  "Fetal pigs used for dissection are meat industry byproducts destined for landfills"
+                ],
+                "weak_negation": [
+                  "No evidence that the particular classroom uses live animals for dissection or causes additional suffering beyond the animals being already dead"
+                ]
+              },
+              "consequent": "Dissection can be carried out using already-dead byproducts, minimizing additional ethical harm"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Animal dissection is educationally worthwhile even if some learning objectives can be met without it",
+                  "Dissection can increase students' interest in pursuing science careers",
+                  "Dissection can be carried out using already-dead byproducts, minimizing additional ethical harm"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Students should dissect animals as part of biology education"
+            }
+          ],
+          "Conc": [
+            "Animal dissection is educationally worthwhile even if some learning objectives can be met without it",
+            "Dissection can increase students' interest in pursuing science careers",
+            "Dissection can be carried out using already-dead byproducts, minimizing additional ethical harm",
+            "Students should dissect animals as part of biology education"
+          ],
+          "Ass": [
+            "No evidence that the particular classroom uses live animals for dissection or causes additional suffering beyond the animals being already dead"
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-6178c153eb",
+      "target_field": "Conc",
+      "target_statement": "Students should not dissect animals."
+    },
+    {
+      "id": "arg-12ff8493e5",
+      "agent": "AG2",
+      "proponent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Approximately 99% of dissection animals are caught in the wild"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Most school dissection specimens originate from wild capture (i.e., are not exclusively already-dead byproducts)."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Methods used to supply animals for dissections are inhumane",
+                  "Wild-capture and transport for use in dissections involve harm beyond the animals’ final death"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Dissection supply typically subjects animals to additional suffering before death, beyond the “already-dead when used” endpoint."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Most school dissection specimens originate from wild capture (i.e., are not exclusively already-dead byproducts).",
+                  "Dissection supply typically subjects animals to additional suffering before death, beyond the “already-dead when used” endpoint."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "There is evidence that school dissection specimens involve live/wild capture and additional suffering beyond what would occur if the classroom only received already-dead animals."
+            }
+          ],
+          "Conc": [
+            "Most school dissection specimens originate from wild capture (i.e., are not exclusively already-dead byproducts).",
+            "Dissection supply typically subjects animals to additional suffering before death, beyond the “already-dead when used” endpoint.",
+            "There is evidence that school dissection specimens involve live/wild capture and additional suffering beyond what would occur if the classroom only received already-dead animals."
+          ],
+          "Ass": []
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-28dc0e52ac",
+      "target_field": "Ass"
+    },
+    {
+      "id": "arg-c7eb96c2b4",
+      "agent": "AG1",
+      "proponent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "AP Biology (College Board) and the Next Generation Science Standards do not require animal dissection",
+                  "Animal dissection is a valuable part of teaching biology in schools",
+                  "Dissection provides students with more learning opportunities and develops fine motor skills, hand-eye coordination, and critical thinking"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Even if animal dissection is not required by AP/NGSS, it can still be educationally worthwhile in biology classes."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Hands-on dissection experience can inspire students' career interest",
+                  "Dissection creates aha moments that spark enthusiasm for scientific fields"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Animal dissection can increase students’ interest in pursuing careers in science."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Over 98% of dissected animals were already deceased",
+                  "Fetal pigs used for dissection are meat industry byproducts destined for landfills"
+                ],
+                "weak_negation": [
+                  "No evidence that the particular classroom dissection uses live animals or adds additional animal suffering beyond the animals already being dead."
+                ]
+              },
+              "consequent": "Animal dissection can be a productive use of already-dead specimens, minimizing additional ethical harm."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Animal dissection can be educationally worthwhile even if not required by AP/NGSS",
+                  "Animal dissection can increase students’ interest in pursuing careers in science",
+                  "Animal dissection can minimize additional ethical harm when using already-dead specimens"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Students should dissect animals as part of biology education."
+            }
+          ],
+          "Conc": [
+            "Even if animal dissection is not required by AP/NGSS, it can still be educationally worthwhile in biology classes.",
+            "Animal dissection can increase students’ interest in pursuing careers in science.",
+            "Animal dissection can be a productive use of already-dead specimens, minimizing additional ethical harm.",
+            "Students should dissect animals as part of biology education."
+          ],
+          "Ass": [
+            "No evidence that the particular classroom dissection uses live animals or adds additional animal suffering beyond the animals already being dead."
+          ]
+        }
+      },
+      "attack": "rebut",
+      "target_id": "arg-6178c153eb",
+      "target_field": "Conc",
+      "target_statement": "Students should not dissect animals."
+    },
+    {
+      "id": "arg-19a55056d7",
+      "agent": "AG2",
+      "proponent": "AG2",
+      "type": "defeat",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [
+                  "Approximately 99% of dissection animals are caught in the wild",
+                  "Wild-catching necessarily involves live animals experiencing capture/transport stress and injury before being killed"
+                ],
+                "weak_negation": [
+                  "The particular classroom dissection program can show independently verified sourcing of exclusively already-deceased byproduct specimens (not wild-captured animals)."
+                ]
+              },
+              "consequent": "There is evidence that the animals used in dissection programs are sourced from live-capture and experience additional suffering prior to the final death endpoint."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "There is evidence that dissection animals are typically sourced via live-capture with additional pre-death suffering",
+                  "A classroom dissection uses the animals provided by the relevant sourcing supply chain for such dissections"
+                ],
+                "weak_negation": [
+                  "The particular classroom dissection program is an exception case with verified exclusively already-deceased byproduct specimens."
+                ]
+              },
+              "consequent": "There is evidence that the particular classroom dissection uses live-captured animals or otherwise adds suffering beyond the “already-dead” condition claimed by the target."
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "The target’s weak-negation assumption is: 'No evidence that the particular classroom dissection uses live animals or adds additional animal suffering beyond the animals already being dead.'",
+                  "There is evidence that the particular classroom dissection uses live-captured animals or adds additional suffering beyond the animals already being dead."
+                ],
+                "weak_negation": []
+              },
+              "consequent": "The target’s weak-negation assumption is false and can be undercut."
+            }
+          ],
+          "Conc": [
+            "There is evidence that the animals used in dissection programs are sourced from live-capture and experience additional suffering prior to the final death endpoint.",
+            "There is evidence that the particular classroom dissection uses live-captured animals or otherwise adds suffering beyond the “already-dead” condition claimed by the target.",
+            "The target’s weak-negation assumption is false and can be undercut."
+          ],
+          "Ass": [
+            "The particular classroom dissection program can show independently verified sourcing of exclusively already-deceased byproduct specimens (not wild-captured animals).",
+            "The particular classroom dissection program is an exception case with verified exclusively already-deceased byproduct specimens."
+          ]
+        }
+      },
+      "attack": "undercut",
+      "target_id": "arg-c7eb96c2b4",
+      "target_field": "Ass"
+    }
+  ],
+  "final_answer": "Students **should generally not dissect animals** in school biology classes—**unless** the program can be **independently verified** to use **only** specimens that were **already dead meat-industry byproducts** (with **no** wild-caught/live-capture sourcing and **no** additional pre-death suffering beyond the “already-dead” condition) **and** the dissection is genuinely used to deliver meaningful educational and career-interest benefits.\n\n### Why the best-supported recommendation is “generally no”\n1. **The key ethical condition is not reliably met in typical supply chains.**  \n   The strongest anti-dissection concern isn’t that dissection necessarily uses live animals at the classroom moment; it’s that, in practice, the supply chain often involves **wild capture**. Wild capture implies **capture/transport stress and injury** before death, which is **additional suffering** and also harms local populations and biodiversity. The debate’s pro-dissection case relied on claims like “over 98% were already deceased,” but the counter-case emphasized that the default sourcing pattern is closer to “about 99% wild-caught,” and—critically—that the pro side did not establish **independent verification** for the specific classroom’s sourcing.\n\n2. **This “independently verified byproduct-only” safeguard is the deciding factor—and it was not shown.**  \n   The strongest, most defensible way to support dissection is to require documentation that is **independently verified** showing the animals are **exclusively** already-dead meat-industry/byproduct specimens, with **no wild-capture/live-capture**. Without that level of verification, the ethical objection remains substantial, because the default probability points toward wild-capture sourcing.\n\n3. **Dissection is not required by major education standards.**  \n   Dissection is not required for meeting the core learning goals in **AP Biology (College Board)** or **NGSS**, and it is also not presented as necessary for medical training preparedness (including that U.S./Canadian physician training does not rely on animal use in the way the “need it for medicine” argument suggests).\n\n4. **Alternatives can teach the same biology objectives without creating the same ethical cost.**  \n   High-quality synthetic models and computer simulations can teach anatomy/biology effectively (and sometimes better), so schools are not forced to choose dissection to achieve learning outcomes.\n\n### What would justify allowing dissection\nAllowing dissection is defensible **only** when both are true:\n- **Specimen ethics/verification:** the school (or supplier) has **independently verified** that specimens come **exclusively** from **already-dead meat-industry/byproducts**—not wild-caught/live-capture—and there is no added pre-death harm.\n- **Educational/career value:** the activity is structured to deliver **meaningful** learning (e.g., hands-on skills and conceptual “aha” moments) and can reasonably be expected to support science career interest.\n\n### Confidence / remaining uncertainty\nThis conclusion is **high confidence for a general policy** (“generally no”) because the decisive unresolved issue is whether typical programs meet the **independently verified byproduct-only** sourcing condition. The pro case did not demonstrate that most schools reliably meet that verification requirement; therefore the ethical risk remains too high to justify routine dissection.\n\n**Bottom line:** **Do not require or default to animal dissection.** If a district can meet strict independent-sourcing verification and still deliver meaningful educational benefits, it may be acceptable—but as a general student practice, it isn’t justified.",
+  "integrated_rules": [
+    "Reusable decision rule (map conditions to outcome):\n\n1) Recommend students SHOULD dissect animals (for biology education) if ALL hold:\n   - Educational benefit condition: animal dissection provides significant educational benefits to students (e.g., meaningful biology learning via hands-on dissection) AND can increase students’ interest in pursuing careers in science.\n   - Ethical-minimization condition: the animals used are predominantly already deceased/byproducts (e.g., over 98% already deceased; e.g., fetal pigs as meat-industry byproducts destined for landfills), so dissection is a productive use that minimizes additional ethical harm.\n   - Non-replaceability condition: dissection is not shown to be unnecessary because alternatives (synthetic models/computer simulations) do not teach the relevant outcomes equally well or better.\n\n2) Recommend students SHOULD NOT dissect animals if EITHER of the following is met:\n   - Necessity/standards-and-medical-preparedness condition: dissection is not necessary to meet required biology learning objectives (not required by College Board AP Biology or Next Generation Science Standards) AND/OR is not necessary for medical preparedness because it is not used for physician training in U.S. or Canadian medical schools.\n   - Alternatives-and-environment condition: effective alternatives exist that teach the relevant outcomes equally well or better AND/OR the supply for dissections is largely inhumane and harmful to the environment (e.g., approximately 99% of dissection animals are caught in the wild, decreasing local populations and biodiversity), without a countervailing showing that the program’s animal sourcing primarily uses already-dead/byproduct animals (e.g., over 98% already deceased; byproducts such as fetal pigs).\n\n3) If the evidence is mixed (e.g., educational/career benefits exist and sourcing appears to be byproduct/deceased, but necessity/replaceability or environmental-ethics evidence is unclear, or vice versa), then the rule yields “unresolved” (no decisive recommendation under this criterion set)."
+  ],
+  "consensus_reached": false,
+  "justification_status": "fallback_full_dialogue_synthesis",
+  "finalization_path": "last_statements_rule",
+  "fallback_synthesis": "**Integrated resolution (policy on whether students should dissect animals):**\n\n1. **Default rule: Do not use animal dissection in classrooms (students should not dissect), and use alternatives instead.**  \n   - Rationale bundle:  \n     - Animal dissection is **not required** for meeting standard biology learning goals (it is not required by **College Board AP Biology** or **Next Generation Science Standards**).  \n     - Animal dissection is also **not necessary** for physician training in **U.S. or Canadian medical schools**.  \n     - **Alternatives** (e.g., synthetic models and computer simulations) can teach relevant anatomy/biology outcomes and are asserted to teach **equally well or better**, so dissection is not the educationally necessary option.\n\n2. **Permitted exception (conditional): Animal dissection may be allowed only if a school can verify sourcing that eliminates additional harms beyond the animals’ pre-existing death.**  \n   Dissection is permitted **only** when all of the following are satisfied:\n   - **Verified byproduct-only sourcing:** The school must have **independently verifiable documentation** that the specimens are exclusively **already-deceased meat-industry byproducts** (or otherwise already-dead specimens), not animals obtained via **wild capture** for dissection.  \n   - **No live capture for dissection and no classroom-caused additional harm:** The school must be able to show there is **no evidence** that live-captured animals are introduced, and that the dissection activity does **not** introduce additional animal suffering beyond what occurred before the animals were already dead.  \n   - **Chain-of-custody accountability:** Documentation must clearly link the purchased specimens to the byproduct origin and allow verification that the supply chain does not rely on wild-caught animals.\n\n3. **Ethical presumption when verification is absent (how to handle the “typical conditions” dispute):**  \n   - Because a major contention in the debate is that **most dissection animals are sourced via wild capture** (with consequent ecological and welfare harm), the policy treats **unverified or undocumented sourcing** as ethically unacceptable.  \n   - Therefore: if a program **cannot demonstrate** byproduct-only, independently verified sourcing that rules out wild-caught specimens, the exception does **not** apply, and the default rule stands (**students should not dissect**).\n\n4. **Educational rationale when the exception is met (why dissection could be allowed):**  \n   If the strict exception conditions are met, dissection may be permitted because it can provide:\n   - tangible, hands-on learning opportunities, and  \n   - benefits to students’ fine motor skills, hand-eye coordination, and critical thinking, and  \n   - potential motivation/engagement (“aha moments”) that can increase interest in science careers.  \n   Importantly, this educational value **does not override** the sourcing/verification requirements in items 2–3; it only supports approval **when** ethical risk is minimized as specified.\n\n5. **Non-requirement principle (applies in all cases):**  \n   Even where dissection is permitted under the exception, dissection should not be treated as the only acceptable way to learn biology; schools should continue offering effective alternatives to students when dissection is not used (and should accommodate students who decline participation).\n\n---\n\n### Bottom line decision rule\n- **If** a school can **independently verify** specimens are **exclusively already-deceased byproducts** and that the classroom dissection **does not involve live-captured animals or additional pre-death/welfare harm**, **then** students may be allowed to dissect.  \n- **If not**, then **students should not dissect**, and education should rely on **alternatives**.  \n\n**What remains unresolved (and deliberately not forced into the policy):** the debate does not establish conclusively, across all regions/programs, the exact factual proportion for every classroom’s specimens. The policy therefore resolves this by making eligibility depend on **verifiable sourcing documentation** rather than on generalized statistics alone.",
+  "main_unavailable_reasons": {
+    "AG1": "Dialogue turn budget (max_dialogue_turns) reached.",
+    "AG2": "Dialogue turn budget (max_dialogue_turns) reached."
+  },
+  "attempt_log": [
+    {
+      "kind": "no_reverse_attack",
+      "phase": "counter",
+      "agent": "AG2",
+      "target_id": "arg-4e005a6449",
+      "reason": "<new_counter> explicitly and substantively attacks the key evidential step your undercut relied on: that “typical conditions/general statistics” are enough to justify rejecting the target’s “no evidence” assumption about what happened in the *particular* classroom dissection. It states that general background frequency/typicality does not, by itself, establish case-specific evidence unless linked to that specific case. That directly undercuts your “typical conditions ⇒ evidence for the particular dissection’s additional suffering/live-source status” inference, so your original attack no longer poses a live threat."
+    }
+  ],
+  "previous_final_answer": "Students **should not dissect animals** in classrooms **as a default**. Schools should instead use **synthetic models and computer simulations**, which are asserted to teach biology outcomes **equally well or better** than real-animal dissection.\n\n### When dissection may be allowed (conditional exception)\nAllowing dissection is **only** permitted if the school can **independently verify** that all of the following are true:\n\n1. **Verified byproduct-only sourcing**\n   - The specimens must be documented as **exclusively already-deceased meat-industry byproducts** (or otherwise already-dead specimens).\n   - There must be **independently verifiable documentation** that the supply chain does **not** rely on **wild-caught** animals for classroom dissection.\n\n2. **No evidence of live capture or additional classroom-caused harm**\n   - The school must be able to show there is **no** indication that live-captured animals are introduced.\n   - The dissection must not be adding **additional suffering beyond** whatever occurred before the animals were already dead.\n\n3. **Chain-of-custody accountability**\n   - Paperwork and documentation must clearly link purchased specimens to byproduct origin, so the school can be checked and verified on sourcing rather than relying on general claims.\n\n### Ethical presumption if verification is missing\nBecause a key concern is that many dissection animals are allegedly sourced via **wild capture**, the policy treats **unverified or undocumented sourcing** as ethically unacceptable. Therefore:\n- **If** a program cannot demonstrate **byproduct-only, independently verified sourcing** that rules out wild-caught specimens, then the exception **does not apply** and students **should not dissect**.\n\n### Why dissection could be permitted (only if the above is met)\nIf the strict sourcing/verification conditions are satisfied, dissection may be permitted because it can provide:\n- tangible, hands-on learning,\n- benefits to fine motor skills, hand-eye coordination, and critical thinking, and\n- engagement that can create “aha moments” and support interest in science careers.\n\nHowever, those educational benefits **do not override** the sourcing/verification requirements.\n\n### Non-requirement principle\nEven when dissection is permitted under the exception, it should not be treated as the only way to learn biology—schools should continue offering effective alternatives and accommodate students who decline participation.\n\n### What remains unresolved (intentionally not forced)\nThe underlying policy does **not** claim certainty about the exact proportion of specimens across all regions/programs. Instead, it resolves the uncertainty by making dissection eligibility depend on **verifiable sourcing documentation**, not on generalized statistics alone.",
+  "refinalized_from": "/Users/yuzuki/Desktop/Dialect-MAS/logs/fin/turns10/raw_dialogue/Education/animal_dissection/01_schema_20261004_035949_499366.json",
+  "last_statements_rule": "Recommend using animal dissection (rather than avoiding it) only when **both** of these are satisfied: **(i) Specimen ethics/verification:** the dissection program has **independently verified** sourcing showing specimens are **exclusively already-deceased meat-industry/byproduct animals** (i.e., **no wild-caught/live-capture** and no added pre-death suffering beyond the “already-dead” condition; the default/supply-chain pattern is otherwise that about **~99%** are caught in the wild, which would imply capture/transport stress/injury and biodiversity harm), **and** **(ii) Educational/career value:** dissection is used to provide **meaningful** learning benefits (more learning opportunities, fine-motor skills, hand-eye coordination, critical thinking) and can reasonably be expected to increase students’ **science career interest** via hands-on experience and “aha” moments. If the independently-verified exclusively-already-deceased (no live-capture/no added suffering) condition is **not** met—i.e., evidence remains consistent with **wild capture (~99%)** and thus added suffering/environmental harm—then recommend **against** animal dissection, especially given that it is **not required** by **AP Biology/NGSS** and that **alternatives** (synthetic models/computer simulations) can teach as well or better."
+}

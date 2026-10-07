@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import sys
+from functools import partial
 from collections.abc import Awaitable, Callable
 from datetime import datetime
 from pathlib import Path
@@ -39,6 +40,8 @@ RUNNERS: dict[str, Callable[..., Awaitable[Path]]] = {
     "no_schema": run_no_schema_topic_once,
     "free_debate": run_free_debate_topic_once,
     "mad": run_mad_topic_once,
+    # MAD の議論のあと、judge ではなく共通の統合プロンプト（止揚）で最終回答を作る。
+    "mad_synthesis": partial(run_mad_topic_once, use_synthesis=True),
 }
 # ラウンド上限は十分大きくして、max_dialogue_turns だけが効くようにする。
 DEFAULT_MAX_TURNS = 40
@@ -49,7 +52,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "topic_files", nargs="+", help="トピック JSON（複数可。例: datasets/Education/animal_dissection.json）"
     )
-    parser.add_argument("--methods", default="schema,no_schema", help="',' 区切り（schema / no_schema / free_debate / mad）。")
+    parser.add_argument("--methods", default="schema,no_schema", help="',' 区切り（schema / no_schema / free_debate / mad / mad_synthesis）。")
     parser.add_argument("--turns", default="20", help="max_dialogue_turns を ',' 区切りで（例: 10,20,30）。")
     parser.add_argument("--runs", type=int, default=1, help="各条件の実行回数。")
     parser.add_argument(
