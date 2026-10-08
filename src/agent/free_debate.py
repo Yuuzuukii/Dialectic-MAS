@@ -10,20 +10,22 @@ AG1・AG2 が同一ラウンド内で交互に発言する（AG2 は AG1 のそ�
 
 from __future__ import annotations
 
-import json
 from dataclasses import dataclass, field
-from types import SimpleNamespace
 from typing import Any
 
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
 from langgraph.graph import END, START, StateGraph
 from pydantic import BaseModel, Field
 
-from .arguments import generate_final_answer as _generate_final_answer
-from .arguments import generate_integration as _generate_integration
 from .edges import _int_env, _optional_int_env
+from .final_answer import (
+    PATH_DIALOGUE_ONLY,
+    PATH_INTEGRATED,
+    answer_from_materials,
+    integrate_positions,
+    last_position,
+)
 from .llm import chat_structured
-from .nodes import extract_integrated_rule
 from .prompts import PromptTemplates, agent_system
 from .schema.types import AgentName
 
@@ -66,6 +68,9 @@ class FreeDebateState:
     ag2_has_new: bool | None = None
     integration_result: str | None = None
     integrated_rule: str | None = None
+    # 最終回答の材料にした統合案と、最終回答の作り方（final_answer.py）。
+    integrated_proposal: str | None = None
+    finalization_path: str | None = None
 
 
 def _stance(state: FreeDebateState, agent: AgentName) -> str:
@@ -81,6 +86,7 @@ _NOVELTY_HINT = (
     " has_new_point=false. Otherwise, make your new argument or rebuttal and set"
     " has_new_point=true."
 )
+
 
 def _round_instruction(state: FreeDebateState, agent: AgentName) -> str:
     if state.round == 1:
@@ -201,55 +207,40 @@ def route_after_ag2_turn(state: FreeDebateState) -> str:
     return "ag1_turn"
 
 
-def _last_argument_by(state: FreeDebateState, agent: AgentName) -> str:
-    for turn in reversed(state.dialogue_history):
-        if turn.get("agent") == agent:
-            return str(turn.get("argument", ""))
-    return ""
-
-
 async def integrate(state: FreeDebateState) -> dict[str, Any]:
-    """止揚による統合.
+    """各陣営の最後の発言から統合案を作る（schema / no_schema と共通の処理）.
 
-    schema/no_schemaと共通の統合プロンプトで、両サイド最新の主張を汎化した上で
-    1つの再利用可能ルールにまとめる。弁証法プロトコルのような形式的な warrant
-    抽出は無いため、各サイドの最新の主張を warrant の代わりとして渡す。
+    どちらかの陣営に発言がなければ、統合案は作らない。
     """
-    warrant_result = json.dumps(
-        {
-            "Argument1": {"agent": "AG1", "warrant": _last_argument_by(state, "AG1")},
-            "Argument2": {"agent": "AG2", "warrant": _last_argument_by(state, "AG2")},
-        },
-        ensure_ascii=False,
-    )
-    synthesis_state = SimpleNamespace(
-        warrant_result=warrant_result,
+    position1 = last_position(state.dialogue_history, "AG1")
+    position2 = last_position(state.dialogue_history, "AG2")
+    if not (position1 and position2):
+        return {"integrated_rule": None}
+    rule = await integrate_positions(
         agent1_stance=state.agent1_stance,
         agent2_stance=state.agent2_stance,
-        output_mode="no_schema",
+        position1=position1,
+        position2=position2,
     )
-    output = await _generate_integration(synthesis_state)
-    response = json.dumps(
-        output.model_dump(exclude_none=True), ensure_ascii=False, indent=2
-    )
-    rule = extract_integrated_rule(response)
-    return {"integration_result": response, "integrated_rule": rule}
+    return {"integrated_rule": rule}
 
 
 async def generate_final_answer(state: FreeDebateState) -> dict[str, Any]:
-    """統合ルールを踏まえて最終回答を生成する（schema/no_schemaの合意なし時と共通のプロンプト）."""
-    last_argument = state.dialogue_history[-1]["argument"] if state.dialogue_history else None
-    synthesis_state = SimpleNamespace(
-        justified_argument=last_argument,
-        dialogue_history=state.dialogue_history,
-        integrated_rules=[state.integrated_rule] if state.integrated_rule else [],
-        consensus_reached=False,
+    """統合案（あれば）と議論全体から最終回答を生成する（schema / no_schema と共通のプロンプト）."""
+    answer = await answer_from_materials(
         question=state.question,
         agent1_stance=state.agent1_stance,
         agent2_stance=state.agent2_stance,
+        dialogue_history=state.dialogue_history,
+        integrated_proposal=state.integrated_rule,
     )
-    answer = await _generate_final_answer(synthesis_state)
-    return {"final_answer": answer.strip()}
+    return {
+        "final_answer": answer,
+        "integrated_proposal": state.integrated_rule,
+        "finalization_path": PATH_INTEGRATED
+        if state.integrated_rule
+        else PATH_DIALOGUE_ONLY,
+    }
 
 
 graph_free_debate = (

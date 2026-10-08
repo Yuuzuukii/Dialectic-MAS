@@ -62,9 +62,11 @@ def route_after_can_generate_main(state: Any) -> str:
 #   Opponent が生成し、defeat 判定を行う。defeat できなければ同じフレームで
 #   opponent_move に戻り別の B' を試す。
 # proponent_move ⇄ validate_proponent_move: B に対する反論 (C) を Proponent が
-#   生成し、strictly defeat かどうかを判定する。strictly defeat しなければ同じ
-#   フレームで proponent_move に戻り別の C' を試す。strictly defeat すれば C を
-#   argument_id とする子フレームを push し、opponent_move へ戻って1段深く探索する。
+#   1 つだけ生成し、B を defeat するかを判定する（B 1 つにつき返答は 1 つ）。
+#   C が B を defeat しなければフレームは lost_by_p で閉じる（overruled）。
+#   strictly defeat なら C を argument_id とする子フレームを push し、opponent_move へ
+#   戻って1段深く探索する。相互 defeat（B も C を defeat する）でも、B を strictly には
+#   退けていないことを覚えたうえで同じく子フレームを push する（Def 3.4: defensible）。
 # pop_and_propagate: フレームが閉じた（won_by_p/lost_by_p/undetermined）ときに
 #   呼ばれ、親フレームへ結果を伝播する。根が閉じれば resolve_tree_status へ。
 # ----------------------------------------------------------------------------
@@ -110,12 +112,17 @@ def route_after_proponent_move(state: Any) -> str:
 
 
 def route_after_validate_proponent_move(state: Any) -> str:
-    """C が B を strictly defeat するかの検証後の遷移先を決める."""
+    """C が B を strictly defeat するかの検証後の遷移先を決める.
+
+    O の手 B 1 つにつき、P の返答は 1 つ。C が B を defeat した（strict または相互）なら、C を
+    新しいフレームとして O の次の攻撃へ。defeat しなかったなら、P はこの B に答えられなかった
+    （フレームは lost_by_p で閉じている）ので、作り直さずに pop_and_propagate へ伝播させる。
+    """
     if state.error:
         return "finish_with_error"
     if state.last_counter_strictly_defeated is True:
         return "opponent_move"
-    return "proponent_move"
+    return "pop_and_propagate"
 
 
 def route_after_pop_and_propagate(state: Any) -> str:

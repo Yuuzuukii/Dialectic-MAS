@@ -25,7 +25,10 @@ pytestmark = pytest.mark.anyio
 def _record(agent: str, conc: str) -> ArgumentRecord:
     payload = {"Argument": {"rules": [], "Conc": [conc], "Ass": []}}
     return ArgumentRecord(
-        type="main", argument=json.dumps(payload), support=[], agent=agent  # type: ignore[arg-type]
+        type="main",
+        argument=json.dumps(payload),
+        support=[],
+        agent=agent,  # type: ignore[arg-type]
     )
 
 
@@ -80,12 +83,16 @@ async def _run_tree(
         # 実際に defeat するかどうかは stage_aware_evaluate_attack 側の reverse_defeats で制御）。
         return AttackMatch(method="rebut", field="Conc", statement="c's conclusion")
 
-    async def stage_aware_evaluate_attack(_state, attacker, target, _defender, **kwargs):
+    async def stage_aware_evaluate_attack(
+        _state, attacker, target, _defender, **kwargs
+    ):
         # proponent_move 経由の「B defeats C」逆検証だけ persist_metadata=False で
         # 呼ばれるので、それを reverse_defeats、それ以外を defeats で消費する。
         if kwargs.get("persist_metadata") is False:
             return AttackEvaluation(
-                defeats=next(reverse_iter), attack=attacker.attack or "rebut", relations=[]
+                defeats=next(reverse_iter),
+                attack=attacker.attack or "rebut",
+                relations=[],
             )
         return AttackEvaluation(
             defeats=next(defeats_iter), attack=attacker.attack or "rebut", relations=[]
@@ -120,7 +127,9 @@ async def _run_tree(
                     else "pop_and_propagate"
                 )
             elif current == "validate_opponent_move":
-                current = "proponent_move" if state.last_attack_defeated else "opponent_move"
+                current = (
+                    "proponent_move" if state.last_attack_defeated else "opponent_move"
+                )
             elif current == "proponent_move":
                 current = (
                     "validate_proponent_move"
@@ -129,7 +138,9 @@ async def _run_tree(
                 )
             elif current == "validate_proponent_move":
                 current = (
-                    "opponent_move" if state.last_counter_strictly_defeated else "proponent_move"
+                    "opponent_move"
+                    if state.last_counter_strictly_defeated
+                    else "pop_and_propagate"
                 )
             elif current == "pop_and_propagate":
                 if state.last_propagation_action == "resolved":
@@ -205,7 +216,9 @@ async def test_reinstatement_after_strict_defeat_is_justified() -> None:
     )
     c_argument = ArgumentRecord(
         type="counter",
-        argument=json.dumps({"Argument": {"rules": [], "Conc": ["not not a"], "Ass": []}}),
+        argument=json.dumps(
+            {"Argument": {"rules": [], "Conc": ["not not a"], "Ass": []}}
+        ),
         support=[],
         agent="AG1",  # type: ignore[arg-type]
         attack="rebut",  # type: ignore[arg-type]
@@ -227,11 +240,12 @@ async def test_reinstatement_after_strict_defeat_is_justified() -> None:
     assert result.tree_root_closed_by_budget is False
 
 
-async def test_mutual_defeat_without_other_counter_is_overruled() -> None:
-    """B が A を defeat、C が B を defeat するが B も C に反撃できる ＝ C は不採用.
+async def test_mutual_defeat_without_other_attack_is_defensible() -> None:
+    """B が A を defeat、C が B を defeat するが B も C に反撃できる ＝ 相互 defeat ＝ defensible.
 
-    (mutual defeat: C は B を strictly defeat していない。他に反論も出せないので、
-    P の真の手詰まりとして overruled。反論回数の上限は無いので予算切れ扱いにならない)
+    (Prakken & Sartor Def 3.4: B も C も defensible で、A は justified でも overruled でもない。
+    フレームは閉じず、O は C への新しい攻撃を探すが、見つからなければ contested で閉じる。
+    予算切れ扱いにはならない)
     """
     main = _record("AG1", "we should choose a")
     b_argument = ArgumentRecord(
@@ -243,7 +257,9 @@ async def test_mutual_defeat_without_other_counter_is_overruled() -> None:
     )
     c_argument = ArgumentRecord(
         type="counter",
-        argument=json.dumps({"Argument": {"rules": [], "Conc": ["not not a"], "Ass": []}}),
+        argument=json.dumps(
+            {"Argument": {"rules": [], "Conc": ["not not a"], "Ass": []}}
+        ),
         support=[],
         agent="AG1",  # type: ignore[arg-type]
         attack="rebut",  # type: ignore[arg-type]
@@ -258,8 +274,9 @@ async def test_mutual_defeat_without_other_counter_is_overruled() -> None:
         reverse_defeats=[True],  # B も C に反撃できる ＝ mutual defeat
     )
 
-    assert result.tree_root_status == "overruled"
+    assert result.tree_root_status == "defensible"
     assert result.tree_root_closed_by_budget is False
+    assert "mutual_defeat" in [e["kind"] for e in result.attempt_log]
 
 
 async def test_depth_four_recursion_reaches_justified() -> None:
@@ -326,3 +343,131 @@ async def test_no_counter_available_is_overruled() -> None:
 
     assert result.tree_root_status == "overruled"
     assert result.tree_root_closed_by_budget is False
+
+
+async def test_mutual_defeat_counter_is_not_retried() -> None:
+    """B 1 つにつき P の返答は 1 つ。相互 defeat でも、2 つ目の反撃は作らず、defensible で閉じる.
+
+    counters に、2 つ目の反撃を用意しておき、それが消費されないことを確かめる。
+    """
+    main = _record("AG1", "we should choose a")
+
+    def rec(agent: str, tag: str, kind: str) -> ArgumentRecord:
+        return ArgumentRecord(
+            type=kind,  # type: ignore[arg-type]
+            argument=json.dumps({"Argument": {"rules": [], "Conc": [tag], "Ass": []}}),
+            support=[],
+            agent=agent,  # type: ignore[arg-type]
+            attack="rebut",  # type: ignore[arg-type]
+        )
+
+    b_argument = rec("AG2", "not a", "defeat")
+    first_counter = rec("AG1", "first", "counter")
+    second_counter = rec("AG1", "second", "counter")
+    state = _fresh_state(main)
+
+    result = await _run_tree(
+        state,
+        attacks=[b_argument],
+        counters=[first_counter, second_counter],
+        defeats=[True, True],  # B defeats A, 1 つ目の C defeats B
+        reverse_defeats=[
+            True
+        ],  # B も C に反撃できる ＝ 相互 defeat ＝ strictly defeat にならない
+    )
+
+    assert result.tree_root_status == "defensible"
+    assert result.tree_root_closed_by_budget is False
+    counters_in_records = [r for r in result.argument_records if r.type == "counter"]
+    assert len(counters_in_records) == 1  # 2 つ目の反撃は作られていない
+
+
+def _rec(agent: str, tag: str, kind: str) -> ArgumentRecord:
+    return ArgumentRecord(
+        type=kind,  # type: ignore[arg-type]
+        argument=json.dumps({"Argument": {"rules": [], "Conc": [tag], "Ass": []}}),
+        support=[],
+        agent=agent,  # type: ignore[arg-type]
+        attack="rebut",  # type: ignore[arg-type]
+    )
+
+
+async def test_mutual_defeat_then_unanswered_attack_on_counter_is_overruled() -> None:
+    """相互 defeat のあと、O が C を defeat する D を出し、P が返せなければ、C は負けて A は overruled."""
+    result = await _run_tree(
+        _fresh_state(_record("AG1", "we should choose a")),
+        attacks=[_rec("AG2", "not a", "defeat"), _rec("AG2", "d", "defeat")],
+        counters=[_rec("AG1", "c", "counter"), None],
+        defeats=[True, True, True],  # B>A, C>B, D>C
+        reverse_defeats=[True],
+    )
+
+    assert result.tree_root_status == "overruled"
+    assert result.tree_root_closed_by_budget is False
+
+
+async def test_mutual_defeat_branch_then_other_attack_repelled_stays_defensible() -> None:
+    """相互 defeat の枝の後、別の B2 は strict に退けられても、A は justified にならず defensible."""
+    result = await _run_tree(
+        _fresh_state(_record("AG1", "we should choose a")),
+        attacks=[_rec("AG2", "not a", "defeat"), None, _rec("AG2", "not a, again", "defeat")],
+        counters=[_rec("AG1", "c", "counter"), _rec("AG1", "c2", "counter")],
+        defeats=[True, True, True, True],  # B>A, C>B, B2>A, C2>B2
+        reverse_defeats=[True, False],  # B⇄C は相互、B2 は C2 に反撃できない（strict）
+    )
+
+    assert result.tree_root_status == "defensible"
+    assert result.tree_root_closed_by_budget is False
+
+
+async def test_mutual_defeat_branch_then_other_attack_unanswered_is_overruled() -> None:
+    """相互 defeat の枝の後、別の B2 に P が返せなければ、justified な B2 が A を倒すので overruled."""
+    result = await _run_tree(
+        _fresh_state(_record("AG1", "we should choose a")),
+        attacks=[_rec("AG2", "not a", "defeat"), None, _rec("AG2", "not a, again", "defeat")],
+        counters=[_rec("AG1", "c", "counter"), None],
+        defeats=[True, True, True],  # B>A, C>B, B2>A
+        reverse_defeats=[True],
+    )
+
+    assert result.tree_root_status == "overruled"
+
+
+async def test_counter_that_does_not_defeat_is_not_retried() -> None:
+    """反撃 C がそもそも B を defeat できない場合も、作り直さず、その枝は P の負け."""
+    main = _record("AG1", "we should choose a")
+
+    def rec(agent: str, tag: str, kind: str) -> ArgumentRecord:
+        return ArgumentRecord(
+            type=kind,  # type: ignore[arg-type]
+            argument=json.dumps({"Argument": {"rules": [], "Conc": [tag], "Ass": []}}),
+            support=[],
+            agent=agent,  # type: ignore[arg-type]
+            attack="rebut",  # type: ignore[arg-type]
+        )
+
+    state = _fresh_state(main)
+
+    result = await _run_tree(
+        state,
+        attacks=[rec("AG2", "not a", "defeat")],
+        counters=[rec("AG1", "first", "counter"), rec("AG1", "second", "counter")],
+        defeats=[True, False],  # B defeats A, しかし C は B を defeat しない
+        reverse_defeats=[],
+    )
+
+    assert result.tree_root_status == "overruled"
+    assert len([r for r in result.argument_records if r.type == "counter"]) == 1
+
+
+def test_route_after_failed_counter_goes_to_pop_and_propagate() -> None:
+    """strictly defeat にならなかった反撃のあとは、proponent_move には戻らず pop_and_propagate."""
+    from agent.edges import route_after_validate_proponent_move
+
+    failed = State(question="Q?", agent1_stance="s1", agent2_stance="s2")
+    failed.last_counter_strictly_defeated = False
+    assert route_after_validate_proponent_move(failed) == "pop_and_propagate"
+
+    succeeded = State(question="Q?", agent1_stance="s1", agent2_stance="s2")
+    succeeded.last_counter_strictly_defeated = True
+    assert route_after_validate_proponent_move(succeeded) == "opponent_move"

@@ -522,14 +522,23 @@ _CONTENT_REQUIREMENT_BLOCK = "\n".join(
         "<content_requirement>",
         "Your Argument's rules must state a substantive position about the issue itself "
         "(facts, causal claims, values, tradeoffs) — never a verdict about the dialectical "
-        "game (e.g. \"the target attack fails\", \"X does not defeat Y\", \"X's conclusion "
-        "does not follow from its premises\"). Whether your argument defeats the target is "
+        'game (e.g. "the target attack fails", "X does not defeat Y", "X\'s conclusion '
+        'does not follow from its premises"). Whether your argument defeats the target is '
         "determined separately from the Attack field and the defeat-checking logic, not from "
         "how you phrase your conclusion. State your own substantive position, engaging the "
         "target's specific content (see below) — never phrase the conclusion itself as a "
         "verdict about whether that content holds up.",
         "</content_requirement>",
     ]
+)
+
+
+_DEFEAT_RELATIONS_NOTE = (
+    "Each earlier turn is numbered [n]. <defeat_relations> lists which turns of the current thread "
+    "have defeated which (and which attempts did not). Take them into account before you write: "
+    "see which of your earlier arguments have already defeated, or been defeated by, which; do not "
+    "attack an argument that is already defeated, and do not rebuild a move that was already defeated; "
+    "base your move on what the relations show."
 )
 
 
@@ -549,6 +558,7 @@ def attack_instruction(
             "State what you hold to be true about the issue that directly answers this specific "
             "challenge — a substantive claim about the issue, not a verdict about whether the attack "
             "succeeds.",
+            _DEFEAT_RELATIONS_NOTE,
             "</task>",
             "",
             "<issue>",
@@ -618,6 +628,7 @@ def attack_instruction(
             "attack from your own stance: state what you hold to be true about the issue that negates "
             "the target argument's specific claim — a substantive claim about the issue, not a "
             "verdict about whether the target argument is defeated.",
+            _DEFEAT_RELATIONS_NOTE,
             "</task>",
             "",
             "<issue>",
@@ -648,7 +659,10 @@ def attack_instruction(
 
 
 def existing_undercut_instruction(
-    own: Any, attack: Any, assumptions: list[str] | None = None, state: Any | None = None
+    own: Any,
+    attack: Any,
+    assumptions: list[str] | None = None,
+    state: Any | None = None,
 ) -> str:
     """すでにある自分の論証が、相手の rebut を undercut しているかを問う指示文を組む.
 

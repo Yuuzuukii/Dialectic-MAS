@@ -540,11 +540,11 @@ async def _run_topic_once(
     # justified はしていない（docs/argumentation_model_rebuild_plan.md §9 #2/#8 参照）。
     log["consensus_reached"] = final_state.get("consensus_reached")
     log["justification_status"] = final_state.get("justification_status")
-    # 最終回答の作り方（justified_argument / fallback_full_dialogue_synthesis）と、決着しなかった
-    # ときに議論全体から作った統合文。
+    # 最終回答の作り方（justified_with_dialogue / integrated_with_dialogue / dialogue_only）と、
+    # 各陣営の最後の main から作った統合案（作らなかったときは無い）。
     log["finalization_path"] = final_state.get("finalization_path")
-    if final_state.get("fallback_synthesis"):
-        log["fallback_synthesis"] = final_state["fallback_synthesis"]
+    if final_state.get("integrated_proposal"):
+        log["integrated_proposal"] = final_state["integrated_proposal"]
     # agent 別の「新しい main を出せなかった理由」（出せた場合は空）。
     log["main_unavailable_reasons"] = final_state.get("main_unavailable_reasons") or {}
     # 「出せなかった／認められなかった」試行（反論なし・ブロッカーなし・攻撃不成立など）と理由。
@@ -657,7 +657,7 @@ async def run_free_debate_topic_once(
     log["dialogue_history"] = result.get("dialogue_history", [])
     log["final_answer"] = result.get("final_answer")
     log["finalization_path"] = result.get("finalization_path")
-    log["fallback_synthesis"] = result.get("fallback_synthesis")
+    log["integrated_proposal"] = result.get("integrated_proposal")
     path = save_log(log, output_path("free_debate", topic_path, output_root, run_index))
     print(f"[system] log saved -> {path}", flush=True)
     return path
@@ -733,8 +733,8 @@ async def run_mad_topic_once(
     log["dialogue_history"] = result.get("dialogue_history", [])
     log["final_answer"] = result.get("final_answer")
     if use_synthesis:
-        integrated_rule = result.get("integrated_rule")
-        log["integrated_rules"] = [integrated_rule] if integrated_rule else []
+        log["finalization_path"] = result.get("finalization_path")
+        log["integrated_proposal"] = result.get("integrated_proposal")
     path = save_log(log, output_path(method, topic_path, output_root, run_index))
     print(f"[system] log saved -> {path}", flush=True)
     return path

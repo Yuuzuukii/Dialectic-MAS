@@ -26,13 +26,15 @@ from .arguments import (
     generate_attack,
     take_decline_reason,
 )
+from .final_answer import finalize as finalize_answer
 from .prompts import attack_instruction, main_instruction
-from .schema.state import ArgumentRecord, DialogueNode, parse_serialized_payload
-from .two_path_finalization import (
-    answer_from_fallback_synthesis,
-    speech_log,
-    synthesize_unresolved_dialogue,
+from .schema.state import (
+    ArgumentRecord,
+    DefeatRelation,
+    DialogueNode,
+    parse_serialized_payload,
 )
+from .two_path_finalization import speech_log
 
 # ============================================================================
 # 簿記ヘルパ
@@ -155,9 +157,10 @@ def thread_finding(state: Any, status: str) -> str | None:
     if state.current_argument is None or state.root_node_id is None:
         return None
     root = _find_node(state.dialogue_nodes, state.root_node_id)
-    if root.current_attacker_id is None:
+    attacker_id = root.current_attacker_id or root.contested_by
+    if attacker_id is None:
         return None
-    attacker = _find_argument(state, root.current_attacker_id)
+    attacker = _find_argument(state, attacker_id)
     main_conclusion = (
         "; ".join(state.current_argument.conclusions) or "the previous main argument"
     )
@@ -330,7 +333,9 @@ async def opponent_move(state: Any) -> dict[str, Any]:
     if argument is None:
         # Opponent がこの argument への新しい攻撃を1つも思いつけなかった
         # （真の手詰まり）。dialogue tree の "O が手を出せない" 終端条件。
-        nodes_ = _replace_node(state.dialogue_nodes, frame.id, outcome="won_by_p")
+        # 退けた枝がすべて strict だったなら won_by_p。相互 defeat の枝があれば contested（defensible）。
+        outcome = "contested" if frame.contested_by is not None else "won_by_p"
+        nodes_ = _replace_node(state.dialogue_nodes, frame.id, outcome=outcome)
         event = _attempt_event(
             "no_attack", state.current_opponent, target.id, take_decline_reason(), "defeat"
         )
@@ -447,8 +452,9 @@ async def validate_opponent_move(state: Any) -> dict[str, Any]:
 async def proponent_move(state: Any) -> dict[str, Any]:
     """現フレームの攻撃者 (B) に対し、Proponent が反論 (C) を試みる.
 
-    同じ B に対して P が試せる反論の回数に個別の上限は設けない（opponent_move と同様）。
-    リソース制約は `max_dialogue_turns`（対話全体の絶対予算）だけで課す。
+    O の手 B 1 つにつき、P の返答 C は 1 つだけ（Prakken & Sartor の dialogue tree）。
+    C が B を strictly defeat しなければ、validate_proponent_move がフレームを lost_by_p で閉じる。
+    リソース制約は `max_dialogue_turns`（対話全体の絶対予算）で課す。
 
     `max_dialogue_turns`（対話全体の絶対予算）が尽きた場合はこのフレーム固有の
     話ではないので、opponent_move と同様 undetermined（→defensible）として扱う。
@@ -491,6 +497,29 @@ async def proponent_move(state: Any) -> dict[str, Any]:
         "history": history,
         "argument_records": records,
         "dialogue_history": dialogue_history(records),
+    }
+
+
+def _counter_failed(
+    state: Any, frame: DialogueNode, relations: list[DefeatRelation]
+) -> dict[str, Any]:
+    """反撃 C が B を strictly defeat しなかったときの状態更新を作る.
+
+    Prakken & Sartor（Definition 4.5/4.6）では、O の手 B に対する P の返答は 1 つで、
+    それが B を strictly defeat しなければ P は動けず、この枝は O の勝ち。作り直しはしない。
+    フレームを lost_by_p（予算切れではない）で閉じ、pop_and_propagate に伝播させる。
+    """
+    nodes_ = _replace_node(
+        state.dialogue_nodes,
+        frame.id,
+        counter_attempts=frame.counter_attempts + 1,
+        outcome="lost_by_p",
+    )
+    return {
+        "dialogue_nodes": nodes_,
+        "defeat_relations": relations,
+        "pending_counter_argument": None,
+        "last_counter_strictly_defeated": False,
     }
 
 
@@ -547,17 +576,7 @@ async def validate_proponent_move(state: Any) -> dict[str, Any]:
                 "counter",
             )
         )
-        nodes_ = _replace_node(
-            state.dialogue_nodes, frame.id, counter_attempts=frame.counter_attempts + 1
-        )
-        return _finish(
-            {
-                "dialogue_nodes": nodes_,
-                "defeat_relations": relations,
-                "pending_counter_argument": None,
-                "last_counter_strictly_defeated": False,
-            }
-        )
+        return _finish(_counter_failed(state, frame, relations))
 
     # B はもともと別の対象（A、またはこのフレームの argument）を狙って宣言された
     # 攻撃なので、その .attack/target_statement を C にそのまま使い回さない
@@ -566,6 +585,7 @@ async def validate_proponent_move(state: Any) -> dict[str, Any]:
     # 対しても undercut として無条件に勝てるとは限らない）。ask_attack_extends が
     # B-C 間の攻撃関係を C の中身を見た上で改めて宣言し、それだけを判定に使う。
     take_decline_reason()
+    mutual = False
     reverse_match = await ask_attack_extends(
         state, state.current_opponent, b_argument, c_argument
     )
@@ -600,25 +620,27 @@ async def validate_proponent_move(state: Any) -> dict[str, Any]:
         )
         relations = [*relations, *reverse.relations]
         if reverse.defeats:
-            # B が C にも反撃できる＝相互 defeat＝C は B を strictly defeat していない。
-            nodes_ = _replace_node(
-                state.dialogue_nodes,
-                frame.id,
-                counter_attempts=frame.counter_attempts + 1,
-            )
-            return _finish(
-                {
-                    "dialogue_nodes": nodes_,
-                    "defeat_relations": relations,
-                    "pending_counter_argument": None,
-                    "last_counter_strictly_defeated": False,
-                }
+            # B が C にも反撃できる＝相互 defeat。C は B を strictly defeat していないが、
+            # defeat はしている（Prakken & Sartor Def 3.4: B も C も defensible）。
+            # フレームは閉じず、C を子フレームとして push して、O に C への新しい攻撃を探させる。
+            mutual = True
+            events.append(
+                _attempt_event(
+                    "mutual_defeat",
+                    state.current_opponent,
+                    c_argument.id,
+                    f"{b_argument.id} and {c_argument.id} defeat each other; the branch can only be defensible.",
+                    "counter",
+                )
             )
 
-    # C が B を strictly defeat した。C を新しいフレームとして push し、
+    # C が B を defeat した（strict、または相互）。C を新しいフレームとして push し、
     # 探索を1段深くする（C 自身が次の攻撃対象になる）。
     child = DialogueNode(
-        parent_id=frame.id, argument_id=c_argument.id, depth=frame.depth + 1
+        parent_id=frame.id,
+        argument_id=c_argument.id,
+        depth=frame.depth + 1,
+        entered_by_mutual_defeat=mutual,
     )
     nodes_ = [*state.dialogue_nodes, child]
     return _finish(
@@ -637,6 +659,9 @@ async def pop_and_propagate(state: Any) -> dict[str, Any]:
 
     - 子（B への反論 C）が生き残った(won_by_p) ＝ この B は撃退された
       → 親フレームは次の B を探しに `opponent_move` へ戻る。
+      子が相互 defeat を通っていた(entered_by_mutual_defeat) か contested なら、B は strictly には
+      退けられていないので、親にその B を contested として覚えさせる（O が手詰まりになった
+      とき、親は won_by_p ではなく contested＝defensible で閉じる）。
     - 子が生き残れなかった(lost_by_p/undetermined) ＝ この B は最終的に撃退できなかった
       → 親フレーム全体が負ける（AND 条件: 1つでも撃退できない攻撃があれば親は負け）。
         親を lost_by_p にして、さらに1段上へ伝播する（`pop_and_propagate` を再度呼ぶ）。
@@ -665,13 +690,21 @@ async def pop_and_propagate(state: Any) -> dict[str, Any]:
     parent_id = new_stack[-1]
     parent = _find_node(state.dialogue_nodes, parent_id)
 
-    if closed.outcome == "won_by_p":
+    if closed.outcome in ("won_by_p", "contested"):
+        # 相互 defeat を通った枝は、B を strictly には退けていない。親は次の B を探すが、
+        # その B を contested として覚えておき、O が手詰まりになったとき contested で閉じる。
+        contested = closed.outcome == "contested" or closed.entered_by_mutual_defeat
         nodes_ = _replace_node(
             state.dialogue_nodes,
             parent.id,
             attack_attempts=parent.attack_attempts + 1,
             current_attacker_id=None,
             counter_attempts=0,
+            contested_by=(
+                parent.current_attacker_id
+                if contested and parent.contested_by is None
+                else parent.contested_by
+            ),
         )
         return {
             "dialogue_nodes": nodes_,
@@ -868,42 +901,30 @@ async def finalize_fallback(state: Any) -> dict[str, Any]:
 
 
 async def generate_final_answer(state: Any) -> dict[str, Any]:
-    """最終回答を生成する（決着した議論 / 決着しなかった議論の2経路）.
+    """最終回答を生成する（材料と経路は ``final_answer.finalize`` を参照）.
 
-    A) justified: 勝った主張（justified_argument）から最終回答を作る。
-    B) 決着しなかった（ターン予算切れ・どちらの main も勝たない等）: 直近の main や統合ルール
-       1つに頼らず、議論全体を中立に1つの統合文へまとめ、その統合文だけを土台に回答する。
-       schema / no_schema で同じ方針を使うので、両者の差は議論の表現だけに由来する。
+    justified の主張があれば、その論証と議論全体から作る（Prakken & Sartor: justified な論証が
+    対話の結論）。なければ、両陣営の最後の main から統合案を作り、統合案と議論全体から作る。
+    どちらかの陣営に main がなければ、統合案は作らず、議論全体だけから作る。
+    schema / no_schema / free_debate / MAD（止揚）で同じ関数・同じプロンプトを使う。
     """
+    justified: str | None = None
     if state.consensus_reached:
         if not state.justified_argument:
             return {"final_answer": None, "consensus_reached": state.consensus_reached}
-        answer = await arguments.generate_final_answer(state)
-        return {
-            "final_answer": answer,
-            "consensus_reached": state.consensus_reached,
-            "finalization_path": "justified_argument",
-        }
-
-    history = speech_log(dialogue_history(_records(state)))
-    synthesis = await synthesize_unresolved_dialogue(
+        justified = state.justified_argument
+    result = await finalize_answer(
         question=state.question,
         agent1_stance=state.agent1_stance,
         agent2_stance=state.agent2_stance,
-        dialogue_history=history,
-    )
-    answer = await answer_from_fallback_synthesis(
-        question=state.question,
-        agent1_stance=state.agent1_stance,
-        agent2_stance=state.agent2_stance,
-        synthesis=synthesis,
+        dialogue_history=speech_log(dialogue_history(_records(state))),
+        justified_argument=justified,
     )
     return {
-        "final_answer": answer,
-        "consensus_reached": False,
-        "justification_status": "fallback_full_dialogue_synthesis",
-        "finalization_path": "fallback_full_dialogue_synthesis",
-        "fallback_synthesis": synthesis,
+        "final_answer": result["final_answer"],
+        "consensus_reached": bool(state.consensus_reached),
+        "finalization_path": result["finalization_path"],
+        "integrated_proposal": result["integrated_proposal"],
     }
 
 
@@ -914,7 +935,7 @@ async def finish(state: Any) -> dict[str, Any]:
         "justified_argument": state.justified_argument,
         "justification_status": state.justification_status,
         "finalization_path": state.finalization_path,
-        "fallback_synthesis": state.fallback_synthesis,
+        "integrated_proposal": state.integrated_proposal,
         "consensus_reached": state.consensus_reached,
         "final_rebuttal": state.final_rebuttal,
         "final_answer": state.final_answer,

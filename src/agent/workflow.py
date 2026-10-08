@@ -103,6 +103,7 @@ class State:
     pending_counter_argument: ArgumentRecord | None = None
     # 直前の検証結果（ルーティング専用の一時フラグ）。
     last_attack_defeated: bool | None = None
+    # True: C が B を defeat し、子フレームを push した（strict のほか、相互 defeat も含む）。
     last_counter_strictly_defeated: bool | None = None
     last_propagation_action: Literal["retry_attack", "cascade", "resolved"] | None = None
 
@@ -145,9 +146,10 @@ class State:
 
     justified_argument: str | None = None
     justification_status: str | None = None
-    # 最終回答の作り方。決着（justified）した議論はその主張から、しなかった議論は議論全体の統合から作る。
+    # 最終回答の作り方（justified_with_dialogue / integrated_with_dialogue / dialogue_only）。
     finalization_path: str | None = None
-    fallback_synthesis: str | None = None
+    # 最終回答の材料にした統合案（各陣営の最後の main から作る。作らなかったときは None）。
+    integrated_proposal: str | None = None
     final_answer: str | None = None
     error: str | None = None
 
@@ -231,7 +233,7 @@ graph = (
         route_after_validate_proponent_move,
         {
             "opponent_move": "opponent_move",
-            "proponent_move": "proponent_move",
+            "pop_and_propagate": "pop_and_propagate",
             "finish_with_error": "finish_with_error",
         },
     )

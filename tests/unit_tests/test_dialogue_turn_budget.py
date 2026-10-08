@@ -43,7 +43,9 @@ async def test_can_generate_main_stops_when_dialogue_turn_budget_reached(
     monkeypatch,
 ) -> None:
     async def should_not_be_called(*args, **kwargs):
-        raise AssertionError("generate_main should not be called once the budget is hit")
+        raise AssertionError(
+            "generate_main should not be called once the budget is hit"
+        )
 
     monkeypatch.setattr("agent.arguments.chat_structured", should_not_be_called)
 
@@ -114,8 +116,6 @@ async def test_opponent_move_treats_dialogue_budget_as_undetermined() -> None:
     assert update["pending_attacker_argument"] is None
 
 
-
-
 async def test_proponent_move_treats_dialogue_budget_as_undetermined() -> None:
     """max_dialogue_turns 到達は opponent_move 側と同様 undetermined として扱う
     （lost_by_p ではない。どちらも resolve_tree_status では defensible に落ちるが、
@@ -157,7 +157,9 @@ def test_mad_route_after_ag1_turn_cuts_off_mid_round_when_budget_set() -> None:
         agent1_stance="s1",
         agent2_stance="s2",
         max_dialogue_turns=1,
-        dialogue_history=[{"agent": "AG1", "round": 1, "argument": "x", "has_new_point": True}],
+        dialogue_history=[
+            {"agent": "AG1", "round": 1, "argument": "x", "has_new_point": True}
+        ],
     )
     assert mad_route_after_ag1_turn(state) == "judge"
 
@@ -168,7 +170,9 @@ def test_mad_route_after_ag1_turn_proceeds_normally_when_unset() -> None:
         agent1_stance="s1",
         agent2_stance="s2",
         max_dialogue_turns=None,
-        dialogue_history=[{"agent": "AG1", "round": 1, "argument": "x", "has_new_point": True}],
+        dialogue_history=[
+            {"agent": "AG1", "round": 1, "argument": "x", "has_new_point": True}
+        ],
     )
     assert mad_route_after_ag1_turn(state) == "ag2_turn"
 
@@ -197,7 +201,9 @@ def test_free_debate_route_after_ag1_turn_cuts_off_mid_round_when_budget_set() -
         agent1_stance="s1",
         agent2_stance="s2",
         max_dialogue_turns=1,
-        dialogue_history=[{"agent": "AG1", "round": 1, "argument": "x", "has_new_point": True}],
+        dialogue_history=[
+            {"agent": "AG1", "round": 1, "argument": "x", "has_new_point": True}
+        ],
     )
     assert fd_route_after_ag1_turn(state) == "integrate"
 

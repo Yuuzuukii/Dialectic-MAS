@@ -1,4 +1,4 @@
-"""Two-path finalization shared by schema, no-schema and free-debate.
+"""Two-path finalization shared by schema, no-schema, free-debate and mad-synthesis.
 
 Path A: if a main argument is justified, keep the existing justified-argument finalization
 (schema / no_schema only: the other protocols have no notion of a justified argument).
@@ -19,7 +19,8 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from .dialogue_transcript import TRANSCRIPT_DESCRIPTION, format_transcript
 from .llm import chat_text
 
-SUPPORTED_METHODS = {"schema", "no_schema", "free_debate"}
+# mad_synthesis は、MAD の議論を judge ではなく統合で終える版（free_debate と同じく決着の概念が無い）。
+SUPPORTED_METHODS = {"schema", "no_schema", "free_debate", "mad_synthesis"}
 
 # ログ（dialogue_history）に残す発話のフィールド。最終化の入力もこの形に揃える
 # （生成中の finalize と、ログからの後付け refinalize で同じ入力になるように）。

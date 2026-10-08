@@ -20,8 +20,17 @@ _SCHEMA_ARGUMENT = json.dumps(
     {
         "Argument": {
             "rules": [
-                {"antecedent": {"strong": ["Fact A holds."], "weak_negation": ["no evidence B"]}, "consequent": "Step one."},
-                {"antecedent": {"strong": ["Step one."], "weak_negation": []}, "consequent": "Therefore the conclusion."},
+                {
+                    "antecedent": {
+                        "strong": ["Fact A holds."],
+                        "weak_negation": ["no evidence B"],
+                    },
+                    "consequent": "Step one.",
+                },
+                {
+                    "antecedent": {"strong": ["Step one."], "weak_negation": []},
+                    "consequent": "Therefore the conclusion.",
+                },
             ],
             "Conc": ["Step one.", "Therefore the conclusion."],
             "Ass": ["no evidence B"],
@@ -29,7 +38,16 @@ _SCHEMA_ARGUMENT = json.dumps(
     }
 )
 
-_LEAK_WORDS = ("rebut", "undercut", "justified", "overruled", "defensible", "status", "target_statement", "closed_by_budget")
+_LEAK_WORDS = (
+    "rebut",
+    "undercut",
+    "justified",
+    "overruled",
+    "defensible",
+    "status",
+    "target_statement",
+    "closed_by_budget",
+)
 
 
 def test_schema_argument_is_rendered_as_prose() -> None:
@@ -47,9 +65,30 @@ def test_free_text_is_kept_as_is() -> None:
 
 def test_schema_and_free_debate_labels_use_the_same_vocabulary() -> None:
     schema_history: list[dict[str, Any]] = [
-        {"id": "a", "agent": "AG1", "type": "main", "argument": _SCHEMA_ARGUMENT, "status": "defensible"},
-        {"id": "b", "agent": "AG2", "type": "defeat", "attack": "rebut", "target_id": "a", "target_statement": "x", "argument": "reply"},
-        {"id": "c", "agent": "AG1", "type": "counter", "attack": "undercut", "target_id": "b", "argument": "again"},
+        {
+            "id": "a",
+            "agent": "AG1",
+            "type": "main",
+            "argument": _SCHEMA_ARGUMENT,
+            "status": "defensible",
+        },
+        {
+            "id": "b",
+            "agent": "AG2",
+            "type": "defeat",
+            "attack": "rebut",
+            "target_id": "a",
+            "target_statement": "x",
+            "argument": "reply",
+        },
+        {
+            "id": "c",
+            "agent": "AG1",
+            "type": "counter",
+            "attack": "undercut",
+            "target_id": "b",
+            "argument": "again",
+        },
         {"id": "d", "agent": "AG2", "type": "main", "argument": "second line"},
     ]
     free_history = [
@@ -71,7 +110,9 @@ def test_schema_and_free_debate_labels_use_the_same_vocabulary() -> None:
         assert word not in free_text.lower()
 
 
-async def test_synthesis_prompts_are_method_neutral(monkeypatch: pytest.MonkeyPatch) -> None:
+async def test_synthesis_prompts_are_method_neutral(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     seen: list[list[Any]] = []
 
     async def fake_chat_text(messages: list[Any], **kwargs: Any) -> str:

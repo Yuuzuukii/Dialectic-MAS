@@ -3,7 +3,7 @@
 - タブ: topic → method、ボタン: run（複数回実行）
 - schema / no_schema: target_id（どの論証を攻撃したか）で親子をつないだ木構造
   （根 = main、子 = それを攻撃/反論した論証。実線 rebut / 破線 undercut、枠色は status）
-- free_debate / mad: 明示的な辺が無いため、発話順の応答関係（直前の相手発話への返答）を
+- free_debate / mad / mad_synthesis: 明示的な辺が無いため、発話順の応答関係（直前の相手発話への返答）を
   グレーの点線で描く。※順序からの推定であり、ログ上の関係ではない。
 
 Usage:
@@ -25,7 +25,7 @@ from typing import Any
 
 DEFAULT_ROOT = Path("logs/experiment_20260916_020350/raw_dialogue")
 DEFAULT_OUT = Path("logs/experiment_20260916_020350/eval_result/dialogue_tree/argument_network.html")
-METHODS = ["schema", "no_schema", "free_debate", "mad"]
+METHODS = ["schema", "no_schema", "free_debate", "mad", "mad_synthesis"]
 EDGE_METHODS = {"schema", "no_schema"}
 TREE_DX, TREE_DY = 170, 140
 AGENT_COLORS = {"AG1": "#1f77b4", "AG2": "#d62728"}
@@ -35,7 +35,7 @@ STATUS_BORDER = {
     "overruled": "#888888",
 }
 FILE_RE = re.compile(
-    r"^(?:(\d+)_)?(schema|no_schema|free_debate|mad)_\d{8}_\d{6}_\d+\.json$"
+    r"^(?:(\d+)_)?(schema|no_schema|free_debate|mad_synthesis|mad)_\d{8}_\d{6}_\d+\.json$"
 )
 
 ATTEMPT_LABELS = {

@@ -232,12 +232,20 @@ class DialogueNode(BaseModel):
     attack_attempts: int = Field(
         default=0, description="このフレームで O が試した攻撃 (B) の本数。"
     )
-    # current_attacker_id に対して P が試した反論 (C) の本数。B が変わるたびリセット。
+    # current_attacker_id に対して P が出した反論 (C) の本数（B 1 つにつき 1 つ。記録用）。
     counter_attempts: int = Field(default=0)
 
-    outcome: Literal["open", "won_by_p", "lost_by_p", "undetermined"] = Field(
+    # contested: P は strictly defeat できなかったが、O の攻撃を退けた枝が相互 defeat だけだった
+    # （Prakken & Sartor Def 3.4 の defensible。justified でも overruled でもない）。
+    outcome: Literal["open", "won_by_p", "lost_by_p", "undetermined", "contested"] = Field(
         default="open"
     )
+    # True: このフレームは、C が B と互いに defeat し合う（相互 defeat）ことで push された。
+    # P は B を strictly defeat していないので、親から見て B は退けられていない。
+    entered_by_mutual_defeat: bool = Field(default=False)
+    # 子の枝が相互 defeat（contested）だった B の id。O がこれ以上攻撃を出せなくなったとき、
+    # 親フレームは won_by_p ではなく contested で閉じる。
+    contested_by: str | None = Field(default=None)
     # True: 予算切れ（max_dialogue_turns）による確定。
     # False: 相手が本当に手を出せなくなった/出せた、という理論的な確定。
     closed_by_budget: bool = Field(default=False)

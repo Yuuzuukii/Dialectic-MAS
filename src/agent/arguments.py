@@ -133,6 +133,61 @@ def build_main_argument_messages(state: Any, agent: AgentName) -> list[BaseMessa
     ]
 
 
+def _thread_numbering(state: Any) -> tuple[list[ArgumentRecord], dict[str, int]]:
+    """履歴の発言（argument_records）と id→連番の対応を返す。連番は 1 始まりで、履歴の AIMessage と同じ順."""
+    records = list(getattr(state, "argument_records", None) or [])
+    return records, {record.id: index + 1 for index, record in enumerate(records)}
+
+
+def numbered_history(state: Any) -> list[BaseMessage]:
+    """発言に連番 [n] を付けた履歴を返す（schema / no_schema 共通。本文は変えない）.
+
+    履歴の AIMessage は argument_records と同じ順に 1 対 1 で並ぶ。数が合わないときは番号を付けない。
+    """
+    messages = render_history(state.history)
+    records = list(getattr(state, "argument_records", None) or [])
+    if len(messages) != len(records):
+        return messages
+    return [
+        AIMessage(content=f"[{index + 1}] {message.content}", name=message.name)
+        for index, message in enumerate(messages)
+    ]
+
+
+def defeat_relations_block(state: Any) -> str:
+    """現在のスレッド（今の main 以降）の defeat 関係を、種別を伏せた短い行にして返す.
+
+    schema / no_schema に同じ形で渡す。成立した defeat は「[x] defeats [y]」、判定で成立しなかった
+    攻撃は「[x] does not defeat [y]」。互いに defeat しているときは (mutual) を付ける。
+    """
+    records, number = _thread_numbering(state)
+    main = getattr(state, "current_argument", None)
+    start = number.get(main.id, 1) if main is not None else 1
+    in_thread = {rid for rid, n in number.items() if n >= start}
+    won: set[tuple[str, str]] = set()
+    failed: set[tuple[str, str]] = set()
+    for rel in getattr(state, "defeat_relations", None) or []:
+        if rel.attacker_id not in in_thread or rel.target_id not in in_thread:
+            continue
+        (won if rel.valid else failed).add((rel.attacker_id, rel.target_id))
+    lines: list[str] = []
+    for attacker, target in sorted(
+        won, key=lambda pair: (number[pair[0]], number[pair[1]])
+    ):
+        mutual = (
+            f" (mutual: [{number[target]}] also defeats [{number[attacker]}])"
+            if (target, attacker) in won
+            else ""
+        )
+        lines.append(f"[{number[attacker]}] defeats [{number[target]}]{mutual}")
+    for attacker, target in sorted(
+        failed - won, key=lambda pair: (number[pair[0]], number[pair[1]])
+    ):
+        lines.append(f"[{number[attacker]}] does not defeat [{number[target]}]")
+    body = "\n".join(lines) if lines else "(none yet)"
+    return f"<defeat_relations>\n{body}\n</defeat_relations>"
+
+
 async def build_attack_messages(
     state: Any, attacker: AgentName, target: ArgumentRecord, *, purpose: str
 ) -> list[BaseMessage]:
@@ -143,18 +198,25 @@ async def build_attack_messages(
         else PromptTemplates.ARGUMENT_SYSTEM
     )
     main_argument = getattr(state, "current_argument", None)
+    instruction = attack_instruction(
+        purpose,
+        target,
+        state=state,
+        main_argument=main_argument,
+    )
+    _, number = _thread_numbering(state)
+    target_label = (
+        f"\n<target_number>[{number[target.id]}]</target_number>"
+        if target.id in number
+        else ""
+    )
     return [
         SystemMessage(
             content=agent_system(_stance(state, attacker), attacker, template)
         ),
-        *render_history(state.history),
+        *numbered_history(state),
         HumanMessage(
-            content=attack_instruction(
-                purpose,
-                target,
-                state=state,
-                main_argument=main_argument,
-            )
+            content=f"{defeat_relations_block(state)}{target_label}\n\n{instruction}"
         ),
     ]
 
@@ -219,7 +281,7 @@ def _meta_conclusion_violation(index: int, consequent: str) -> str | None:
     for pattern in _META_CONCLUSION_PATTERNS:
         if pattern in lowered:
             return (
-                f"rule {index + 1}'s consequent (\"{consequent}\") states a verdict about "
+                f'rule {index + 1}\'s consequent ("{consequent}") states a verdict about '
                 f'the dialectical game ("{pattern}") instead of a substantive claim about '
                 "the issue"
             )
@@ -383,7 +445,11 @@ async def generate_attack(
     ):
         _decline_reason.set(
             "Repeats a reason I already used"
-            + (f" (closest earlier argument: {novelty.closest_earlier_id})" if novelty.closest_earlier_id else "")
+            + (
+                f" (closest earlier argument: {novelty.closest_earlier_id})"
+                if novelty.closest_earlier_id
+                else ""
+            )
             + "; there is no new reason to add."
         )
         return None
@@ -538,8 +604,7 @@ async def generate_final_answer(state: Any) -> str:
     if state.integrated_rules:
         rules_text = "\n".join(f"- {rule}" for rule in state.integrated_rules)
         integrated_rules_block = (
-            "\nShared integrated rules produced in earlier rounds:\n"
-            f"{rules_text}\n"
+            f"\nShared integrated rules produced in earlier rounds:\n{rules_text}\n"
         )
     else:
         integrated_rules_block = ""
