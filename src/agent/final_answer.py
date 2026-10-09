@@ -62,6 +62,23 @@ Answer the original question, using the record of the debate between AG1 and AG2
 </requirements>"""
 
 
+_WRITER_ROLE = """<role>
+You are {writer} in this debate. The stance labeled "{writer} stance" below is yours. You now write the final answer
+to the original question.
+</role>
+
+"""
+
+
+def final_system(writer: str | None = None) -> str:
+    """最終回答のシステムプロンプトを返す。writer（例: "AG1"）を渡すと、その陣営の役割で書かせる."""
+    return (
+        _FINAL_SYSTEM
+        if writer is None
+        else _WRITER_ROLE.format(writer=writer) + _FINAL_SYSTEM
+    )
+
+
 def last_position(dialogue_history: list[dict[str, Any]], agent: str) -> str | None:
     """その陣営の最後の主張を、読める文章で返す（なければ None）.
 
@@ -140,8 +157,13 @@ async def answer_from_materials(
     integrated_proposal: str | None = None,
     justified_argument: str | None = None,
     model: str | None = None,
+    writer: str | None = None,
 ) -> str:
-    """議論全体と、（あれば）justified な論証・統合案から、最終回答を作る."""
+    """議論全体と、（あれば）justified な論証・統合案から、最終回答を作る.
+
+    writer が None なら中立な書き手（既定）。"AG1" などを渡すと、その陣営の役割で書く（立場文は、ユーザー側に
+    「AG1 stance」として、どちらの場合も渡している）。
+    """
     user = _final_user(
         question=question,
         agent1_stance=agent1_stance,
@@ -152,7 +174,7 @@ async def answer_from_materials(
     )
     return (
         await chat_text(
-            [SystemMessage(content=_FINAL_SYSTEM), HumanMessage(content=user)],
+            [SystemMessage(content=final_system(writer)), HumanMessage(content=user)],
             model=model,
             verbosity="high",
         )
