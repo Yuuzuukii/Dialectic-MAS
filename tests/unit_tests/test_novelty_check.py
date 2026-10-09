@@ -10,13 +10,13 @@ import pytest
 from agent import arguments
 from agent.prompts import attack_instruction
 from agent.schema.llm_outputs import (
-    Antecedent,
-    ArgumentBody,
+    AntecedentDraft,
+    ArgumentDraft,
     AttackMetadata,
     DefeatingArgumentOutput,
     DefeatingArgumentOutputFree,
     NoveltyCheck,
-    Rule,
+    RuleDraft,
     TargetReference,
 )
 from agent.schema.state import ArgumentRecord
@@ -39,18 +39,15 @@ def _output(novelty: NoveltyCheck | None) -> DefeatingArgumentOutput:
     return DefeatingArgumentOutput(
         Novelty=novelty,
         can_defeat="YES",
-        Argument=ArgumentBody(
+        Argument=ArgumentDraft(
             rules=[
-                Rule(
-                    antecedent=Antecedent(strong=["a is affordable"]),
+                RuleDraft(
+                    antecedent=AntecedentDraft(),
                     consequent="We should buy a",
                 )
             ]
         ),
-        Attack=AttackMetadata(
-            method="rebut",
-            target=TargetReference(field="Conc", statement="We should not buy a"),
-        ),
+        Attack=AttackMetadata(method="rebut", target=TargetReference(number=1)),
     )
 
 

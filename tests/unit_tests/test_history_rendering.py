@@ -41,7 +41,12 @@ async def test_defeat_prompt_does_not_carry_other_turns_instructions() -> None:
         current_argument=None,
         history=_history(),
     )
-    target = cast("Any", SimpleNamespace(id="arg-x", agent="AG2", argument="{}"))
+    target = cast(
+        "Any",
+        SimpleNamespace(
+            id="arg-x", agent="AG2", argument="{}", conclusions=[], assumptions=[]
+        ),
+    )
 
     messages = await arguments.build_attack_messages(state, "AG1", target, purpose="defeat")
 

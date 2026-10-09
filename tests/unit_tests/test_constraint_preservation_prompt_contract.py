@@ -6,18 +6,18 @@ from typing import Any
 import pytest
 
 from agent import arguments
-from agent.arguments import validate_argument_body
+from agent.arguments import resolve_draft
 from agent.prompts import (
     PromptTemplates,
     integration_instruction,
     main_instruction,
 )
 from agent.schema.llm_outputs import (
-    Antecedent,
-    ArgumentBody,
+    AntecedentDraft,
+    ArgumentDraft,
     IntegrationBody,
     IntegrationBodyFree,
-    Rule,
+    RuleDraft,
 )
 
 pytestmark = pytest.mark.anyio
@@ -124,21 +124,16 @@ async def test_justified_final_answer_receives_integrated_rules(
 
 
 def test_argument_validation_rejects_empty_placeholder_rule() -> None:
-    body = ArgumentBody(
+    draft = ArgumentDraft(
         rules=[
-            Rule(
-                antecedent=Antecedent(
-                    strong=[],
-                    weak_negation=["No additional rule needed."],
-                ),
+            RuleDraft(
+                antecedent=AntecedentDraft(weak_negation=["No additional rule needed."]),
                 consequent=" ",
             )
         ]
     )
 
-    violations = validate_argument_body(body)
+    _, violations = resolve_draft(draft)
 
     assert "rule 1 has an empty consequent" in violations
-    assert (
-        "rule 1 has no meaningful strong or weak_negation antecedent" in violations
-    )
+    assert "rule 1 has a placeholder in weak_negation" in violations

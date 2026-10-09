@@ -84,6 +84,44 @@ class TokenUsageTracker(BaseCallbackHandler):
         }
 
 
+def _judge_stats(tracker: TokenUsageTracker, stats: Any) -> dict[str, Any]:
+    """判定の呼び出し回数とトークン数、書き直しの回数と、判定と書き手の費用の内訳を、ログ用に作る.
+
+    グラフ全体のコールバック（tracker）は、ノードの中の判定の呼び出しも数え、全体を 1 つのモデルの
+    単価で計算する。そこで、判定の分（別のモデル）を引いた書き手の分を書き手の単価で、判定の分を
+    判定のモデルの単価で計算し直す（corrected_total_cost_usd）。
+    """
+    from src.agent.attack_judge import judge_model
+
+    data: dict[str, Any] = stats.to_dict()
+    judge = data["judge_tokens"]
+    usage = tracker.usage()
+
+    def cost(model: str, prompt: int, cached: int, completion: int) -> float:
+        price_input, price_cached, price_output = _prices_for(model)
+        return ((prompt - cached) * price_input + cached * price_cached + completion * price_output) / 1_000_000
+
+    generator_cost = cost(
+        tracker.model,
+        usage["prompt_tokens"] - judge["prompt_tokens"],
+        usage["cached_tokens"] - judge["cached_tokens"],
+        usage["completion_tokens"] - judge["completion_tokens"],
+    )
+    judge_cost = cost(
+        judge_model(), judge["prompt_tokens"], judge["cached_tokens"], judge["completion_tokens"]
+    )
+    data.update(
+        {
+            "judge_model": judge_model(),
+            "tokens_included_in_metrics": True,
+            "generator_cost_usd": round(generator_cost, 6),
+            "judge_cost_usd": round(judge_cost, 6),
+            "corrected_total_cost_usd": round(generator_cost + judge_cost, 6),
+        }
+    )
+    return data
+
+
 def _parse_json_text(value: Any) -> Any:
     if not isinstance(value, str):
         return value
@@ -506,6 +544,9 @@ async def _run_topic_once(
         state_kwargs["max_dialogue_turns"] = max_dialogue_turns
     graph_input = State(**state_kwargs)
 
+    from src.agent.run_stats import begin_run
+
+    run_stats = begin_run()
     start = time.perf_counter()
     result: dict[str, Any] = dict(graph_input.__dict__)
     seen_argument_ids: set[str] = set()
@@ -549,6 +590,11 @@ async def _run_topic_once(
     log["main_unavailable_reasons"] = final_state.get("main_unavailable_reasons") or {}
     # 「出せなかった／認められなかった」試行（反論なし・ブロッカーなし・攻撃不成立など）と理由。
     log["attempt_log"] = final_state.get("attempt_log") or []
+    # 判定の呼び出し回数とトークン数、書き直しの回数、判定と書き手の費用の内訳。
+    judge_stats = _judge_stats(tracker, run_stats)
+    # 形式の違反で却下された下書き（書き直しで捨てられたもの）は、本文を含むので、別の項目にする。
+    log["discarded_drafts"] = judge_stats.pop("discarded_drafts", [])
+    log["judge_stats"] = judge_stats
     error = final_state.get("error")
     if error is not None:
         log["error"] = error

@@ -2,7 +2,7 @@
 
 `opponent_move` / `validate_opponent_move` / `proponent_move` /
 `validate_proponent_move` / `pop_and_propagate` / `resolve_tree_status` を、
-LLM 呼び出し（`generate_attack` / `evaluate_attack` / `ask_attack_extends`）を
+LLM 呼び出し（`generate_attack` / `evaluate_attack` / `undercut_relation`）を
 モックしながら実際に駆動し、木の解決（AND/OR 集約）が原論文の定義どおりに
 動くことを検証する。
 """
@@ -15,7 +15,9 @@ from typing import Any
 
 import pytest
 
-from agent.argumentation_model import AttackEvaluation, AttackMatch
+from agent.argumentation_model import AttackEvaluation
+from agent.attack_judge import UndercutVerdict
+from agent.edges import route_after_validate_proponent_move
 from agent.schema.state import ArgumentRecord
 from agent.workflow import State
 
@@ -78,22 +80,18 @@ async def _run_tree(
             return next(attacks_iter, None)
         return next(counters_iter, None)
 
-    async def fake_ask_attack_extends(*_args, **_kwargs):
-        # B-C 間で改めて宣言された攻撃関係（常に「及ぶ」ものとして rebut/Conc を返す。
-        # 実際に defeat するかどうかは stage_aware_evaluate_attack 側の reverse_defeats で制御）。
-        return AttackMatch(method="rebut", field="Conc", statement="c's conclusion")
+    async def fake_undercut_relation(_state, attack, _target, context="relation"):
+        # strictly defeat の判定（SD(C, B) = U(C, B) ∧ ¬U(B, C)）で呼ばれる undercut の確認を、
+        # reverse_defeats（B が C に反撃できるか＝相互 defeat か）から作って返す。
+        #  - B → C（attack が反論側 B）: 相互 defeat のとき、B は C を undercut している（holds）。
+        #  - C → B（attack が主張側 C）: 相互 defeat のとき、C は B を undercut していない（not holds）。
+        mutual = next(reverse_iter)
+        holds = (not mutual) if attack.agent == _state.current_proponent else mutual
+        return UndercutVerdict(holds, None, "test")
 
     async def stage_aware_evaluate_attack(
         _state, attacker, target, _defender, **kwargs
     ):
-        # proponent_move 経由の「B defeats C」逆検証だけ persist_metadata=False で
-        # 呼ばれるので、それを reverse_defeats、それ以外を defeats で消費する。
-        if kwargs.get("persist_metadata") is False:
-            return AttackEvaluation(
-                defeats=next(reverse_iter),
-                attack=attacker.attack or "rebut",
-                relations=[],
-            )
         return AttackEvaluation(
             defeats=next(defeats_iter), attack=attacker.attack or "rebut", relations=[]
         )
@@ -106,10 +104,10 @@ async def _run_tree(
 
     original_generate_attack = nodes_module.generate_attack
     original_evaluate_attack = nodes_module.evaluate_attack
-    original_ask_attack_extends = nodes_module.ask_attack_extends
+    original_undercut_relation = nodes_module.undercut_relation
 
     nodes_module.generate_attack = fake_generate_attack  # type: ignore[assignment]
-    nodes_module.ask_attack_extends = fake_ask_attack_extends  # type: ignore[assignment]
+    nodes_module.undercut_relation = fake_undercut_relation  # type: ignore[assignment]
 
     nodes_module.evaluate_attack = stage_aware_evaluate_attack  # type: ignore[assignment]
 
@@ -137,11 +135,7 @@ async def _run_tree(
                     else "pop_and_propagate"
                 )
             elif current == "validate_proponent_move":
-                current = (
-                    "opponent_move"
-                    if state.last_counter_strictly_defeated
-                    else "pop_and_propagate"
-                )
+                current = route_after_validate_proponent_move(state)
             elif current == "pop_and_propagate":
                 if state.last_propagation_action == "resolved":
                     current = "resolve_tree_status"
@@ -158,7 +152,7 @@ async def _run_tree(
     finally:
         nodes_module.generate_attack = original_generate_attack
         nodes_module.evaluate_attack = original_evaluate_attack
-        nodes_module.ask_attack_extends = original_ask_attack_extends
+        nodes_module.undercut_relation = original_undercut_relation
 
     return state
 
@@ -433,41 +427,87 @@ async def test_mutual_defeat_branch_then_other_attack_unanswered_is_overruled() 
     assert result.tree_root_status == "overruled"
 
 
-async def test_counter_that_does_not_defeat_is_not_retried() -> None:
-    """反撃 C がそもそも B を defeat できない場合も、作り直さず、その枝は P の負け."""
+def _counter_rec(agent: str, tag: str, kind: str) -> ArgumentRecord:
+    return ArgumentRecord(
+        type=kind,  # type: ignore[arg-type]
+        argument=json.dumps({"Argument": {"rules": [], "Conc": [tag], "Ass": []}}),
+        support=[],
+        agent=agent,  # type: ignore[arg-type]
+        attack="rebut",  # type: ignore[arg-type]
+    )
+
+
+async def test_counter_that_does_not_defeat_is_retried_and_can_then_succeed() -> None:
+    """反撃 C が B を defeat できなくても、P は同じ B への別の反撃をやり直せる.
+
+    文献（Def 4.8）は、P が勝つ木が存在することを証明の条件とし、P は返答を探してよい。
+    弾かれた C も、履歴に残り、ターン数に数える。
+    """
     main = _record("AG1", "we should choose a")
-
-    def rec(agent: str, tag: str, kind: str) -> ArgumentRecord:
-        return ArgumentRecord(
-            type=kind,  # type: ignore[arg-type]
-            argument=json.dumps({"Argument": {"rules": [], "Conc": [tag], "Ass": []}}),
-            support=[],
-            agent=agent,  # type: ignore[arg-type]
-            attack="rebut",  # type: ignore[arg-type]
-        )
-
     state = _fresh_state(main)
 
     result = await _run_tree(
         state,
-        attacks=[rec("AG2", "not a", "defeat")],
-        counters=[rec("AG1", "first", "counter"), rec("AG1", "second", "counter")],
-        defeats=[True, False],  # B defeats A, しかし C は B を defeat しない
+        attacks=[_counter_rec("AG2", "not a", "defeat"), None],
+        counters=[_counter_rec("AG1", "first", "counter"), _counter_rec("AG1", "second", "counter")],
+        defeats=[True, False, True],  # B>A、1 つ目の C は B を defeat しない、2 つ目の C は defeat する
+        reverse_defeats=[False],  # 2 つ目の C は strictly defeat
+    )
+
+    assert result.tree_root_status == "justified"
+    # 弾かれた C も、やり直した C も、履歴（ターン数の対象）に残る。
+    assert [r.type for r in result.argument_records].count("counter") == 2
+
+
+async def test_proponent_with_no_new_counter_after_a_rejection_loses_the_branch() -> None:
+    """弾かれたあと、P が新しい反撃を作れなければ（no_counter）、その枝は P の負け."""
+    main = _record("AG1", "we should choose a")
+    state = _fresh_state(main)
+
+    result = await _run_tree(
+        state,
+        attacks=[_counter_rec("AG2", "not a", "defeat")],
+        counters=[_counter_rec("AG1", "first", "counter"), None],
+        defeats=[True, False],
         reverse_defeats=[],
     )
 
     assert result.tree_root_status == "overruled"
-    assert len([r for r in result.argument_records if r.type == "counter"]) == 1
+    assert [r.type for r in result.argument_records].count("counter") == 1
 
 
-def test_route_after_failed_counter_goes_to_pop_and_propagate() -> None:
-    """strictly defeat にならなかった反撃のあとは、proponent_move には戻らず pop_and_propagate."""
+async def test_rejected_counters_count_toward_the_turn_budget() -> None:
+    """やり直した反撃は、ターン数に数えられ、予算が尽きると、その枠は undetermined（defensible）で閉じる."""
+    main = _record("AG1", "we should choose a")
+    state = replace(_fresh_state(main), max_dialogue_turns=6)  # AG1 の予算は 3 発話（main を含む）
+
+    result = await _run_tree(
+        state,
+        attacks=[_counter_rec("AG2", "not a", "defeat"), None],
+        counters=[_counter_rec("AG1", f"c{i}", "counter") for i in range(10)],
+        defeats=[True] + [False] * 10,
+        reverse_defeats=[],
+    )
+
+    assert result.tree_root_status == "defensible"
+    assert result.tree_root_closed_by_budget is True
+    # main 1 + B 1 + 弾かれた C が、予算 3 に達するまで。
+    assert len(result.argument_records) == 3
+
+
+def test_route_after_validate_proponent_move() -> None:
+    """defeat した C は opponent_move へ、弾かれた C は proponent_move へ戻る（やり直し）."""
     from agent.edges import route_after_validate_proponent_move
 
-    failed = State(question="Q?", agent1_stance="s1", agent2_stance="s2")
-    failed.last_counter_strictly_defeated = False
-    assert route_after_validate_proponent_move(failed) == "pop_and_propagate"
+    rejected = State(question="Q?", agent1_stance="s1", agent2_stance="s2")
+    rejected.last_counter_strictly_defeated = False
+    rejected.last_counter_rejected = True
+    assert route_after_validate_proponent_move(rejected) == "proponent_move"
 
     succeeded = State(question="Q?", agent1_stance="s1", agent2_stance="s2")
     succeeded.last_counter_strictly_defeated = True
+    succeeded.last_counter_rejected = False
     assert route_after_validate_proponent_move(succeeded) == "opponent_move"
+
+    neither = State(question="Q?", agent1_stance="s1", agent2_stance="s2")
+    assert route_after_validate_proponent_move(neither) == "pop_and_propagate"

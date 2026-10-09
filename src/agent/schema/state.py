@@ -232,7 +232,7 @@ class DialogueNode(BaseModel):
     attack_attempts: int = Field(
         default=0, description="このフレームで O が試した攻撃 (B) の本数。"
     )
-    # current_attacker_id に対して P が出した反論 (C) の本数（B 1 つにつき 1 つ。記録用）。
+    # current_attacker_id に対して P が出した反論 (C) の本数（弾かれて、やり直した分を含む。記録用）。
     counter_attempts: int = Field(default=0)
 
     # contested: P は strictly defeat できなかったが、O の攻撃を退けた枝が相互 defeat だけだった

@@ -6,11 +6,14 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import Any, Literal
 
+from .attack_judge import judge_rebut, judge_undercut
 from .schema.state import ArgumentRecord, DefeatRelation
 from .schema.types import AgentName, AttackType
+from .target_selection import candidates, is_schema, quote_in_text
 
 # 防御側のすでにある論証（own）が、相手の rebut（attack）を undercut しているかの判定。
 # undercut しているならその理由を返し、していなければ None（新しい論証は作らない）。
+# 判定は、議論を書く側とは別の LLM（attack_judge）が行う。
 UndercutCheck = Callable[[ArgumentRecord, ArgumentRecord], Awaitable[str | None]]
 TargetField = Literal["Conc", "Ass"]
 
@@ -52,21 +55,21 @@ def attack_from_metadata(attacker: ArgumentRecord) -> AttackMatch | None:
     return AttackMatch(attacker.attack, field, attacker.target_statement)
 
 
-def target_statement_exists(match: AttackMatch, target: ArgumentRecord) -> bool:
-    """LLM が宣言した target_statement が、対象の実際の Conc/Ass に存在するか検証する.
+def target_statement_exists(
+    match: AttackMatch, target: ArgumentRecord, mode: str = "schema"
+) -> bool:
+    """宣言された対象の文が、対象の論証に実在するか検証する.
 
-    Definition 2.8 の attack は論証の実際の内容から客観的に決まる関係であり、
-    攻撃側が自己申告する target_statement をそのまま信用してよい理由にはならない。
-    no_schema（target.body が空）では Conc/Ass が構造化されていないため検証できず、
-    常に True とする。
+    schema は、番号から復元した文なので、通常は常に実在する（防御的な再確認）。対象の実際の
+    Conc（rebut）または Ass（undercut）に、一字一句、一致することを求める。no_schema は、攻撃側が
+    対象の本文から書き写した文なので、その文が対象の本文に含まれる（空白と大文字小文字を揃えて）ことを求める。
     """
-    if not target.body:
-        return True
-    candidates = target.conclusions if match.field == "Conc" else target.assumptions
     if match.statement is None:
         return False
+    if not is_schema(mode):
+        return quote_in_text(match.statement, target.argument)
     wanted = _normalize(match.statement)
-    return any(_normalize(c) == wanted for c in candidates)
+    return any(_normalize(item) == wanted for item in candidates(target, match.method))
 
 
 def relation(
@@ -98,7 +101,12 @@ async def evaluate_attack(
     undercut_check: UndercutCheck | None = None,
     persist_metadata: bool = True,
 ) -> AttackEvaluation:
-    """攻撃者が対象を破れるか判定する。rebut は、対象側のすでにある論証が攻撃を undercut していなければ defeat."""
+    """攻撃者が対象を defeat するかを、別の LLM の判定で決める（Prakken & Sartor Def 2.16）.
+
+    - undercut: 宣言された対象の仮定が、対象に実在し、攻撃がその否定を確立していれば defeat。
+    - rebut: 宣言された対象の結論が、対象に実在し、攻撃の結論のどれかがその否定であり、かつ、
+      対象のすでにある論証が攻撃を undercut していなければ defeat。
+    """
     _log(f"[argumentation_model] {relation_context}")
     match = attack_from_metadata(attacker)
     if match is None:
@@ -118,9 +126,10 @@ async def evaluate_attack(
         )
 
     _log(f'  attack: {match.method} on {match.field} — "{match.statement}"')
+    mode = str(getattr(state, "output_mode", "schema"))
 
-    if not target_statement_exists(match, target):
-        _log("  → declared target_statement not found in target's Conc/Ass: not defeated")
+    if not target_statement_exists(match, target, mode):
+        _log("  → declared target_statement not found in the target: not defeated")
         return AttackEvaluation(
             defeats=False,
             attack=match.method,
@@ -140,8 +149,31 @@ async def evaluate_attack(
         attacker.target_field = match.field
         attacker.target_statement = match.statement
 
+    statement = match.statement or ""
     if match.method == "undercut":
-        _log("  → undercut: defeated")
+        verdict = await judge_undercut(
+            state,
+            attacker,
+            target,
+            [statement],
+            presumption_check=mode == "no_schema",
+        )
+        if not verdict.holds:
+            _log("  → judge: the undercut is not established: not defeated")
+            return AttackEvaluation(
+                defeats=False,
+                attack=match.method,
+                relations=[
+                    relation(
+                        attacker,
+                        target,
+                        match,
+                        False,
+                        f"{relation_context}: undercut not established — {verdict.reason}",
+                    )
+                ],
+            )
+        _log("  → judge: undercut established: defeated")
         return AttackEvaluation(
             defeats=True,
             attack=match.method,
@@ -151,13 +183,30 @@ async def evaluate_attack(
                     target,
                     match,
                     True,
-                    f"{relation_context}: undercut defeats target",
+                    f"{relation_context}: undercut defeats target — {verdict.reason}",
+                )
+            ],
+        )
+
+    rebut = await judge_rebut(state, attacker, statement, target)
+    if not rebut.holds:
+        _log("  → judge: no conclusion of the attack contradicts the target statement: not defeated")
+        return AttackEvaluation(
+            defeats=False,
+            attack=match.method,
+            relations=[
+                relation(
+                    attacker,
+                    target,
+                    match,
+                    False,
+                    f"{relation_context}: rebut not established — {rebut.reason}",
                 )
             ],
         )
 
     if undercut_check is not None:
-        _log(f"  rebut detected — checking whether {target.id} already undercuts {attacker.id}")
+        _log(f"  rebut established — checking whether {target.id} already undercuts {attacker.id}")
         reason = await undercut_check(target, attacker)
         if reason is not None:
             _log("  → target already undercuts the rebut: not defeated")
@@ -186,7 +235,7 @@ async def evaluate_attack(
                 target,
                 match,
                 True,
-                f"{relation_context}: rebut not undercut by the target",
+                f"{relation_context}: rebut not undercut by the target — {rebut.reason}",
             )
         ],
     )

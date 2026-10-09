@@ -17,6 +17,7 @@ from __future__ import annotations
 from typing import Any
 
 from .schema.types import AgentName
+from .target_selection import options_block
 
 # ---- 共有ブロック（複数テンプレートで再利用） ----
 
@@ -48,15 +49,16 @@ Represent Argument as a structured object consisting of rules, Conc, and Ass.
 - rules is a finite sequence of rules r_1, ..., r_n.
 - Each rule has an antecedent and a consequent.
 - Antecedents may contain strong premises and weak_negation assumptions (strong and weak literals in Prakken & Sartor's terms).
-- A strong premise is a claim that must be established for the rule to apply: it is given in your stance, the dialogue history, or the integrated rules, supported by general knowledge, or derived as the consequent of an earlier rule in this Argument. It says that something definitely holds (or definitely does not hold). A rule whose strong premise is not established does not fire. Strong premises are not assumptions: never list them in Ass.
-- A weak_negation entry is an exception clause ("unless X", "as long as there is no evidence that X"): the rule applies by default and stops applying only if X is shown to hold; it needs no support of its own. Write it as the presumption "X is not the case" (e.g. "no evidence that Y fails here", "Z does not occur in this case"). It must be a specific claim that could in principle be proven false by evidence that X actually holds — an attacker undercuts the Argument by proving X. Use weak_negation wherever your reasoning genuinely rests on the absence of something that would block it (an exception you presume absent, a risk you presume not to occur, an obstacle you presume is not present): when a step of your reasoning holds only as long as nothing blocks it, state that as "X is not the case" rather than silently treating it as given. A weak_negation entry is always a negation; never write a positive assumption ("X is the case") there — a positive claim is a strong premise and must be established as such. Do not put scope stipulations, definitions, or framing choices ("we are evaluating only Y") in weak_negation — those are not defeasible assumptions and cannot be coherently undercut; state them as strong premises or fold them into the reasoning directly instead.
-- Every rule must have at least one explicit strong or weak_negation antecedent; never derive a consequent from an empty antecedent.
+- A strong premise is the consequent of an EARLIER rule in this Argument, and nothing else. A rule names its strong premises by the numbers of the earlier rules it relies on (from_rules); each premise is then that rule's consequent. A rule that cites no earlier rule has no strong premise. Your stance, the dialogue history, and general knowledge cannot be cited as premises: a claim you take from them must first be stated as the consequent of a rule of its own. Strong premises are not assumptions: never list them in Ass.
+- A weak_negation entry is an exception clause ("unless X", "as long as there is no evidence that X"): the rule applies by default and stops applying only if X is shown to hold; it needs no support of its own. Write it as the presumption "X is not the case" (e.g. "no evidence that Y fails here", "Z does not occur in this case"). It must be a specific claim that could in principle be proven false by evidence that X actually holds — an attacker undercuts the Argument by proving X. Use weak_negation wherever your reasoning genuinely rests on the absence of something that would block it (an exception you presume absent, a risk you presume not to occur, an obstacle you presume is not present): when a step of your reasoning holds only as long as nothing blocks it, state that as "X is not the case" rather than silently treating it as given. A weak_negation entry is always a negation; never write a positive assumption ("X is the case") there — a positive claim is not an exception clause: state it as the consequent of a rule. Do not put scope stipulations, definitions, or framing choices ("we are evaluating only Y") in weak_negation — those are not defeasible assumptions and cannot be coherently undercut; state them as the consequent of a rule or fold them into the reasoning directly instead.
+- The FIRST rule has no strong premise (from_rules is empty): its consequent is one claim that you hold, taken from your stance (or, where your stance is silent, from the dialogue or general knowledge). It may carry weak_negation entries. A later rule may also have no strong premise, but only to state another claim that you hold in the same way; whenever a later rule cites premises, it cites only earlier rules.
 - Conc contains the conclusions derived by the rules.
 - Ass contains the weak_negation assumptions used by the rules.
+- Every consequent except the final one must be cited by a later rule: the final rule is the warrant of the Argument, and the rules before it lead to it.
 - Use as many rules as your reasoning genuinely needs and no more: add a rule whenever it introduces a materially new fact, point, or inferential step that strengthens your case; do not add a rule that merely restates an earlier one.
 - Each rule's consequent must state a materially new claim — a new fact, a new point, or a new inferential step — not a paraphrase or near-synonym of an earlier rule's consequent (e.g. "the attack is insufficient" -> "the attack fails to show invalidity" -> "the attack does not defeat the conclusion" is the same claim restated three times, not three rules). If a later rule's consequent would just restate an earlier one in different words, merge them into a single rule instead.
-- When attacking (defeat/counter), the FIRST rule's antecedent must already contain a strong premise that directly engages the specific content of the argument you are attacking — name a specific weakness in its stated reasoning, an assumption it depends on, or a gap between its premises and its consequent.
-- Do not satisfy the previous rule by appending a short final rule that merely quotes or paraphrases the target ("The target says X, but Y") while your earlier rules argue a generic, self-contained point from your own stance that never references the target. The engagement with the target's specific content must be load-bearing for your conclusion from the first rule onward, not a bolted-on afterthought.
+- When attacking (defeat/counter), the conclusions of your Argument (the consequents of its rules) must include the contradiction of the target item you choose in Attack: for a rebut, the contradictory of one of the target's conclusions; for an undercut, the contradictory of one of the target's assumptions. Build it from the claims you hold, through your chain of rules.
+- Do not satisfy this by appending a short final rule that merely quotes or paraphrases the target ("The target says X, but Y") while your earlier rules argue a generic, self-contained point that never touches the target. The contradiction of the chosen target item must be what your chain of rules actually establishes.
 </schema_overlay>"""
 
 _ATTACK_TYPES = """\
@@ -90,6 +92,7 @@ Prior turns of this debate are provided as preceding messages. Each message's co
 - "phase" is one of main / defeat / counter. "status" (justified/overruled/defensible) appears only on a
   main turn, once its thread has closed; a defeat/counter turn carries no outcome field of its own.
 - "attack"/"target_id"/"target_statement" (on defeat/counter) show exactly what was attacked.
+- In each rule, "strong" lists the premises, which are the consequents of the earlier rules named in "from_rules".
 - A message whose "agent"/name equals YOUR identity is your own past turn; the other agent's are your opponent's.
 Use this history to stay consistent with the current round and integrated rules.
 </history_format>"""
@@ -167,9 +170,6 @@ class PromptTemplates:
     COUNTER_ARGUMENT_SYSTEM_NO_SCHEMA = ARGUMENT_SYSTEM_NO_SCHEMA
     UNDERCUT_SYSTEM = ARGUMENT_SYSTEM
     UNDERCUT_SYSTEM_NO_SCHEMA = ARGUMENT_SYSTEM_NO_SCHEMA
-
-    # 自分の攻撃(B)が相手の新しいカウンター(C)にも及ぶかを尋ねる手番用（schema/no_schema共通）。
-    ATTACK_EXTENDS_SYSTEM = _system(_GROUNDING)
 
     # 汎化(generalize)と統合(integrate)は別々の往復にせず、1回のLLM呼び出しで
     # 「両者のwarrantを汎化した上で1つの再利用可能ルールにまとめる」ところまで行う。
@@ -503,18 +503,50 @@ def main_instruction(state: Any) -> str:
     return "\n".join(lines)
 
 
-def _target_block(target: Any) -> str:
-    """ArgumentRecord target を HumanMessage 内に埋め込む短い XML ブロックへ変換する."""
-    return "\n".join(
-        [
-            "<target>",
-            f"id: {target.id}",
-            f"agent: {target.agent}",
-            "argument:",
-            target.argument,
-            "</target>",
+def _target_block(target: Any, state: Any | None = None) -> str:
+    """対象の論証と、（schema は）攻撃の対象を番号で選ぶための一覧を、HumanMessage 内に埋め込む XML 風ブロックにする."""
+    mode = str(getattr(state, "output_mode", "schema")) if state is not None else "schema"
+    lines = [
+        "<target>",
+        f"id: {target.id}",
+        f"agent: {target.agent}",
+        "argument:",
+        target.argument,
+        "</target>",
+    ]
+    options = options_block(target, mode)
+    if options:
+        lines.append(options)
+    return "\n".join(lines)
+
+
+def _target_rules(state: Any | None) -> list[str]:
+    """攻撃の種類と、対象の指定の規則（schema は番号で選び、no_schema は対象の本文から書き写す）."""
+    mode = str(getattr(state, "output_mode", "schema")) if state is not None else "schema"
+    if mode == "no_schema":
+        return [
+            "- rebut: one claim you make must directly oppose a claim of the target. In Attack, give "
+            "the sentence or phrase of <target> that states the claim you oppose.",
+            "- undercut: one claim you make must establish that a presumption the target relies on by "
+            "default (an exception it takes to be absent) does not hold. In Attack, give the sentence "
+            "or phrase of <target> that states that presumption. Merely asserting the opposite of the "
+            "target's conclusion, or arguing that the target's framing/scope is inappropriate, does "
+            "not qualify.",
+            "- Copy the target's words from <target> word for word: do not paraphrase, shorten with "
+            "an ellipsis, or combine sentences.",
         ]
-    )
+    return [
+        "- rebut: one conclusion of your argument (any rule's consequent) must contradict one "
+        "conclusion of the target. In Attack, give the number of that conclusion in "
+        "<target_conclusions>.",
+        "- undercut: one conclusion of your argument must establish that an assumption of the target "
+        "(a weak_negation entry, of the form 'X is not the case') does not hold, i.e. prove that X "
+        "actually holds. In Attack, give the number of that assumption in <target_assumptions>. "
+        "Merely asserting the opposite of the target's conclusion, or arguing that the target's "
+        "framing/scope is inappropriate, does not qualify. If <target_assumptions> is empty, you "
+        "cannot undercut.",
+        "- Choose the target only by its number; never copy its text.",
+    ]
 
 
 _CONTENT_REQUIREMENT_BLOCK = "\n".join(
@@ -537,8 +569,7 @@ _DEFEAT_RELATIONS_NOTE = (
     "Each earlier turn is numbered [n]. <defeat_relations> lists which turns of the current thread "
     "have defeated which (and which attempts did not). Take them into account before you write: "
     "see which of your earlier arguments have already defeated, or been defeated by, which; do not "
-    "attack an argument that is already defeated, and do not rebuild a move that was already defeated; "
-    "base your move on what the relations show."
+    "rebuild a move that was already defeated; base your move on what the relations show."
 )
 
 
@@ -575,19 +606,14 @@ def attack_instruction(
                 "",
             ]
         blocks += [
-            _target_block(target),
+            _target_block(target, state),
             "",
             _CONTENT_REQUIREMENT_BLOCK,
             "",
             "<attack_conditions>",
             "- Your counterargument must defeat the target attack.",
             "- You may use rebut or undercut.",
-            "- rebut: your argument must directly negate the target's stated conclusion.",
-            "- undercut: identify a weak_negation assumption (of the form 'X is not the case') that the "
-            "target's argument relies on, and construct your argument to prove that X actually holds. "
-            "Merely asserting the opposite of the target's conclusion, or arguing that the target's "
-            "framing/scope is inappropriate, does not qualify — your reasoning must establish X.",
-            "- Do not attack a claim or assumption that is not present in the target argument.",
+            *_target_rules(state),
             "</attack_conditions>",
             "",
             "<non_repetition>",
@@ -635,151 +661,19 @@ def attack_instruction(
             issue,
             "</issue>",
             "",
-            _target_block(target),
+            _target_block(target, state),
             "",
             _CONTENT_REQUIREMENT_BLOCK,
             "",
             "<attack_conditions>",
             "- You may use rebut or undercut.",
-            "- rebut: your argument must directly negate the target's stated conclusion.",
-            "- undercut: identify a weak_negation assumption (of the form 'X is not the case') that the "
-            "target's argument relies on, and construct your argument to prove that X actually holds. "
-            "Merely asserting the opposite of the target's conclusion, or arguing that the target's "
-            "framing/scope is inappropriate, does not qualify — your reasoning must establish X.",
-            "- Do not attack a claim or assumption that is not present in the target argument.",
+            *_target_rules(state),
             "- Supporting a different option does not by itself count as negating the target.",
             "</attack_conditions>",
             "",
             "<response_contract>",
             "If a valid attack exists, set can_defeat=YES and include Argument and Attack.",
             "Otherwise, set can_defeat=NO and omit Argument and Attack.",
-            "</response_contract>",
-        ]
-    )
-
-
-def existing_undercut_instruction(
-    own: Any,
-    attack: Any,
-    assumptions: list[str] | None = None,
-    state: Any | None = None,
-) -> str:
-    """すでにある自分の論証が、相手の rebut を undercut しているかを問う指示文を組む.
-
-    新しい論証は作らせない。Prakken & Sartor の defeat（Def 2.16）の
-    「A は B を undercut しない」は、すでにある A と B の組の関係であり、
-    A の結論が B の仮定を否定しているかだけで決まる。
-    """
-    issue = getattr(state, "question", "") if state is not None else ""
-    blocks = [
-        "<task>",
-        "The opponent has produced a rebuttal, labeled <their_attack>, against your argument "
-        "labeled <your_argument>.",
-        "Decide whether <your_argument>, exactly as it is already written, undercuts "
-        "<their_attack>: does it establish that one of the assumptions <their_attack> relies on "
-        "does not hold?",
-        "Judge only what <your_argument> already says. Do not write a new argument.",
-        "</task>",
-        "",
-        "<issue>",
-        issue,
-        "</issue>",
-        "",
-        "<your_argument>",
-        f"id: {own.id}",
-        own.argument,
-        "</your_argument>",
-        "",
-        "<their_attack>",
-        f"id: {attack.id}",
-        attack.argument,
-    ]
-    if assumptions:
-        blocks += ["assumptions it relies on:", *[f"- {item}" for item in assumptions]]
-    blocks += [
-        "</their_attack>",
-        "",
-        "<response_contract>",
-        "Set undercuts=YES only if you can name a specific assumption of <their_attack> (a "
-        "statement it takes to hold only because nothing contradicts it) and <your_argument> "
-        "already establishes the opposite.",
-        "Set undercuts=NO otherwise — in particular if answering would require a new argument, or "
-        "if <your_argument> merely reasserts its own conclusion.",
-        "</response_contract>",
-    ]
-    return "\n".join(blocks)
-
-
-def attack_extends_instruction(
-    b_argument: Any, c_argument: Any, state: Any | None = None
-) -> str:
-    """自分の攻撃(B)が相手の新しいカウンター(C)にも及ぶかを尋ね、及ぶ場合はBからCへの攻撃関係（method・対象）を改めて宣言させる指示文を組む.
-
-    判定基準は字面の一致（同じ statement が残っているか）ではなく、
-    「自分の攻撃の主張を真だと認めた場合、相手の新しい結論が成り立たなくなるか」
-    という実質的な脅威性。相手が自分の攻撃内容を前提として受け入れた上で、それでも
-    自分の結論は揺るがないと論じている（譲歩した上で結論を守っている）場合は、
-    もはやその攻撃は新しい結論を脅かしていないので NO とする。
-
-    YES の場合、method/target は <your_attack> が元の対象に対して宣言したものを
-    流用せず、C の中身（rules/Conc/Ass）を見た上で改めて宣言させる。attack/defeat は
-    Prakken & Sartor では論証単体の性質ではなく「特定の2論証の組」に対して定義される
-    関係であり、B が A に対して undercut だったからといって C に対しても undercut に
-    なるとは限らない（rebut になることもあれば、成り立たないこともある）。
-    """
-    issue = getattr(state, "question", "") if state is not None else ""
-    return "\n".join(
-        [
-            "<task>",
-            "You previously attacked the target argument below; that attack is labeled "
-            "<your_attack>. The opponent has now produced a new counterargument, labeled "
-            "<new_counter>, in response.",
-            "Determine whether your attack still poses a live threat to the new "
-            "counterargument: does <new_counter>, taken as a whole (every premise and "
-            "inferential step it relies on, not just its headline conclusion), actually "
-            "refute the specific premise or step your attack relies on?",
-            "</task>",
-            "",
-            "<issue>",
-            issue,
-            "</issue>",
-            "",
-            "<your_attack>",
-            f"id: {b_argument.id}",
-            f"attack method against the ORIGINAL target: {b_argument.attack}",
-            f"statement you negated in the ORIGINAL target: {b_argument.target_statement}",
-            "your argument:",
-            b_argument.argument,
-            "</your_attack>",
-            "",
-            "<new_counter>",
-            f"id: {c_argument.id}",
-            "argument:",
-            c_argument.argument,
-            "</new_counter>",
-            "",
-            "<response_contract>",
-            "Set attack_extends=YES only if you can name a specific premise or inferential "
-            "step that your attack relies on and that <new_counter> leaves unaddressed (or "
-            "merely re-asserts its own conclusion over, without substantively refuting it).",
-            "Set attack_extends=NO if <new_counter> explicitly and substantively refutes the "
-            "specific premise or step your attack relies on, or if you cannot name any such "
-            "unaddressed premise or step.",
-            "Merely sharing the same wording or topic as your attack's target is not "
-            "enough by itself to set YES, and <new_counter> sounding confident or well-argued "
-            "is not enough by itself to set NO.",
-            "",
-            "If attack_extends=YES, you must ALSO declare how your argument attacks "
-            "<new_counter> SPECIFICALLY — do not copy the method/target you used against "
-            "the original target above; re-derive it from <new_counter>'s actual content:",
-            "- rebut: your argument's conclusion must directly negate a stated conclusion "
-            "(Conc) of <new_counter>.",
-            "- undercut: identify a weak_negation assumption (of the form 'X is not the "
-            "case') in <new_counter>'s Ass that your argument proves X actually holds for.",
-            "- Only declare a method that is actually true of <new_counter>'s own content; "
-            "if your argument does not genuinely negate any of <new_counter>'s stated "
-            "conclusions or assumptions, set attack_extends=NO instead, even if you "
-            "initially leaned YES above.",
             "</response_contract>",
         ]
     )

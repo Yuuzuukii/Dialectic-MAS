@@ -21,31 +21,32 @@ from typing import Any, cast
 
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
 
-from .argumentation_model import AttackMatch
+from .attack_judge import undercut_relation
 from .llm import chat_structured, chat_text
 from .prompts import (
     PromptTemplates,
     agent_system,
-    attack_extends_instruction,
     attack_instruction,
-    existing_undercut_instruction,
     integration_instruction,
     main_instruction,
     synthesis_system,
 )
+from .run_stats import record_discarded, record_regeneration
 from .schema.llm_outputs import (
+    Antecedent,
     ArgumentBody,
-    AttackExtendsOutput,
+    ArgumentDraft,
     DefeatingArgumentOutput,
     DefeatingArgumentOutputFree,
-    ExistingUndercutOutput,
     IntegrationOutput,
     IntegrationOutputFree,
     MainArgumentAvailabilityOutput,
     MainArgumentAvailabilityOutputFree,
+    Rule,
 )
 from .schema.state import ArgumentRecord, parse_serialized_payload
 from .schema.types import AgentName
+from .target_selection import field_for, is_schema, quote_in_text, resolve_target
 
 
 @dataclass
@@ -288,54 +289,65 @@ def _meta_conclusion_violation(index: int, consequent: str) -> str | None:
     return None
 
 
-def validate_argument_body(body: ArgumentBody) -> list[str]:
-    """各 rule の形式的不変条件を機械的に検証し、違反メッセージのリストを返す（空=適合）.
+def resolve_draft(draft: ArgumentDraft) -> tuple[ArgumentBody, list[str]]:
+    """LLM が書いた Argument（強い前提は、前の規則の番号）を、保存する形へ直し、形式の違反を返す（空=適合）.
 
-    以前は _SCHEMA_OVERLAY と ArgumentBody.rules の description に散文で二重に書いていた
-    連鎖制約を、生成プロンプトから外してここで決定論的に検証する（GPT-5 の推論予算を
-    帳簿付けに費やさせないため）。
-
-    ここで強制する形式条件:
-      1. 各ruleのconsequentは空でない。
-      2. 各ruleは意味のあるstrongまたはweak_negationを少なくとも1つ持つ。
-      3. 2つ以上のruleが同じconsequentを持たない（重複禁止）。
-      4. 非末尾consequentは、後続ruleのstrong先行詞として再利用される（連結性）。
-      5. consequentが「defeatの成否」自体を述べる勝敗宣言になっていない
-         （実質的な主張ではなく対話ゲームの状態を書いてしまう問題への対処。
-         docs/argumentation_model_rebuild_plan.md §4.7 参照）。
-    旧仕様の「r_i (i>1) の strong 先行詞はすべて先行 consequent でなければならない」は、
-    後段で新しい前提事実を導入する妥当な論証まで弾くため、あえて強制しない。
+    強い前提の文は、番号が指す前の規則の結論から、コードが入れる（LLM は書き写さない）。
+    原著（Prakken & Sartor Def 2.2）の形式条件を、ここで決定的に検査する:
+      1. 各規則の強い前提は、それより前の規則の結論に限る（番号は、その規則より前を指す）。
+         最初の規則は、強い前提を持たない（前提が空、または weak_negation のみ）。
+      2. 同じ結論を持つ規則を、2 つ以上含めない。
+      3. 結論は空でなく、defeat の成否そのものを述べる勝敗宣言になっていない。
+      4. 非末尾の結論は、後の規則の強い前提として使われる（連結性。最後の規則が論証の warrant）。
     """
-    rules = body.rules or []
+    rules = draft.rules or []
     consequents = [(rule.consequent or "").strip() for rule in rules]
     violations: list[str] = []
-    placeholder_antecedents = {
+    resolved: list[Rule] = []
+    placeholders = {
         "n/a",
+        "none",
         "no additional premise needed",
         "no additional rule needed",
-        "none",
     }
+    used: set[int] = set()
+
+    if not rules:
+        violations.append("the Argument has no rule")
 
     for index, (rule, consequent) in enumerate(zip(rules, consequents, strict=True)):
+        position = index + 1
         if not consequent:
-            violations.append(f"rule {index + 1} has an empty consequent")
+            violations.append(f"rule {position} has an empty consequent")
         else:
-            meta_violation = _meta_conclusion_violation(index, consequent)
-            if meta_violation is not None:
-                violations.append(meta_violation)
-        antecedents = [
-            *(rule.antecedent.strong or []),
-            *(rule.antecedent.weak_negation or []),
-        ]
-        meaningful = [
-            item.strip()
-            for item in antecedents
-            if item.strip().lower().rstrip(".") not in placeholder_antecedents
-        ]
-        if not meaningful:
-            violations.append(
-                f"rule {index + 1} has no meaningful strong or weak_negation antecedent"
+            meta = _meta_conclusion_violation(index, consequent)
+            if meta is not None:
+                violations.append(meta)
+        strong: list[str] = []
+        valid_numbers: list[int] = []
+        for number in rule.antecedent.from_rules or []:
+            if isinstance(number, bool) or not isinstance(number, int) or not 1 <= number < position:
+                violations.append(
+                    f"rule {position} cites rule {number} as a premise; a premise must be the "
+                    "consequent of an EARLIER rule"
+                    + (" (the first rule has no premise)" if position == 1 else "")
+                )
+                continue
+            if number not in valid_numbers:
+                valid_numbers.append(number)
+                strong.append(consequents[number - 1])
+                used.add(number)
+        weak = [item.strip() for item in rule.antecedent.weak_negation or [] if item.strip()]
+        if any(item.lower().rstrip(".") in placeholders for item in weak):
+            violations.append(f"rule {position} has a placeholder in weak_negation")
+        resolved.append(
+            Rule(
+                antecedent=Antecedent(
+                    strong=strong, from_rules=valid_numbers, weak_negation=weak
+                ),
+                consequent=consequent,
             )
+        )
 
     seen: set[str] = set()
     for consequent in consequents:
@@ -343,32 +355,86 @@ def validate_argument_body(body: ArgumentBody) -> list[str]:
             violations.append(f'two rules share the same consequent: "{consequent}"')
         seen.add(consequent)
 
-    used_as_strong: set[str] = set()
-    for rule in rules:
-        for strong in rule.antecedent.strong or []:
-            stripped = (strong or "").strip()
-            if stripped:
-                used_as_strong.add(stripped)
     for index, consequent in enumerate(consequents[:-1]):
-        if consequent and consequent not in used_as_strong:
+        if consequent and index + 1 not in used:
             violations.append(
-                f"non-final consequent of rule {index + 1} is never used by a "
-                f'later rule: "{consequent}"'
+                f"non-final consequent of rule {index + 1} is never used by a later rule "
+                f'(cite it in from_rules): "{consequent}"'
             )
-    return violations
+    return ArgumentBody(rules=resolved), violations
 
 
-async def _generate_structured_argument(
-    messages: list[BaseMessage], schema: Any
-) -> Any:
-    """構造化出力で Argument を1回だけ生成して返す.
+# 形式の違反（番号の誤り、対象の番号の範囲外など）があったとき、書き直させる最大回数。
+MAX_REGENERATIONS = 2
 
-    形式の検証（`validate_argument_body`）に違反しても、再生成（修復）は行わない。
-    修復は schema にだけ追加の LLM 呼び出しを与え、no_schema との比較を不公平にするうえ、
-    修復の応答が本来の判断（反論の可否など）を歪めうるため。違反は診断用に
-    `validate_argument_body` で事後に数えられる。
+
+def _repair_note(violations: list[str]) -> HumanMessage:
+    listed = "\n".join(f"- {item}" for item in violations)
+    return HumanMessage(
+        content=(
+            "<rejected>\nYour previous answer was rejected for the following problems:\n"
+            f"{listed}\nAnswer again with the same task, fixing exactly these problems.\n</rejected>"
+        )
+    )
+
+
+def _discarded_payload(output: Any) -> dict[str, Any]:
+    """却下された出力の、ログに残す内容（理由、Argument、Attack）."""
+    payload: dict[str, Any] = {}
+    for key in ("can_generate", "can_defeat", "reason", "Argument", "Attack"):
+        value = getattr(output, key, None)
+        if value is None:
+            continue
+        payload[key] = value.model_dump(exclude_none=True) if hasattr(value, "model_dump") else value
+    return payload
+
+
+async def _generate_checked(
+    messages: list[BaseMessage],
+    schema: Any,
+    check: Any,
+    kind: str,
+    context: dict[str, Any] | None = None,
+) -> tuple[Any, list[str]]:
+    """構造化出力を生成し、check(output) が違反を返したら、最大 MAX_REGENERATIONS 回、書き直させる.
+
+    schema と no_schema のどちらにも、同じ回数を認める（違反が起きた分だけ、呼び出しが増える）。
+    書き直しの回数は、run の集計に記録する（kind は main / attack。書き直しても直らなかったときは、
+    ``<kind>_gave_up`` に 1 を足す）。却下された下書きは、本文と違反の理由を、context（誰の、どの対象への
+    手か）つきで、run の記録に残す。戻り値は、最後の出力と、その違反（空なら適合）。
     """
-    return await chat_structured(messages, schema)
+    output = await chat_structured(messages, schema)
+    violations = check(output)
+    attempts = 0
+    while True:
+        if violations:
+            record_discarded(
+                {
+                    "kind": kind,
+                    **(context or {}),
+                    "attempt": attempts + 1,
+                    "gave_up": attempts >= MAX_REGENERATIONS,
+                    "violations": list(violations),
+                    "output": _discarded_payload(output),
+                }
+            )
+        if not violations or attempts >= MAX_REGENERATIONS:
+            break
+        attempts += 1
+        record_regeneration(kind)
+        output = await chat_structured([*messages, _repair_note(violations)], schema)
+        violations = check(output)
+    if violations:
+        record_regeneration(f"{kind}_gave_up")
+    return output, violations
+
+
+def _draft_violations(output: Any) -> list[str]:
+    """出力に Argument（schema の下書き）があれば、その形式の違反を返す."""
+    draft = getattr(output, "Argument", None)
+    if isinstance(draft, ArgumentDraft):
+        return resolve_draft(draft)[1]
+    return []
 
 
 async def generate_main(state: Any, agent: AgentName) -> MainGeneration:
@@ -379,17 +445,25 @@ async def generate_main(state: Any, agent: AgentName) -> MainGeneration:
         if _output_mode(state) == "no_schema"
         else MainArgumentAvailabilityOutput
     )
+    output, violations = await _generate_checked(
+        messages, schema, _draft_violations, "main", {"agent": agent}
+    )
     output = cast(
-        "MainArgumentAvailabilityOutputFree | MainArgumentAvailabilityOutput",
-        await _generate_structured_argument(messages, schema),
+        "MainArgumentAvailabilityOutputFree | MainArgumentAvailabilityOutput", output
     )
     if output.can_generate != "YES":
         return MainGeneration(available=False, reason=output.reason, argument=None)
     if output.Argument is None:
         return MainGeneration(available=True, reason=output.reason, argument=None)
+    if violations:
+        return MainGeneration(
+            available=False,
+            reason="could not produce a well-formed Argument: " + "; ".join(violations),
+            argument=None,
+        )
     argument = ArgumentRecord(
         type="main",
-        argument=_serialize_argument(state, output.Argument),
+        argument=_serialize_argument(state, _argument_payload(output.Argument)),
         support=[],
         agent=agent,
         round=state.debate_round,
@@ -397,7 +471,14 @@ async def generate_main(state: Any, agent: AgentName) -> MainGeneration:
     return MainGeneration(available=True, reason=None, argument=argument)
 
 
-# 直近の generate_attack / ask_attack_extends が「出せない」と答えたときの
+def _argument_payload(argument: ArgumentDraft | str) -> ArgumentBody | str:
+    """Return the ArgumentBody (schema; strong premises restored) or the free text (no_schema)."""
+    if isinstance(argument, ArgumentDraft):
+        return resolve_draft(argument)[0]
+    return argument
+
+
+# 直近の generate_attack が「出せない」と答えたときの
 # 理由。戻り値は None のままにして既存の呼び出し側を変えないため、タスクごとの ContextVar で渡す。
 _decline_reason: ContextVar[str | None] = ContextVar("decline_reason", default=None)
 
@@ -409,6 +490,44 @@ def take_decline_reason() -> str | None:
     return reason
 
 
+def declared_statement(
+    state: Any, target: ArgumentRecord, attack: Any
+) -> str | None:
+    """攻撃側の宣言から、対象の文を得る。実在しなければ None.
+
+    schema は、番号から文を復元する。no_schema は、攻撃側が対象の本文から書き写した文が、
+    対象の本文に含まれるかを確かめる。
+    """
+    method = attack.method
+    if is_schema(_output_mode(state)):
+        return resolve_target(target, method, attack.target.number)
+    statement = str(attack.target.statement).strip()
+    return statement if quote_in_text(statement, target.argument) else None
+
+
+def _attack_violations(state: Any, target: ArgumentRecord) -> Any:
+    """攻撃の出力の形式の違反を返す関数を作る（Argument の形式と、対象の指定）."""
+
+    def check(output: Any) -> list[str]:
+        if output.can_defeat != "YES" or output.Argument is None or output.Attack is None:
+            return []
+        violations = _draft_violations(output)
+        if declared_statement(state, target, output.Attack) is None:
+            if is_schema(_output_mode(state)):
+                violations.append(
+                    f"Attack.target.number {output.Attack.target.number} is not a number in the "
+                    f"list shown for a {output.Attack.method}"
+                )
+            else:
+                violations.append(
+                    "Attack.target.statement is not words copied word for word from the target "
+                    "argument's text"
+                )
+        return violations
+
+    return check
+
+
 async def generate_attack(
     state: Any,
     attacker: AgentName,
@@ -418,6 +537,8 @@ async def generate_attack(
 ) -> ArgumentRecord | None:
     """攻撃（defeat/counter）主張を LLM 生成し、ArgumentRecord 化する.
 
+    攻撃の対象は、schema は、対象の論証から見せた番号つきの一覧から、番号で選ばせ、文はコードが復元する。
+    no_schema は、対象の本文から書き写した文を出させ、本文に含まれるかを照合する。
     非反復（同じ target への実質的に同じ内容の繰り返しを避ける）は counter 側
     （proponent）の attack_instruction の指示文だけで扱う。Prakken & Sartor の
     dialogue game（Definition 4.5 条件2）では非反復は proponent の手だけに課される
@@ -430,12 +551,21 @@ async def generate_attack(
         if _output_mode(state) == "no_schema"
         else DefeatingArgumentOutput
     )
-    output = cast(
-        "DefeatingArgumentOutputFree | DefeatingArgumentOutput",
-        await _generate_structured_argument(messages, schema),
+    output, violations = await _generate_checked(
+        messages,
+        schema,
+        _attack_violations(state, target),
+        "attack",
+        {"agent": attacker, "target_id": target.id, "purpose": purpose},
     )
+    output = cast("DefeatingArgumentOutputFree | DefeatingArgumentOutput", output)
     if output.can_defeat != "YES" or output.Argument is None or output.Attack is None:
         _decline_reason.set(output.reason or "(no reason given)")
+        return None
+    if violations:
+        _decline_reason.set(
+            "could not produce a well-formed attack: " + "; ".join(violations)
+        )
         return None
     # 非反復の自己点検（反撃だけ）。自分で「新しい理由を足さない」と申告したら、その反撃は
     # 出さない（P は同じ内容の手を、2度指せない）。反論側は、論文でも繰り返してよいので対象外。
@@ -459,15 +589,17 @@ async def generate_attack(
         if novelty is not None
         else None
     )
+    method = output.Attack.method
+    statement = declared_statement(state, target, output.Attack)
     return ArgumentRecord(
         type="counter" if purpose == "counter" else "defeat",
-        argument=_serialize_argument(state, output.Argument),
+        argument=_serialize_argument(state, _argument_payload(output.Argument)),
         support=[],
         agent=attacker,
-        attack=output.Attack.method,
+        attack=method,
         target_id=target.id,
-        target_field=output.Attack.target.field,
-        target_statement=output.Attack.target.statement,
+        target_field=field_for(method),  # type: ignore[arg-type]
+        target_statement=statement,
         round=getattr(state, "debate_round", 1),
         novelty_note=novelty_note,
     )
@@ -479,74 +611,21 @@ async def ask_existing_undercut(
     own: ArgumentRecord,
     attack: ArgumentRecord,
 ) -> str | None:
-    """すでにある論証 own が、相手の rebut（attack）を undercut しているかを author に問う.
+    """すでにある論証 own が、相手の rebut（attack）を undercut しているかを、別の LLM に判定させる.
 
     新しい論証は作らない（Prakken & Sartor の defeat は、すでにある2論証の組の関係）。
     戻り値は undercut している場合の理由、していなければ None。
-    undercut は、相手が仮定（Ass）として明示した文を否定することなので、仮定が宣言されて
-    いなければ undercut しようがない。schema では、attack に仮定（weak_negation）が無ければ
-    LLM を呼ばずに None。no_schema は、論証の本文が自由記述で仮定を宣言する構造を持たない
-    ので、常に None（schema の構造が可能にする判定を、no_schema に持ち込まない。
-    仮定の有無を LLM に判断させると、作者が「自分の論証が undercut している」と答えやすく、
-    実測で O の rebut の93%が取り消された）。
+    undercut は、attack の仮定（Ass）の否定を、own の結論が確立していることなので、attack の
+    仮定の一覧を判定者に渡す。schema は attack の Ass、no_schema は attack の本文に明示された
+    例外条項（引用）。仮定がなければ undercut しようがないので、LLM を呼ばずに None。
+    `author` は、判定の呼び出し側の互換のために残す（判定者は、書き手とは別のモデル）。
     """
-    if _output_mode(state) != "schema":
-        return None
-    assumptions = attack.assumptions
-    if not assumptions:
-        return None
-    system = agent_system(
-        _stance(state, author), author, PromptTemplates.ATTACK_EXTENDS_SYSTEM
+    verdict = await undercut_relation(
+        state, own, attack, context="rebut_defeat_condition"
     )
-    messages = [
-        SystemMessage(content=system),
-        *render_history(state.history),
-        HumanMessage(
-            content=existing_undercut_instruction(
-                own, attack, assumptions=assumptions, state=state
-            )
-        ),
-    ]
-    output = await chat_structured(messages, ExistingUndercutOutput)
-    if output.undercuts != "YES":
+    if not verdict.holds:
         return None
-    return output.reason or "(no reason given)"
-
-
-async def ask_attack_extends(
-    state: Any,
-    attacker: AgentName,
-    b_argument: ArgumentRecord,
-    c_argument: ArgumentRecord,
-) -> AttackMatch | None:
-    """B（attackerが既に行った攻撃）が、相手の新しいカウンターCにも及ぶかを問い、及ぶ場合はBからCへの攻撃関係（method・対象）を改めて宣言させる.
-
-    B の作者である attacker 自身に尋ねる（新しい論証は生成しない）。attack/defeat は
-    論証単体の性質ではなく「特定の2論証の組」に対して定義される関係（Prakken &
-    Sartor）なので、B が元の対象に対して宣言した `.attack`/`target_statement` を
-    そのまま C に流用してはならない。戻り値はこの B-C 間で改めて判定された
-    攻撃関係（Noneなら及ばない、または C に対して有効な攻撃が成立しない）。
-    """
-    system = agent_system(
-        _stance(state, attacker), attacker, PromptTemplates.ATTACK_EXTENDS_SYSTEM
-    )
-    messages = [
-        SystemMessage(content=system),
-        *render_history(state.history),
-        HumanMessage(
-            content=attack_extends_instruction(b_argument, c_argument, state=state)
-        ),
-    ]
-    output = await chat_structured(messages, AttackExtendsOutput)
-    if output.attack_extends != "YES" or output.Attack is None:
-        _decline_reason.set(output.reason or "(no reason given)")
-        return None
-    _decline_reason.set(None)
-    return AttackMatch(
-        method=output.Attack.method,
-        field=output.Attack.target.field,
-        statement=output.Attack.target.statement,
-    )
+    return verdict.reason or "(no reason given)"
 
 
 async def generate_integration(state: Any) -> IntegrationOutput | IntegrationOutputFree:

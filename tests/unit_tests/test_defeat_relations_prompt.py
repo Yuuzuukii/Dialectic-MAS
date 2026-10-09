@@ -90,3 +90,15 @@ def test_numbering_skipped_when_counts_mismatch() -> None:
     state = _state("schema")
     state.history = state.history[:2]
     assert not str(numbered_history(state)[0].content).startswith("[1]")
+
+
+def test_note_does_not_forbid_attacking_an_already_defeated_argument() -> None:
+    """O は、直前の手を defeat できるなら続けられる（Prakken & Sartor Def 4.5）。
+
+    相互 defeat では、C は B に defeat されているが、O は C を攻撃してよい。「defeat 済みの論証を
+    攻撃しない」という指示は、この攻撃を止めてしまう（試運転で、反論側が no_attack と答えた）。
+    """
+    from agent.prompts import _DEFEAT_RELATIONS_NOTE
+
+    assert "do not rebuild a move that was already defeated" in _DEFEAT_RELATIONS_NOTE
+    assert "do not attack an argument that is already defeated" not in _DEFEAT_RELATIONS_NOTE

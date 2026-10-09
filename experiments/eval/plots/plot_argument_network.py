@@ -105,17 +105,22 @@ const cy = cytoscape({container:document.getElementById('cy'), wheelSensitivity:
   {selector:'node.note',style:{shape:'round-rectangle','background-color':'#fff7d6','background-opacity':1,width:'label',
     height:'label',padding:6,'border-width':1,'border-color':'#e6b800','color':'#333','font-size':11,
     'text-valign':'center','text-margin-y':0,'text-wrap':'wrap','text-max-width':320}},
+  {selector:'node.rejected',style:{'border-width':3,'border-style':'dotted','border-color':'#333','background-opacity':0.45}},
+  {selector:'node.discarded',style:{shape:'round-rectangle','background-color':'#f2f2f2','background-opacity':1,width:'label',
+    height:'label',padding:6,'border-width':2,'border-style':'dotted','border-color':'#777','color':'#555','font-size':10,
+    'text-valign':'center','text-margin-y':0,'text-wrap':'wrap','text-max-width':260}},
   {selector:':selected',style:{'overlay-color':'#2563eb','overlay-opacity':0.25}},
  ]});
 cy.on('tap','node,edge',e=>{document.getElementById('detail').textContent=e.target.data('detail')||'';});
 
 function btn(parent,label,on,fn){const b=document.createElement('button');b.textContent=label;
   if(on)b.className='on';b.onclick=fn;parent.appendChild(b);}
-function fit(){ // 切り替え後も、できるだけ同じ topic / method を保つ
+function fit(){ // 切り替え後も、できるだけ同じ topic / method / run 番号を保つ
   const d=D();
   if(!d[st.topic])st.topic=Object.keys(d)[0];
   if(!d[st.topic][st.method])st.method=METHODS.find(m=>d[st.topic][m]);
-  if(st.run>=d[st.topic][st.method].length)st.run=0;
+  const i=d[st.topic][st.method].findIndex(r=>r.run===st.runNo);
+  st.run=i>=0?i:0;
 }
 function renderTabs(){
   const U=document.getElementById('turns'),T=document.getElementById('topics'),
@@ -125,14 +130,15 @@ function renderTabs(){
   U.style.display=(keys.length===1&&keys[0]==='')?'none':'';
   keys.forEach(k=>btn(U,k,k===st.turns,()=>{st.turns=k;fit();show();}));
   const d=D();
-  Object.keys(d).forEach(t=>btn(T,t,t===st.topic,()=>{st.topic=t;st.run=0;
-    if(!d[t][st.method])st.method=METHODS.find(m=>d[t][m]);show();}));
-  METHODS.filter(m=>d[st.topic][m]).forEach(m=>btn(M,m,m===st.method,()=>{st.method=m;st.run=0;show();}));
+  Object.keys(d).forEach(t=>btn(T,t,t===st.topic,()=>{st.topic=t;
+    if(!d[t][st.method])st.method=METHODS.find(m=>d[t][m]);fit();show();}));
+  METHODS.filter(m=>d[st.topic][m]).forEach(m=>btn(M,m,m===st.method,()=>{st.method=m;fit();show();}));
   d[st.topic][st.method].forEach((r,i)=>btn(R,'#'+r.run,i===st.run,()=>{st.run=i;show();}));
 }
 function show(){
   renderTabs();
   const r=D()[st.topic][st.method][st.run];
+  st.runNo=r.run;
   document.getElementById('q').textContent=r.question;
   document.getElementById('legend2').textContent=r.lane
     ?'点線: 発話順からの推定（直前の相手発話への応答）'
@@ -221,6 +227,81 @@ def _node(
     return node
 
 
+REJECTED_KINDS = {"attack_rejected", "rebut_undercut_by_target"}
+
+
+def _rejections(log: dict[str, Any]) -> dict[str, str]:
+    """成立の判定で弾かれた攻撃・反撃の id → 理由（attempt_log の、攻撃の id をキーにした記録）."""
+    return {
+        str(ev.get("target_id")): str(ev.get("reason") or "")
+        for ev in log.get("attempt_log") or []
+        if ev.get("kind") in REJECTED_KINDS
+    }
+
+
+def _judge_reasons(log: dict[str, Any], attack_id: str) -> list[str]:
+    """その攻撃についての、判定者の理由（judge_stats.judgements の、攻撃の id が一致する記録）."""
+    items = (log.get("judge_stats") or {}).get("judgements") or []
+    return [
+        f"[{item.get('kind')}{'/' + item['context'] if item.get('context') else ''}] "
+        f"holds={item.get('holds')}: {item.get('reason')}"
+        for item in items
+        if item.get("attack_id") == attack_id
+    ]
+
+
+def _discarded_nodes(
+    log: dict[str, Any], pos: dict[str, dict[str, float]], right: float
+) -> list[dict[str, Any]]:
+    """形式の違反で却下された下書きを、点線の枠のノードにする（対象のある攻撃は、対象へ点線でつなぐ）."""
+    elements: list[dict[str, Any]] = []
+    per_target: dict[str, int] = {}
+    main_index = 0
+    for i, draft in enumerate(log.get("discarded_drafts") or []):
+        target = draft.get("target_id")
+        if target in pos:
+            k = per_target.get(target, 0)
+            per_target[target] = k + 1
+            position = {
+                "x": pos[target]["x"] + TREE_DX * (0.55 + 0.45 * k),
+                "y": pos[target]["y"] + TREE_DY * 0.5,
+            }
+        else:
+            position = {"x": right + TREE_DX * 1.2, "y": main_index * TREE_DY * 0.6}
+            main_index += 1
+        reason = "; ".join(draft.get("violations") or [])
+        label = (
+            f"却下された下書き（{draft.get('agent')} {draft.get('kind')}"
+            f"{'・断念' if draft.get('gave_up') else ''}）\n{reason[:110]}"
+        )
+        node_id = f"discarded-{i}"
+        elements.append(
+            {
+                "data": {
+                    "id": node_id,
+                    "label": label,
+                    "detail": json.dumps(draft, ensure_ascii=False, indent=2),
+                },
+                "position": position,
+                "classes": "discarded",
+                "grabbable": False,
+            }
+        )
+        if target in pos:
+            elements.append(
+                {
+                    "data": {
+                        "id": f"discarded-e-{i}",
+                        "source": node_id,
+                        "target": target,
+                        "ls": "dotted",
+                        "inferred": 1,
+                    }
+                }
+            )
+    return elements
+
+
 def build_run(method: str, log: dict[str, Any]) -> tuple[list[dict[str, Any]], bool]:
     """dialogue_history を Cytoscape の elements にする。戻り値は (elements, lane レイアウトか)."""
     hist = log.get("dialogue_history", [])
@@ -259,9 +340,17 @@ def build_run(method: str, log: dict[str, Any]) -> tuple[list[dict[str, Any]], b
                 cur = by_id[cur["target_id"]]
             root_of[rec["id"]] = cur["id"]
         last_leaf = {root_of[r["id"]]: r["id"] for r in hist}
+        rejected = _rejections(log)
         for rec in hist:
             label = f"{rec['agent']} {rec['type']}\n{_text(rec.get('argument'))[:40]}"
-            elements.append(_node(rec, rec["id"], label, pos[rec["id"]]))
+            node = _node(rec, rec["id"], label, pos[rec["id"]])
+            if rec["id"] in rejected:
+                # 成立の判定で弾かれた攻撃・反撃は、点線の枠で描く（理由は、詳細に出す）。
+                node["classes"] = "rejected"
+                notes = [f"✗ 弾かれた: {rejected[rec['id']]}", *_judge_reasons(log, rec["id"])]
+                node["data"]["detail"] = "\n".join(notes) + "\n\n" + node["data"]["detail"]
+                node["data"]["label"] = label + "\n✗弾かれた"
+            elements.append(node)
             if rec.get("target_id") in ids:
                 elements.append(
                     {
@@ -333,6 +422,7 @@ def build_run(method: str, log: dict[str, Any]) -> tuple[list[dict[str, Any]], b
                     "grabbable": False,
                 }
             )
+        elements.extend(_discarded_nodes(log, pos, right))
         return elements, False
     # free_debate / mad: 2 レーンに並べ、直前の相手発話への応答を推定の辺にする
     last_by_agent: dict[str, str] = {}

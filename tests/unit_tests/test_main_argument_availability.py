@@ -10,7 +10,7 @@ from agent.arguments import build_main_argument_messages
 from agent.edges import route_after_can_generate_main, route_after_resolve_tree_status
 from agent.nodes import advance_to_ag2, can_generate_main
 from agent.prompts import main_instruction
-from agent.schema.llm_outputs import ArgumentBody
+from agent.schema.llm_outputs import AntecedentDraft, ArgumentDraft, RuleDraft
 from agent.schema.state import ArgumentRecord
 from agent.workflow import State
 
@@ -134,7 +134,9 @@ async def test_can_generate_main_routes_to_generation_when_available(monkeypatch
         return SimpleNamespace(
             can_generate="YES",
             reason="A distinct main argument is available.",
-            Argument=ArgumentBody(rules=[]),
+            Argument=ArgumentDraft(
+                rules=[RuleDraft(antecedent=AntecedentDraft(), consequent="We should buy a")]
+            ),
         )
 
     monkeypatch.setattr("agent.arguments.chat_structured", has_new_argument)

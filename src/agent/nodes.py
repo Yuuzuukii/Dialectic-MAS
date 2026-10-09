@@ -18,14 +18,14 @@ from typing import Any
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 
 from . import arguments
-from .argumentation_model import evaluate_attack
+from .argumentation_model import AttackMatch, evaluate_attack, relation
 from .arguments import (
     argument_message_content,
-    ask_attack_extends,
     ask_existing_undercut,
     generate_attack,
     take_decline_reason,
 )
+from .attack_judge import undercut_relation
 from .final_answer import finalize as finalize_answer
 from .prompts import attack_instruction, main_instruction
 from .schema.state import (
@@ -209,6 +209,7 @@ _TREE_RESET_FIELDS: dict[str, Any] = {
     "pending_counter_argument": None,
     "last_attack_defeated": None,
     "last_counter_strictly_defeated": None,
+    "last_counter_rejected": None,
     "last_propagation_action": None,
 }
 
@@ -452,8 +453,9 @@ async def validate_opponent_move(state: Any) -> dict[str, Any]:
 async def proponent_move(state: Any) -> dict[str, Any]:
     """現フレームの攻撃者 (B) に対し、Proponent が反論 (C) を試みる.
 
-    O の手 B 1 つにつき、P の返答 C は 1 つだけ（Prakken & Sartor の dialogue tree）。
-    C が B を strictly defeat しなければ、validate_proponent_move がフレームを lost_by_p で閉じる。
+    C が B を defeat しなければ、validate_proponent_move は、フレームを閉じず、P に同じ B への
+    別の反撃を試させる（`_counter_rejected`）。P が新しい反撃を作れなければ（no_counter）、
+    ここでフレームを lost_by_p で閉じる。
     リソース制約は `max_dialogue_turns`（対話全体の絶対予算）で課す。
 
     `max_dialogue_turns`（対話全体の絶対予算）が尽きた場合はこのフレーム固有の
@@ -500,37 +502,40 @@ async def proponent_move(state: Any) -> dict[str, Any]:
     }
 
 
-def _counter_failed(
+def _counter_rejected(
     state: Any, frame: DialogueNode, relations: list[DefeatRelation]
 ) -> dict[str, Any]:
-    """反撃 C が B を strictly defeat しなかったときの状態更新を作る.
+    """反撃 C が B を defeat しなかったときの状態更新を作る（P は同じ B に、もう一度返せる）.
 
-    Prakken & Sartor（Definition 4.5/4.6）では、O の手 B に対する P の返答は 1 つで、
-    それが B を strictly defeat しなければ P は動けず、この枝は O の勝ち。作り直しはしない。
-    フレームを lost_by_p（予算切れではない）で閉じ、pop_and_propagate に伝播させる。
+    文献（Prakken & Sartor Def 4.8）は、P が勝つ木が存在することを、証明の条件とし、P は複数の返答の
+    中から、勝てるものを探してよい。そこで、C が B を defeat しなかった場合は、フレームを閉じず、
+    P に同じ B への別の反撃を試させる。弾かれた C も、履歴に残り、ターン数（`max_dialogue_turns`）に
+    数えられる。再試行は、予算が尽きるか、P が新しい反撃を作れなくなる（no_counter）まで続く。
     """
     nodes_ = _replace_node(
         state.dialogue_nodes,
         frame.id,
         counter_attempts=frame.counter_attempts + 1,
-        outcome="lost_by_p",
     )
     return {
         "dialogue_nodes": nodes_,
         "defeat_relations": relations,
         "pending_counter_argument": None,
         "last_counter_strictly_defeated": False,
+        "last_counter_rejected": True,
     }
 
 
 async def validate_proponent_move(state: Any) -> dict[str, Any]:
-    """C が B を strictly defeat するか検証する（C defeats B かつ not B defeats C）.
+    """C が B を defeat するかを検証し、strictly defeat か相互 defeat かを決める.
 
-    strictly defeat していれば、C を argument_id とする子フレームを push して
-    探索を1段深くする（Definition 4.6: Pの手番の子は、その論証に対する
+    C が B を defeat していれば（strict、または相互）、C を argument_id とする子フレームを
+    push して探索を1段深くする（Definition 4.6: Pの手番の子は、その論証に対する
     Oの defeater 全て。つまり C 自身も次の攻撃対象になる）。
-    rebut の defeat は、対象側のすでにある論証が攻撃を undercut していなければ成立する
-    （新しい undercut の論証は作らない）。
+    defeat の成否は、別の LLM の判定による（rebut は、対象側のすでにある論証が攻撃を
+    undercut していなければ成立する。新しい undercut の論証は作らない）。
+    strictly defeat か相互 defeat かは、優先順位がないので、SD(C, B) = U(C, B) ∧ ¬U(B, C)
+    （U は undercut。rebut は対称）で決める。
     """
     frame = _top_frame(state)
     if frame.current_attacker_id is None:
@@ -576,63 +581,66 @@ async def validate_proponent_move(state: Any) -> dict[str, Any]:
                 "counter",
             )
         )
-        return _finish(_counter_failed(state, frame, relations))
+        return _finish(_counter_rejected(state, frame, relations))
 
-    # B はもともと別の対象（A、またはこのフレームの argument）を狙って宣言された
-    # 攻撃なので、その .attack/target_statement を C にそのまま使い回さない
-    # （Prakken & Sartor の attack/defeat は論証単体の性質ではなく「特定の2論証の組」
-    # に対して定義される関係。B が A に対して undercut だったからといって、C に
-    # 対しても undercut として無条件に勝てるとは限らない）。ask_attack_extends が
-    # B-C 間の攻撃関係を C の中身を見た上で改めて宣言し、それだけを判定に使う。
+    # strictly defeat か相互 defeat か。優先順位がないので rebut は対称（C が B を rebut するなら、B も
+    # C を rebut する）であり、Prakken & Sartor の定義（Def 2.16）から
+    #     SD(C, B) = U(C, B) ∧ ¬U(B, C)
+    # となる（U は undercut）。つまり、C が B を strictly defeat するのは、C が B を undercut し、
+    # B が C を undercut しないときだけ。ここまでで C は B を defeat している（result.defeats）ので、
+    # 残りの U を、別の LLM の判定で確かめる。
     take_decline_reason()
     mutual = False
-    reverse_match = await ask_attack_extends(
-        state, state.current_opponent, b_argument, c_argument
-    )
-    if reverse_match is None:
+    if result.attack == "undercut":
+        # C は B を undercut している（U(C, B) は成立）。B が C を undercut するなら相互 defeat。
+        back = await undercut_relation(
+            state, b_argument, c_argument, context="strict_defeat_check"
+        )
+        mutual = back.holds
+        relations = [
+            *relations,
+            relation(
+                b_argument,
+                c_argument,
+                AttackMatch("undercut", "Ass", None) if back.holds else None,
+                back.holds,
+                f"{b_argument.id} defeats {c_argument.id}: undercut — {back.reason}"
+                if back.holds
+                else f"{b_argument.id} does not undercut {c_argument.id} — {back.reason}",
+            ),
+        ]
+    else:
+        # C は B を rebut し、B は C を undercut しない（defeat の条件）。C も B を undercut するなら
+        # C が B を strictly defeat、しないなら、rebut の対称性から、B も C を defeat する（相互 defeat）。
+        forward = await undercut_relation(
+            state, c_argument, b_argument, context="strict_defeat_check"
+        )
+        mutual = not forward.holds
+        relations = [
+            *relations,
+            relation(
+                b_argument,
+                c_argument,
+                AttackMatch("rebut", "Conc", None) if mutual else None,
+                mutual,
+                f"{b_argument.id} defeats {c_argument.id}: rebut is symmetric and neither undercuts the other"
+                if mutual
+                else f"{c_argument.id} undercuts {b_argument.id} — {forward.reason}",
+            ),
+        ]
+    if mutual:
+        # B が C にも反撃できる＝相互 defeat。C は B を strictly defeat していないが、
+        # defeat はしている（Prakken & Sartor Def 3.4: B も C も defensible）。
+        # フレームは閉じず、C を子フレームとして push して、O に C への新しい攻撃を探させる。
         events.append(
             _attempt_event(
-                "no_reverse_attack",
+                "mutual_defeat",
                 state.current_opponent,
                 c_argument.id,
-                take_decline_reason(),
+                f"{b_argument.id} and {c_argument.id} defeat each other; the branch can only be defensible.",
                 "counter",
             )
         )
-    else:
-        b_for_reverse = b_argument.model_copy(
-            update={
-                "attack": reverse_match.method,
-                "target_field": reverse_match.field,
-                "target_statement": reverse_match.statement,
-            }
-        )
-        reverse = await evaluate_attack(
-            state,
-            b_for_reverse,
-            c_argument,
-            state.current_proponent,
-            relation_context=f"{b_argument.id} defeats {c_argument.id}",
-            undercut_check=_undercut_check_for(state, state.current_proponent),
-            # b_for_reverse は B-C 間専用に作った一時コピー。判定結果として B の
-            # 本来（A向け）の attack 宣言を上書きしてはならない。
-            persist_metadata=False,
-        )
-        relations = [*relations, *reverse.relations]
-        if reverse.defeats:
-            # B が C にも反撃できる＝相互 defeat。C は B を strictly defeat していないが、
-            # defeat はしている（Prakken & Sartor Def 3.4: B も C も defensible）。
-            # フレームは閉じず、C を子フレームとして push して、O に C への新しい攻撃を探させる。
-            mutual = True
-            events.append(
-                _attempt_event(
-                    "mutual_defeat",
-                    state.current_opponent,
-                    c_argument.id,
-                    f"{b_argument.id} and {c_argument.id} defeat each other; the branch can only be defensible.",
-                    "counter",
-                )
-            )
 
     # C が B を defeat した（strict、または相互）。C を新しいフレームとして push し、
     # 探索を1段深くする（C 自身が次の攻撃対象になる）。
@@ -650,6 +658,7 @@ async def validate_proponent_move(state: Any) -> dict[str, Any]:
             "defeat_relations": relations,
             "pending_counter_argument": None,
             "last_counter_strictly_defeated": True,
+            "last_counter_rejected": False,
         }
     )
 

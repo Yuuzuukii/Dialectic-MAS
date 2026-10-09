@@ -105,6 +105,8 @@ class State:
     last_attack_defeated: bool | None = None
     # True: C が B を defeat し、子フレームを push した（strict のほか、相互 defeat も含む）。
     last_counter_strictly_defeated: bool | None = None
+    # True: C が B を defeat せず（弾かれた）、フレームは開いたまま。P が同じ B への反撃をやり直す。
+    last_counter_rejected: bool | None = None
     last_propagation_action: Literal["retry_attack", "cascade", "resolved"] | None = None
 
     # LLM に再送する通常の対話履歴。各ターンは HumanMessage(question/instruction)
@@ -233,6 +235,7 @@ graph = (
         route_after_validate_proponent_move,
         {
             "opponent_move": "opponent_move",
+            "proponent_move": "proponent_move",
             "pop_and_propagate": "pop_and_propagate",
             "finish_with_error": "finish_with_error",
         },

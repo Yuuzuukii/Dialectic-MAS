@@ -19,7 +19,7 @@ class MainArgumentAvailabilityOutput(BaseModel):
         )
     )
     reason: str = Field(description="Brief reason for the availability decision.")
-    Argument: ArgumentBody | None = Field(
+    Argument: ArgumentDraft | None = Field(
         default=None,
         description="Required only when can_generate is YES.",
     )
@@ -78,67 +78,12 @@ class DefeatingArgumentOutput(BaseModel):
         default="",
         description="Brief reason for the decision: why NO (what blocks you), or what the argument rests on if YES.",
     )
-    Argument: ArgumentBody | None = Field(
+    Argument: ArgumentDraft | None = Field(
         default=None, description="Defeating argument body, omitted when NO."
     )
     Attack: AttackMetadata | None = Field(
         default=None,
         description="Attack made by this argument against a specified item in the target argument, omitted when NO.",
-    )
-
-
-# LLM出力：すでにある自分の論証が、相手の rebut の仮定（Ass）を undercut しているかの判定
-class ExistingUndercutOutput(BaseModel):
-    """自分の既存の論証が、相手の攻撃の仮定を undercut しているかの判定.
-
-    Prakken & Sartor（Def 2.16）では「B が A を rebut し、かつ A が B を undercut しない」と
-    きに B が A を defeat する。ここでの undercut は、すでにある A と B の2つの間の関係
-    （A の結論が B の仮定を否定しているか）であり、新しい論証を作る手番ではない。
-    """
-
-    undercuts: Literal["YES", "NO"] = Field(
-        description=(
-            "YES only if your argument, exactly as already stated, establishes that a "
-            "specific assumption of the attack does not hold. NO otherwise; do not write a "
-            "new argument."
-        )
-    )
-    reason: str = Field(
-        default="",
-        description="Brief reason: the assumption of the attack that your argument already negates if YES, or why no such assumption is negated if NO.",
-    )
-
-
-# LLM出力：B（自分の攻撃）がC（相手の新しいカウンター）にも及ぶかの自己判定
-class AttackExtendsOutput(BaseModel):
-    """自分の攻撃が、相手の新しい論証 C に対しても有効な攻撃として成り立つかの判定.
-
-    B は元々別の論証（A）を狙って宣言されたものなので、その `.attack`/`target` を
-    C に対してそのまま使い回してはならない（Prakken & Sartor の attack/defeat は
-    論証単体の性質ではなく、常に「特定の2論証の組」に対して定義される関係のため）。
-    YES の場合は、C の中身を実際に見た上で、B が C に対してどう攻撃するか
-    （method・対象フィールド・対象文）を改めて宣言させる。
-    """
-
-    attack_extends: Literal["YES", "NO"] = Field(
-        description=(
-            "YES only if your original argument, taken as a standalone claim, still poses a "
-            "genuine rebut or undercut against this new counterargument specifically. NO if "
-            "the new counterargument has moved past what your original argument addresses, "
-            "so it no longer applies."
-        )
-    )
-    reason: str = Field(
-        default="",
-        description="Brief reason for the decision: why NO (what blocks you), or what the argument rests on if YES.",
-    )
-    Attack: AttackMetadata | None = Field(
-        default=None,
-        description=(
-            "Required when attack_extends=YES: a fresh declaration of how your original "
-            "argument attacks the NEW counterargument specifically (not a copy of the "
-            "attack you declared against the original target). Omit when NO."
-        ),
     )
 
 
@@ -189,7 +134,7 @@ class DefeatingArgumentOutputFree(BaseModel):
     Argument: str | None = Field(
         default=None, description="Free natural-language defeating argument, omitted when NO."
     )
-    Attack: AttackMetadata | None = Field(
+    Attack: AttackMetadataFree | None = Field(
         default=None,
         description="Attack made by this argument against a specified part of the target argument, omitted when NO.",
     )
@@ -251,8 +196,34 @@ class Antecedent(BaseModel):
     strong: list[str] = Field(
         default_factory=list,
         description=(
-            "Strong premises: claims that must be established (given facts, or "
-            "consequents of earlier rules) for the rule to apply. Not assumptions."
+            "Strong premises: the consequents of the earlier rules named in from_rules, "
+            "filled in from those rules (never written by the model)."
+        ),
+    )
+    from_rules: list[int] = Field(
+        default_factory=list,
+        description="1-based numbers of the earlier rules whose consequents are the strong premises.",
+    )
+    weak_negation: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Exception clauses ('unless X'): defeasible assumptions of the form 'X is not "
+            "the case', held only in the absence of evidence to the contrary. An "
+            "undercutting attack defeats one of these by proving that X actually holds."
+        ),
+    )
+
+
+# LLM が書く形（強い前提は、文ではなく、前の規則の番号で参照する）
+class AntecedentDraft(BaseModel):
+    """LLM が書く先行詞（強い前提は、前の規則の番号で指す。weak_negation は文で書く）."""
+
+    from_rules: list[int] = Field(
+        default_factory=list,
+        description=(
+            "Strong premises, given as the numbers (1-based) of EARLIER rules in this Argument "
+            "whose consequents this rule relies on. The first rule has none (empty list). "
+            "Leave empty when the rule states a claim from your stance without a premise."
         ),
     )
     weak_negation: list[str] = Field(
@@ -265,33 +236,87 @@ class Antecedent(BaseModel):
     )
 
 
+class RuleDraft(BaseModel):
+    """LLM が書く 1 規則（先行詞 + 帰結）."""
+
+    antecedent: AntecedentDraft = Field(
+        description="The earlier rules this rule relies on, and its exception clauses."
+    )
+    consequent: str = Field(description="The claim this rule concludes.")
+
+
+class ArgumentDraft(BaseModel):
+    """LLM が書く Argument（規則の列）。強い前提の文は、コードが、番号から復元する."""
+
+    rules: list[RuleDraft] = Field(
+        default_factory=list,
+        description=(
+            "Finite sequence of rules forming an argument; the final rule is the warrant of "
+            "the argument."
+        ),
+    )
+
+
 # 攻撃側が提示する攻撃関係
 class AttackMetadata(BaseModel):
-    """攻撃側が宣言する攻撃方法（rebut/undercut）と対象参照."""
+    """攻撃側が宣言する攻撃方法（rebut/undercut）と、対象の番号."""
 
     method: AttackType = Field(
         description=(
             "Attack method used by this argument: "
-            "'rebut' when a conclusion of this argument explicitly negates "
-            "a conclusion in the target argument; "
-            "'undercut' when a conclusion of this argument explicitly negates "
-            "an assumption in the target argument."
+            "'rebut' when a conclusion of this argument contradicts a conclusion of the "
+            "target argument; "
+            "'undercut' when a conclusion of this argument contradicts an assumption of "
+            "the target argument."
         )
     )
     target: TargetReference = Field(
-        description="Conclusion or assumption in the target argument attacked by this argument."
+        description="The item of the target argument that this argument attacks, chosen by number."
     )
 
 
-# 攻撃側が指定する攻撃対象
+# 攻撃側が指定する攻撃対象（番号）
 class TargetReference(BaseModel):
-    """攻撃対象（対象 Argument 内の Conc または Ass の具体文）の参照."""
+    """攻撃対象を、対象の論証から見せられた一覧の番号で指す（文を書き写さない）."""
 
-    field: Literal["Conc", "Ass"] = Field(
-        description="Field attacked in the target argument: 'Conc' for a rebut; 'Ass' for an undercut."
+    number: int = Field(
+        description=(
+            "The number of the attacked item, copied from the list shown in the instruction: "
+            "for a rebut, a number in the target's conclusions; for an undercut, a number in "
+            "the target's assumptions; when the target is listed as numbered sentences, the "
+            "sentence number."
+        )
     )
+
+
+# 攻撃側が指定する攻撃対象（no_schema: 対象の本文から書き写した文）
+class TargetQuote(BaseModel):
+    """攻撃対象を、対象の論証の本文から書き写した文（またはフレーズ）で指す（no_schema）."""
+
     statement: str = Field(
-        description="Exact conclusion or assumption in the target argument attacked by this argument."
+        description=(
+            "The sentence or phrase of the target argument that this argument attacks, copied "
+            "word for word from the target's text (no paraphrase, no ellipsis, no combining "
+            "sentences)."
+        )
+    )
+
+
+# 攻撃側が提示する攻撃関係（no_schema）
+class AttackMetadataFree(BaseModel):
+    """攻撃側が宣言する攻撃方法（rebut/undercut）と、対象の本文から書き写した文（no_schema）."""
+
+    method: AttackType = Field(
+        description=(
+            "Attack method used by this argument: "
+            "'rebut' when a claim of this argument directly opposes a claim of the target "
+            "argument; "
+            "'undercut' when a claim of this argument establishes that a presumption the "
+            "target argument relies on by default does not hold."
+        )
+    )
+    target: TargetQuote = Field(
+        description="The words of the target argument that this argument attacks, copied from its text."
     )
 
 
