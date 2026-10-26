@@ -326,7 +326,11 @@ def resolve_draft(draft: ArgumentDraft) -> tuple[ArgumentBody, list[str]]:
         strong: list[str] = []
         valid_numbers: list[int] = []
         for number in rule.antecedent.from_rules or []:
-            if isinstance(number, bool) or not isinstance(number, int) or not 1 <= number < position:
+            if (
+                isinstance(number, bool)
+                or not isinstance(number, int)
+                or not 1 <= number < position
+            ):
                 violations.append(
                     f"rule {position} cites rule {number} as a premise; a premise must be the "
                     "consequent of an EARLIER rule"
@@ -337,7 +341,9 @@ def resolve_draft(draft: ArgumentDraft) -> tuple[ArgumentBody, list[str]]:
                 valid_numbers.append(number)
                 strong.append(consequents[number - 1])
                 used.add(number)
-        weak = [item.strip() for item in rule.antecedent.weak_negation or [] if item.strip()]
+        weak = [
+            item.strip() for item in rule.antecedent.weak_negation or [] if item.strip()
+        ]
         if any(item.lower().rstrip(".") in placeholders for item in weak):
             violations.append(f"rule {position} has a placeholder in weak_negation")
         resolved.append(
@@ -385,7 +391,11 @@ def _discarded_payload(output: Any) -> dict[str, Any]:
         value = getattr(output, key, None)
         if value is None:
             continue
-        payload[key] = value.model_dump(exclude_none=True) if hasattr(value, "model_dump") else value
+        payload[key] = (
+            value.model_dump(exclude_none=True)
+            if hasattr(value, "model_dump")
+            else value
+        )
     return payload
 
 
@@ -490,9 +500,7 @@ def take_decline_reason() -> str | None:
     return reason
 
 
-def declared_statement(
-    state: Any, target: ArgumentRecord, attack: Any
-) -> str | None:
+def declared_statement(state: Any, target: ArgumentRecord, attack: Any) -> str | None:
     """攻撃側の宣言から、対象の文を得る。実在しなければ None.
 
     schema は、番号から文を復元する。no_schema は、攻撃側が対象の本文から書き写した文が、
@@ -509,7 +517,11 @@ def _attack_violations(state: Any, target: ArgumentRecord) -> Any:
     """攻撃の出力の形式の違反を返す関数を作る（Argument の形式と、対象の指定）."""
 
     def check(output: Any) -> list[str]:
-        if output.can_defeat != "YES" or output.Argument is None or output.Attack is None:
+        if (
+            output.can_defeat != "YES"
+            or output.Argument is None
+            or output.Attack is None
+        ):
             return []
         violations = _draft_violations(output)
         if declared_statement(state, target, output.Attack) is None:
