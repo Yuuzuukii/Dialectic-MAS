@@ -455,8 +455,6 @@ _META_CONCLUSION_PATTERNS = (
     "is defeated",
 )
 
-MAX_REGENERATIONS = 2
-
 
 def _meta_conclusion_violation(index: int, consequent: str) -> str | None:
     lowered = consequent.lower()
@@ -568,171 +566,163 @@ _QUOTE_MARKS = "\"'“”‘’「」『』"
 _ELLIPSIS = re.compile(r"(?:\.\.\.|…)+")
 
 
-def _field_for(method: str) -> Literal["Conc", "Ass"]:
-    return "Conc" if method == "rebut" else "Ass"
-
-
-def _candidates(target: Speech, method: str) -> list[str]:
-    return target.conclusions if method == "rebut" else target.assumptions
-
-
-def _resolve_target(target: Speech, method: str, number: int) -> str | None:
-    options = _candidates(target, method)
-    if isinstance(number, bool) or not isinstance(number, int):
-        return None
-    return options[number - 1] if 1 <= number <= len(options) else None
-
-
-def _normalize(text: str) -> str:
-    return text.strip().rstrip(".").strip().lower()
-
-
-def _normalize_quote(text: str) -> str:
-    collapsed = " ".join(text.split()).strip(_QUOTE_MARKS + " ")
-    return collapsed.rstrip(".。 ").casefold()
-
-
-def _quote_in_text(quote: str, text: str) -> bool:
-    if _ELLIPSIS.search(quote):
-        return False
-    wanted = _normalize_quote(quote)
-    body = " ".join(text.split()).casefold()
-    return len(wanted) >= _MIN_QUOTE_LENGTH and wanted in body
-
-
-def _numbered(items: list[str]) -> str:
-    return "\n".join(f"[{index}] {item}" for index, item in enumerate(items, start=1))
-
-
-def _options_block(target: Speech, free: bool) -> str:
-    if free:
-        return ""
-    conclusions = target.conclusions
-    assumptions = target.assumptions
-    return (
-        "<target_conclusions>\n"
-        f"{_numbered(conclusions) if conclusions else '(none)'}\n"
-        "</target_conclusions>\n"
-        "<target_assumptions>\n"
-        f"{_numbered(assumptions) if assumptions else '(none)'}\n"
-        "</target_assumptions>"
-    )
-
-
-def _strip_period(text: str) -> str:
-    stripped = text.strip()
-    return stripped[:-1] if stripped.endswith(".") else stripped
-
-
-def _lowercase_first(text: str) -> str:
-    if not text:
-        return text
-    first_word = text.split(" ", 1)[0].rstrip(".,;:")
-    if first_word == "I" or (len(first_word) > 1 and first_word.isupper()):
-        return text
-    return text[0].lower() + text[1:]
-
-
-def _strip_leading_connective(text: str) -> str:
-    stripped = text.strip()
-    lowered = stripped.lower()
-    for connective in (
-        "therefore,",
-        "therefore ",
-        "thus,",
-        "thus ",
-        "hence,",
-        "hence ",
-    ):
-        if lowered.startswith(connective):
-            return stripped[len(connective) :].strip()
-    return stripped
-
-
-def _schema_body(argument: Any) -> dict[str, Any] | None:
-    if isinstance(argument, str):
-        try:
-            argument = json.loads(argument)
-        except json.JSONDecodeError:
-            return None
-    if not isinstance(argument, dict):
-        return None
-    body = argument.get("Argument", argument)
-    if isinstance(body, dict) and isinstance(body.get("rules"), list):
-        return body
-    return None
-
-
-def _schema_text(body: dict[str, Any]) -> str:
-    rules = [rule for rule in body.get("rules", []) if isinstance(rule, dict)]
-
-    def _norm(text: Any) -> str:
-        return _strip_period(str(text)).strip().lower()
-
-    consequent_norms = {
-        _norm(rule["consequent"]) for rule in rules if rule.get("consequent")
-    }
-    parts: list[str] = []
-    assumptions: list[str] = []
-    for index, rule in enumerate(rules):
-        antecedent = rule.get("antecedent") or {}
-        strongs = [
-            _strip_leading_connective(_strip_period(premise))
-            for premise in antecedent.get("strong") or []
-            if premise and premise.strip() and _norm(premise) not in consequent_norms
-        ]
-        assumptions += [
-            _strip_period(item)
-            for item in antecedent.get("weak_negation") or []
-            if item and item.strip()
-        ]
-        consequent = _strip_leading_connective(
-            _strip_period(str(rule.get("consequent", "")))
-        )
-        grounds = ". ".join(strongs)
-        is_last = index == len(rules) - 1
-        connector = "Therefore," if is_last else "So"
-        connected = consequent if is_last else _lowercase_first(consequent)
-        if grounds and connected:
-            parts.append(f"{grounds}. {connector} {connected}.")
-        elif connected:
-            parts.append(f"{connector} {connected}.")
-        elif grounds:
-            parts.append(f"{grounds}.")
-    if assumptions:
-        parts.append(f"(This relies on the assumption that {'; '.join(assumptions)}.)")
-    return " ".join(parts) if parts else "(no argument)"
-
-
-def render_argument_text(argument: Any) -> str:
-    body = _schema_body(argument)
-    if body is not None:
-        return _schema_text(body)
-    if isinstance(argument, str) and argument.strip():
-        return argument.strip()
-    if argument:
-        return json.dumps(argument, ensure_ascii=False)
-    return "(no argument)"
-
-
-def _text(response: Any) -> str:
-    content = getattr(response, "content", response)
-    if isinstance(content, str):
-        return content.strip()
-    return "\n".join(str(part) for part in content).strip()
-
-
-def _root_status(root: Frame) -> tuple[str, bool]:
-    if root.outcome == "won_by_p":
-        status = "justified"
-    elif root.outcome == "lost_by_p" and not root.closed_by_budget:
-        status = "overruled"
-    else:
-        status = "defensible"
-    return status, root.closed_by_budget or root.outcome == "undetermined"
-
-
 class DialecticalArgument:
+    MAX_REGENERATIONS = 2
+
+    def _resolve_attack_target(self, target: Speech, method: str, number: int) -> str | None:
+        options = target.conclusions if method == "rebut" else target.assumptions
+        if isinstance(number, bool) or not isinstance(number, int):
+            return None
+        return options[number - 1] if 1 <= number <= len(options) else None
+
+    def _normalize(self, text: str) -> str:
+        return text.strip().rstrip(".").strip().lower()
+
+
+    def _normalize_quote(self, text: str) -> str:
+        collapsed = " ".join(text.split()).strip(_QUOTE_MARKS + " ")
+        return collapsed.rstrip(".。 ").casefold()
+
+
+    def _quote_in_text(self, quote: str, text: str) -> bool:
+        if _ELLIPSIS.search(quote):
+            return False
+        wanted = self._normalize_quote(quote)
+        body = " ".join(text.split()).casefold()
+        return len(wanted) >= _MIN_QUOTE_LENGTH and wanted in body
+
+
+    def _numbered(self, items: list[str]) -> str:
+        return "\n".join(f"[{index}] {item}" for index, item in enumerate(items, start=1))
+
+
+    def _options_block(self, target: Speech, free: bool) -> str:
+        if free:
+            return ""
+        conclusions = target.conclusions
+        assumptions = target.assumptions
+        return (
+            "<target_conclusions>\n"
+            f"{self._numbered(conclusions) if conclusions else '(none)'}\n"
+            "</target_conclusions>\n"
+            "<target_assumptions>\n"
+            f"{self._numbered(assumptions) if assumptions else '(none)'}\n"
+            "</target_assumptions>"
+        )
+
+
+    def _strip_period(self, text: str) -> str:
+        stripped = text.strip()
+        return stripped[:-1] if stripped.endswith(".") else stripped
+
+
+    def _lowercase_first(self, text: str) -> str:
+        if not text:
+            return text
+        first_word = text.split(" ", 1)[0].rstrip(".,;:")
+        if first_word == "I" or (len(first_word) > 1 and first_word.isupper()):
+            return text
+        return text[0].lower() + text[1:]
+
+
+    def _strip_leading_connective(self, text: str) -> str:
+        stripped = text.strip()
+        lowered = stripped.lower()
+        for connective in (
+            "therefore,",
+            "therefore ",
+            "thus,",
+            "thus ",
+            "hence,",
+            "hence ",
+        ):
+            if lowered.startswith(connective):
+                return stripped[len(connective) :].strip()
+        return stripped
+
+
+    def _schema_body(self, argument: Any) -> dict[str, Any] | None:
+        if isinstance(argument, str):
+            try:
+                argument = json.loads(argument)
+            except json.JSONDecodeError:
+                return None
+        if not isinstance(argument, dict):
+            return None
+        body = argument.get("Argument", argument)
+        if isinstance(body, dict) and isinstance(body.get("rules"), list):
+            return body
+        return None
+
+
+    def _schema_text(self, body: dict[str, Any]) -> str:
+        rules = [rule for rule in body.get("rules", []) if isinstance(rule, dict)]
+
+        def _norm(text: Any) -> str:
+            return self._strip_period(str(text)).strip().lower()
+
+        consequent_norms = {
+            _norm(rule["consequent"]) for rule in rules if rule.get("consequent")
+        }
+        parts: list[str] = []
+        assumptions: list[str] = []
+        for index, rule in enumerate(rules):
+            antecedent = rule.get("antecedent") or {}
+            strongs = [
+                self._strip_leading_connective(self._strip_period(premise))
+                for premise in antecedent.get("strong") or []
+                if premise and premise.strip() and _norm(premise) not in consequent_norms
+            ]
+            assumptions += [
+                self._strip_period(item)
+                for item in antecedent.get("weak_negation") or []
+                if item and item.strip()
+            ]
+            consequent = self._strip_leading_connective(
+                self._strip_period(str(rule.get("consequent", "")))
+            )
+            grounds = ". ".join(strongs)
+            is_last = index == len(rules) - 1
+            connector = "Therefore," if is_last else "So"
+            connected = consequent if is_last else self._lowercase_first(consequent)
+            if grounds and connected:
+                parts.append(f"{grounds}. {connector} {connected}.")
+            elif connected:
+                parts.append(f"{connector} {connected}.")
+            elif grounds:
+                parts.append(f"{grounds}.")
+        if assumptions:
+            parts.append(f"(This relies on the assumption that {'; '.join(assumptions)}.)")
+        return " ".join(parts) if parts else "(no argument)"
+
+
+    def render_argument_text(self, argument: Any) -> str:
+        body = self._schema_body(argument)
+        if body is not None:
+            return self._schema_text(body)
+        if isinstance(argument, str) and argument.strip():
+            return argument.strip()
+        if argument:
+            return json.dumps(argument, ensure_ascii=False)
+        return "(no argument)"
+
+
+    def _text(self, response: Any) -> str:
+        content = getattr(response, "content", response)
+        if isinstance(content, str):
+            return content.strip()
+        return "\n".join(str(part) for part in content).strip()
+
+
+    def _root_status(self, root: Frame) -> tuple[str, bool]:
+        if root.outcome == "won_by_p":
+            status = "justified"
+        elif root.outcome == "lost_by_p" and not root.closed_by_budget:
+            status = "overruled"
+        else:
+            status = "defensible"
+        return status, root.closed_by_budget or root.outcome == "undetermined"
+
     def __init__(
         self,
         ag1: Agent,
@@ -1007,7 +997,7 @@ Use this history to stay consistent with the current round and integrated rules.
             target.argument,
             "</target>",
         ]
-        options = _options_block(target, self.free)
+        options = self._options_block(target, self.free)
         if options:
             lines.append(options)
         return "\n".join(lines)
@@ -1160,7 +1150,7 @@ Use this history to stay consistent with the current round and integrated rules.
         output = await agent.structured(prompt, schema)
         violations = check(output)
         attempts = 0
-        while violations and attempts < MAX_REGENERATIONS:
+        while violations and attempts < self.MAX_REGENERATIONS:
             attempts += 1
             listed = "\n".join(f"- {item}" for item in violations)
             repair = (
@@ -1184,9 +1174,9 @@ Use this history to stay consistent with the current round and integrated rules.
 
     def _declared_statement(self, target: Speech, attack: Any) -> str | None:
         if not self.free:
-            return _resolve_target(target, attack.method, attack.target.number)
+            return self._resolve_attack_target(target, attack.method, attack.target.number)
         statement = str(attack.target.statement).strip()
-        return statement if _quote_in_text(statement, target.argument) else None
+        return statement if self._quote_in_text(statement, target.argument) else None
 
     async def main_argument(self, speaker: Agent) -> Speech | None:
         label = self._label(speaker)
@@ -1283,7 +1273,7 @@ Use this history to stay consistent with the current round and integrated rules.
             proponent=self._label(self.proponent),
             attack=method,
             target_id=target.id,
-            target_field=_field_for(method),
+            target_field=("Conc" if method == "rebut" else "Ass"),
             target_statement=self._declared_statement(target, output.Attack),
             novelty_note=(
                 f"[closest earlier: {novelty.closest_earlier_id}] {novelty.new_reason.strip()}"
@@ -1295,13 +1285,13 @@ Use this history to stay consistent with the current round and integrated rules.
         return speech
 
     def _argument_block(self, speech: Speech) -> str:
-        text = render_argument_text(speech.argument)
+        text = self.render_argument_text(speech.argument)
         if self.free:
             return text
         conclusions = speech.conclusions
         if not conclusions:
             return text
-        return f"Conclusions:\n{_numbered(conclusions)}\n\nFull argument:\n{text}"
+        return f"Conclusions:\n{self._numbered(conclusions)}\n\nFull argument:\n{text}"
 
     async def judge_rebut(
         self, attack: Speech, statement: str, target: Speech | None = None
@@ -1377,7 +1367,7 @@ Judge the meaning, not the wording or the format: a prose argument and a chain o
 </target>
 
 <assumptions>
-{_numbered(assumptions)}
+{self._numbered(assumptions)}
 </assumptions>
 
 <attack>
@@ -1456,10 +1446,10 @@ List the presumptions that the argument states explicitly: exception clauses tha
         if match.statement is None:
             return False
         if self.free:
-            return _quote_in_text(match.statement, target.argument)
-        wanted = _normalize(match.statement)
+            return self._quote_in_text(match.statement, target.argument)
+        wanted = self._normalize(match.statement)
         return any(
-            _normalize(item) == wanted for item in _candidates(target, match.method)
+            self._normalize(item) == wanted for item in (target.conclusions if match.method == "rebut" else target.assumptions)
         )
 
     async def evaluate_attack(self, attacker: Speech, target: Speech) -> Evaluation:
@@ -1476,7 +1466,7 @@ List the presumptions that the argument states explicitly: exception clauses tha
             )
             return Evaluation(False)
         match = AttackMatch(
-            attacker.attack, _field_for(attacker.attack), attacker.target_statement
+            attacker.attack, ("Conc" if attacker.attack == "rebut" else "Ass"), attacker.target_statement
         )
 
         if not self._target_statement_exists(match, target):
@@ -1680,7 +1670,7 @@ List the presumptions that the argument states explicitly: exception clauses tha
     async def run_thread(self, main: Speech) -> str:
         self.current_main = main
         root = await self.defend(main)
-        status, closed_by_budget = _root_status(root)
+        status, closed_by_budget = self._root_status(root)
         main.status = status
         main.closed_by_budget = closed_by_budget
         label = self._label(self.proponent)
@@ -1803,13 +1793,13 @@ List the presumptions that the argument states explicitly: exception clauses tha
                 label = f"[Turn {n}] {speech.agent} (responding to [Turn {number[speech.target_id]}])"
             else:
                 label = f"[Turn {n}] {speech.agent} (responding to an earlier turn)"
-            blocks.append(f"{label}\n{render_argument_text(speech.argument)}")
+            blocks.append(f"{label}\n{self.render_argument_text(speech.argument)}")
         return "\n\n".join(blocks)
 
     def _last_position(self, label: str) -> str | None:
         for speech in reversed(self.history):
             if speech.agent == label and speech.type == "main":
-                return render_argument_text(speech.argument)
+                return self.render_argument_text(speech.argument)
         return None
 
     async def final_answer(self, justified: Speech | None) -> dict[str, Any]:
@@ -1839,7 +1829,7 @@ List the presumptions that the argument states explicitly: exception clauses tha
         ]
         if justified is not None:
             blocks.append(
-                f"Justified argument:\n{render_argument_text(justified.argument)}"
+                f"Justified argument:\n{self.render_argument_text(justified.argument)}"
             )
         if integrated:
             blocks.append(f"Integrated proposal:\n{integrated}")
@@ -1851,7 +1841,7 @@ List the presumptions that the argument states explicitly: exception clauses tha
             f"\n\n{self._transcript()}"
         )
         user = "\n\n".join(blocks).strip()
-        answer = _text(
+        answer = self._text(
             await self.judge.chat(
                 """<task>
 Answer the original question, using the record of the debate between AG1 and AG2.
