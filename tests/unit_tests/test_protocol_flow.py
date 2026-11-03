@@ -99,7 +99,7 @@ def protocol(ag1: FakeAgent, ag2: FakeAgent, max_turns=20, **kw):
 
 def run(ag1: FakeAgent, ag2: FakeAgent, max_turns=20):
     result = asyncio.run(protocol(ag1, ag2, max_turns).run())
-    print("\n" + "\n".join(result.trace) + f"\n  → turns={result.turns} closed_by={result.closed_by} statuses={result.statuses}")
+    print("\n" + "\n".join(result.trace) + f"\n  → turns={result.turns} closed_by={result.closed_by} statuses={result.statuses}")  # noqa: T201
     return result
 
 
@@ -157,7 +157,9 @@ def test_S3_reinstated_by_undercut():
 
 def test_S4_mutual_rebut_never_strict_until_the_thread_limit():
     # ag1 の返答は、毎回 rebut だけ（対称で、strictly defeat にならず、無効）。主張の上限（10 // 2 = 5）で打ち切り。
-    replies = lambda i: rebut(arg(f"r{i}"))
+    def replies(i):
+        return rebut(arg(f"r{i}"))
+
     r = run(FakeAgent(main=[main(arg("m1"))], attack=replies), FakeAgent(attack=[rebut(arg("b1"))]), max_turns=10)
     assert r.statuses == {0: "defensible"} and r.turns <= 10
     assert any("この主張の上限（5）に到達" in t for t in r.trace)
@@ -172,7 +174,9 @@ def test_S4_mutual_rebut_never_strict_until_the_thread_limit():
 
 
 def test_thread_limit_lets_the_other_side_present_a_main_argument():
-    replies = lambda i: rebut(arg(f"r{i}"))
+    def replies(i):
+        return rebut(arg(f"r{i}"))
+
     ag1 = FakeAgent(main=[main(arg("m1")), main(arg("m3"))], attack=replies, integrate=[R([], "claim c")], from_rule=[main(arg("m4"))])
     ag2 = FakeAgent(main=[main(arg("m2"))], attack=[rebut(arg("b1")), rebut(arg("b2"))])
     r = run(ag1, ag2, max_turns=10)
@@ -327,7 +331,7 @@ def free_protocol(ag1, ag2, judge, max_turns=20):
 
 def run_free(ag1, ag2, judge, max_turns=20):
     r = asyncio.run(free_protocol(ag1, ag2, judge, max_turns).run())
-    print("\n" + "\n".join(r.trace) + f"\n  → turns={r.turns} closed_by={r.closed_by} statuses={r.statuses}")
+    print("\n" + "\n".join(r.trace) + f"\n  → turns={r.turns} closed_by={r.closed_by} statuses={r.statuses}")  # noqa: T201
     return r
 
 

@@ -2,7 +2,6 @@ import asyncio
 
 from src.agent_migration.agents import Agent
 from src.agent_migration.argumentation.dialectical import DialecticalProtocol
-from src.agent_migration.argumentation.no_schema import NoSchemaProtocol
 from src.agent_migration.client.llm import OpenAIClient
 from src.agent_migration.config import (
     DIALOGUE_AGENT_MODEL,

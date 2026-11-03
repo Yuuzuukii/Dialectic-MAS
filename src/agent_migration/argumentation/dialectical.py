@@ -16,7 +16,6 @@ from pydantic import BaseModel, Field
 
 from src.agent_migration.agents import Agent
 
-
 # ---------------------------------------------------------------------------
 # スキーマ
 # ---------------------------------------------------------------------------
@@ -210,7 +209,7 @@ class Message:
     kind: str  # "main" | "attack" | "integrate"
     argument: Any = None  # main / attack のときの argument
 
-    def to_dict(self, status: str | None = None) -> dict:
+    def to_dict(self, status: str | None = None) -> dict[str, Any]:
         content = self.content.model_dump() if isinstance(self.content, BaseModel) else self.content
         d = {"role": self.role, "content": content}
         if status is not None:
@@ -227,7 +226,7 @@ class Result:
     turns: int
     closed_by: str  # "justified" | "turn_limit" | "no_more_arguments"
     trace: list[str] = field(default_factory=list)
-    invalid_attempts: list[dict] = field(default_factory=list)  # 無効だった攻撃（履歴には入れない。分析用）
+    invalid_attempts: list[dict[str, Any]] = field(default_factory=list)  # 無効だった攻撃（履歴には入れない。分析用）
 
 
 def norm(s: str) -> str:
@@ -277,7 +276,7 @@ class DialecticalProtocol:
         self.justified_index: int | None = None
         self.integrated = False
         self.trace: list[str] = []
-        self.invalid_attempts: list[dict] = []
+        self.invalid_attempts: list[dict[str, Any]] = []
 
     # ---- プロンプト ----
     def _history_json(self, with_status: bool = False) -> str:
@@ -323,7 +322,7 @@ class DialecticalProtocol:
 
     async def _rebuts(self, move: Any, a: Any, t: Any) -> bool:
         """a が t を rebut しているか。スキーマ版は、a の宣言が rebut か。"""
-        return move.attack_type == "rebut"
+        return bool(move.attack_type == "rebut")
 
     async def _warrant(self, argument: Any) -> Any:
         return argument.warrant()

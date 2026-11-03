@@ -75,7 +75,9 @@ def build_agents(model: str | None, judge_model: str | None) -> tuple[Agent, Age
     )
 
 
-def make_protocol(method: str, topic: dict[str, Any], max_turns: int, ag1: Agent, ag2: Agent, judge: Agent):
+def make_protocol(
+    method: str, topic: dict[str, Any], max_turns: int, ag1: Agent, ag2: Agent, judge: Agent
+) -> DialecticalProtocol:
     kwargs: dict[str, Any] = dict(
         issue=topic["question"],
         theory1=topic["agent1_stance"],

@@ -13,7 +13,6 @@ from src.agent_migration.agents import Agent
 from src.agent_migration.argumentation.dialectical import (
     ATTACK_USER,
     INTEGRATE_USER,
-    MAIN_ARGUMENT_FROM_RULE_USER,
     MAIN_ARGUMENT_USER,
     DialecticalProtocol,
     _dump,
