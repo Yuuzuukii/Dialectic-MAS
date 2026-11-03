@@ -10,10 +10,12 @@ class Agent:
         self.system_prompt = system_prompt
         self.client = client
 
-    def chat(self, prompt: str) -> Any:
-        response = self.client.chat(prompt)
+    def chat(self, prompt: str, system: str | None = None) -> Any:
+        response = self.client.chat(prompt, system=system)
         return response
 
-    def structured(self, prompt: str, schema: type[BaseModel]) -> Any:
-        response = self.client.structured(prompt, schema)
+    def structured(
+        self, prompt: str, schema: type[BaseModel], system: str | None = None
+    ) -> Any:
+        response = self.client.structured(prompt, schema, system=system)
         return response

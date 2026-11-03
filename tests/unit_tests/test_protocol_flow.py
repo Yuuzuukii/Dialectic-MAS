@@ -1,0 +1,379 @@
+"""議論の進め方（architecture.md の run()）を、LLM なしで動かして確認するテスト。
+
+偽の Agent が、あらかじめ決めた発言を返す。各場面で、呼び出しの順（トレース）と、結果、組み立てたプロンプトを確認する。
+トレースを見るには: pytest tests/unit_tests/test_protocol_flow.py -s
+"""
+
+from __future__ import annotations
+
+import asyncio
+import json
+from types import SimpleNamespace
+
+from src.agent_migration.argumentation.dialectical import (
+    AG1,
+    AG2,
+    Antecedent,
+    Argument,
+    Attack,
+    CannotArgue,
+    CannotAttack,
+    DialecticalProtocol,
+    MainArgument,
+    Not,
+    Phase1,
+    Rebut,
+    Rule,
+    Undercut,
+    undercuts,
+)
+from src.agent_migration.argumentation.no_schema import NoSchemaProtocol
+
+
+# ---- 部品 ----
+def R(strong, cons, weak=()):
+    return Rule(antecedent=Antecedent(strong_statements=list(strong), weak_statements=list(weak)), consequent=cons)
+
+
+def A(*rules):
+    return Argument(rules=list(rules))
+
+
+def arg(tag, weak=()):
+    """tag ごとに結論が違う argument（事実 → 主張）。"""
+    return A(R([], f"fact {tag}"), R([f"fact {tag}"], f"claim {tag}", weak))
+
+
+def main(a):
+    return MainArgument(argument_type="main_argument", argument=a)
+
+
+def rebut(a, target="t"):
+    return Rebut(attack_type="rebut", target=target, argument=a)
+
+
+def undercut(a, stmt):
+    return Undercut(attack_type="undercut", target=Not(negated_statement=stmt), argument=a)
+
+
+CANNOT_ARGUE = CannotArgue(argument_type="cannot_argue", reason="x")
+CANNOT_ATTACK = CannotAttack(attack_type="cannot_attack", reason="x")
+
+
+class FakeAgent:
+    """あらかじめ決めた発言を返す Agent。尽きたら、できない（integrate は尽きたらエラー）。
+    spec は、リスト、または i 回目を返す関数。受け取ったプロンプトを calls に残す。"""
+
+    def __init__(self, main=(), attack=(), integrate=(), from_rule=()):
+        self.spec = {"main": main, "attack": attack, "integrate": integrate, "from_rule": from_rule}
+        self.count = {k: 0 for k in self.spec}
+        self.calls: list[dict] = []
+
+    def _next(self, key, default):
+        i, spec = self.count[key], self.spec[key]
+        self.count[key] += 1
+        if callable(spec):
+            return spec(i)
+        return spec[i] if i < len(spec) else default
+
+    async def structured(self, prompt, schema, system=None):
+        self.calls.append({"prompt": prompt, "schema": schema, "system": system})
+        if schema is Phase1:
+            key = "from_rule" if "You created this new strict rule" in prompt else "main"
+            return Phase1(move=self._next(key, CANNOT_ARGUE))
+        if schema is Attack:
+            return Attack(move=self._next("attack", CANNOT_ATTACK))
+        assert schema is Rule
+        r = self._next("integrate", None)
+        assert r is not None, "integrate の発言が足りない"
+        return r
+
+    async def chat(self, prompt, system=None):
+        self.calls.append({"prompt": prompt, "schema": None, "system": system})
+        return SimpleNamespace(content="ANSWER(fallback)" if "no argument was justified" in prompt else "ANSWER(justified)")
+
+
+def protocol(ag1: FakeAgent, ag2: FakeAgent, max_turns=20, **kw):
+    return DialecticalProtocol(ag1, ag2, issue="ISSUE", theory1="THEORY1", theory2="THEORY2", max_turns=max_turns, **kw)
+
+
+def run(ag1: FakeAgent, ag2: FakeAgent, max_turns=20):
+    result = asyncio.run(protocol(ag1, ag2, max_turns).run())
+    print("\n" + "\n".join(result.trace) + f"\n  → turns={result.turns} closed_by={result.closed_by} statuses={result.statuses}")
+    return result
+
+
+# ---- defeat の定義（Kido 定義3、4）----
+def defeat_relations(a, t, rebut_flag):
+    p = protocol(FakeAgent(), FakeAgent())
+    return asyncio.run(_rel(p, a, t, rebut_flag))
+
+
+async def _rel(p, a, t, rebut_flag):
+    return (
+        await p._defeats(a, t, rebut_flag),
+        await p._defeated_back(a, t, rebut_flag),
+        await p._strictly_defeats(a, t, rebut_flag),
+    )
+
+
+def test_defeat_definitions():
+    p_arg, plain = arg("p"), arg("q")
+    weak_holder, killer = arg("w", weak=("x holds",)), A(R([], "x holds"))
+    assert undercuts(killer, weak_holder)
+    # rebut だけ: 対称（互いに defeat する）→ strictly ではない
+    assert defeat_relations(plain, p_arg, True) == (True, True, False)
+    # undercut: a は t を defeat し、t は a を defeat しない → strictly
+    assert defeat_relations(killer, weak_holder, False) == (True, False, True)
+    # 宣言が undercut でも、結論が weak statement と一致しなければ defeat しない
+    assert defeat_relations(plain, weak_holder, False)[0] is False
+    # 相手が自分を undercut するなら、rebut は defeat しない
+    assert defeat_relations(weak_holder, killer, True)[0] is False
+
+
+def test_undercuts_ignores_case_space_and_period():
+    assert undercuts(A(R([], "Anna  is a Minor.")), A(R([], "c", weak=["anna is a minor"])))
+
+
+# ---- 場面 ----
+def test_S1_justified_when_opponent_cannot_attack():
+    r = run(FakeAgent(main=[main(arg("m1"))]), FakeAgent())
+    assert r.closed_by == "justified" and r.statuses[0] == "justified" and r.turns == 2
+    assert r.final_answer == "ANSWER(justified)"
+
+
+def test_S2_overruled_when_proposer_cannot_reply():
+    r = run(FakeAgent(main=[main(arg("m1"))]), FakeAgent(main=[main(arg("m2"))], attack=[rebut(arg("b1"))]))
+    assert r.statuses == {0: "overruled", 2: "justified"} and r.closed_by == "justified"
+
+
+def test_S3_reinstated_by_undercut():
+    b1 = arg("b1", weak=("a is out of stock",))
+    a2 = A(R([], "a is out of stock"))
+    r = run(FakeAgent(main=[main(arg("m1"))], attack=[undercut(a2, "a is out of stock")]), FakeAgent(attack=[rebut(b1)]))
+    assert r.statuses[0] == "justified" and r.turns == 5
+    assert [m.role for m in r.history] == [AG1, AG2, AG1]
+
+
+def test_S4_mutual_rebut_never_strict_until_the_thread_limit():
+    # ag1 の返答は、毎回 rebut だけ（対称で、strictly defeat にならず、無効）。主張の上限（10 // 2 = 5）で打ち切り。
+    replies = lambda i: rebut(arg(f"r{i}"))
+    r = run(FakeAgent(main=[main(arg("m1"))], attack=replies), FakeAgent(attack=[rebut(arg("b1"))]), max_turns=10)
+    assert r.statuses == {0: "defensible"} and r.turns <= 10
+    assert any("この主張の上限（5）に到達" in t for t in r.trace)
+    assert r.final_answer == "ANSWER(fallback)"
+    # 無効だった攻撃は、履歴に入らず、invalid_attempts に残る（対象は ag2 の攻撃＝履歴 1、主張は履歴 0）
+    assert [m.role for m in r.history] == [AG1, AG2]
+    assert len(r.invalid_attempts) == 3
+    first = r.invalid_attempts[0]
+    assert first["role"] == AG1 and first["declared"] == "rebut" and first["reason"] == "strictly defeat でない"
+    assert first["target_index"] == 1 and first["main_index"] == 0
+    assert first["content"]["attack_type"] == "rebut" and first["content"]["argument"]["rules"]
+
+
+def test_thread_limit_lets_the_other_side_present_a_main_argument():
+    replies = lambda i: rebut(arg(f"r{i}"))
+    ag1 = FakeAgent(main=[main(arg("m1")), main(arg("m3"))], attack=replies, integrate=[R([], "claim c")], from_rule=[main(arg("m4"))])
+    ag2 = FakeAgent(main=[main(arg("m2"))], attack=[rebut(arg("b1")), rebut(arg("b2"))])
+    r = run(ag1, ag2, max_turns=10)
+    roles_of_main = [(m.role, i) for i, m in enumerate(r.history) if m.kind == "main"]
+    assert roles_of_main[0][0] == AG1 and any(role == AG2 for role, _ in roles_of_main)  # ag2 にも、主張の番が回る
+    assert r.statuses[0] == "defensible"
+
+
+def test_thread_limit_is_floor_of_half_and_integrated_main_counts_only_attacks():
+    # max_turns=5 → 主張ごとの上限は 2: main_argument() の1回 + attack() の1回。
+    r = run(FakeAgent(main=[main(arg("m1"))], attack=lambda i: rebut(arg(f"r{i}"))), FakeAgent(attack=lambda i: rebut(arg(f"b{i}"))), max_turns=5)
+    assert any("この主張の上限（2）に到達" in t for t in r.trace)
+    assert [m.role for m in r.history][:2] == [AG1, AG2]  # ag1 の主張 + ag2 の攻撃 1回だけ
+
+
+def test_proposer_who_made_only_invalid_replies_is_defensible_not_overruled():
+    # P（ag1）は、rebut だけの返答（相互 defeat で無効。ただし defeat はしている）を作ってから、できないと言う → defensible。
+    r = run(FakeAgent(main=[main(arg("m1"))], attack=[rebut(arg("r1")), CANNOT_ATTACK]), FakeAgent(attack=[rebut(arg("b1"))]))
+    assert r.statuses[0] == "defensible" and len(r.invalid_attempts) == 1
+    # P が、何も作らずにできないと言うなら、overruled
+    r2 = run(FakeAgent(main=[main(arg("m1"))]), FakeAgent(attack=[rebut(arg("b1"))]))
+    assert r2.statuses[0] == "overruled"
+
+
+def test_proposer_reply_that_does_not_defeat_is_not_counted():
+    # O の攻撃（結論 q）が、P の返答（weak statement に q）を undercut する → P の rebut は、O を defeat しない。
+    o_attack = rebut(A(R([], "q")))
+    p_reply = rebut(A(R([], "z", weak=["q"])))
+    r = run(FakeAgent(main=[main(arg("m1"))], attack=[p_reply, CANNOT_ATTACK]), FakeAgent(attack=[o_attack]))
+    assert r.statuses[0] == "overruled" and len(r.invalid_attempts) == 1
+
+
+def test_S5_both_cannot_present_then_integrate_and_justified():
+    r = run(
+        FakeAgent(main=[main(arg("m1"))], attack=[CANNOT_ATTACK, rebut(arg("c1"))]),  # 1回目: b1 に返せない / 2回目: m2 を攻撃
+        FakeAgent(main=[main(arg("m2"))], attack=[rebut(arg("b1"))], integrate=[R(["fact m1"], "claim c")], from_rule=[main(arg("m3"))]),
+    )
+    assert r.closed_by == "justified" and r.final_answer == "ANSWER(justified)"
+    assert any(".integrate" in t for t in r.trace)
+    assert [m.kind for m in r.history][-2:] == ["integrate", "main"]
+
+
+def test_S6_turn_limit_integrates_without_evaluating():
+    r = run(
+        FakeAgent(main=[main(arg("m1")), main(arg("m3"))], attack=[CANNOT_ATTACK, rebut(arg("c1"))], integrate=[R([], "claim c")], from_rule=[main(arg("m4"))]),
+        FakeAgent(main=[main(arg("m2"))], attack=[rebut(arg("b1"))]),
+        max_turns=7,
+    )
+    assert r.closed_by == "turn_limit" and r.justified_index is None
+    assert any("ag1 が統合（評価しない）" in t for t in r.trace)
+    assert r.final_answer == "ANSWER(fallback)"
+
+
+def test_S7_one_sided_no_integration():
+    r = run(FakeAgent(main=[main(arg("m1"))]), FakeAgent(attack=[rebut(arg("b1"))]))
+    assert r.closed_by == "no_more_arguments" and r.statuses == {0: "overruled"}
+    assert any("統合できない" in t for t in r.trace)
+
+
+# ---- プロンプトの組み立て ----
+def test_prompts_are_assembled_from_the_design_doc():
+    ag1, ag2 = FakeAgent(main=[main(arg("m1"))]), FakeAgent(attack=[rebut(arg("b1"))])
+    r = run(ag1, ag2)
+    first = ag1.calls[0]
+    assert first["schema"] is Phase1
+    assert first["system"].startswith("You are agent 1. You are arguing with agent 2.")
+    assert "The issue of this argumentation is:\nISSUE" in first["system"]
+    assert "You have these theory on the issue:\nTHEORY1" in first["system"]
+    assert "An argument is a finite sequence of rules such that:" in first["system"]
+    assert "The argumentation so far:\n[]" in first["system"]
+    assert first["system"].rstrip().endswith("make new main arguments based on it.")
+    assert first["prompt"].startswith("Now it is phase 1.\nMake your main argument")
+    # ag2 の攻撃: 対象の argument が、ユーザープロンプトに入る。システムプロンプトの履歴に、main が入る。
+    attack_call = ag2.calls[0]
+    assert attack_call["schema"] is Attack and attack_call["system"].startswith("You are agent 2. You are arguing with agent 1.")
+    assert "You have these theory on the issue:\nTHEORY2" in attack_call["system"]
+    assert "The other agent's argument:\n" + json.dumps(arg("m1").model_dump(), ensure_ascii=False, indent=2) in attack_call["prompt"]
+    assert '"role": "ag1"' in attack_call["system"] and "claim m1" in attack_call["system"]
+    # 最終回答: ag1 が書く。フェーズの説明と、argument の書き方指示は入れない。履歴に地位が付く。
+    final = ag1.calls[-1]
+    assert final["schema"] is None and final["prompt"].startswith("Now the argumentation is over")
+    assert "Argumentation consists of two phases" not in final["system"] and "An argument is a finite sequence" not in final["system"]
+    assert '"status": "overruled"' in final["system"] or '"status": "justified"' in final["system"]
+    assert r.final_answer in ("ANSWER(justified)", "ANSWER(fallback)")
+
+
+def test_integrate_prompt_contains_both_warrants_and_final_prompt_switches():
+    ag1 = FakeAgent(main=[main(arg("m1"))], attack=[CANNOT_ATTACK, rebut(arg("c1"))])
+    ag2 = FakeAgent(main=[main(arg("m2"))], attack=[rebut(arg("b1"))], integrate=[R([], "claim c")], from_rule=[main(arg("m3"))])
+    r = run(ag1, ag2)
+    integrate_call = next(c for c in ag2.calls if c["schema"] is Rule)
+    assert json.dumps(arg("m2").warrant().model_dump(), ensure_ascii=False, indent=2) in integrate_call["prompt"]
+    assert json.dumps(arg("m1").warrant().model_dump(), ensure_ascii=False, indent=2) in integrate_call["prompt"]
+    assert "Create a new strict rule C from the two warrants." in integrate_call["prompt"]
+    from_rule_call = [c for c in ag2.calls if c["schema"] is Phase1][-1]
+    assert "You created this new strict rule" in from_rule_call["prompt"] and "claim c" in from_rule_call["prompt"]
+    assert ag1.calls[-1]["prompt"].startswith("Now the argumentation is over. Write") and "no argument was justified" not in ag1.calls[-1]["prompt"]
+    assert r.closed_by == "justified"
+
+
+# ---- no schema 版 ----
+class FreeAgent:
+    """chat() だけを持つ Agent。キーごとに、文章を順に返す。プロンプトの種類は、ユーザープロンプトで見分ける。"""
+
+    def __init__(self, main=(), attack=(), integrate=(), from_rule=(), final="FINAL"):
+        self.spec = {"main": list(main), "attack": list(attack), "integrate": list(integrate), "from_rule": list(from_rule)}
+        self.final = final
+        self.calls: list[dict] = []
+
+    async def chat(self, prompt, system=None):
+        self.calls.append({"prompt": prompt, "system": system})
+        if prompt.startswith("Now the argumentation is over"):
+            return SimpleNamespace(content=self.final)
+        key = (
+            "from_rule" if "You created this new strict rule" in prompt
+            else "integrate" if "Create a new strict rule C" in prompt
+            else "attack" if prompt.startswith("Now it is phase 2.")
+            else "main"
+        )
+        spec = self.spec[key]
+        return SimpleNamespace(content=spec.pop(0) if spec else "I cannot do it.")
+
+
+class FakeJudge:
+    """判定用 Agent。プロンプトの文面で、判定の種類を見分けて、あらかじめ決めた規則で答える。"""
+
+    def __init__(self, undercut_pairs=(), rebut_default=True):
+        self.undercut_pairs = set(undercut_pairs)  # (x の中の語, y の中の語)
+        self.rebut_default = rebut_default
+        self.calls: list[str] = []
+
+    async def chat(self, prompt, system=None):
+        self.calls.append(prompt)
+        assert system is None
+        if prompt.startswith("The following is an agent's reply."):
+            reply = prompt.split("\n", 1)[1].rsplit("\nDoes the reply", 1)[0]
+            return SimpleNamespace(content="Yes." if "cannot" in reply else "No.")
+        if prompt.startswith("Argument X:"):
+            x, y = prompt.split("Argument X:\n", 1)[1].split("\n\nArgument Y:\n", 1)
+            y = y.split("\n\nDoes X")[0]
+            if "undercut" in prompt.split("\n\n")[-1]:
+                return SimpleNamespace(content="yes" if any(a in x and b in y for a, b in self.undercut_pairs) else "no")
+            return SimpleNamespace(content="yes" if self.rebut_default else "no")
+        if prompt.startswith("Argument:\n"):
+            return SimpleNamespace(content="WARRANT OF: " + prompt.split("Argument:\n", 1)[1].split("\n\nWrite the warrant")[0])
+        raise AssertionError(prompt)
+
+
+def free_protocol(ag1, ag2, judge, max_turns=20):
+    return NoSchemaProtocol(ag1, ag2, issue="ISSUE", theory1="T1", theory2="T2", max_turns=max_turns, judge=judge)
+
+
+def run_free(ag1, ag2, judge, max_turns=20):
+    r = asyncio.run(free_protocol(ag1, ag2, judge, max_turns).run())
+    print("\n" + "\n".join(r.trace) + f"\n  → turns={r.turns} closed_by={r.closed_by} statuses={r.statuses}")
+    return r
+
+
+def test_free_S1_justified_when_opponent_says_cannot():
+    r = run_free(FreeAgent(main=["I argue for X."]), FreeAgent(attack=["I cannot attack it."]), FakeJudge())
+    assert r.closed_by == "justified" and r.statuses == {0: "justified"} and r.turns == 2
+    assert r.final_answer == "FINAL"
+
+
+def test_free_prompts_have_no_schema_instructions_and_judge_has_no_system_prompt():
+    ag1, ag2, judge = FreeAgent(main=["I argue for X."]), FreeAgent(attack=["I cannot attack it."]), FakeJudge()
+    run_free(ag1, ag2, judge)
+    first = ag1.calls[0]
+    assert "An argument is a finite sequence of rules" not in first["system"]
+    assert "You speak in the form of an argument" not in first["system"]
+    assert first["system"].startswith("You are agent 1.") and first["prompt"].startswith("Now it is phase 1.")
+    assert "The argumentation so far:\n[" in first["system"]
+    assert "I argue for X." in ag2.calls[0]["prompt"]  # 攻撃の対象の文章が、そのまま入る
+    assert judge.calls and all(c.startswith(("The following is an agent's reply.", "Argument X:", "Argument:")) for c in judge.calls)
+    assert "Does the reply say that the agent cannot do it? Answer yes or no." in judge.calls[0]
+
+
+def test_free_rebut_only_is_symmetric_and_never_strict():
+    # judge: undercut は常に no、rebut は常に yes。ag1 の返答は、無効 → 上限まで続く。
+    ag1 = FreeAgent(main=["claim 1"], attack=[f"reply {i}" for i in range(10)])
+    ag2 = FreeAgent(attack=["objection 1"])
+    r = run_free(ag1, ag2, FakeJudge(), max_turns=6)
+    assert r.statuses == {0: "defensible"} and any("この主張の上限（3）に到達" in t for t in r.trace)
+
+
+def test_free_undercut_reinstates_and_status_is_justified():
+    # ag2 の反論に、ag1 が undercut（judge が yes）で返し、ag2 は返せない → 別の攻撃も探せない → justified
+    judge = FakeJudge(undercut_pairs=[("out of stock", "price")])
+    ag1 = FreeAgent(main=["claim 1"], attack=["camera a is out of stock"])
+    ag2 = FreeAgent(attack=["price is too high"])
+    r = run_free(ag1, ag2, judge)
+    assert r.statuses[0] == "justified" and [m.role for m in r.history] == [AG1, AG2, AG1]
+
+
+def test_free_integrate_uses_extracted_warrants_and_passes_text_through():
+    ag1 = FreeAgent(main=["main of ag1"], attack=["I cannot attack it.", "attack on m2"])
+    ag2 = FreeAgent(main=["main of ag2"], attack=["attack on m1"], integrate=["NEW RULE TEXT"], from_rule=["new main"])
+    judge = FakeJudge()
+    r = run_free(ag1, ag2, judge)
+    integrate_call = next(c for c in ag2.calls if "Create a new strict rule C" in c["prompt"])
+    assert "WARRANT OF: main of ag2" in integrate_call["prompt"] and "WARRANT OF: main of ag1" in integrate_call["prompt"]
+    from_rule_call = next(c for c in ag2.calls if "You created this new strict rule" in c["prompt"])
+    assert "NEW RULE TEXT" in from_rule_call["prompt"]
+    assert [m.kind for m in r.history][-2:] == ["integrate", "main"] and r.history[-2].content == "NEW RULE TEXT"
