@@ -232,7 +232,7 @@ def undercuts(x: Argument, y: Argument) -> bool:
     aはtをstrictly defeat = aはtをdefeat and not tはaをdefeat
 宣言が "undercut" でも undercuts(a, t) が false なら、a は t を defeat しない。
 無効な攻撃 = 求められる関係（O は defeat、P は strictly defeat）を満たさない。
-無効な攻撃は、履歴に入れない（対話の move ではない。P&S 定義4.5）。ログの invalid_attempts にだけ残す
+無効な攻撃は、履歴に入れない（対話の move ではない。P&S 定義4.5）。P の無効な攻撃は、やり直さずに、その場で地位が決まる（Pの返答が 1 つもなければ overruled）。O の無効な攻撃は、もう一度出させる。ログの invalid_attempts にだけ残す
 （分析用。動く側にも最終回答にも見せない）。残すもの: 動いた側、宣言、理由、鎖の中の対象の履歴番号、主張の履歴番号、LLM の出力。
 
 run():
@@ -263,8 +263,10 @@ run():
                 鎖 = [M]; Pの返答数 = 0; continue          # P の最後の動きは undefeated。O は M への別の攻撃を探す
             else:
                 return "overruled" if Pの返答数 == 0 else "defensible"
-        if 動く側 == P and Xが鎖[-1]をdefeat: Pの返答数 += 1   # P が defeat した返答の数。相互 defeat で無効になったものは数える。defeat していないものは数えない
-        if X が無効: continue                             # 動く側は、もう一度出す
+        if X が無効:
+            if 動く側 == P: return "overruled" if Pの返答数 == 0 else "defensible"   # P は 1 回だけ。strictly defeat できなければ、やり直さない
+            continue                                      # O は、もう一度出す
+        if 動く側 == P: Pの返答数 += 1                       # P の有効な返答の数
         鎖.append(X); 履歴に記録(X)
 
 統合(統合者, 評価する):   # 上限に達したときは、評価する = false（ag1 が統合する）
@@ -327,3 +329,22 @@ Write the warrant of this argument: the last step, which states what the argumen
 '''
 
 integrate() の出力は、文章（新しい rule）。main_argument_from_rule() には、その文章をそのまま入れる。
+
+## 比較手法（free_debate / mad / mad_synthesis）
+既存実装（src/agent/）の同名の手法を、この実装に写す。実装: argumentation/free_debate.py、mad.py、mad_judge.py。
+議論だけが違い、統合と最終回答は、今のもの（no schema 版と同じ。NoSchemaProtocol を継承して使う）を使う。
+
+議論（free_debate と mad で共通）
+- ag1 → ag2 の順に、交代で発言する（1発言 = 1ターン）。上限は max_turns（発言の数。確認は、発言の前）。
+- 各発言の LLM 出力は DebateTurn(argument, has_new_point)（agent.structured）。1ラウンド目の has_new_point は True 固定。
+  2ラウンド目以降の指示に、新規性の逃げ道（既存の文のまま）を付ける。ag2 の発言のあと、両者の has_new_point が False なら、上限の前でも終わる。
+- 発言用のシステムプロンプト: identity + theory + grounding（既存の文）+ これまでの議論（履歴の JSON）。
+  既存は、履歴を、チャットのメッセージで渡していた。ここでは、他の手法と同じく、システムプロンプトの履歴に入れる。
+- 発言の指示: free_debate は「相手の発言を踏まえて、主張する」。mad は「相手の直前の主張に argue against する」（既存の文）。
+  既存の指示の「above」は、「in the debate so far」に直す。
+
+終わり方
+- free_debate、mad_synthesis: 今の統合（各陣営の最後の発言を warrant として、integrate() → main_argument_from_rule()、評価しない）→ 今の final_answer()（justified なしのほう）。
+- mad: 議論に参加しない judge が、議論全体から最終回答を書く（既存の MAD_JUDGE の文）。統合はしない。judge は、議論の書き手と同じモデル（既存と同じ）。
+- 履歴の発言は kind = "turn"（地位は付けない）。
+

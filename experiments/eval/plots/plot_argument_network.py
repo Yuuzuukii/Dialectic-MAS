@@ -106,6 +106,7 @@ const cy = cytoscape({container:document.getElementById('cy'), wheelSensitivity:
     height:'label',padding:6,'border-width':1,'border-color':'#e6b800','color':'#333','font-size':11,
     'text-valign':'center','text-margin-y':0,'text-wrap':'wrap','text-max-width':320}},
   {selector:'node.rejected',style:{'border-width':3,'border-style':'dotted','border-color':'#333','background-opacity':0.45}},
+  {selector:'node.invalid',style:{'border-width':3,'border-style':'dashed','border-color':'#d62728','background-opacity':0.3,'font-size':9}},
   {selector:'node.discarded',style:{shape:'round-rectangle','background-color':'#f2f2f2','background-opacity':1,width:'label',
     height:'label',padding:6,'border-width':2,'border-style':'dotted','border-color':'#777','color':'#555','font-size':10,
     'text-valign':'center','text-margin-y':0,'text-wrap':'wrap','text-max-width':260}},
@@ -142,7 +143,7 @@ function show(){
   document.getElementById('q').textContent=r.question;
   document.getElementById('legend2').textContent=r.lane
     ?'点線: 発話順からの推定（直前の相手発話への応答）'
-    :'木構造: 上 = 攻撃された論証、下 = それを攻撃/反論した論証（矢印は攻撃の向き）。実線 rebut / 破線 undercut ／ 枠 緑=justified 黄=defensible 灰=overruled';
+    :'木構造: 上 = 攻撃された論証、下 = それを攻撃/反論した論証（矢印は攻撃の向き）。実線 rebut / 破線 undercut ／ 枠 緑=justified 黄=defensible 灰=overruled ／ 赤い破線の枠 = 履歴に入らなかった無効な試行（defeat / strictly defeat になっていない）';
   document.getElementById('meta').innerHTML=r.meta;
   document.getElementById('detail').textContent='ノードをクリック';
   cy.elements().remove(); cy.add(r.elements);
@@ -228,6 +229,32 @@ def _node(
 
 
 REJECTED_KINDS = {"attack_rejected", "rebut_undercut_by_target"}
+
+
+def _invalid_text(content: object) -> str:
+    """無効な試行の本文（schema は最後の rule の結論、no_schema は本文の頭）."""
+    if isinstance(content, dict):
+        try:
+            return str(content["argument"]["rules"][-1]["consequent"])
+        except (KeyError, IndexError, TypeError):
+            return json.dumps(content, ensure_ascii=False)
+    return " ".join(str(content).split())
+
+
+def _invalid_attempts(log: dict[str, Any], ids: set[str]) -> list[dict[str, Any]]:
+    """履歴に入らなかった無効な試行を、描画用の記録にする（対象は履歴番号 h<n>、なければ主張へ）."""
+    out: list[dict[str, Any]] = []
+    for i, attempt in enumerate(log.get("invalid_attempts") or []):
+        target = next(
+            (
+                f"h{attempt[key]}"
+                for key in ("target_index", "main_index")
+                if attempt.get(key) is not None and f"h{attempt[key]}" in ids
+            ),
+            None,
+        )
+        out.append({**attempt, "id": f"x{i}", "target_id": target, "agent": str(attempt["role"]).upper()})
+    return out
 
 
 def _rejections(log: dict[str, Any]) -> dict[str, str]:
@@ -316,6 +343,12 @@ def build_run(method: str, log: dict[str, Any]) -> tuple[list[dict[str, Any]], b
                 children.setdefault(tid, []).append(rec["id"])
             else:
                 roots.append(rec["id"])
+        invalid = _invalid_attempts(log, ids)
+        for att in invalid:  # 無効な試行は、対象の子（葉）として、木の配置に入れる
+            if att["target_id"]:
+                children.setdefault(att["target_id"], []).append(att["id"])
+            else:
+                roots.append(att["id"])
         pos: dict[str, dict[str, float]] = {}
         slot = [0]
 
@@ -363,6 +396,46 @@ def build_run(method: str, log: dict[str, Any]) -> tuple[list[dict[str, Any]], b
                             else "solid",
                             "label": _edge_label(rec),
                             "detail": _edge_detail(rec),
+                        }
+                    }
+                )
+        for att in invalid:
+            text = _invalid_text(att.get("content"))
+            label = f"{att['agent']} {att['declared']}\n✗無効: {att['reason']}\n{text[:40]}"
+            info = {k: v for k, v in att.items() if k != "content"}
+            body = (
+                json.dumps(att["content"], ensure_ascii=False, indent=2)
+                if isinstance(att.get("content"), dict)
+                else str(att.get("content"))
+            )
+            elements.append(
+                {
+                    "data": {
+                        "id": att["id"],
+                        "label": label,
+                        "color": AGENT_COLORS.get(att["agent"], "#999"),
+                        "shape": "ellipse",
+                        "bw": 0,
+                        "bc": "#ffffff",
+                        "detail": "履歴に入らなかった無効な試行\n"
+                        + json.dumps(info, ensure_ascii=False, indent=2)
+                        + "\n\n"
+                        + body,
+                    },
+                    "position": pos[att["id"]],
+                    "classes": "invalid",
+                }
+            )
+            if att["target_id"]:
+                elements.append(
+                    {
+                        "data": {
+                            "id": f"e-{att['id']}",
+                            "source": att["id"],
+                            "target": att["target_id"],
+                            "ls": "dashed" if att["declared"] == "undercut" else "solid",
+                            "label": f"{att['declared']}（無効）",
+                            "inferred": 1,
                         }
                     }
                 )

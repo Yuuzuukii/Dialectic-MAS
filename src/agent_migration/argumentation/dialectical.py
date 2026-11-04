@@ -206,8 +206,14 @@ JUSTIFIED, OVERRULED, DEFENSIBLE = "justified", "overruled", "defensible"
 class Message:
     role: str  # "ag1" | "ag2"
     content: Any  # LLM の出力（スキーマ版: スキーマのまま / no schema 版: 文章）
-    kind: str  # "main" | "attack" | "integrate"
+    kind: str  # "main" | "attack" | "integrate" | "turn"（比較手法の発言）
     argument: Any = None  # main / attack のときの argument
+    # 評価用のログ（既存の評価スクリプトが読む形）に直すための情報。議論の進み方には、使わない。
+    phase: str | None = None  # "main" | "defeat"（O の攻撃）| "counter"（P の返答）
+    proponent: str | None = None  # その主張のスレッドの、主張した側
+    attack: str | None = None  # "rebut" | "undercut"（攻撃の宣言。no schema は、判定用 LLM の判定）
+    target_index: int | None = None  # 攻撃の対象の、履歴の番号
+    target_statement: str | None = None  # 攻撃の対象の文（schema のみ）
 
     def to_dict(self, status: str | None = None) -> dict[str, Any]:
         content = self.content.model_dump() if isinstance(self.content, BaseModel) else self.content
@@ -224,7 +230,7 @@ class Result:
     statuses: dict[int, str]  # 履歴の添字 → main argument の地位
     justified_index: int | None
     turns: int
-    closed_by: str  # "justified" | "turn_limit" | "no_more_arguments"
+    closed_by: str  # "justified" | "turn_limit" | "no_more_arguments" | "no_new_point"（比較手法）
     trace: list[str] = field(default_factory=list)
     invalid_attempts: list[dict[str, Any]] = field(default_factory=list)  # 無効だった攻撃（履歴には入れない。分析用）
 
@@ -248,6 +254,14 @@ def _dump(x: Any) -> str:
     if isinstance(x, str):
         return x
     return json.dumps(x.model_dump() if isinstance(x, BaseModel) else x, ensure_ascii=False, indent=2)
+
+
+def _target_statement(content: Any) -> str | None:
+    """攻撃の出力から、攻撃の対象の文を取る（schema のみ。no schema は、対象の文を、出させない）。"""
+    target = getattr(content, "target", None)
+    if isinstance(target, str):
+        return target
+    return getattr(target, "negated_statement", None)
 
 
 def _text(response: Any) -> str:
@@ -341,13 +355,14 @@ class DialecticalProtocol:
     def budget_left(self) -> bool:
         return self.turns < self.max_turns
 
-    def _record(self, role: str, content: Any, kind: str, argument: Any = None) -> int:
-        self.history.append(Message(role, content, kind, argument))
+    def _record(self, role: str, content: Any, kind: str, argument: Any = None, **info: Any) -> int:
+        self.history.append(Message(role, content, kind, argument, **info))
         return len(self.history) - 1
 
     def _last_main(self, role: str) -> Any:
+        """その陣営の最後の主張（main。比較手法では、最後の発言 = turn）。"""
         for m in reversed(self.history):
-            if m.role == role and m.kind == "main":
+            if m.role == role and m.kind in ("main", "turn"):
                 return m.argument
         return None
 
@@ -372,7 +387,7 @@ class DialecticalProtocol:
                 turn = other(turn)
                 continue
             failed_in_a_row = 0
-            index = self._record(turn, content, "main", argument)
+            index = self._record(turn, content, "main", argument, phase="main", proponent=turn)
             self._log(f"{turn}.main_argument → main_argument（履歴 {index}）")
             status = await self._decide_status(argument, turn, main_index=index)
             self.statuses[index] = status
@@ -413,8 +428,6 @@ class DialecticalProtocol:
             rebut = await self._rebuts(content, argument, target)
             kind = "rebut" if rebut else "undercut"
             defeat = await self._defeats(argument, target, rebut)
-            if mover == proposer and defeat:
-                proposer_replies += 1  # P が defeat した返答の数（相互 defeat で無効になったものも数える）
             ok = defeat if mover == opponent else (defeat and not await self._defeated_back(argument, target, rebut))
             if not ok:
                 reason = "strictly defeat でない" if mover == proposer else "defeat でない"
@@ -429,8 +442,24 @@ class DialecticalProtocol:
                         "content": content.model_dump() if isinstance(content, BaseModel) else content,
                     }
                 )
+                if mover == proposer:
+                    # P は 1 回で strictly defeat できなければ、やり直さない（それ以上の手はない）
+                    self._log("  P は strictly defeat できなかった → これ以上の返答なし")
+                    return OVERRULED if proposer_replies == 0 else DEFENSIBLE
                 continue
-            index = self._record(mover, content, "attack", argument)
+            if mover == proposer:
+                proposer_replies += 1  # P の有効な返答の数
+            index = self._record(
+                mover,
+                content,
+                "attack",
+                argument,
+                phase="defeat" if mover == opponent else "counter",
+                proponent=proposer,
+                attack=kind,
+                target_index=chain_index[-1],
+                target_statement=_target_statement(content),
+            )
             chain.append(argument)
             chain_index.append(index)
             self._log(f"  {mover}.attack({kind}) → 有効（履歴 {index}）")
@@ -449,7 +478,7 @@ class DialecticalProtocol:
         if argument is None:
             self._log(f"{integrator}.main_argument_from_rule → できない")
             return
-        index = self._record(integrator, content, "main", argument)
+        index = self._record(integrator, content, "main", argument, phase="main", proponent=integrator)
         self._log(f"{integrator}.main_argument_from_rule → main_argument（履歴 {index}）")
         if evaluate:
             status = await self._decide_status(argument, integrator, used=0, main_index=index)
@@ -463,15 +492,21 @@ class DialecticalProtocol:
         if not self.budget_left and self.justified_index is None and not self.integrated:
             self._log("上限到達・未統合 → ag1 が統合（評価しない）")
             await self._integrate(AG1, evaluate=False)
+        return await self._finish()
+
+    async def _finish(self, closed_by: str | None = None, answer: str | None = None) -> Result:
+        """地位を付けて、最終回答を書く。answer を渡すと、最終回答は書かない（MAD の judge が書いたもの）。"""
         for i, m in enumerate(self.history):
             if m.kind == "main":
                 self.statuses.setdefault(i, DEFENSIBLE)
         justified = self.justified_index is not None
-        user = FINAL_ANSWER_USER_JUSTIFIED if justified else FINAL_ANSWER_USER_LIMIT
-        response = await self.agents[AG1].chat(user, system=self._system(AG1, final=True))
-        answer = getattr(response, "content", response)
-        self._log(f"final_answer（{'justified あり' if justified else '上限・justified なし'}）")
-        closed_by = "justified" if justified else ("turn_limit" if not self.budget_left else "no_more_arguments")
+        if answer is None:
+            user = FINAL_ANSWER_USER_JUSTIFIED if justified else FINAL_ANSWER_USER_LIMIT
+            response = await self.agents[AG1].chat(user, system=self._system(AG1, final=True))
+            answer = _text(response)
+            self._log(f"final_answer（{'justified あり' if justified else '上限・justified なし'}）")
+        if closed_by is None:
+            closed_by = "justified" if justified else ("turn_limit" if not self.budget_left else "no_more_arguments")
         return Result(
             answer, self.history, self.statuses, self.justified_index, self.turns, closed_by, self.trace, self.invalid_attempts
         )

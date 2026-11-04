@@ -1,0 +1,935 @@
+{
+  "method": "schema",
+  "question": "Should students dissect animals?",
+  "agent1_stance": "Your stance:\nYou support animal dissection.\nYou believe dissecting real animals provides students with more learning opportunities, as dissection is a valuable part of teaching biology in schools, developing fine motor skills, hand-eye coordination, and critical thinking.\nYou believe dissection can encourage students to pursue careers in science by providing hands-on experience that inspires career interest and creates aha moments that spark enthusiasm for scientific fields.\nYou believe animal dissection is a productive and worthwhile use of dead animals, as over 98% of dissected animals were already deceased and fetal pigs are meat industry byproducts destined for landfills.",
+  "agent2_stance": "Your stance:\nYou oppose animal dissection.\nYou believe methods used to supply animals for dissections are inhumane and bad for the environment, as approximately 99% of dissection animals are caught in the wild and wild-catching decreases local populations and reduces biodiversity.\nYou believe medical studies do not require or benefit from animal dissection, as it is not required by College Board AP Biology or Next Generation Science Standards, and no U.S. or Canadian medical schools use animals for physician training.\nYou believe dissecting real animals is unnecessary because alternatives exist, as synthetic models and computer simulations teach equally well or better and students learn just as well or better with alternatives versus dead animals.",
+  "metrics": {
+    "elapsed_seconds": 27.381,
+    "max_dialogue_turns": 10,
+    "turns": 10,
+    "closed_by": "turn_limit",
+    "justified_index": null,
+    "total_dialogue_turns": 10,
+    "main_argument_count": 3,
+    "attack_turn_count": 2,
+    "overruled_count": 0,
+    "defensible_count": 3,
+    "justified_proven_count": 0,
+    "usage": {
+      "agents": {
+        "model": "gpt-5.4-nano",
+        "prompt_tokens": 34841,
+        "cached_tokens": 9216,
+        "completion_tokens": 3229,
+        "total_tokens": 38070,
+        "total_cost_usd": 0.009346
+      },
+      "judge": {
+        "model": "gpt-5.4-mini",
+        "prompt_tokens": 0,
+        "cached_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0,
+        "total_cost_usd": 0.0
+      },
+      "total_cost_usd": 0.009346
+    },
+    "cost_usd_this_run": 0.009346
+  },
+  "dialogue_history": [
+    {
+      "id": "h0",
+      "agent": "AG1",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [],
+                "weak_negation": []
+              },
+              "consequent": "Animal dissection in schools provides valuable biology learning opportunities for students"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Animal dissection in schools provides valuable biology learning opportunities for students"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Dissecting real animals should be part of school biology teaching"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Dissecting real animals should be part of school biology teaching"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Dissecting real animals supports students’ fine motor skills, hand-eye coordination, and critical thinking"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Dissecting real animals supports students’ fine motor skills, hand-eye coordination, and critical thinking"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Dissection can increase student enthusiasm and career interest in science"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Animal dissection in schools provides valuable biology learning opportunities for students"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Using animal remains for dissection is a productive use of dead animals"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Using animal remains for dissection is a productive use of dead animals"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Animal dissection is a worthwhile use of dead animals (including meat-industry byproducts)"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Dissecting real animals should be part of school biology teaching",
+                  "Animal dissection is a worthwhile use of dead animals (including meat-industry byproducts)"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Students should dissect animals in school biology"
+            }
+          ],
+          "Conc": [
+            "Animal dissection in schools provides valuable biology learning opportunities for students",
+            "Dissecting real animals should be part of school biology teaching",
+            "Dissecting real animals supports students’ fine motor skills, hand-eye coordination, and critical thinking",
+            "Dissection can increase student enthusiasm and career interest in science",
+            "Using animal remains for dissection is a productive use of dead animals",
+            "Animal dissection is a worthwhile use of dead animals (including meat-industry byproducts)",
+            "Students should dissect animals in school biology"
+          ],
+          "Ass": []
+        }
+      },
+      "type": "main",
+      "proponent": "AG1",
+      "status": "defensible"
+    },
+    {
+      "id": "h1",
+      "agent": "AG2",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [],
+                "weak_negation": []
+              },
+              "consequent": "Dissecting real animals is unnecessary because synthetic models and computer simulations teach equally well or better and students learn just as well or better with alternatives versus dead animals"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Dissecting real animals is unnecessary because synthetic models and computer simulations teach equally well or better and students learn just as well or better with alternatives versus dead animals"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Dissecting animals in school biology should not be done when effective alternatives exist"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Dissecting animals in school biology should not be done when effective alternatives exist"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Students should not dissect animals in school biology"
+            }
+          ],
+          "Conc": [
+            "Dissecting real animals is unnecessary because synthetic models and computer simulations teach equally well or better and students learn just as well or better with alternatives versus dead animals",
+            "Dissecting animals in school biology should not be done when effective alternatives exist",
+            "Students should not dissect animals in school biology"
+          ],
+          "Ass": []
+        }
+      },
+      "type": "defeat",
+      "proponent": "AG1",
+      "attack": "rebut",
+      "target_id": "h0",
+      "target_statement": "Students should dissect animals in school biology"
+    },
+    {
+      "id": "h2",
+      "agent": "AG2",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [],
+                "weak_negation": []
+              },
+              "consequent": "Dissecting real animals is unnecessary because synthetic models and computer simulations teach equally well or better and students learn just as well or better with alternatives versus dead animals"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Dissecting real animals is unnecessary because synthetic models and computer simulations teach equally well or better and students learn just as well or better with alternatives versus dead animals"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "When effective alternatives exist, school biology should not require students to dissect real animals"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "When effective alternatives exist, school biology should not require students to dissect real animals"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Students should not dissect animals in school biology"
+            }
+          ],
+          "Conc": [
+            "Dissecting real animals is unnecessary because synthetic models and computer simulations teach equally well or better and students learn just as well or better with alternatives versus dead animals",
+            "When effective alternatives exist, school biology should not require students to dissect real animals",
+            "Students should not dissect animals in school biology"
+          ],
+          "Ass": []
+        }
+      },
+      "type": "main",
+      "proponent": "AG2",
+      "status": "defensible"
+    },
+    {
+      "id": "h3",
+      "agent": "AG1",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [],
+                "weak_negation": []
+              },
+              "consequent": "Animal dissection in schools provides valuable biology learning opportunities for students"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Animal dissection in schools provides valuable biology learning opportunities for students"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Dissecting real animals should be part of school biology teaching"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Dissecting real animals should be part of school biology teaching"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Dissection can increase student enthusiasm and career interest in science"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Dissecting real animals should be part of school biology teaching",
+                  "Animal dissection is a worthwhile use of dead animals (including meat-industry byproducts)"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Students should dissect animals in school biology"
+            }
+          ],
+          "Conc": [
+            "Animal dissection in schools provides valuable biology learning opportunities for students",
+            "Dissecting real animals should be part of school biology teaching",
+            "Dissection can increase student enthusiasm and career interest in science",
+            "Students should dissect animals in school biology"
+          ],
+          "Ass": []
+        }
+      },
+      "type": "defeat",
+      "proponent": "AG2",
+      "attack": "rebut",
+      "target_id": "h2",
+      "target_statement": "Students should not dissect animals in school biology"
+    },
+    {
+      "id": "h5",
+      "agent": "AG1",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [],
+                "weak_negation": []
+              },
+              "consequent": "Animal dissection in schools provides valuable biology learning opportunities for students"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Animal dissection in schools provides valuable biology learning opportunities for students"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Dissection can be used as an educational option in school biology"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Using animal remains for dissection is a productive use of dead animals (including meat-industry byproducts)"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Using animal remains for dissection supports the permissibility of having dissection activities"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Dissection can be used as an educational option in school biology",
+                  "Using animal remains for dissection supports the permissibility of having dissection activities"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Students should be allowed to dissect animals in school biology"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "When effective alternatives exist, school biology should not require students to dissect real animals"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "When effective alternatives exist, dissection should not be required"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Students should be allowed to dissect animals in school biology",
+                  "When effective alternatives exist, dissection should not be required"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Students should be allowed to dissect animals in school biology, with dissection as an option rather than a requirement when effective alternatives exist"
+            }
+          ],
+          "Conc": [
+            "Animal dissection in schools provides valuable biology learning opportunities for students",
+            "Dissection can be used as an educational option in school biology",
+            "Using animal remains for dissection supports the permissibility of having dissection activities",
+            "Students should be allowed to dissect animals in school biology",
+            "When effective alternatives exist, dissection should not be required",
+            "Students should be allowed to dissect animals in school biology, with dissection as an option rather than a requirement when effective alternatives exist"
+          ],
+          "Ass": []
+        }
+      },
+      "type": "main",
+      "proponent": "AG1",
+      "status": "defensible"
+    }
+  ],
+  "history": [
+    {
+      "role": "ag1",
+      "content": {
+        "argument_type": "main_argument",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "Animal dissection in schools provides valuable biology learning opportunities for students"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Animal dissection in schools provides valuable biology learning opportunities for students"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Dissecting real animals should be part of school biology teaching"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Dissecting real animals should be part of school biology teaching"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Dissecting real animals supports students’ fine motor skills, hand-eye coordination, and critical thinking"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Dissecting real animals supports students’ fine motor skills, hand-eye coordination, and critical thinking"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Dissection can increase student enthusiasm and career interest in science"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Animal dissection in schools provides valuable biology learning opportunities for students"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Using animal remains for dissection is a productive use of dead animals"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Using animal remains for dissection is a productive use of dead animals"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Animal dissection is a worthwhile use of dead animals (including meat-industry byproducts)"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Dissecting real animals should be part of school biology teaching",
+                  "Animal dissection is a worthwhile use of dead animals (including meat-industry byproducts)"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Students should dissect animals in school biology"
+            }
+          ]
+        }
+      },
+      "status": "defensible",
+      "kind": "main"
+    },
+    {
+      "role": "ag2",
+      "content": {
+        "attack_type": "rebut",
+        "target": "Students should dissect animals in school biology",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "Dissecting real animals is unnecessary because synthetic models and computer simulations teach equally well or better and students learn just as well or better with alternatives versus dead animals"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Dissecting real animals is unnecessary because synthetic models and computer simulations teach equally well or better and students learn just as well or better with alternatives versus dead animals"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Dissecting animals in school biology should not be done when effective alternatives exist"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Dissecting animals in school biology should not be done when effective alternatives exist"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Students should not dissect animals in school biology"
+            }
+          ]
+        }
+      },
+      "kind": "attack"
+    },
+    {
+      "role": "ag2",
+      "content": {
+        "argument_type": "main_argument",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "Dissecting real animals is unnecessary because synthetic models and computer simulations teach equally well or better and students learn just as well or better with alternatives versus dead animals"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Dissecting real animals is unnecessary because synthetic models and computer simulations teach equally well or better and students learn just as well or better with alternatives versus dead animals"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "When effective alternatives exist, school biology should not require students to dissect real animals"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "When effective alternatives exist, school biology should not require students to dissect real animals"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Students should not dissect animals in school biology"
+            }
+          ]
+        }
+      },
+      "status": "defensible",
+      "kind": "main"
+    },
+    {
+      "role": "ag1",
+      "content": {
+        "attack_type": "rebut",
+        "target": "Students should not dissect animals in school biology",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "Animal dissection in schools provides valuable biology learning opportunities for students"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Animal dissection in schools provides valuable biology learning opportunities for students"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Dissecting real animals should be part of school biology teaching"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Dissecting real animals should be part of school biology teaching"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Dissection can increase student enthusiasm and career interest in science"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Dissecting real animals should be part of school biology teaching",
+                  "Animal dissection is a worthwhile use of dead animals (including meat-industry byproducts)"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Students should dissect animals in school biology"
+            }
+          ]
+        }
+      },
+      "kind": "attack"
+    },
+    {
+      "role": "ag1",
+      "content": {
+        "antecedent": {
+          "strong_statements": [
+            "Animal dissection in schools provides valuable biology learning opportunities for students",
+            "Using animal remains for dissection is a productive use of dead animals (including meat-industry byproducts)",
+            "When effective alternatives exist, school biology should not require students to dissect real animals"
+          ],
+          "weak_statements": []
+        },
+        "consequent": "Students should be allowed to dissect animals in school biology, with dissection as an option rather than a requirement when effective alternatives exist"
+      },
+      "kind": "integrate"
+    },
+    {
+      "role": "ag1",
+      "content": {
+        "argument_type": "main_argument",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "Animal dissection in schools provides valuable biology learning opportunities for students"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Animal dissection in schools provides valuable biology learning opportunities for students"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Dissection can be used as an educational option in school biology"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Using animal remains for dissection is a productive use of dead animals (including meat-industry byproducts)"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Using animal remains for dissection supports the permissibility of having dissection activities"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Dissection can be used as an educational option in school biology",
+                  "Using animal remains for dissection supports the permissibility of having dissection activities"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Students should be allowed to dissect animals in school biology"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "When effective alternatives exist, school biology should not require students to dissect real animals"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "When effective alternatives exist, dissection should not be required"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Students should be allowed to dissect animals in school biology",
+                  "When effective alternatives exist, dissection should not be required"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Students should be allowed to dissect animals in school biology, with dissection as an option rather than a requirement when effective alternatives exist"
+            }
+          ]
+        }
+      },
+      "status": "defensible",
+      "kind": "main"
+    }
+  ],
+  "statuses": {
+    "0": "defensible",
+    "2": "defensible",
+    "5": "defensible"
+  },
+  "integrated_rules": [],
+  "consensus_reached": false,
+  "justification_status": "fallback_no_consensus",
+  "final_answer": "The pro-dissection side (my stance, ag1) put forward two main opinions:\n\n1) **Dissecting real animals should be part of school biology.**  \n   The argument was that dissection provides **valuable learning opportunities** and supports **fine motor skills, hand-eye coordination, and critical thinking**. It was also claimed that dissection can **increase enthusiasm and interest in science careers** by creating “aha moments.” Finally, it was argued that using animal remains for dissection is a **productive use of dead animals**, including **fetal pig byproducts** that are otherwise destined for landfill.\n\n2) **Dissection should be allowed as an option, not forced when alternatives exist.**  \n   The argument was adjusted to say: even if alternatives can be effective, students should still be **permitted** to dissect, with dissection functioning as an **educational option**. It explicitly included the idea that **when effective alternatives exist, dissection should not be required**.\n\nThe anti-dissection side (ag2) raised the main objection:\n\n- **Objection:** Dissection is unnecessary because **synthetic models and computer simulations** can teach **equally well or better**, and therefore students should **not be required** to dissect real animals when effective alternatives exist.\n\nHow the responses went:\n- The pro-dissection side attempted a partial answer by **conceding the “not required when alternatives exist” principle**, reframing dissection as **optional rather than mandatory**. This directly addresses the objection about *requiring* dissection, but it does not fully resolve the deeper claim that alternatives may teach as well or better in every relevant case, nor does it settle whether optional dissection is justified on ethical grounds in general.\n\nWhat remains undecided:\n- **Whether real-animal dissection should ever be used at all** (even as an option), given the objection that alternatives teach as well or better.\n- **Whether the learning/career benefits claimed for dissection are demonstrably stronger than alternatives** (e.g., evidence comparing outcomes between real dissection vs. models/simulations).\n- **Ethical and policy thresholds:** how schools should weigh educational benefits, student autonomy/comfort, religious or moral objections, and the acceptability of using animal remains even if they are already dead.\n\nWhat is known (from the argumentation itself):\n- There is agreement in the pro-dissection rebuttal framework that **dissection should not be *required*** when **effective alternatives exist**.\n- The disagreement is mainly about **necessity/optimality** (is real-animal dissection educationally justified compared to alternatives?) and **permissibility as an optional activity**.",
+  "trace": [
+    "ag1.main_argument → main_argument（履歴 0）",
+    "  ag2.attack(rebut) → 有効（履歴 1）",
+    "  ag1.attack(rebut) → 無効（strictly defeat でない）",
+    "  ag1.attack(rebut) → 無効（strictly defeat でない）",
+    "  ag1.attack(rebut) → 無効（strictly defeat でない）",
+    "  この主張の上限（5）に到達 → defensible",
+    "  地位: 履歴 0 は defensible",
+    "ag2.main_argument → main_argument（履歴 2）",
+    "  ag1.attack(rebut) → 有効（履歴 3）",
+    "  ag2.attack(rebut) → 無効（strictly defeat でない）",
+    "  ag2.attack(rebut) → 無効（strictly defeat でない）",
+    "  ag2.attack(rebut) → 無効（strictly defeat でない）",
+    "  上限到達 → defensible",
+    "  地位: 履歴 2 は defensible",
+    "上限到達・未統合 → ag1 が統合（評価しない）",
+    "ag1.integrate → rule",
+    "ag1.main_argument_from_rule → main_argument（履歴 5）",
+    "final_answer（上限・justified なし）"
+  ],
+  "invalid_attempts": [
+    {
+      "role": "ag1",
+      "declared": "rebut",
+      "reason": "strictly defeat でない",
+      "target_index": 1,
+      "main_index": 0,
+      "content": {
+        "attack_type": "rebut",
+        "target": "Students should not dissect animals in school biology",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "Animal dissection in schools provides valuable biology learning opportunities for students"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Animal dissection in schools provides valuable biology learning opportunities for students"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Dissecting real animals should be part of school biology teaching"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Dissecting real animals should be part of school biology teaching"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Students should dissect animals in school biology"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "role": "ag1",
+      "declared": "rebut",
+      "reason": "strictly defeat でない",
+      "target_index": 1,
+      "main_index": 0,
+      "content": {
+        "attack_type": "rebut",
+        "target": "Students should not dissect animals in school biology",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "Animal dissection in schools provides valuable biology learning opportunities for students"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Animal dissection in schools provides valuable biology learning opportunities for students"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Dissecting real animals should be part of school biology teaching"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Dissecting real animals should be part of school biology teaching"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Dissecting real animals supports students’ fine motor skills, hand-eye coordination, and critical thinking"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Dissecting real animals supports students’ fine motor skills, hand-eye coordination, and critical thinking"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Dissection can increase student enthusiasm and career interest in science"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Animal dissection in schools provides valuable biology learning opportunities for students"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Using animal remains for dissection is a productive use of dead animals"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Using animal remains for dissection is a productive use of dead animals"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Animal dissection is a worthwhile use of dead animals (including meat-industry byproducts)"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Dissecting real animals should be part of school biology teaching",
+                  "Animal dissection is a worthwhile use of dead animals (including meat-industry byproducts)"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Students should dissect animals in school biology"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "role": "ag1",
+      "declared": "rebut",
+      "reason": "strictly defeat でない",
+      "target_index": 1,
+      "main_index": 0,
+      "content": {
+        "attack_type": "rebut",
+        "target": "Students should not dissect animals in school biology",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "Students should dissect animals in school biology"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Students should dissect animals in school biology"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Therefore, effective alternatives do not justify stopping animal dissection in school biology"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Therefore, effective alternatives do not justify stopping animal dissection in school biology"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "So the claim that students should not dissect animals in school biology is false"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "role": "ag2",
+      "declared": "rebut",
+      "reason": "strictly defeat でない",
+      "target_index": 3,
+      "main_index": 2,
+      "content": {
+        "attack_type": "rebut",
+        "target": "Animal dissection in schools provides valuable biology learning opportunities for students",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "Dissecting real animals is unnecessary because synthetic models and computer simulations teach equally well or better and students learn just as well or better with alternatives versus dead animals"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Dissecting real animals is unnecessary because synthetic models and computer simulations teach equally well or better and students learn just as well or better with alternatives versus dead animals"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Animal dissection in schools does not provide uniquely valuable biology learning opportunities for students"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Animal dissection in schools does not provide uniquely valuable biology learning opportunities for students"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Animal dissection in schools provides valuable biology learning opportunities for students"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "role": "ag2",
+      "declared": "rebut",
+      "reason": "strictly defeat でない",
+      "target_index": 3,
+      "main_index": 2,
+      "content": {
+        "attack_type": "rebut",
+        "target": "Animal dissection in schools provides valuable biology learning opportunities for students",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "Dissecting real animals is unnecessary because synthetic models and computer simulations teach equally well or better and students learn just as well or better with alternatives versus dead animals"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Dissecting real animals is unnecessary because synthetic models and computer simulations teach equally well or better and students learn just as well or better with alternatives versus dead animals"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Animal dissection in schools does not provide uniquely valuable biology learning opportunities for students"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Animal dissection in schools does not provide uniquely valuable biology learning opportunities for students"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Animal dissection in schools provides valuable biology learning opportunities for students is false"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "role": "ag2",
+      "declared": "rebut",
+      "reason": "strictly defeat でない",
+      "target_index": 3,
+      "main_index": 2,
+      "content": {
+        "attack_type": "rebut",
+        "target": "Animal dissection in schools provides valuable biology learning opportunities for students",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "Dissecting real animals is unnecessary because synthetic models and computer simulations teach equally well or better and students learn just as well or better with alternatives versus dead animals"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Dissecting real animals is unnecessary because synthetic models and computer simulations teach equally well or better and students learn just as well or better with alternatives versus dead animals"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Animal dissection in schools does not provide valuable biology learning opportunities for students"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Animal dissection in schools does not provide valuable biology learning opportunities for students"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Animal dissection in schools should not be part of school biology teaching"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

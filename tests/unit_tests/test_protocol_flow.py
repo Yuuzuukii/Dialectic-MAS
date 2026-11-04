@@ -155,34 +155,32 @@ def test_S3_reinstated_by_undercut():
     assert [m.role for m in r.history] == [AG1, AG2, AG1]
 
 
-def test_S4_mutual_rebut_never_strict_until_the_thread_limit():
-    # ag1 の返答は、毎回 rebut だけ（対称で、strictly defeat にならず、無効）。主張の上限（10 // 2 = 5）で打ち切り。
-    def replies(i):
-        return rebut(arg(f"r{i}"))
-
-    r = run(FakeAgent(main=[main(arg("m1"))], attack=replies), FakeAgent(attack=[rebut(arg("b1"))]), max_turns=10)
-    assert r.statuses == {0: "defensible"} and r.turns <= 10
-    assert any("この主張の上限（5）に到達" in t for t in r.trace)
-    assert r.final_answer == "ANSWER(fallback)"
-    # 無効だった攻撃は、履歴に入らず、invalid_attempts に残る（対象は ag2 の攻撃＝履歴 1、主張は履歴 0）
-    assert [m.role for m in r.history] == [AG1, AG2]
-    assert len(r.invalid_attempts) == 3
+def test_S4_proposer_gets_one_attempt_and_non_strict_defeat_is_overruled():
+    # ag1 の返答は rebut だけ（対称で、strictly defeat にならない）。やり直さず、その場で overruled。
+    r = run(
+        FakeAgent(main=[main(arg("m1"))], attack=lambda i: rebut(arg(f"r{i}"))),
+        FakeAgent(attack=[rebut(arg("b1"))]),
+        max_turns=10,
+    )
+    assert r.statuses[0] == "overruled"
+    assert any("P は strictly defeat できなかった" in t for t in r.trace)
+    # 無効だった攻撃は、履歴に入らず、invalid_attempts に 1 回だけ残る（対象は ag2 の攻撃＝履歴 1、主張は履歴 0）
+    assert [m.role for m in r.history][:2] == [AG1, AG2]
+    assert len(r.invalid_attempts) == 1
     first = r.invalid_attempts[0]
     assert first["role"] == AG1 and first["declared"] == "rebut" and first["reason"] == "strictly defeat でない"
     assert first["target_index"] == 1 and first["main_index"] == 0
     assert first["content"]["attack_type"] == "rebut" and first["content"]["argument"]["rules"]
 
 
-def test_thread_limit_lets_the_other_side_present_a_main_argument():
-    def replies(i):
-        return rebut(arg(f"r{i}"))
-
-    ag1 = FakeAgent(main=[main(arg("m1")), main(arg("m3"))], attack=replies, integrate=[R([], "claim c")], from_rule=[main(arg("m4"))])
-    ag2 = FakeAgent(main=[main(arg("m2"))], attack=[rebut(arg("b1")), rebut(arg("b2"))])
+def test_overruled_main_lets_the_other_side_present_a_main_argument():
+    extra = {"integrate": [R([], "claim c")], "from_rule": [main(arg("m4"))]}
+    ag1 = FakeAgent(main=[main(arg("m1"))], attack=lambda i: rebut(arg(f"r{i}")), **extra)
+    ag2 = FakeAgent(main=[main(arg("m2"))], attack=[rebut(arg("b1"))], **extra)
     r = run(ag1, ag2, max_turns=10)
     roles_of_main = [(m.role, i) for i, m in enumerate(r.history) if m.kind == "main"]
     assert roles_of_main[0][0] == AG1 and any(role == AG2 for role, _ in roles_of_main)  # ag2 にも、主張の番が回る
-    assert r.statuses[0] == "defensible"
+    assert r.statuses[0] == "overruled"
 
 
 def test_thread_limit_is_floor_of_half_and_integrated_main_counts_only_attacks():
@@ -192,9 +190,12 @@ def test_thread_limit_is_floor_of_half_and_integrated_main_counts_only_attacks()
     assert [m.role for m in r.history][:2] == [AG1, AG2]  # ag1 の主張 + ag2 の攻撃 1回だけ
 
 
-def test_proposer_who_made_only_invalid_replies_is_defensible_not_overruled():
-    # P（ag1）は、rebut だけの返答（相互 defeat で無効。ただし defeat はしている）を作ってから、できないと言う → defensible。
-    r = run(FakeAgent(main=[main(arg("m1"))], attack=[rebut(arg("r1")), CANNOT_ATTACK]), FakeAgent(attack=[rebut(arg("b1"))]))
+def test_proposer_with_a_valid_reply_earlier_is_defensible_when_next_reply_fails():
+    # O の 2 回目の攻撃に、P が rebut だけ（strictly でない）で返す → 1 回目の有効な返答があるので defensible。
+    r = run(
+        FakeAgent(main=[main(arg("m1"))], attack=[undercut(A(R([], "w1")), "w1"), rebut(arg("r2"))]),
+        FakeAgent(attack=[rebut(arg("b1", weak=("w1",))), rebut(arg("b2"))]),
+    )
     assert r.statuses[0] == "defensible" and len(r.invalid_attempts) == 1
     # P が、何も作らずにできないと言うなら、overruled
     r2 = run(FakeAgent(main=[main(arg("m1"))]), FakeAgent(attack=[rebut(arg("b1"))]))
@@ -355,11 +356,11 @@ def test_free_prompts_have_no_schema_instructions_and_judge_has_no_system_prompt
 
 
 def test_free_rebut_only_is_symmetric_and_never_strict():
-    # judge: undercut は常に no、rebut は常に yes。ag1 の返答は、無効 → 上限まで続く。
+    # judge: undercut は常に no、rebut は常に yes。ag1 の返答は、無効 → やり直さず overruled。
     ag1 = FreeAgent(main=["claim 1"], attack=[f"reply {i}" for i in range(10)])
     ag2 = FreeAgent(attack=["objection 1"])
     r = run_free(ag1, ag2, FakeJudge(), max_turns=6)
-    assert r.statuses == {0: "defensible"} and any("この主張の上限（3）に到達" in t for t in r.trace)
+    assert r.statuses == {0: "overruled"} and any("P は strictly defeat できなかった" in t for t in r.trace)
 
 
 def test_free_undercut_reinstates_and_status_is_justified():

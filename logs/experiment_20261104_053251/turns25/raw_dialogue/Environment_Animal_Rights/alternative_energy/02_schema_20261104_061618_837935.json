@@ -1,0 +1,1666 @@
+{
+  "method": "schema",
+  "question": "Can alternative energies effectively replace fossil fuels?",
+  "agent1_stance": "Your stance:\nYou support alternative energies replacing fossil fuels.\nYou believe alternative energies not only can but must replace fossil fuels if we want to continue living on Earth, as we already possess the knowledge and tools needed.\nYou believe many countries are already operating on significant renewable energy sources, including Iceland (85% renewable), Paraguay (99.9%), Costa Rica (99.78%), and Norway (98%), demonstrating that renewable transitions are achievable.\nYou believe nuclear energy, a low-carbon source of alternative energy, is the quickest way to end dependence on fossil fuels, requiring far less land than renewables.",
+  "agent2_stance": "Your stance:\nYou oppose the idea that alternative energies can effectively replace fossil fuels.\nYou believe natural gas, a fossil fuel, is an appropriate and necessary bridge fuel to meet net-zero emissions goals, as existing infrastructure allows rapid emissions reductions.\nYou believe the idea that renewable energies will fill the energy needs of large countries anytime soon hinders realistic change, as U.S. alternative energy use has never exceeded 20% historically.\nYou believe nuclear energy is too dangerous and ineffective to be a serious solution to global warming, as accidents like Fukushima eliminate carbon-free electricity gains.",
+  "metrics": {
+    "elapsed_seconds": 73.298,
+    "max_dialogue_turns": 25,
+    "turns": 25,
+    "closed_by": "turn_limit",
+    "justified_index": null,
+    "total_dialogue_turns": 25,
+    "main_argument_count": 4,
+    "attack_turn_count": 2,
+    "overruled_count": 0,
+    "defensible_count": 4,
+    "justified_proven_count": 0,
+    "usage": {
+      "agents": {
+        "model": "gpt-5.4-nano",
+        "prompt_tokens": 82282,
+        "cached_tokens": 38656,
+        "completion_tokens": 7932,
+        "total_tokens": 90214,
+        "total_cost_usd": 0.019413
+      },
+      "judge": {
+        "model": "gpt-5.4-mini",
+        "prompt_tokens": 0,
+        "cached_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0,
+        "total_cost_usd": 0.0
+      },
+      "total_cost_usd": 0.019413
+    },
+    "cost_usd_this_run": 0.019413
+  },
+  "dialogue_history": [
+    {
+      "id": "h0",
+      "agent": "AG1",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [],
+                "weak_negation": []
+              },
+              "consequent": "Many countries can run on large shares of renewable electricity"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Many countries can run on large shares of renewable electricity"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Renewable energy transitions are achievable at national scale"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Renewable energy transitions are achievable at national scale"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Alternative energies can replace fossil fuels for electricity generation"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Alternative energies can replace fossil fuels for electricity generation"
+                ],
+                "weak_negation": [
+                  "There is no reliable evidence that other energy sectors (transport, heating) can also be electrified or otherwise decarbonized"
+                ]
+              },
+              "consequent": "Alternative energies can replace fossil fuels across the wider energy system"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Alternative energies can replace fossil fuels across the wider energy system",
+                  "We must reduce fossil-fuel dependence to continue living on Earth"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Alternative energies effectively can replace fossil fuels, and we must replace them"
+            }
+          ],
+          "Conc": [
+            "Many countries can run on large shares of renewable electricity",
+            "Renewable energy transitions are achievable at national scale",
+            "Alternative energies can replace fossil fuels for electricity generation",
+            "Alternative energies can replace fossil fuels across the wider energy system",
+            "Alternative energies effectively can replace fossil fuels, and we must replace them"
+          ],
+          "Ass": [
+            "There is no reliable evidence that other energy sectors (transport, heating) can also be electrified or otherwise decarbonized"
+          ]
+        }
+      },
+      "type": "main",
+      "proponent": "AG1",
+      "status": "defensible"
+    },
+    {
+      "id": "h1",
+      "agent": "AG2",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [],
+                "weak_negation": []
+              },
+              "consequent": "Net-zero requires deep emissions cuts in the near term before renewables can scale to cover all fossil-fuel uses"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Net-zero requires deep emissions cuts in the near term before renewables can scale to cover all fossil-fuel uses"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Natural gas, a fossil fuel with existing infrastructure, is an appropriate bridge fuel for rapid emissions reductions"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Natural gas, a fossil fuel with existing infrastructure, is an appropriate bridge fuel for rapid emissions reductions",
+                  "Net-zero requires deep emissions cuts in the near term before renewables can scale to cover all fossil-fuel uses"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Alternative energies alone do not effectively replace fossil fuels across the needed time horizon and system scale"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Alternative energies alone do not effectively replace fossil fuels across the needed time horizon and system scale"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Therefore, alternative energies effectively can replace fossil fuels (as the core replacement strategy) is false, and we should not rely on it as stated"
+            }
+          ],
+          "Conc": [
+            "Net-zero requires deep emissions cuts in the near term before renewables can scale to cover all fossil-fuel uses",
+            "Natural gas, a fossil fuel with existing infrastructure, is an appropriate bridge fuel for rapid emissions reductions",
+            "Alternative energies alone do not effectively replace fossil fuels across the needed time horizon and system scale",
+            "Therefore, alternative energies effectively can replace fossil fuels (as the core replacement strategy) is false, and we should not rely on it as stated"
+          ],
+          "Ass": []
+        }
+      },
+      "type": "defeat",
+      "proponent": "AG1",
+      "attack": "rebut",
+      "target_id": "h0",
+      "target_statement": "Alternative energies effectively can replace fossil fuels, and we must replace them"
+    },
+    {
+      "id": "h2",
+      "agent": "AG2",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [],
+                "weak_negation": []
+              },
+              "consequent": "U.S. alternative (renewable) energy use has historically remained below about 20% of total energy demand"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "U.S. alternative (renewable) energy use has historically remained below about 20% of total energy demand"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Because U.S. alternative energy penetration has never exceeded ~20% historically, it has not effectively replaced fossil fuels to meet total energy demand"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Because U.S. alternative energy penetration has never exceeded ~20% historically, it has not effectively replaced fossil fuels to meet total energy demand",
+                  "We must cut fossil-fuel dependence substantially to address climate change"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Alternative energies cannot effectively replace fossil fuels at the needed scale in the near term"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Alternative energies cannot effectively replace fossil fuels at the needed scale in the near term"
+                ],
+                "weak_negation": [
+                  "There is reliable evidence that renewables alone can rapidly cover all remaining fossil-fuel energy uses (electricity, transport, heating) for large countries"
+                ]
+              },
+              "consequent": "Therefore, alternative energies do not effectively replace fossil fuels as a realistic primary strategy"
+            }
+          ],
+          "Conc": [
+            "U.S. alternative (renewable) energy use has historically remained below about 20% of total energy demand",
+            "Because U.S. alternative energy penetration has never exceeded ~20% historically, it has not effectively replaced fossil fuels to meet total energy demand",
+            "Alternative energies cannot effectively replace fossil fuels at the needed scale in the near term",
+            "Therefore, alternative energies do not effectively replace fossil fuels as a realistic primary strategy"
+          ],
+          "Ass": [
+            "There is reliable evidence that renewables alone can rapidly cover all remaining fossil-fuel energy uses (electricity, transport, heating) for large countries"
+          ]
+        }
+      },
+      "type": "main",
+      "proponent": "AG2",
+      "status": "defensible"
+    },
+    {
+      "id": "h3",
+      "agent": "AG1",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [],
+                "weak_negation": []
+              },
+              "consequent": "Many countries can run on large shares of renewable electricity"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Many countries can run on large shares of renewable electricity"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Renewable energy transitions are achievable at national scale"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Renewable energy transitions are achievable at national scale"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Alternative energies can replace fossil fuels for electricity generation"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Alternative energies can replace fossil fuels for electricity generation"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Alternative energies can displace fossil fuels at substantial scale in the near term for electricity"
+            }
+          ],
+          "Conc": [
+            "Many countries can run on large shares of renewable electricity",
+            "Renewable energy transitions are achievable at national scale",
+            "Alternative energies can replace fossil fuels for electricity generation",
+            "Alternative energies can displace fossil fuels at substantial scale in the near term for electricity"
+          ],
+          "Ass": []
+        }
+      },
+      "type": "defeat",
+      "proponent": "AG2",
+      "attack": "rebut",
+      "target_id": "h2",
+      "target_statement": "Alternative energies cannot effectively replace fossil fuels at the needed scale in the near term"
+    },
+    {
+      "id": "h4",
+      "agent": "AG1",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [],
+                "weak_negation": []
+              },
+              "consequent": "Alternative energy sources (renewables and nuclear) can generate electricity with low lifecycle greenhouse-gas emissions"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Alternative energy sources (renewables and nuclear) can generate electricity with low lifecycle greenhouse-gas emissions"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Electrifying end-uses (e.g., transport and heating) converts fossil-fuel energy demand into electricity demand"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Electrifying end-uses (e.g., transport and heating) converts fossil-fuel energy demand into electricity demand",
+                  "Alternative energy sources (renewables and nuclear) can generate electricity with low lifecycle greenhouse-gas emissions"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Using alternative energy to supply electricity can substantially decarbonize transport and heating"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Using alternative energy to supply electricity can substantially decarbonize transport and heating"
+                ],
+                "weak_negation": [
+                  "There is no reliable evidence that electrification of transport and heating cannot be scaled sufficiently where it is technically feasible"
+                ]
+              },
+              "consequent": "Alternative energies effectively replace fossil fuels across key sectors (electricity, transport, heating) when scaled and integrated with demand"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Alternative energies effectively replace fossil fuels across key sectors (electricity, transport, heating) when scaled and integrated with demand",
+                  "We must reduce fossil-fuel dependence to continue living on Earth"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Alternative energies effectively can replace fossil fuels, and we must replace them as a core strategy"
+            }
+          ],
+          "Conc": [
+            "Alternative energy sources (renewables and nuclear) can generate electricity with low lifecycle greenhouse-gas emissions",
+            "Electrifying end-uses (e.g., transport and heating) converts fossil-fuel energy demand into electricity demand",
+            "Using alternative energy to supply electricity can substantially decarbonize transport and heating",
+            "Alternative energies effectively replace fossil fuels across key sectors (electricity, transport, heating) when scaled and integrated with demand",
+            "Alternative energies effectively can replace fossil fuels, and we must replace them as a core strategy"
+          ],
+          "Ass": [
+            "There is no reliable evidence that electrification of transport and heating cannot be scaled sufficiently where it is technically feasible"
+          ]
+        }
+      },
+      "type": "main",
+      "proponent": "AG1",
+      "status": "defensible"
+    },
+    {
+      "id": "h6",
+      "agent": "AG1",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [],
+                "weak_negation": []
+              },
+              "consequent": "We must reduce fossil-fuel dependence to continue living on Earth"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "We must reduce fossil-fuel dependence to continue living on Earth"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Alternative energies effectively can replace fossil fuels across key sectors (electricity, transport, heating) when scaled and integrated with demand"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Alternative energies effectively can replace fossil fuels across key sectors (electricity, transport, heating) when scaled and integrated with demand",
+                  "We must reduce fossil-fuel dependence to continue living on Earth"
+                ],
+                "weak_negation": [
+                  "There is reliable evidence that renewables alone can rapidly cover all remaining fossil-fuel energy uses (electricity, transport, heating) for large countries"
+                ]
+              },
+              "consequent": "Alternative energies can effectively replace fossil fuels as a primary strategy, provided the transition includes rapid scaling (not necessarily renewables alone) to cover all major sectors and meet urgent fossil-reduction needs"
+            }
+          ],
+          "Conc": [
+            "We must reduce fossil-fuel dependence to continue living on Earth",
+            "Alternative energies effectively can replace fossil fuels across key sectors (electricity, transport, heating) when scaled and integrated with demand",
+            "Alternative energies can effectively replace fossil fuels as a primary strategy, provided the transition includes rapid scaling (not necessarily renewables alone) to cover all major sectors and meet urgent fossil-reduction needs"
+          ],
+          "Ass": [
+            "There is reliable evidence that renewables alone can rapidly cover all remaining fossil-fuel energy uses (electricity, transport, heating) for large countries"
+          ]
+        }
+      },
+      "type": "main",
+      "proponent": "AG1",
+      "status": "defensible"
+    }
+  ],
+  "history": [
+    {
+      "role": "ag1",
+      "content": {
+        "argument_type": "main_argument",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "Many countries can run on large shares of renewable electricity"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Many countries can run on large shares of renewable electricity"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Renewable energy transitions are achievable at national scale"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Renewable energy transitions are achievable at national scale"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Alternative energies can replace fossil fuels for electricity generation"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Alternative energies can replace fossil fuels for electricity generation"
+                ],
+                "weak_statements": [
+                  "There is no reliable evidence that other energy sectors (transport, heating) can also be electrified or otherwise decarbonized"
+                ]
+              },
+              "consequent": "Alternative energies can replace fossil fuels across the wider energy system"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Alternative energies can replace fossil fuels across the wider energy system",
+                  "We must reduce fossil-fuel dependence to continue living on Earth"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Alternative energies effectively can replace fossil fuels, and we must replace them"
+            }
+          ]
+        }
+      },
+      "status": "defensible",
+      "kind": "main"
+    },
+    {
+      "role": "ag2",
+      "content": {
+        "attack_type": "rebut",
+        "target": "Alternative energies effectively can replace fossil fuels, and we must replace them",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "Net-zero requires deep emissions cuts in the near term before renewables can scale to cover all fossil-fuel uses"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Net-zero requires deep emissions cuts in the near term before renewables can scale to cover all fossil-fuel uses"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Natural gas, a fossil fuel with existing infrastructure, is an appropriate bridge fuel for rapid emissions reductions"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Natural gas, a fossil fuel with existing infrastructure, is an appropriate bridge fuel for rapid emissions reductions",
+                  "Net-zero requires deep emissions cuts in the near term before renewables can scale to cover all fossil-fuel uses"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Alternative energies alone do not effectively replace fossil fuels across the needed time horizon and system scale"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Alternative energies alone do not effectively replace fossil fuels across the needed time horizon and system scale"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Therefore, alternative energies effectively can replace fossil fuels (as the core replacement strategy) is false, and we should not rely on it as stated"
+            }
+          ]
+        }
+      },
+      "kind": "attack"
+    },
+    {
+      "role": "ag2",
+      "content": {
+        "argument_type": "main_argument",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "U.S. alternative (renewable) energy use has historically remained below about 20% of total energy demand"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "U.S. alternative (renewable) energy use has historically remained below about 20% of total energy demand"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Because U.S. alternative energy penetration has never exceeded ~20% historically, it has not effectively replaced fossil fuels to meet total energy demand"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Because U.S. alternative energy penetration has never exceeded ~20% historically, it has not effectively replaced fossil fuels to meet total energy demand",
+                  "We must cut fossil-fuel dependence substantially to address climate change"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Alternative energies cannot effectively replace fossil fuels at the needed scale in the near term"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Alternative energies cannot effectively replace fossil fuels at the needed scale in the near term"
+                ],
+                "weak_statements": [
+                  "There is reliable evidence that renewables alone can rapidly cover all remaining fossil-fuel energy uses (electricity, transport, heating) for large countries"
+                ]
+              },
+              "consequent": "Therefore, alternative energies do not effectively replace fossil fuels as a realistic primary strategy"
+            }
+          ]
+        }
+      },
+      "status": "defensible",
+      "kind": "main"
+    },
+    {
+      "role": "ag1",
+      "content": {
+        "attack_type": "rebut",
+        "target": "Alternative energies cannot effectively replace fossil fuels at the needed scale in the near term",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "Many countries can run on large shares of renewable electricity"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Many countries can run on large shares of renewable electricity"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Renewable energy transitions are achievable at national scale"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Renewable energy transitions are achievable at national scale"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Alternative energies can replace fossil fuels for electricity generation"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Alternative energies can replace fossil fuels for electricity generation"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Alternative energies can displace fossil fuels at substantial scale in the near term for electricity"
+            }
+          ]
+        }
+      },
+      "kind": "attack"
+    },
+    {
+      "role": "ag1",
+      "content": {
+        "argument_type": "main_argument",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "Alternative energy sources (renewables and nuclear) can generate electricity with low lifecycle greenhouse-gas emissions"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Alternative energy sources (renewables and nuclear) can generate electricity with low lifecycle greenhouse-gas emissions"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Electrifying end-uses (e.g., transport and heating) converts fossil-fuel energy demand into electricity demand"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Electrifying end-uses (e.g., transport and heating) converts fossil-fuel energy demand into electricity demand",
+                  "Alternative energy sources (renewables and nuclear) can generate electricity with low lifecycle greenhouse-gas emissions"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Using alternative energy to supply electricity can substantially decarbonize transport and heating"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Using alternative energy to supply electricity can substantially decarbonize transport and heating"
+                ],
+                "weak_statements": [
+                  "There is no reliable evidence that electrification of transport and heating cannot be scaled sufficiently where it is technically feasible"
+                ]
+              },
+              "consequent": "Alternative energies effectively replace fossil fuels across key sectors (electricity, transport, heating) when scaled and integrated with demand"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Alternative energies effectively replace fossil fuels across key sectors (electricity, transport, heating) when scaled and integrated with demand",
+                  "We must reduce fossil-fuel dependence to continue living on Earth"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Alternative energies effectively can replace fossil fuels, and we must replace them as a core strategy"
+            }
+          ]
+        }
+      },
+      "status": "defensible",
+      "kind": "main"
+    },
+    {
+      "role": "ag1",
+      "content": {
+        "antecedent": {
+          "strong_statements": [
+            "Alternative energies effectively replace fossil fuels across key sectors (electricity, transport, heating) when scaled and integrated with demand",
+            "We must reduce fossil-fuel dependence to continue living on Earth"
+          ],
+          "weak_statements": [
+            "There is reliable evidence that renewables alone can rapidly cover all remaining fossil-fuel energy uses (electricity, transport, heating) for large countries"
+          ]
+        },
+        "consequent": "Alternative energies can effectively replace fossil fuels as a primary strategy, provided the transition includes rapid scaling (not necessarily renewables alone) to cover all major sectors and meet urgent fossil-reduction needs"
+      },
+      "kind": "integrate"
+    },
+    {
+      "role": "ag1",
+      "content": {
+        "argument_type": "main_argument",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "We must reduce fossil-fuel dependence to continue living on Earth"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "We must reduce fossil-fuel dependence to continue living on Earth"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Alternative energies effectively can replace fossil fuels across key sectors (electricity, transport, heating) when scaled and integrated with demand"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Alternative energies effectively can replace fossil fuels across key sectors (electricity, transport, heating) when scaled and integrated with demand",
+                  "We must reduce fossil-fuel dependence to continue living on Earth"
+                ],
+                "weak_statements": [
+                  "There is reliable evidence that renewables alone can rapidly cover all remaining fossil-fuel energy uses (electricity, transport, heating) for large countries"
+                ]
+              },
+              "consequent": "Alternative energies can effectively replace fossil fuels as a primary strategy, provided the transition includes rapid scaling (not necessarily renewables alone) to cover all major sectors and meet urgent fossil-reduction needs"
+            }
+          ]
+        }
+      },
+      "status": "defensible",
+      "kind": "main"
+    }
+  ],
+  "statuses": {
+    "0": "defensible",
+    "2": "defensible",
+    "4": "defensible",
+    "6": "defensible"
+  },
+  "integrated_rules": [],
+  "consensus_reached": false,
+  "justification_status": "fallback_no_consensus",
+  "final_answer": "Opinions put forward (agent 1)\n1) “Many countries can run on large shares of renewable electricity,” supported by examples such as Iceland (~85% renewable), Paraguay (~99.9%), Costa Rica (~99.78%), and Norway (~98%).\n   - Conclusion drawn: renewable energy transitions are achievable at national scale, so alternative energy can replace fossil fuels for electricity generation.\n\n2) “Alternative energy sources (renewables and nuclear) can generate electricity with low lifecycle greenhouse-gas emissions,” and\n   - “Electrifying end-uses (transport and heating) converts fossil-fuel energy demand into electricity demand.”\n   - Conclusion drawn: supplying the resulting electricity demand with low-carbon electricity can substantially decarbonize transport and heating too. Therefore alternative energy can effectively replace fossil fuels across key sectors (electricity, transport, heating) when scaled and integrated with demand.\n\n3) “We must reduce fossil-fuel dependence to continue living on Earth.”\n   - Combined with the above: alternative energy should be used as a primary replacement strategy, and the replacement should include rapid scaling across major sectors (not necessarily renewables alone—agent 1’s formulation allows nuclear as well).\n\nObjections raised (agent 2)\nA) “Net-zero requires deep emissions cuts in the near term before renewables can scale to cover all fossil-fuel uses,”\n   - leading to: natural gas is an appropriate “bridge fuel,” and therefore “alternative energies alone do not effectively replace fossil fuels” across the needed time horizon and system scale.\n   - This objection attacks the claim that “alternative energies effectively can replace fossil fuels (and we must replace them).”\n\nB) A second objection to feasibility at large scale:\n   - “U.S. alternative (renewable) energy use has historically remained below about 20% of total energy demand.”\n   - Conclusion drawn: because penetration hasn’t exceeded ~20% historically, renewables have not effectively replaced fossil fuels to meet total energy demand; thus “alternative energies cannot effectively replace fossil fuels at the needed scale in the near term.”\n   - This challenges the idea that renewables can rapidly and sufficiently displace fossil fuels.\n\nHow each objection was answered (agent 1’s replies)\n1) To the “renewables alone / near-term scale” critique, agent 1’s main response was essentially to narrow and reframe:\n   - Agent 1 argued the core point is not that renewables by themselves must do everything instantly, but that alternative low-carbon power (including renewables and nuclear) plus electrification can replace fossil fuels across major sectors when the whole system is scaled and integrated.\n   - In effect, agent 1 answered the critique by saying the replacement strategy can be “renewables plus nuclear” and tied to electrification, rather than “renewables alone,” and that the transition is achievable where technically feasible.\n\n2) To the “historical U.S. penetration never exceeded ~20%” argument, agent 1 did not directly refute the factual claim in the argumentation provided.\n   - Instead, agent 1 relied on the earlier premise that many countries have already achieved high renewable electricity shares and that renewable transitions are achievable at national scale; thus the historical U.S. percentage is treated as not decisive against the general feasibility of replacement.\n\nWhat remains undecided\n- Whether the proposed replacement can be achieved fast enough in the “near term” to satisfy the “net-zero requires deep near-term cuts” constraint without relying on fossil fuels (even as a bridge).\n- Whether the “effective replacement across the wider energy system” can be done at required speed and scale globally, not just in the electricity subsector, given constraints like:\n  - grid expansion and storage,\n  - resource and siting limitations,\n  - industrial/other hard-to-electrify uses,\n  - and the practicality/cost of electrification nationwide.\n- How much of the transition must rely on non-renewable low-carbon sources (agent 1 mentioned nuclear) versus renewables alone—agent 2’s objections were partly framed as “renewables alone,” while agent 1’s answer broadened the strategy.\n\nWhat is known (from the argumentation itself, not from outside evidence)\n- It is acknowledged in the debate that some countries operate with extremely high renewable electricity shares (agent 1’s examples).\n- It is acknowledged in the debate that the U.S. historically has had renewables below roughly a fifth of total energy demand (agent 2’s premise).\n- There is agreement (implicitly) on the direction of change: reduce fossil-fuel dependence for climate and livability reasons.\n- The key dispute is not the moral necessity but the feasibility timing and scale: whether alternative energy, as the main strategy, can realistically replace fossil fuels quickly enough across the whole system.\n\nBottom line\n- Agent 1 established a multi-step case: renewables (and nuclear) can supply low-carbon electricity; electrification can shift transport/heating to electricity; therefore fossil fuels can be displaced when scaled.\n- Agent 2 raised a timing-and-scale objection: renewables (especially alone) may not scale quickly enough, so fossil fuels (e.g., natural gas) may be needed as a bridge, and thus “alternative energies effectively can replace fossil fuels” (as stated) may be false.\n- Because agent 1 did not directly dismantle the “near-term total-energy displacement” concern with a fully specified timeline/system capacity argument (within the provided reasoning), the debate’s decisive uncertainty remains whether the replacement can occur fast enough across all relevant energy uses without significant fossil reliance in the critical near-term window.",
+  "trace": [
+    "ag1.main_argument → main_argument（履歴 0）",
+    "  ag2.attack(undercut) → 無効（defeat でない）",
+    "  ag2.attack(rebut) → 有効（履歴 1）",
+    "  ag1.attack(undercut) → 無効（strictly defeat でない）",
+    "  ag1.attack(rebut) → 無効（strictly defeat でない）",
+    "  ag1.attack(undercut) → 無効（strictly defeat でない）",
+    "  ag1.attack(rebut) → 無効（strictly defeat でない）",
+    "  ag1.attack(rebut) → 無効（strictly defeat でない）",
+    "  ag1.attack(undercut) → 無効（strictly defeat でない）",
+    "  ag1.attack(rebut) → 無効（strictly defeat でない）",
+    "  ag1.attack(rebut) → 無効（strictly defeat でない）",
+    "  ag1.attack(undercut) → 無効（strictly defeat でない）",
+    "  この主張の上限（12）に到達 → defensible",
+    "  地位: 履歴 0 は defensible",
+    "ag2.main_argument → main_argument（履歴 2）",
+    "  ag1.attack(rebut) → 有効（履歴 3）",
+    "  ag2.attack(rebut) → 無効（strictly defeat でない）",
+    "  ag2.attack(rebut) → 無効（strictly defeat でない）",
+    "  ag2.attack(rebut) → 無効（strictly defeat でない）",
+    "  ag2.attack(rebut) → 無効（strictly defeat でない）",
+    "  ag2.attack(rebut) → 無効（strictly defeat でない）",
+    "  ag2.attack(rebut) → 無効（strictly defeat でない）",
+    "  ag2.attack(rebut) → 無効（strictly defeat でない）",
+    "  ag2.attack(rebut) → 無効（strictly defeat でない）",
+    "  ag2.attack(rebut) → 無効（strictly defeat でない）",
+    "  ag2.attack(rebut) → 無効（strictly defeat でない）",
+    "  この主張の上限（12）に到達 → defensible",
+    "  地位: 履歴 2 は defensible",
+    "ag1.main_argument → main_argument（履歴 4）",
+    "  上限到達 → defensible",
+    "  地位: 履歴 4 は defensible",
+    "上限到達・未統合 → ag1 が統合（評価しない）",
+    "ag1.integrate → rule",
+    "ag1.main_argument_from_rule → main_argument（履歴 6）",
+    "final_answer（上限・justified なし）"
+  ],
+  "invalid_attempts": [
+    {
+      "role": "ag2",
+      "declared": "undercut",
+      "reason": "defeat でない",
+      "target_index": 0,
+      "main_index": 0,
+      "content": {
+        "attack_type": "undercut",
+        "target": {
+          "negated_statement": "There is no reliable evidence that other energy sectors (transport, heating) can also be electrified or otherwise decarbonized"
+        },
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "Large-scale decarbonization of transport and heating is possible via electrification and non-fossil fuels"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Large-scale decarbonization of transport and heating is possible via electrification and non-fossil fuels"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "There is reliable evidence that other energy sectors (transport, heating) can also be electrified or otherwise decarbonized"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "role": "ag1",
+      "declared": "undercut",
+      "reason": "strictly defeat でない",
+      "target_index": 1,
+      "main_index": 0,
+      "content": {
+        "attack_type": "undercut",
+        "target": {
+          "negated_statement": "there is no evidence that renewables can scale to cover all fossil-fuel uses after deep emissions cuts in the near term are achieved for net-zero (the weak statement underlying: 'Net-zero requires deep emissions cuts in the near term before renewables can scale to cover all fossil-fuel uses')? (i.e., the negation-of-a-weak statement that would make the bridge-fuel/near-term-scaling sequencing assumption fail)??"
+        },
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "Many countries can run on large shares of renewable electricity"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Many countries can run on large shares of renewable electricity"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Renewable energy transitions are achievable at national scale"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Renewable energy transitions are achievable at national scale"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Alternative energies can replace fossil fuels for electricity generation"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Alternative energies can replace fossil fuels for electricity generation"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "A sequencing claim that near-term deep cuts are required before renewables can scale to cover all fossil-fuel uses is undermined by observed large-scale renewable operation, so the bridge-fuel based timing premise is not a necessary constraint"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "role": "ag1",
+      "declared": "rebut",
+      "reason": "strictly defeat でない",
+      "target_index": 1,
+      "main_index": 0,
+      "content": {
+        "attack_type": "rebut",
+        "target": "Therefore, alternative energies effectively can replace fossil fuels (as the core replacement strategy) is false, and we should not rely on it as stated",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "Significant national-scale renewable electricity systems already exist"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Significant national-scale renewable electricity systems already exist"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Because large shares of electricity can be supplied by renewables, fossil fuel dependence for electricity can be rapidly reduced"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Because large shares of electricity can be supplied by renewables, fossil fuel dependence for electricity can be rapidly reduced",
+                  "We must reduce fossil-fuel dependence to continue living on Earth"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Alternative energies effectively can replace fossil fuels as a core replacement strategy (at least starting with electricity, and enabling economy-wide decarbonization)"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "role": "ag1",
+      "declared": "undercut",
+      "reason": "strictly defeat でない",
+      "target_index": 1,
+      "main_index": 0,
+      "content": {
+        "attack_type": "undercut",
+        "target": {
+          "negated_statement": "There is no evidence that other energy sectors (transport, heating) can also be electrified or otherwise decarbonized"
+        },
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "Other energy sectors (transport, heating) can be electrified or otherwise decarbonized as renewables scale"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Other energy sectors (transport, heating) can be electrified or otherwise decarbonized as renewables scale"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "There is evidence that other energy sectors (transport, heating) can also be electrified or otherwise decarbonized"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "There is evidence that other energy sectors (transport, heating) can also be electrified or otherwise decarbonized"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "The negated weak statement in the opponent’s assumed dependency is false: There is no reliable evidence that other energy sectors (transport, heating) can also be electrified or otherwise decarbonized"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "role": "ag1",
+      "declared": "rebut",
+      "reason": "strictly defeat でない",
+      "target_index": 1,
+      "main_index": 0,
+      "content": {
+        "attack_type": "rebut",
+        "target": "Alternative energies alone do not effectively replace fossil fuels across the needed time horizon and system scale",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "Renewable electricity transitions are achievable at national scale"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Renewable electricity transitions are achievable at national scale"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Alternative energies can replace fossil fuels for electricity generation"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Alternative energies can replace fossil fuels for electricity generation",
+                  "We must reduce fossil-fuel dependence to continue living on Earth"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Alternative energies effectively can replace fossil fuels (not only for electricity), given the known tools for decarbonization"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Alternative energies effectively can replace fossil fuels (not only for electricity), given the known tools for decarbonization"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Alternative energies alone do not effectively replace fossil fuels across the needed time horizon and system scale is false"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "role": "ag1",
+      "declared": "rebut",
+      "reason": "strictly defeat でない",
+      "target_index": 1,
+      "main_index": 0,
+      "content": {
+        "attack_type": "rebut",
+        "target": "Therefore, alternative energies effectively can replace fossil fuels (as the core replacement strategy) is false, and we should not rely on it as stated",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "Renewable energy transitions are achievable at national scale"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Renewable energy transitions are achievable at national scale"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Alternative energies can replace fossil fuels for electricity generation"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Alternative energies can replace fossil fuels for electricity generation"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "We already have the knowledge and tools needed to replace fossil fuels with alternative energies"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "We already have the knowledge and tools needed to replace fossil fuels with alternative energies",
+                  "Alternative energies can replace fossil fuels for electricity generation"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Alternative energies effectively can replace fossil fuels (as a core replacement strategy)"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "role": "ag1",
+      "declared": "undercut",
+      "reason": "strictly defeat でない",
+      "target_index": 1,
+      "main_index": 0,
+      "content": {
+        "attack_type": "undercut",
+        "target": {
+          "negated_statement": "Net-zero requires deep emissions cuts in the near term before renewables can scale to cover all fossil-fuel uses"
+        },
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "Renewables can scale and materially displace fossil-fuel generation before the distant future."
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Renewables can scale and materially displace fossil-fuel generation before the distant future."
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Net-zero can be achieved in the near term by expanding alternative energy to displace fossil-fuel emissions."
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Net-zero can be achieved in the near term by expanding alternative energy to displace fossil-fuel emissions."
+                ],
+                "weak_statements": []
+              },
+              "consequent": "There is no evidence that net-zero requires deep emissions cuts in the near term before renewables can scale to cover all fossil-fuel uses."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "role": "ag1",
+      "declared": "rebut",
+      "reason": "strictly defeat でない",
+      "target_index": 1,
+      "main_index": 0,
+      "content": {
+        "attack_type": "rebut",
+        "target": "Alternative energies effectively can replace fossil fuels (as the core replacement strategy) is false, and we should not rely on it as stated",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "Many countries can run on large shares of renewable electricity"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Many countries can run on large shares of renewable electricity"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Renewable energy transitions are achievable at national scale"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Renewable energy transitions are achievable at national scale"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Alternative energies can replace fossil fuels for electricity generation"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Alternative energies can replace fossil fuels for electricity generation"
+                ],
+                "weak_statements": [
+                  "There is no reliable evidence that other energy sectors (transport, heating) can also be electrified or otherwise decarbonized"
+                ]
+              },
+              "consequent": "Alternative energies can replace fossil fuels across the wider energy system"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Alternative energies can replace fossil fuels across the wider energy system",
+                  "We must reduce fossil-fuel dependence to continue living on Earth"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Alternative energies effectively can replace fossil fuels, and we must replace them"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "role": "ag1",
+      "declared": "rebut",
+      "reason": "strictly defeat でない",
+      "target_index": 1,
+      "main_index": 0,
+      "content": {
+        "attack_type": "rebut",
+        "target": "Alternative energies effectively can replace fossil fuels (as the core replacement strategy) is false, and we should not rely on it as stated",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "We already have the knowledge and tools to scale non-fossil energy systems to replace fossil fuels"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "We already have the knowledge and tools to scale non-fossil energy systems to replace fossil fuels"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Alternative energy transitions are achievable at national scale even while fossil use declines"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Alternative energy transitions are achievable at national scale even while fossil use declines",
+                  "We must reduce fossil-fuel dependence to continue living on Earth"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Alternative energies effectively can replace fossil fuels, and we must replace them"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "role": "ag1",
+      "declared": "undercut",
+      "reason": "strictly defeat でない",
+      "target_index": 1,
+      "main_index": 0,
+      "content": {
+        "attack_type": "undercut",
+        "target": {
+          "negated_statement": "Net-zero requires deep emissions cuts in the near term before renewables can scale to cover all fossil-fuel uses (i.e., there is no evidence this is required) "
+        },
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "Large shares of electricity can be produced from renewables in national power systems (e.g., Iceland, Paraguay, Costa Rica, Norway)"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Large shares of electricity can be produced from renewables in national power systems (e.g., Iceland, Paraguay, Costa Rica, Norway)"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Renewables can scale quickly enough to substantially displace fossil-fuel electricity generation in at least some countries"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Renewables can scale quickly enough to substantially displace fossil-fuel electricity generation in at least some countries"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "It is not the case that net-zero requires deep near-term emissions cuts specifically before renewables can scale to cover all fossil-fuel uses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "role": "ag2",
+      "declared": "rebut",
+      "reason": "strictly defeat でない",
+      "target_index": 3,
+      "main_index": 2,
+      "content": {
+        "attack_type": "rebut",
+        "target": "Alternative energies can displace fossil fuels at substantial scale in the near term for electricity",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "U.S. alternative (renewable) energy use has historically remained below about 20% of total energy demand"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "U.S. alternative (renewable) energy use has historically remained below about 20% of total energy demand"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Because alternative energy penetration has historically stayed below ~20%, it has not effectively displaced fossil fuels at substantial scale in the near term for electricity"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Because alternative energy penetration has historically stayed below ~20%, it has not effectively displaced fossil fuels at substantial scale in the near term for electricity"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Alternative energies cannot displace fossil fuels at substantial scale in the near term for electricity"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "role": "ag2",
+      "declared": "rebut",
+      "reason": "strictly defeat でない",
+      "target_index": 3,
+      "main_index": 2,
+      "content": {
+        "attack_type": "rebut",
+        "target": "Alternative energies can displace fossil fuels at substantial scale in the near term for electricity",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "Renewables have historically not exceeded about 20% of total energy demand in the U.S."
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Renewables have historically not exceeded about 20% of total energy demand in the U.S."
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Because renewables have historically remained under ~20% of total energy demand, they have not effectively displaced fossil fuels at substantial scale in the near term for electricity"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Because renewables have historically remained under ~20% of total energy demand, they have not effectively displaced fossil fuels at substantial scale in the near term for electricity"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Therefore, alternative energies cannot displace fossil fuels at substantial scale in the near term for electricity"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "role": "ag2",
+      "declared": "rebut",
+      "reason": "strictly defeat でない",
+      "target_index": 3,
+      "main_index": 2,
+      "content": {
+        "attack_type": "rebut",
+        "target": "Alternative energies can displace fossil fuels at substantial scale in the near term for electricity",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "U.S. alternative (renewable) energy use has historically remained below about 20% of total energy demand"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "U.S. alternative (renewable) energy use has historically remained below about 20% of total energy demand"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Because U.S. alternative energy penetration has never exceeded ~20% historically, it has not effectively replaced fossil fuels to meet total energy demand"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Because U.S. alternative energy penetration has never exceeded ~20% historically, it has not effectively replaced fossil fuels to meet total energy demand",
+                  "We must cut fossil-fuel dependence substantially to address climate change"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Therefore, alternative energies cannot displace fossil fuels at substantial scale in the near term for electricity"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Therefore, alternative energies cannot displace fossil fuels at substantial scale in the near term for electricity"
+                ],
+                "weak_statements": [
+                  "We must provide reliable electricity during the transition, and natural gas (existing infrastructure) is well suited to that near-term reliability need"
+                ]
+              },
+              "consequent": "So the claim that alternative energies can displace fossil fuels at substantial scale in the near term for electricity is false."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "role": "ag2",
+      "declared": "rebut",
+      "reason": "strictly defeat でない",
+      "target_index": 3,
+      "main_index": 2,
+      "content": {
+        "attack_type": "rebut",
+        "target": "Alternative energies can displace fossil fuels at substantial scale in the near term for electricity",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "Alternative energy penetration is limited in practice (e.g., U.S. renewables have never exceeded ~20% of total energy historically)"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Alternative energy penetration is limited in practice (e.g., U.S. renewables have never exceeded ~20% of total energy historically)"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Because alternative penetration has been historically limited, alternative energies cannot reliably displace fossil fuels at substantial scale in the near term for electricity"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Because alternative penetration has been historically limited, alternative energies cannot reliably displace fossil fuels at substantial scale in the near term for electricity"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Therefore, the claim that alternative energies can displace fossil fuels at substantial scale in the near term for electricity is false"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "role": "ag2",
+      "declared": "rebut",
+      "reason": "strictly defeat でない",
+      "target_index": 3,
+      "main_index": 2,
+      "content": {
+        "attack_type": "rebut",
+        "target": "Alternative energies can displace fossil fuels at substantial scale in the near term for electricity",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "U.S. alternative (renewable) energy use has historically remained below about 20% of total energy demand"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "U.S. alternative (renewable) energy use has historically remained below about 20% of total energy demand"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Because U.S. alternative energy penetration has never exceeded ~20% historically, it has not effectively displaced fossil fuels to meet total electricity and energy needs at substantial scale in the near term"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Because U.S. alternative energy penetration has never exceeded ~20% historically, it has not effectively displaced fossil fuels to meet total electricity and energy needs at substantial scale in the near term",
+                  "Net-zero requires deep emissions cuts in the near term before renewables can scale to cover all fossil-fuel uses"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Alternative energies do not displace fossil fuels at substantial scale in the near term for electricity"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Alternative energies do not displace fossil fuels at substantial scale in the near term for electricity"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Therefore, the claim that alternative energies can displace fossil fuels at substantial scale in the near term for electricity is false"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "role": "ag2",
+      "declared": "rebut",
+      "reason": "strictly defeat でない",
+      "target_index": 3,
+      "main_index": 2,
+      "content": {
+        "attack_type": "rebut",
+        "target": "Alternative energies can displace fossil fuels at substantial scale in the near term for electricity",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "Natural gas is available now and with existing infrastructure can rapidly reduce electricity emissions compared with higher-emitting fossil generation"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Natural gas is available now and with existing infrastructure can rapidly reduce electricity emissions compared with higher-emitting fossil generation",
+                  "We must reduce fossil-fuel dependence substantially to address climate change"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "In the near term, rapid fossil-fuel displacement in electricity is better achieved via a transition using natural gas rather than by renewables alone"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "In the near term, rapid fossil-fuel displacement in electricity is better achieved via a transition using natural gas rather than by renewables alone"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Alternative energies can displace fossil fuels at substantial scale in the near term for electricity is false"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "role": "ag2",
+      "declared": "rebut",
+      "reason": "strictly defeat でない",
+      "target_index": 3,
+      "main_index": 2,
+      "content": {
+        "attack_type": "rebut",
+        "target": "Alternative energies can displace fossil fuels at substantial scale in the near term for electricity",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "Renewables have historically not provided the majority share of total U.S. energy demand (generally staying below ~20%)."
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Renewables have historically not provided the majority share of total U.S. energy demand (generally staying below ~20%)."
+                ],
+                "weak_statements": []
+              },
+              "consequent": "If renewables cannot reliably scale to provide the large system share needed historically, then they cannot be relied on to displace fossil fuels at substantial scale in the near term for electricity."
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "If renewables cannot reliably scale to provide the large system share needed historically, then they cannot be relied on to displace fossil fuels at substantial scale in the near term for electricity.",
+                  "We must cut fossil-fuel dependence substantially to address climate change."
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Therefore, alternative energies cannot displace fossil fuels at substantial scale in the near term for electricity."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "role": "ag2",
+      "declared": "rebut",
+      "reason": "strictly defeat でない",
+      "target_index": 3,
+      "main_index": 2,
+      "content": {
+        "attack_type": "rebut",
+        "target": "Alternative energies can displace fossil fuels at substantial scale in the near term for electricity",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "U.S. alternative (renewable) energy use has historically remained below about 20% of total energy demand"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "U.S. alternative (renewable) energy use has historically remained below about 20% of total energy demand"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Because U.S. alternative energy penetration has never exceeded ~20% historically, it has not effectively displaced fossil fuels for total energy demand"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Because U.S. alternative energy penetration has never exceeded ~20% historically, it has not effectively displaced fossil fuels for total energy demand",
+                  "We must cut fossil-fuel dependence substantially to address climate change"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Renewables have not demonstrated the ability to displace fossil fuels at substantial scale in the near term for the electricity system as a whole"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Renewables have not demonstrated the ability to displace fossil fuels at substantial scale in the near term for the electricity system as a whole"
+                ],
+                "weak_statements": [
+                  "There is reliable evidence that renewable electricity alone can rapidly eliminate fossil-fuel generation at substantial scale nationwide despite intermittency, grid limits, and system integration needs"
+                ]
+              },
+              "consequent": "Therefore, the claim that alternative energies can displace fossil fuels at substantial scale in the near term for electricity is false as a realistic expectation across large systems. "
+            }
+          ]
+        }
+      }
+    },
+    {
+      "role": "ag2",
+      "declared": "rebut",
+      "reason": "strictly defeat でない",
+      "target_index": 3,
+      "main_index": 2,
+      "content": {
+        "attack_type": "rebut",
+        "target": "Alternative energies can displace fossil fuels at substantial scale in the near term for electricity",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "U.S. alternative (renewable) energy use has historically remained below about 20% of total energy demand"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "U.S. alternative (renewable) energy use has historically remained below about 20% of total energy demand"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Because U.S. alternative energy penetration has never exceeded ~20% historically, it has not effectively replaced fossil fuels to meet electricity demand"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Because U.S. alternative energy penetration has never exceeded ~20% historically, it has not effectively replaced fossil fuels to meet electricity demand",
+                  "We must reduce fossil-fuel dependence substantially to address climate change"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Alternative energies do not effectively displace fossil fuels at substantial scale in the near term for electricity"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Alternative energies do not effectively displace fossil fuels at substantial scale in the near term for electricity"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Therefore, the claim that alternative energies can displace fossil fuels at substantial scale in the near term for electricity is false"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "role": "ag2",
+      "declared": "rebut",
+      "reason": "strictly defeat でない",
+      "target_index": 3,
+      "main_index": 2,
+      "content": {
+        "attack_type": "rebut",
+        "target": "Alternative energies can displace fossil fuels at substantial scale in the near term for electricity",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "U.S. alternative (renewable) electricity generation historically has not displaced fossil fuels at a dominant scale in the near term"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "U.S. alternative (renewable) electricity generation historically has not displaced fossil fuels at a dominant scale in the near term"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Because the U.S. has not shown near-term dominant displacement of fossil fuels by renewables, near-term substantial displacement at substantial scale is not effectively achievable as a general strategy"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Because the U.S. has not shown near-term dominant displacement of fossil fuels by renewables, near-term substantial displacement at substantial scale is not effectively achievable as a general strategy"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Therefore, alternative energies do not effectively displace fossil fuels at substantial scale in the near term for electricity"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

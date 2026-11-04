@@ -51,3 +51,30 @@ def test_discarded_drafts_become_dotted_nodes_linked_to_their_target() -> None:
     assert len(drafts) == 2
     assert [e["data"]["target"] for e in edges] == ["m1"]  # 対象のない下書きは、辺なし
     assert "断念" in drafts[1]["data"]["label"]
+
+
+def test_invalid_attempts_are_drawn_as_leaves_under_their_target() -> None:
+    log = {
+        "dialogue_history": [_rec("h0", "main", "AG1"), _rec("h1", "defeat", "AG2", "h0")],
+        "invalid_attempts": [
+            {
+                "role": "ag1",
+                "declared": "rebut",
+                "reason": "strictly defeat でない",
+                "target_index": 1,
+                "main_index": 0,
+                "content": {"argument": {"rules": [{"consequent": "retry text"}]}},
+            },
+            {"role": "ag1", "declared": "undercut", "reason": "defeat でない", "target_index": None, "main_index": 0, "content": "free text"},
+        ],
+    }
+    elements, _ = build_run("schema", log)
+    nodes = {e["data"]["id"]: e for e in elements if e.get("classes") == "invalid"}
+    edges = {e["data"]["id"]: e["data"] for e in elements if str(e["data"].get("id", "")).startswith("e-x")}
+
+    assert set(nodes) == {"x0", "x1"}
+    assert edges["e-x0"]["target"] == "h1"  # 反撃の対象（O の攻撃）の下に付く
+    assert edges["e-x1"]["target"] == "h0"  # 対象の番号がなければ、主張に付く
+    assert "retry text" in nodes["x0"]["data"]["label"]
+    assert "strictly defeat でない" in nodes["x0"]["data"]["detail"]
+    assert nodes["x0"]["position"]["y"] > next(e for e in elements if e["data"].get("id") == "h1")["position"]["y"]
