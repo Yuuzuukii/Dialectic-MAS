@@ -45,7 +45,7 @@ def arg(tag, weak=()):
 
 
 def main(a):
-    return MainArgument(argument_type="main_argument", argument=a)
+    return MainArgument(argument_type="main_argument", argument=a, reason_no_weak_statements="")
 
 
 def rebut(a, target="t"):
@@ -251,7 +251,11 @@ def test_prompts_are_assembled_from_the_design_doc():
     assert "You have these theory on the issue:\nTHEORY1" in first["system"]
     assert "An argument is a finite sequence of rules such that:" in first["system"]
     assert "The argumentation so far:\n[]" in first["system"]
-    assert first["system"].rstrip().endswith("make new main arguments based on it.")
+    assert "make new main arguments based on it." in first["system"]
+    # defeat / strictly defeat（Kido 定義4）と、justified / overruled / defensible（定義5）の定義は、フェーズの説明の直後に入る
+    assert "A1 strictly defeats A2 iff A1 defeats A2 and A2 does not defeat A1." in first["system"]
+    assert first["system"].rstrip().endswith("A is defensible if A is neither justified nor overruled.")
+    assert "is justified if no argument defeats A or if every argument which defeats A is also strictly defeated" in first["system"]
     assert first["prompt"].startswith("Now it is phase 1.\nMake your main argument")
     # ag2 の攻撃: 対象の argument が、ユーザープロンプトに入る。システムプロンプトの履歴に、main が入る。
     attack_call = ag2.calls[0]

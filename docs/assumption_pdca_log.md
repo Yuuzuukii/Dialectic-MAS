@@ -91,3 +91,12 @@ O は、defeat すれば足りるので（P&S 定義4.5）、rebut で済ませ�
 ## 終了（20周に到達）
 基準 A・B・C・D のうち、A と D を満たした（A はぎりぎり）。B と C は、満たせなかった。累計費用: 約 $0.60（エージェントのモデルのみ。判定用モデルは使っていない）。
 残した文言: weak_statements の説明（P&S 2.1・2.4・序論の文と、例 2.4 に基づく例。『there is no evidence』の句は外した）、MAIN_ARGUMENT_USER・ATTACK_USER の例外の文、ATTACK_USER の undercut の説明。差分は `git diff src/agent_migration/argumentation/dialectical.py`。
+
+## 追記: 独自の文の削除（2026-11-05）
+先生の指摘（勝ち負けの定義を知らないエージェントに、undercut を選ぶよう促す指示は、恣意的で、平等なゲームを崩す）を受けて、
+weak statement と attack のプロンプトから、独自の文と、undercut を選ぶよう促す文を削除した。
+削除: weak_statements の「A weak negation means…」「For example…」、Attack.move の優先順位・条件の言い換え、
+MAIN_ARGUMENT_USER・ATTACK_USER の「For each rule … consider which exception …」、ATTACK_USER の Undercut の言い換え・
+「…by stating an argument…」・P&S 2.4 の文・「First look at the weak statements …」。
+残した: weak_statements の P&S の引用（2.1 の文、'If A then B, unless…'、'a person who cannot be shown to be a minor…'、'unless the law provides otherwise'、序論の文）と、
+作業前（a51a3a7c）の Rebut / Undercut の説明。

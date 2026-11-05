@@ -17,16 +17,14 @@ class Antecedent(BaseModel):
     weak_statements: list[str] = Field(
         description="The statements in the antecedent of the rule that have weak negation, "
         "with the weak negation removed. "
-        "A weak negation means that the statement is assumed not to hold unless the contrary can be shown, "
-        "while a strong negation says 'the statement is definitely not the case'. "
         "A defeasible rule can contain assumptions that are not warranted: "
         "weak negation is used to express explicit exceptions. "
+        "The subjective literals appearing in a proof are the assumptions on which the proof is based. "
+        "It is clear that the \"acceptance\" of a proof depends on the \"acceptance\" of the assumptions on which it is based. "
         "'If A then B, unless the contrary can be shown'… "
         "…a person who cannot be shown to be a minor has the capacity to perform legal acts… "
         "…'unless the law provides otherwise'. "
         "…by stating an argument with a conclusion providing an 'unless' clause of the other argument. "
-        "For example, for the rule 'a person who cannot be shown to be a minor has legal capacity', "
-        "the weak statement is 'the person is a minor'. "
         "Written in a casual style: 'x is earlier than y' is our variant of the "
         "more standard logical notation Earlier(x, y)."
     )
@@ -95,9 +93,8 @@ class CannotAttack(BaseModel):
 
 class Attack(BaseModel):
     move: Rebut | Undercut | CannotAttack = Field(
-        description="Use Undercut if your attack consists in contradicting one of the assumptions of the opponent's argument, "
-        "that is, if the opponent's argument has a weak statement that you can establish. "
-        "Use Rebut if your attack consists in contradicting one of the conclusions of the opponent's argument. "
+        description="Use Rebut if your attack consists in contradicting one of the conclusions of the opponent's argument. "
+        "Use Undercut if your attack consists in contradicting one of the assumptions of the opponent's argument. "
         "Use CannotAttack if you cannot make an attack."
     )
 
@@ -106,6 +103,10 @@ class Attack(BaseModel):
 class MainArgument(BaseModel):
     argument_type: Literal["main_argument"]
     argument: Argument
+    reason_no_weak_statements: str = Field(
+        description="If no rule of your argument has a weak statement, you must write here why you did not use any weak statement. "
+        "Leave it empty only if your argument has a weak statement."
+    )
 
 class CannotArgue(BaseModel):
     argument_type: Literal["cannot_argue"]
@@ -120,11 +121,6 @@ warrant は Argument の最後の rule（機械的に取る）:
         return self.rules[-1]
 
 ## プロンプト構成
-
-【独自】の文（P&S/Kido の文ではない、この実装での言い換え・補い。docs/assumption_pdca_log.md に経緯）:
-MAIN_ARGUMENT_USER と ATTACK_USER の「For each rule … consider which exception …」、Undercut の説明の言い換え
-（「assumes that each of its weak statements does not hold…」「word for word: write a rule whose consequent is…」）、
-「First look at the weak statements …」、Attack.move の description の言い換え、weak_statements の最後の For example の文。
 
 システムプロンプト（main_argument()、integrate()、main_argument_from_rule()、attack() のとき。final_answer() には、議論全体の説明と、argumentの書き方指示を入れない。履歴には地位を付ける）
 '''
@@ -143,6 +139,9 @@ The argumentation so far:
 {議論の履歴}
 
 Argumentation consists of two phases. In phase 1, you and the other agent make your main arguments whose conclusions address the issue. In phase 2, you make arguments defeating the other agent's arguments. In each phase, you make arguments from your own theory. No two arguments you present have the same content. If you cannot make an argument from your own theory, you do not make one. In phase 1, if you can make no argument not yet presented, then you create new strict rules by applying the proposed reasoning method and make new main arguments based on it.
+Roughly, the idea of argumentational reasoning is that a statement is believable if it can be argued successfully against attacking arguments. In other words, whether or not a rational agent believes in a statement depends on whether or not the argument supporting this statement can be successfully defended against the counterarguments.
+Let A1 and A2 be two arguments. Then A1 defeats A2 iff A1 undercuts A2; or A1 rebuts A2 and A2 does not undercut A1. We say that A1 strictly defeats A2 iff A1 defeats A2 and A2 does not defeat A1.
+An argument A is justified if no argument defeats A or if every argument which defeats A is also strictly defeated. A is overruled if A is defeated by the justified argument. A is defensible if A is neither justified nor overruled.
 '''
 
 ユーザープロンプト（行動ごとに変える）
@@ -156,7 +155,6 @@ Argumentation consists of two phases. In phase 1, you and the other agent make y
 '''
 Now it is phase 1.
 Make your main argument whose conclusions address the issue.
-A defeasible rule can contain assumptions that are not warranted. For each rule, consider which exception to it you take to be absent unless the contrary can be shown, and write that exception as a weak statement in the antecedent of the rule.
 If you cannot make a main argument, you cannot argue.
 '''
 
@@ -199,16 +197,12 @@ Make your new main argument based on it.
 '''
 Now it is phase 2.
 In phase 2, you make an argument defeating the other agent's argument. If the other agent's argument does not contradict your own theory, there is nothing to defeat.
-A defeasible rule can contain assumptions that are not warranted. For each rule of your argument, consider which exception to it you take to be absent unless the contrary can be shown, and write that exception as a weak statement in the antecedent of the rule.
 The other agent's argument:
 {攻撃の対象の argument}
 There are two ways of attack:
 
 - Rebut: contradicting a conclusion. One of your conclusions is the negation of one of the conclusions of the other agent's argument.
-- Undercut: contradicting an assumption. The other agent's argument assumes that each of its weak statements does not hold, unless the contrary can be shown. You contradict the assumption by showing that one of its weak statements holds: one of your conclusions is that weak statement itself, word for word: write a rule whose consequent is that statement, from the facts of your own theory.
-  …by stating an argument with a conclusion providing an 'unless' clause of the other argument.
-  Attacks on assumptions do not only always succeed, but are also always stronger than an attack on a conclusion: if one argument undercuts the other, and the other does not undercut but only rebuts the first, the first defeats the second but the second does not defeat the first.
-  First look at the weak statements of the other agent's argument: they are the 'weak_statements' in the antecedents of its rules. An argument without weak statements cannot be undercut. If it has a weak statement that your theory lets you derive, make an undercut; otherwise, make a rebut.
+- Undercut: contradicting an assumption. An assumption of the other agent's argument is the negation of one of its weak statements. The negation of a negation is the original statement, so you contradict the assumption by deriving that weak statement itself: one of your conclusions is one of the weak statements of the other agent's argument.
   If you can make neither of these attacks, you cannot attack.
   '''
 - final_answer()

@@ -12,52 +12,52 @@
 
 ## 用語
 
-| 英語 | 訳語 |
-|---|---|
-| argument | argument(訳さない) |
-| rule / antecedent / consequent | rule / 前件 / 後件 |
-| strong literal / weak literal | strong literal / weak literal |
-| strict rule / defeasible rule | strict rule / defeasible rule |
-| conclusion / assumption | 結論 / assumption |
-| attack / rebut / undercut | attack / rebut / undercut |
-| defeat / strictly defeat | defeat / strictly defeat |
+| 英語                               | 訳語                               |
+| ---------------------------------- | ---------------------------------- |
+| argument                           | argument(訳さない)                 |
+| rule / antecedent / consequent     | rule / 前件 / 後件                 |
+| strong literal / weak literal      | strong literal / weak literal      |
+| strict rule / defeasible rule      | strict rule / defeasible rule      |
+| conclusion / assumption            | 結論 / assumption                  |
+| attack / rebut / undercut          | attack / rebut / undercut          |
+| defeat / strictly defeat           | defeat / strictly defeat           |
 | justified / overruled / defensible | justified / overruled / defensible |
-| proponent (P) / opponent (O) | proponent(P) / opponent(O) |
+| proponent (P) / opponent (O)       | proponent(P) / opponent(O)         |
 
 ## 目次(全30個)
 
-| 節 | 定義 | 内容 | 原論文のページ |
-|---|---|---|---|
-| 2 | 2.1 | rule | 29 |
-| | 2.2 | argument | 30-31 |
-| | 2.3 | strict / defeasible、subargument、結論、assumption | 31 |
-| | 2.7 | A + T | 33 |
-| | 2.8 | attack | 33-34 |
-| | 2.11 | coherent | 34 |
-| | 2.12 | conflict-free | 34 |
-| | 2.13 | R_L(結論 L に関係する defeasible rule の集合) | 35-36 |
-| | 2.14 | rule 集合の順序 | 36 |
-| | 2.15 | rebut / undercut | 36 |
-| | 2.16 | defeat / strictly defeat | 37 |
-| 3 | 3.1 | acceptable | 39 |
-| | 3.2 | 特性関数 F_Γ | 39 |
-| | 3.4 | justified / overruled / defensible | 40 |
-| | 3.5 | finitary | 40 |
-| 4 | 4.5 | dialogue | 48 |
-| | 4.6 | dialogue tree | 48 |
-| | 4.7 | 勝敗 | 48 |
-| | 4.8 | provably justified | 48 |
-| 5 | 5.1 | <_Args、Args-defeat | 50 |
-| | 5.3 | acceptable(再定義) | 51 |
-| | 5.4 | 特性関数 G_Γ | 51 |
-| | 5.6 | justified(再定義) | 51 |
-| | 5.10 | complete extension | 52 |
-| 6 | 6.1 | priority dialogue | 54-55 |
-| | 6.2 | priority dialogue tree | 55 |
-| 7 | 7.1 | stable extension | 58 |
-| | 7.5 | defensible extension | 59 |
-| 9 | 9.2 | d-acceptable | 61 |
-| | 9.4 | d-well-founded conclusions | 62 |
+| 節 | 定義 | 内容                                               | 原論文のページ |
+| -- | ---- | -------------------------------------------------- | -------------- |
+| 2  | 2.1  | rule                                               | 29             |
+|    | 2.2  | argument                                           | 30-31          |
+|    | 2.3  | strict / defeasible、subargument、結論、assumption | 31             |
+|    | 2.7  | A + T                                              | 33             |
+|    | 2.8  | attack                                             | 33-34          |
+|    | 2.11 | coherent                                           | 34             |
+|    | 2.12 | conflict-free                                      | 34             |
+|    | 2.13 | R_L(結論 L に関係する defeasible rule の集合)      | 35-36          |
+|    | 2.14 | rule 集合の順序                                    | 36             |
+|    | 2.15 | rebut / undercut                                   | 36             |
+|    | 2.16 | defeat / strictly defeat                           | 37             |
+| 3  | 3.1  | acceptable                                         | 39             |
+|    | 3.2  | 特性関数 F_Γ                                      | 39             |
+|    | 3.4  | justified / overruled / defensible                 | 40             |
+|    | 3.5  | finitary                                           | 40             |
+| 4  | 4.5  | dialogue                                           | 48             |
+|    | 4.6  | dialogue tree                                      | 48             |
+|    | 4.7  | 勝敗                                               | 48             |
+|    | 4.8  | provably justified                                 | 48             |
+| 5  | 5.1  | <_Args、Args-defeat                                | 50             |
+|    | 5.3  | acceptable(再定義)                                 | 51             |
+|    | 5.4  | 特性関数 G_Γ                                      | 51             |
+|    | 5.6  | justified(再定義)                                  | 51             |
+|    | 5.10 | complete extension                                 | 52             |
+| 6  | 6.1  | priority dialogue                                  | 54-55          |
+|    | 6.2  | priority dialogue tree                             | 55             |
+| 7  | 7.1  | stable extension                                   | 58             |
+|    | 7.5  | defensible extension                               | 59             |
+| 9  | 9.2  | d-acceptable                                       | 61             |
+|    | 9.4  | d-well-founded conclusions                         | 62             |
 
 ---
 
@@ -95,14 +95,15 @@
 
 ## 2.2 argument
 
-> システムの基本概念は argument である。一般に、ある命題の argument とは、基礎となる言語の論理におけるその命題の証明である。我々のシステムでは、単純な言語から単純な argument の概念が得られる。すなわち、連鎖させることができ、かつ事実に「根拠づけられた」rule の列である。これは [Dung 93b] の「defeasible proof」の概念の、わずかな変種で捉えられる。
+> * [ ] システムの基本概念は argument である。一般に、ある命題の argument とは、基礎となる言語の論理におけるその命題の証明である。我々のシステムでは、単純な言語から単純な argument の概念が得られる。すなわち、連鎖させることができ、かつ事実に「根拠づけられた」rule の列である。これは [Dung 93b] の「defeasible proof」の概念の、わずかな変種で捉えられる。
 
 ### 定義2.2
 
 **原文:** An argument is a finite sequence A = [r0, …, rn] of ground instances of rules such that
+
 1. for every i (0 ≤ i ≤ n), for every strong literal Lj in the antecedent of ri there is a k < i such that Lj is the consequent of rk;
 2. No two distinct rules in the sequence have the same consequent.
-An argument A is based on the ordered theory (S, D, <) iff all rules of A are in S ∪ D.
+   An argument A is based on the ordered theory (S, D, <) iff all rules of A are in S ∪ D.
 
 **和訳:** **argument** とは、rule の基底例の有限列 A = [r0, …, rn] であって、次を満たすものである。
 
@@ -130,6 +131,7 @@ argument A が順序理論 (S, D, <) に**基づく(based on)**とは、A のす
 ### 定義2.3
 
 **原文:** For any argument A:
+
 1. A is strict iff it does not contain any defeasible rule; it is defeasible otherwise.
 2. An argument A′ is a (proper) subargument of A iff A′ is a (proper) subsequence of A.
 3. A literal L is a conclusion of A iff L is the consequent of some rule in A.
@@ -183,6 +185,7 @@ argument A が順序理論 (S, D, <) に**基づく(based on)**とは、A のす
 ### 定義2.8
 
 **原文:** Let A1 and A2 be two arguments. Then A1 attacks A2 iff there are sequences S1, S2 of strict rules such that A1 + S1 is an argument with conclusion L and
+
 1. A2 + S2 is an argument with a conclusion L̄; or
 2. A2 is an argument with an assumption L̄.
 
@@ -232,6 +235,7 @@ argument A が順序理論 (S, D, <) に**基づく(based on)**とは、A のす
 ### 定義2.13
 
 **原文:** For any argument A and set S of strict rules such that A + S is an argument with conclusion L we define the set R_L(A + S) of the defeasible rules relevant to L in the argument A + S as follows. R_L(A + S) =
+
 1. {r_d} iff A includes a defeasible rule r_d with consequent L;
 2. R_L1(A + S) ∪ … ∪ R_Ln(A + S) iff A is defeasible and S includes a strict rule r_s: L1 ∧ … ∧ Ln → L.
 
@@ -364,10 +368,11 @@ A1 が A2 を **strictly defeat** するとは、A1 が A2 を defeat し、か�
 ### 定義3.4
 
 **原文:** For any ordered theory Γ and argument A we say that on the basis of Γ:
+
 1. A is justified iff A is in the least fixpoint of F_Γ (denoted by JustArgs_Γ);
 2. A is overruled iff A is attacked by a justified argument.
 3. A is defensible iff A is neither justified nor overruled.
-And for any literal L, we say that on the basis of Γ L is a justified conclusion iff it is a conclusion of a justified argument, L is a defensible conclusion iff it is not justified and it is a conclusion of some defensible argument, and L is an overruled conclusion iff it is not justified or defensible, and a conclusion of an overruled argument.
+   And for any literal L, we say that on the basis of Γ L is a justified conclusion iff it is a conclusion of a justified argument, L is a defensible conclusion iff it is not justified and it is a conclusion of some defensible argument, and L is an overruled conclusion iff it is not justified or defensible, and a conclusion of an overruled argument.
 
 **和訳:** 任意の順序理論 Γ と argument A について、Γ に基づいて次のように言う。
 
@@ -422,6 +427,7 @@ And for any literal L, we say that on the basis of Γ L is a justified conclusio
 ### 定義4.5
 
 **原文:** A dialogue is a finite nonempty sequence of moves move_i = (Player_i, Arg_i) (i > 0), such that
+
 1. Player_i = P iff i is odd; and Player_i = O iff i is even;
 2. If Player_i = Player_j = P and i ≠ j, then Arg_i ≠ Arg_j;
 3. If Player_i = P (i > 1), then Arg_i is a minimal (w.r.t. set inclusion) argument strictly defeating Arg_{i-1};
@@ -441,6 +447,7 @@ And for any literal L, we say that on the basis of Γ L is a justified conclusio
 ### 定義4.6
 
 **原文:** A dialogue tree is a finite tree of moves such that
+
 1. Each branch is a dialogue;
 2. If Player_i = P then the children of move_i are all defeaters of Arg_i.
 
@@ -603,11 +610,12 @@ And for any literal L, we say that on the basis of Γ L is a justified conclusio
 ### 定義6.1
 
 **原文:** A priority dialogue is a finite sequence of moves move_i = (Player_i, Arg_i) (i > 0), where
+
 1. Player_i = P iff i is odd, and Player_i = O iff i is even;
 2. If Player_i = Player_j = P and i ≠ j, then Arg_i ≠ Arg_j;
 3. If Player_i = P (i > 1) then Arg_i is a minimal (w.r.t. set inclusion) argument such that
-　• Arg_i strictly Arg_i-defeats Arg_{i-1}; or
-　• Arg_{i-1} does not Arg_i-defeat A_{i-2};
+   　• Arg_i strictly Arg_i-defeats Arg_{i-1}; or
+   　• Arg_{i-1} does not Arg_i-defeat A_{i-2};
 4. If Player_i = O then Arg_i ∅-defeats Arg_{i-1}.
 
 **和訳:** **priority dialogue** とは、手 move_i = (Player_i, Arg_i)(i > 0)の有限列であって、次を満たすものである。
@@ -615,8 +623,8 @@ And for any literal L, we say that on the basis of Γ L is a justified conclusio
 1. Player_i = P であるのは i が奇数のときかつそのときに限り、Player_i = O であるのは i が偶数のときかつそのときに限る。
 2. Player_i = Player_j = P かつ i ≠ j ならば、Arg_i ≠ Arg_j である。
 3. Player_i = P(i > 1)ならば、Arg_i は、次のいずれかを満たす、(集合の包含に関して)極小の argument である。
-　- Arg_i が Arg_{i-1} を strictly Arg_i-defeat する。または
-　- Arg_{i-1} が A_{i-2} を Arg_i-defeat しない。
+   　- Arg_i が Arg_{i-1} を strictly Arg_i-defeat する。または
+   　- Arg_{i-1} が A_{i-2} を Arg_i-defeat しない。
 4. Player_i = O ならば、Arg_i は Arg_{i-1} を ∅-defeat する。
 
 【訳注】原文は3の2つ目の条件で「A_{i-2}」と書いており、「Arg_{i-2}」の誤記と思われるが、原文のまま訳した。
@@ -628,6 +636,7 @@ And for any literal L, we say that on the basis of Γ L is a justified conclusio
 ### 定義6.2
 
 **原文:** A priority dialogue tree is a finite tree of moves such that
+
 1. Each branch is a dialogue;
 2. If Player_i = P then the children of move_i are all ∅-defeaters of Arg_i.
 

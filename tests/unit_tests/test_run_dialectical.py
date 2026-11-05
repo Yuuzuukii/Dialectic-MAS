@@ -37,7 +37,7 @@ class FakeAgent:
             return DebateTurn(argument="a point", has_new_point=True)
         if schema is Phase1:
             r = Rule(antecedent=Antecedent(strong_statements=[], weak_statements=[]), consequent="claim")
-            return Phase1(move=MainArgument(argument_type="main_argument", argument=Argument(rules=[r])))
+            return Phase1(move=MainArgument(argument_type="main_argument", argument=Argument(rules=[r]), reason_no_weak_statements=""))
         assert schema is Attack
         return Attack(move=CannotAttack(attack_type="cannot_attack", reason="x"))
 
