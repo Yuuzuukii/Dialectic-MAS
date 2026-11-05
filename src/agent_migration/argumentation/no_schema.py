@@ -86,5 +86,9 @@ class NoSchemaProtocol(DialecticalProtocol):
     async def _rebuts(self, move: Any, a: Any, t: Any) -> bool:
         return await self._judge_yes(REBUTS_JUDGE.replace("{x}", a).replace("{y}", t))
 
+    async def _defeats(self, a: Any, t: Any, rebut: bool) -> bool:
+        # 宣言がないので、判定用 LLM の undercuts / rebuts の答えから決める（P&S 定義2.8）
+        return await self._undercuts(a, t) or (rebut and not await self._undercuts(t, a))
+
     async def _warrant(self, argument: Any) -> Any:
         return _text(await self.judge.chat(WARRANT_EXTRACT.replace("{argument}", argument)))

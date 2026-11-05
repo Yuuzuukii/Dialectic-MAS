@@ -31,10 +31,16 @@ class Antecedent(BaseModel):
     weak_statements: list[str] = Field(
         description="The statements in the antecedent of the rule that have weak negation, "
         "with the weak negation removed. "
-        "A weak statement reads as 'there is no evidence that the statement is the case'. "
-        "…a person who cannot be shown to be a minor… "
+        "A weak negation means that the statement is assumed not to hold unless the contrary can be shown, "
+        "while a strong negation says 'the statement is definitely not the case'. "
+        "A defeasible rule can contain assumptions that are not warranted: "
+        "weak negation is used to express explicit exceptions. "
         "'If A then B, unless the contrary can be shown'… "
+        "…a person who cannot be shown to be a minor has the capacity to perform legal acts… "
         "…'unless the law provides otherwise'. "
+        "…by stating an argument with a conclusion providing an 'unless' clause of the other argument. "
+        "For example, for the rule 'a person who cannot be shown to be a minor has legal capacity', "
+        "the weak statement is 'the person is a minor'. "
         "Written in a casual style: 'x is earlier than y' is our variant of the "
         "more standard logical notation Earlier(x, y)."
     )
@@ -100,8 +106,9 @@ class CannotAttack(BaseModel):
 
 class Attack(BaseModel):
     move: Rebut | Undercut | CannotAttack = Field(
-        description="Use Rebut if your attack consists in contradicting one of the conclusions of the opponent's argument. "
-        "Use Undercut if your attack consists in contradicting one of the assumptions of the opponent's argument. "
+        description="Use Undercut if your attack consists in contradicting one of the assumptions of the opponent's argument, "
+        "that is, if the opponent's argument has a weak statement that you can establish. "
+        "Use Rebut if your attack consists in contradicting one of the conclusions of the opponent's argument. "
         "Use CannotAttack if you cannot make an attack."
     )
 
@@ -147,6 +154,7 @@ PHASES = (
 MAIN_ARGUMENT_USER = """\
 Now it is phase 1.
 Make your main argument whose conclusions address the issue.
+A defeasible rule can contain assumptions that are not warranted. For each rule, consider which exception to it you take to be absent unless the contrary can be shown, and write that exception as a weak statement in the antecedent of the rule.
 If you cannot make a main argument, you cannot argue."""
 
 INTEGRATE_USER = """\
@@ -173,11 +181,15 @@ Make your new main argument based on it."""
 ATTACK_USER = """\
 Now it is phase 2.
 In phase 2, you make an argument defeating the other agent's argument. If the other agent's argument does not contradict your own theory, there is nothing to defeat.
+A defeasible rule can contain assumptions that are not warranted. For each rule of your argument, consider which exception to it you take to be absent unless the contrary can be shown, and write that exception as a weak statement in the antecedent of the rule.
 The other agent's argument:
 {target}
 There are two ways of attack:
 - Rebut: contradicting a conclusion. One of your conclusions is the negation of one of the conclusions of the other agent's argument.
-- Undercut: contradicting an assumption. An assumption of the other agent's argument is the negation of one of its weak statements. The negation of a negation is the original statement, so you contradict the assumption by deriving that weak statement itself: one of your conclusions is one of the weak statements of the other agent's argument.
+- Undercut: contradicting an assumption. The other agent's argument assumes that each of its weak statements does not hold, unless the contrary can be shown. You contradict the assumption by showing that one of its weak statements holds: one of your conclusions is that weak statement itself, word for word: write a rule whose consequent is that statement, from the facts of your own theory.
+…by stating an argument with a conclusion providing an 'unless' clause of the other argument.
+Attacks on assumptions do not only always succeed, but are also always stronger than an attack on a conclusion: if one argument undercuts the other, and the other does not undercut but only rebuts the first, the first defeats the second but the second does not defeat the first.
+First look at the weak statements of the other agent's argument: they are the 'weak_statements' in the antecedents of its rules. An argument without weak statements cannot be undercut. If it has a weak statement that your theory lets you derive, make an undercut; otherwise, make a rebut.
 If you can make neither of these attacks, you cannot attack."""
 
 FINAL_ANSWER_USER_JUSTIFIED = (
@@ -214,12 +226,15 @@ class Message:
     attack: str | None = None  # "rebut" | "undercut"（攻撃の宣言。no schema は、判定用 LLM の判定）
     target_index: int | None = None  # 攻撃の対象の、履歴の番号
     target_statement: str | None = None  # 攻撃の対象の文（schema のみ）
+    defeats: bool | None = None  # 攻撃のあと、地位の計算で求めた関係（O: 対象を defeat するか / P: strictly defeat するか）。攻撃の採否には使わない
 
     def to_dict(self, status: str | None = None) -> dict[str, Any]:
         content = self.content.model_dump() if isinstance(self.content, BaseModel) else self.content
         d = {"role": self.role, "content": content}
         if status is not None:
             d["status"] = status
+        if self.defeats is not None:
+            d["defeats"] = self.defeats
         return d
 
 
@@ -232,7 +247,6 @@ class Result:
     turns: int
     closed_by: str  # "justified" | "turn_limit" | "no_more_arguments" | "no_new_point"（比較手法）
     trace: list[str] = field(default_factory=list)
-    invalid_attempts: list[dict[str, Any]] = field(default_factory=list)  # 無効だった攻撃（履歴には入れない。分析用）
 
 
 def norm(s: str) -> str:
@@ -290,7 +304,6 @@ class DialecticalProtocol:
         self.justified_index: int | None = None
         self.integrated = False
         self.trace: list[str] = []
-        self.invalid_attempts: list[dict[str, Any]] = []
 
     # ---- プロンプト ----
     def _history_json(self, with_status: bool = False) -> str:
@@ -342,7 +355,9 @@ class DialecticalProtocol:
         return argument.warrant()
 
     async def _defeats(self, a: Any, t: Any, rebut: bool) -> bool:
-        return await self._undercuts(a, t) or (rebut and not await self._undercuts(t, a))
+        if not rebut:
+            return True  # undercut と宣言した攻撃は、判定せずに defeat とする（宣言を信じる）
+        return not await self._undercuts(t, a)  # rebut と宣言した攻撃は、既出の相手が undercut し返せるかだけを見る
 
     async def _defeated_back(self, a: Any, t: Any, rebut: bool) -> bool:
         return await self._undercuts(t, a) or (rebut and not await self._undercuts(a, t))
@@ -380,10 +395,12 @@ class DialecticalProtocol:
             self.turns += 1
             if argument is None:
                 self._log(f"{turn}.main_argument → できない")
+                if all(self._last_main(role) is not None for role in (AG1, AG2)):
+                    await self._integrate(turn, evaluate=True)  # 両者の main argument がある: 出せない側が、すぐ統合する
+                    return await self._close()
                 failed_in_a_row += 1
                 if failed_in_a_row == 2:
-                    await self._integrate(turn, evaluate=True)
-                    return await self._close()
+                    return await self._close()  # 両者が続けて出せず、統合もできない
                 turn = other(turn)
                 continue
             failed_in_a_row = 0
@@ -429,26 +446,7 @@ class DialecticalProtocol:
             kind = "rebut" if rebut else "undercut"
             defeat = await self._defeats(argument, target, rebut)
             ok = defeat if mover == opponent else (defeat and not await self._defeated_back(argument, target, rebut))
-            if not ok:
-                reason = "strictly defeat でない" if mover == proposer else "defeat でない"
-                self._log(f"  {mover}.attack({kind}) → 無効（{reason}）")
-                self.invalid_attempts.append(
-                    {
-                        "role": mover,
-                        "declared": kind,
-                        "reason": reason,
-                        "target_index": chain_index[-1],
-                        "main_index": main_index,
-                        "content": content.model_dump() if isinstance(content, BaseModel) else content,
-                    }
-                )
-                if mover == proposer:
-                    # P は 1 回で strictly defeat できなければ、やり直さない（それ以上の手はない）
-                    self._log("  P は strictly defeat できなかった → これ以上の返答なし")
-                    return OVERRULED if proposer_replies == 0 else DEFENSIBLE
-                continue
-            if mover == proposer:
-                proposer_replies += 1  # P の有効な返答の数
+            # 攻撃は、そのまま履歴に入れる（攻撃のターンでは、成立を判定しない）。関係は、出そろった argument 同士で、あとから見る。
             index = self._record(
                 mover,
                 content,
@@ -459,10 +457,24 @@ class DialecticalProtocol:
                 attack=kind,
                 target_index=chain_index[-1],
                 target_statement=_target_statement(content),
+                defeats=ok,
             )
+            self._log(f"  {mover}.attack({kind}) → 履歴 {index}" + ("" if ok else "（" + ("strictly defeat でない" if mover == proposer else "defeat でない") + "）"))
+            if not ok:
+                if mover == proposer:
+                    # P は 1 回で strictly defeat できなければ、それ以上の手はない
+                    self._log("  P は strictly defeat できなかった → これ以上の返答なし")
+                    return OVERRULED if proposer_replies == 0 else DEFENSIBLE
+                # O の攻撃が defeat でない: 対象を defeat する argument がない（「攻撃できない」と同じ）
+                if len(chain) == 1:
+                    return JUSTIFIED
+                chain, chain_index, proposer_replies = [main], [main_index], 0  # O は M への別の攻撃を探す
+                self._log("  → O は M への別の攻撃を探す")
+                continue
+            if mover == proposer:
+                proposer_replies += 1  # P の strictly defeat する返答の数
             chain.append(argument)
             chain_index.append(index)
-            self._log(f"  {mover}.attack({kind}) → 有効（履歴 {index}）")
 
     # ---- 統合 ----
     async def _integrate(self, integrator: str, evaluate: bool) -> None:
@@ -508,5 +520,5 @@ class DialecticalProtocol:
         if closed_by is None:
             closed_by = "justified" if justified else ("turn_limit" if not self.budget_left else "no_more_arguments")
         return Result(
-            answer, self.history, self.statuses, self.justified_index, self.turns, closed_by, self.trace, self.invalid_attempts
+            answer, self.history, self.statuses, self.justified_index, self.turns, closed_by, self.trace
         )

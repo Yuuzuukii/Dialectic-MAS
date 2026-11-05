@@ -85,7 +85,7 @@ def test_log_is_saved_under_experiment_turns_raw_dialogue(tmp_path):
         }
     ]
     assert log["consensus_reached"] is True and log["integrated_rules"] == [] and log["metrics"]["total_dialogue_turns"] == 2
-    assert "error" not in log and log["invalid_attempts"] == []
+    assert "error" not in log
 
 
 def test_run_index_prefix_is_added_for_multiple_runs(tmp_path):
@@ -126,7 +126,7 @@ def test_baseline_log_has_turn_kinds_and_the_judge_answer(tmp_path) -> None:
     assert [h["kind"] for h in log["history"]] == ["turn", "turn"] and log["final_answer"] == "FINAL"
     # 比較手法の発言は、type を持たない（既存と同じ）
     assert [(h["agent"], "type" in h) for h in log["dialogue_history"]] == [("AG1", False), ("AG2", False)]
-    assert log["metrics"]["closed_by"] == "turn_limit" and log["invalid_attempts"] == []
+    assert log["metrics"]["closed_by"] == "turn_limit"
 
 
 def test_dry_run_needs_no_api_key_and_calls_no_llm(capsys, monkeypatch) -> None:

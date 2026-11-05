@@ -125,8 +125,8 @@ def test_defeat_definitions():
     assert defeat_relations(plain, p_arg, True) == (True, True, False)
     # undercut: a は t を defeat し、t は a を defeat しない → strictly
     assert defeat_relations(killer, weak_holder, False) == (True, False, True)
-    # 宣言が undercut でも、結論が weak statement と一致しなければ defeat しない
-    assert defeat_relations(plain, weak_holder, False)[0] is False
+    # undercut と宣言した攻撃は、結論が weak statement と一致しなくても、判定せずに defeat とする
+    assert defeat_relations(plain, weak_holder, False) == (True, False, True)
     # 相手が自分を undercut するなら、rebut は defeat しない
     assert defeat_relations(weak_holder, killer, True)[0] is False
 
@@ -164,13 +164,10 @@ def test_S4_proposer_gets_one_attempt_and_non_strict_defeat_is_overruled():
     )
     assert r.statuses[0] == "overruled"
     assert any("P は strictly defeat できなかった" in t for t in r.trace)
-    # 無効だった攻撃は、履歴に入らず、invalid_attempts に 1 回だけ残る（対象は ag2 の攻撃＝履歴 1、主張は履歴 0）
-    assert [m.role for m in r.history][:2] == [AG1, AG2]
-    assert len(r.invalid_attempts) == 1
-    first = r.invalid_attempts[0]
-    assert first["role"] == AG1 and first["declared"] == "rebut" and first["reason"] == "strictly defeat でない"
-    assert first["target_index"] == 1 and first["main_index"] == 0
-    assert first["content"]["attack_type"] == "rebut" and first["content"]["argument"]["rules"]
+    # 攻撃のターンでは判定しない: P の返答も、そのまま履歴に入る（対象は ag2 の攻撃＝履歴 1）。関係は defeats に残る。
+    assert [m.role for m in r.history][:3] == [AG1, AG2, AG1]
+    assert r.history[1].defeats is True and r.history[2].defeats is False
+    assert r.history[2].attack == "rebut" and r.history[2].target_index == 1
 
 
 def test_overruled_main_lets_the_other_side_present_a_main_argument():
@@ -196,7 +193,7 @@ def test_proposer_with_a_valid_reply_earlier_is_defensible_when_next_reply_fails
         FakeAgent(main=[main(arg("m1"))], attack=[undercut(A(R([], "w1")), "w1"), rebut(arg("r2"))]),
         FakeAgent(attack=[rebut(arg("b1", weak=("w1",))), rebut(arg("b2"))]),
     )
-    assert r.statuses[0] == "defensible" and len(r.invalid_attempts) == 1
+    assert r.statuses[0] == "defensible" and [m.defeats for m in r.history if m.kind == "attack"] == [True, True, True, False]
     # P が、何も作らずにできないと言うなら、overruled
     r2 = run(FakeAgent(main=[main(arg("m1"))]), FakeAgent(attack=[rebut(arg("b1"))]))
     assert r2.statuses[0] == "overruled"
@@ -207,13 +204,14 @@ def test_proposer_reply_that_does_not_defeat_is_not_counted():
     o_attack = rebut(A(R([], "q")))
     p_reply = rebut(A(R([], "z", weak=["q"])))
     r = run(FakeAgent(main=[main(arg("m1"))], attack=[p_reply, CANNOT_ATTACK]), FakeAgent(attack=[o_attack]))
-    assert r.statuses[0] == "overruled" and len(r.invalid_attempts) == 1
+    assert r.statuses[0] == "overruled" and r.history[-1].defeats is False
 
 
-def test_S5_both_cannot_present_then_integrate_and_justified():
+def test_S5_cannot_present_with_both_mains_then_integrate_and_justified():
+    # ag1 が、2つ目の main argument を出せない。履歴に両者の main があるので、ag1 が、すぐ統合する。
     r = run(
-        FakeAgent(main=[main(arg("m1"))], attack=[CANNOT_ATTACK, rebut(arg("c1"))]),  # 1回目: b1 に返せない / 2回目: m2 を攻撃
-        FakeAgent(main=[main(arg("m2"))], attack=[rebut(arg("b1"))], integrate=[R(["fact m1"], "claim c")], from_rule=[main(arg("m3"))]),
+        FakeAgent(main=[main(arg("m1"))], attack=[CANNOT_ATTACK, rebut(arg("c1"))], integrate=[R(["fact m1"], "claim c")], from_rule=[main(arg("m3"))]),  # 1回目: b1 に返せない / 2回目: m2 を攻撃
+        FakeAgent(main=[main(arg("m2"))], attack=[rebut(arg("b1"))]),
     )
     assert r.closed_by == "justified" and r.final_answer == "ANSWER(justified)"
     assert any(".integrate" in t for t in r.trace)
@@ -232,9 +230,10 @@ def test_S6_turn_limit_integrates_without_evaluating():
 
 
 def test_S7_one_sided_no_integration():
+    # ag2 に main argument がない。両者が続けて出せなくても、統合はせず、議論を終える。
     r = run(FakeAgent(main=[main(arg("m1"))]), FakeAgent(attack=[rebut(arg("b1"))]))
     assert r.closed_by == "no_more_arguments" and r.statuses == {0: "overruled"}
-    assert any("統合できない" in t for t in r.trace)
+    assert not any(".integrate" in t for t in r.trace)
 
 
 # ---- プロンプトの組み立て ----
@@ -265,14 +264,14 @@ def test_prompts_are_assembled_from_the_design_doc():
 
 
 def test_integrate_prompt_contains_both_warrants_and_final_prompt_switches():
-    ag1 = FakeAgent(main=[main(arg("m1"))], attack=[CANNOT_ATTACK, rebut(arg("c1"))])
-    ag2 = FakeAgent(main=[main(arg("m2"))], attack=[rebut(arg("b1"))], integrate=[R([], "claim c")], from_rule=[main(arg("m3"))])
+    ag1 = FakeAgent(main=[main(arg("m1"))], attack=[CANNOT_ATTACK, rebut(arg("c1"))], integrate=[R([], "claim c")], from_rule=[main(arg("m3"))])
+    ag2 = FakeAgent(main=[main(arg("m2"))], attack=[rebut(arg("b1"))])
     r = run(ag1, ag2)
-    integrate_call = next(c for c in ag2.calls if c["schema"] is Rule)
+    integrate_call = next(c for c in ag1.calls if c["schema"] is Rule)
     assert json.dumps(arg("m2").warrant().model_dump(), ensure_ascii=False, indent=2) in integrate_call["prompt"]
     assert json.dumps(arg("m1").warrant().model_dump(), ensure_ascii=False, indent=2) in integrate_call["prompt"]
     assert "Create a new strict rule C from the two warrants." in integrate_call["prompt"]
-    from_rule_call = [c for c in ag2.calls if c["schema"] is Phase1][-1]
+    from_rule_call = [c for c in ag1.calls if c["schema"] is Phase1][-1]
     assert "You created this new strict rule" in from_rule_call["prompt"] and "claim c" in from_rule_call["prompt"]
     assert ag1.calls[-1]["prompt"].startswith("Now the argumentation is over. Write") and "no argument was justified" not in ag1.calls[-1]["prompt"]
     assert r.closed_by == "justified"
@@ -373,12 +372,26 @@ def test_free_undercut_reinstates_and_status_is_justified():
 
 
 def test_free_integrate_uses_extracted_warrants_and_passes_text_through():
-    ag1 = FreeAgent(main=["main of ag1"], attack=["I cannot attack it.", "attack on m2"])
-    ag2 = FreeAgent(main=["main of ag2"], attack=["attack on m1"], integrate=["NEW RULE TEXT"], from_rule=["new main"])
+    ag1 = FreeAgent(main=["main of ag1"], attack=["I cannot attack it.", "attack on m2"], integrate=["NEW RULE TEXT"], from_rule=["new main"])
+    ag2 = FreeAgent(main=["main of ag2"], attack=["attack on m1"])
     judge = FakeJudge()
     r = run_free(ag1, ag2, judge)
-    integrate_call = next(c for c in ag2.calls if "Create a new strict rule C" in c["prompt"])
+    integrate_call = next(c for c in ag1.calls if "Create a new strict rule C" in c["prompt"])
     assert "WARRANT OF: main of ag2" in integrate_call["prompt"] and "WARRANT OF: main of ag1" in integrate_call["prompt"]
-    from_rule_call = next(c for c in ag2.calls if "You created this new strict rule" in c["prompt"])
+    from_rule_call = next(c for c in ag1.calls if "You created this new strict rule" in c["prompt"])
     assert "NEW RULE TEXT" in from_rule_call["prompt"]
     assert [m.kind for m in r.history][-2:] == ["integrate", "main"] and r.history[-2].content == "NEW RULE TEXT"
+
+
+def test_opponent_rebut_that_the_target_undercuts_is_recorded_and_treated_as_no_attack():
+    # O の rebut を、M が undercut し返せる（O の weak statement が M の結論）→ defeat でない。履歴に入り、やり直しはなく、justified。
+    m = A(R([], "x holds"))
+    r = run(FakeAgent(main=[main(m)]), FakeAgent(attack=[rebut(arg("w", weak=("x holds",)))]))
+    assert r.statuses[0] == "justified"
+    assert [m.kind for m in r.history] == ["main", "attack"] and r.history[1].defeats is False
+
+
+def test_opponent_undercut_declaration_is_trusted_even_if_conclusion_does_not_match():
+    bad = undercut(A(R([], "something else")), "w1")
+    r = run(FakeAgent(main=[main(arg("m1", weak=("w1",)))]), FakeAgent(attack=[bad]))
+    assert r.history[1].defeats is True and r.statuses[0] != "justified"

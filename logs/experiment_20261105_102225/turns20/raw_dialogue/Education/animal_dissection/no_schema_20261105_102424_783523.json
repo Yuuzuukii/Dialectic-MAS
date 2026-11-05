@@ -1,0 +1,328 @@
+{
+  "method": "no_schema",
+  "question": "Should students dissect animals?",
+  "agent1_stance": "Your stance:\nYou support animal dissection.\nYou believe dissecting real animals provides students with more learning opportunities, as dissection is a valuable part of teaching biology in schools, developing fine motor skills, hand-eye coordination, and critical thinking.\nYou believe dissection can encourage students to pursue careers in science by providing hands-on experience that inspires career interest and creates aha moments that spark enthusiasm for scientific fields.\nYou believe animal dissection is a productive and worthwhile use of dead animals, as over 98% of dissected animals were already deceased and fetal pigs are meat industry byproducts destined for landfills.",
+  "agent2_stance": "Your stance:\nYou oppose animal dissection.\nYou believe methods used to supply animals for dissections are inhumane and bad for the environment, as approximately 99% of dissection animals are caught in the wild and wild-catching decreases local populations and reduces biodiversity.\nYou believe medical studies do not require or benefit from animal dissection, as it is not required by College Board AP Biology or Next Generation Science Standards, and no U.S. or Canadian medical schools use animals for physician training.\nYou believe dissecting real animals is unnecessary because alternatives exist, as synthetic models and computer simulations teach equally well or better and students learn just as well or better with alternatives versus dead animals.",
+  "metrics": {
+    "elapsed_seconds": 118.722,
+    "max_dialogue_turns": 20,
+    "turns": 20,
+    "closed_by": "turn_limit",
+    "justified_index": null,
+    "total_dialogue_turns": 20,
+    "main_argument_count": 7,
+    "attack_turn_count": 7,
+    "overruled_count": 5,
+    "defensible_count": 2,
+    "justified_proven_count": 0,
+    "usage": {
+      "agents": {
+        "model": "gpt-5.4-nano",
+        "prompt_tokens": 72630,
+        "cached_tokens": 28160,
+        "completion_tokens": 8975,
+        "total_tokens": 81605,
+        "total_cost_usd": 0.020676
+      },
+      "judge": {
+        "model": "gpt-5.4-mini",
+        "prompt_tokens": 30381,
+        "cached_tokens": 0,
+        "completion_tokens": 1310,
+        "total_tokens": 31691,
+        "total_cost_usd": 0.028681
+      },
+      "total_cost_usd": 0.049357
+    },
+    "cost_usd_this_run": 0.049357
+  },
+  "dialogue_history": [
+    {
+      "id": "h0",
+      "agent": "AG1",
+      "argument": "**Main argument 1 (supporting animal dissection):**  \nIn school biology, hands-on study of real anatomical structures is more effective for learning than purely virtual alternatives, because it trains fine motor skills, hand-eye coordination, and critical thinking through direct observation.  \nTherefore, **students should dissect animals** (real specimens are an effective and educational part of biology instruction, unless it is shown that the learning goal can’t be met with comparable effectiveness by non-animal methods).",
+      "type": "main",
+      "proponent": "AG1",
+      "status": "overruled"
+    },
+    {
+      "id": "h1",
+      "agent": "AG2",
+      "argument": "### Attack (Undercut)\n\n**Target assumption in ag1:** the weak “unless” clause embedded in ag1’s conclusion:  \n> “real specimens are an effective and educational part of biology instruction, **unless it is shown that the learning goal can’t be met with comparable effectiveness by non-animal methods**.”\n\n**Undercut rule from my theory (explicitly stating the “weak statement” as the consequent):**  \n**Rule U1 (from my theory):**  \nIf non-animal alternatives (e.g., synthetic models and computer simulations) **teach equally well or better** than dissections for the intended learning goals,  \nthen it is the case that **the learning goal can be met with comparable effectiveness by non-animal methods**.\n\n**Why this undercuts ag1:**  \nMy theory directly supports the antecedent of U1: that alternatives teach equally well or better and students learn as well or better with alternatives versus dead animals. Therefore, the “unless … non-animal methods can’t meet the learning goal comparably” condition is not met, which removes the justification for ag1’s “unless” safeguard for animal dissection.\n\n**Net effect:** ag1’s conclusion (“therefore students should dissect animals…”) is undercut by demonstrating that the learning goals can be met with comparable effectiveness using non-animal methods.",
+      "type": "defeat",
+      "proponent": "AG1",
+      "attack": "rebut",
+      "target_id": "h0"
+    },
+    {
+      "id": "h2",
+      "agent": "AG2",
+      "argument": "### Main argument (oppose animal dissection)\n\n**Claim:** Students should **not** dissect animals.\n\n**Argument from my theory:**\n- **Rule R1 (from my theory):** If the intended biology learning goals can be achieved **at least as well** using non-animal alternatives (synthetic models and computer simulations), then it is not justified to use animal dissection as the instructional method.\n  - **Exception (treated as absent unless shown otherwise):** *unless* non-animal methods cannot meet the learning goals at comparable quality.\n\n**Why R1 applies:**\n- Synthetic models and computer simulations can teach anatomy and biology learning objectives effectively (often with better opportunities for repetition and safer, controlled learning).\n- Therefore, the “unless” exception is not supported: non-animal methods can meet the learning goals comparably.\n\n**Conclusion:** Since dissection is unnecessary when comparable alternatives exist, and because the practice also relies on sourcing animals from the wild, students should **not** dissect animals.",
+      "type": "main",
+      "proponent": "AG2",
+      "status": "overruled"
+    },
+    {
+      "id": "h3",
+      "agent": "AG1",
+      "argument": "### Phase 2 — Defeat the other agent\n\nI will attack **a weak statement/assumption** in the other agent’s argument (undercut), by deriving that weak statement from my theory.\n\n#### Other agent’s weak statements\nIn R1, the weak statement is the *exception*:\n- **W1 (weak statement):** “*unless* non-animal methods cannot meet the learning goals at comparable quality.”\n\nTo defeat R1, I need a rule from my theory whose consequent is (word-for-word) essentially this weak statement holding.\n\n#### Undercut (attack the exception)\nFrom my theory, I can justify that non-animal methods are **not** necessary to reach the goals because dissection itself is a worthwhile, effective way to achieve them (fine motor skills, critical thinking, and “aha moments”), and that the animals used are largely already dead byproduct specimens. That supports the negation of the other agent’s weak exception (“non-animal methods cannot meet the goals”).\n\nSo I state an undercutting rule:\n\n**Rule D1 (from my theory):**  \nIf dissection provides valuable learning experiences aligned with biology learning goals (e.g., fine motor skills, hand-eye coordination, critical thinking, and strong student engagement/aha moments), and the specimens are mainly already-deceased byproducts, then **non-animal methods can meet the learning goals at comparable quality**.\n\nSince the other agent’s “unless” exception is exactly the claim that non-animal methods *cannot* meet the goals comparably, D1 undercuts that weak statement.\n\n### Result\nBecause I undercut the “unless non-animal methods cannot meet … comparable quality” exception, the other agent’s Rule R1 loses its support, and their conclusion “students should not dissect animals” is defeated.",
+      "type": "defeat",
+      "proponent": "AG2",
+      "attack": "rebut",
+      "target_id": "h2"
+    },
+    {
+      "id": "h4",
+      "agent": "AG1",
+      "argument": "**Main argument (supporting animal dissection):**\n\n**Claim:** Students **should dissect animals**.\n\n**Rule (from my theory):**  \n**R2:** If animal dissection (1) provides effective hands-on learning for biology (supporting fine motor skills, hand-eye coordination, and critical thinking through real anatomical study) and (2) is likely to increase student engagement and science-career interest through “aha moments,” and (3) uses specimens that are already dead byproducts (so the practice is not primarily driving additional animal harm),  \nthen it is justified that **students should dissect animals**.  \n\n**Exception (treated as absent unless shown):**  \nThis rule is assumed not to apply only when the contrary is shown that dissection is **not** effective/justified for the intended learning goals *or* that it meaningfully increases harm beyond byproduct use.  \nSo the exception is captured as a weak statement:  \n- **W2:** “unless dissection is shown to be ineffective/insufficient for the learning goals *or* to rely on sourcing that is not mainly from already-deceased byproducts.”\n\n**Conclusion:** Since dissection is educationally valuable (real anatomical learning + skill building + engagement) and can be a productive use of animals that are largely already dead byproducts, **students should dissect animals** under R2, with W2 as the absent exception.",
+      "type": "main",
+      "proponent": "AG1",
+      "status": "overruled"
+    },
+    {
+      "id": "h5",
+      "agent": "AG2",
+      "argument": "### Phase 2 — Defeat ag1’s argument (oppose dissection)\n\n**Target (weak statement in ag1):**  \nag1’s W2 is (as written):  \n> **W2:** “unless dissection is shown to be ineffective/insufficient for the learning goals *or* to rely on sourcing that is not mainly from already-deceased byproducts.”\n\nTo **undercut**, I need to derive **W2 itself** from my theory (i.e., show the “unless” condition holds), by giving a rule whose **consequent is exactly W2** (or its stated disjunctive content: either ineffectiveness or sourcing not mainly byproduct).\n\n---\n\n## Undercut (attack the sourcing part of W2)\n\n### Rule U-S (from my theory)\nIf it is the case that **~99% of dissection animals are caught in the wild** and that **wild-catching reduces local populations and biodiversity**,  \nthen dissection **relies on sourcing that is not mainly from already-deceased byproducts**—and therefore **W2 holds**.\n\n### Why U-S defeats ag1\n- My theory explicitly says ~**99%** of dissection animals are **wild-caught**.  \n- That means the “already dead byproduct” condition is not met in practice.  \n- So ag1’s weak statement W2 (“unless … reliance on sourcing that is not mainly from already-deceased byproducts”) is triggered: the sourcing is **not mainly** byproducts.\n\n**Net effect:** ag1’s Rule R2 loses its support because W2 holds (the exception is not “absent unless shown”); hence students should not dissect animals.\n\n--- \n\nIf you want, I can also provide a second undercut that targets the *“ineffective/insufficient”* disjunct of W2 using my alternatives argument (models/simulations teach as well or better).",
+      "type": "defeat",
+      "proponent": "AG1",
+      "attack": "rebut",
+      "target_id": "h4"
+    },
+    {
+      "id": "h6",
+      "agent": "AG2",
+      "argument": "### Main argument (oppose animal dissection)\n\n**Claim:** Students **should not** dissect animals.\n\n**Rule (from my theory):**  \n**R-Alt:** If (1) the intended biology learning goals can be achieved **at least as well** using non-animal alternatives (synthetic models and computer simulations), and (2) animal dissection is supported by a practice that is environmentally harmful and involves inhumane wild-capture of animals (≈99% caught in the wild, with resulting population declines and biodiversity loss),  \n**then** it is not justified to use animal dissection in instruction.\n\n**Exception (treated as absent unless the contrary is shown):**  \nThis rule’s exception is taken to be absent unless there is evidence that (a) alternatives are **not** comparable for the specific learning goals *or* (b) the dissection program does **not** rely on the harmful sourcing pattern described in my theory. I represent that exception as a weak statement:\n\n**W-Ex (exception):**  \n“**unless** it is shown that non-animal alternatives cannot meet the relevant learning goals at comparable quality, **or** that the dissection program uses specimens that are mainly already-deceased byproducts rather than ~99% wild-caught animals.”\n\n**Conclusion:** Since comparable alternatives exist and dissection (as typically practiced) depends on harmful wild capture and biodiversity loss, **students should not dissect animals**.",
+      "type": "main",
+      "proponent": "AG2",
+      "status": "overruled"
+    },
+    {
+      "id": "h7",
+      "agent": "AG1",
+      "argument": "### Phase 2 — Defeat ag2 (oppose “students should not dissect”)\n\nI will **undercut** ag2’s argument by showing that one of ag2’s **weak statements in the antecedent** actually holds, using my theory.  \n\n#### Target weak statement\nAg2’s exception weak statement is:\n\n**W-Ex:**  \n“**unless** it is shown that non-animal alternatives cannot meet the relevant learning goals at comparable quality, **or** that the dissection program uses specimens that are mainly already-deceased byproducts rather than ~99% wild-caught animals.”\n\nTo undercut, it suffices to support the corresponding **“unless” condition** in ag2’s weak statement.\n\n---\n\n## Undercut: show the sourcing part of W-Ex holds (by my byproduct claim)\n\n### Rule (from my theory)\n**U-Byp:**  \nIf (1) **over 98%** of dissected animals are **already deceased byproduct specimens**, and (2) therefore the dissection practice **does not mainly rely on ~99% wild-caught sourcing**,  \nthen **the dissection program uses specimens that are mainly already-deceased byproducts rather than ~99% wild-caught animals**.\n\n### Why this defeats ag2\n- Under **U-Byp**, we can derive exactly the disjunct inside ag2’s W-Ex:  \n  “the dissection program uses specimens that are mainly already-deceased byproducts rather than ~99% wild-caught animals.”\n- Therefore, ag2’s **exception does not hold as an “absent unless contrary shown” condition**—because the “mainly already-deceased byproducts” condition is already supported by my theory.\n- That undermines ag2’s Rule **R-Alt**, removing the support for “students should not dissect animals.”\n\n**Net effect:** ag2’s conclusion is defeated by undercutting its exception condition (W-Ex).",
+      "type": "defeat",
+      "proponent": "AG2",
+      "attack": "rebut",
+      "target_id": "h6"
+    },
+    {
+      "id": "h8",
+      "agent": "AG1",
+      "argument": "### Main argument (supporting animal dissection)\n\n**Claim:** Students **should dissect animals**.\n\n**Rule (from my theory):**  \n**R-Dissect:** If  \n1) animal dissection provides **effective hands-on biology learning** (improves fine motor skills and hand-eye coordination while strengthening critical thinking through direct anatomical observation), and  \n2) it increases **student engagement** in science by creating “aha moments” that can spark **career interest** in STEM, and  \n3) the specimens used are **mainly already-deceased byproducts** (so dissection is not primarily creating new harm),  \nthen it is justified that **students should dissect animals**.\n\n**Exception (taken as absent unless the contrary can be shown):**  \nThis rule can be overridden only if there is evidence that dissection is **not** meeting its instructional purpose or is **not** mainly using byproduct specimens, captured by this weak statement in the antecedent as a disjunct to the rule’s justification:\n\n**W-Ex (weak exception in antecedent):**  \n“unless it is shown that dissection is ineffective/insufficient for the intended learning goals **or** that the program relies mainly on sourcing that is not already-deceased byproducts.”\n\n**Conclusion:** Given (1)–(3), and with W-Ex treated as absent unless contrary evidence exists, **students should dissect animals**.",
+      "type": "main",
+      "proponent": "AG1",
+      "status": "overruled"
+    },
+    {
+      "id": "h9",
+      "agent": "AG2",
+      "argument": "### Phase 2 — Defeat ag1 (supporting animal dissection)\n\nAg1’s argument depends on its weak exception **W-Ex** being *absent unless contrary evidence exists*, i.e., it assumes the “unless” disjuncts largely do **not** hold.\n\nAg1’s **weak statement** is:\n\n**W-Ex:**  \n“**unless** it is shown that dissection is ineffective/insufficient for the intended learning goals **or** that the program relies mainly on sourcing that is not already-deceased byproducts.”\n\nSo to **undercut**, I only need to derive (from my theory) that the sourcing disjunct holds—i.e., the program relies mainly on sourcing **not** already-deceased byproducts.\n\n---\n\n## Undercut: derive the sourcing disjunct of W-Ex\n\n### Rule (from my theory)\n**U-Wild:**  \nIf approximately **99%** of dissection animals are **caught in the wild** and wild-catching **reduces local populations** and **biodiversity**,  \nthen it is the case that the dissection program relies mainly on sourcing that is **not** already-deceased byproducts.\n\n### Why this undercuts ag1\n- Under **U-Wild**, we can infer exactly the disjunct inside **W-Ex**:  \n  “the program relies mainly on sourcing that is **not** already-deceased byproducts.”\n- Therefore, the **“unless …”** exception in ag1’s antecedent is *triggered* (its exception-absence assumption fails).\n- Net effect: ag1’s rule **R-Dissect** is no longer justified, so **“students should dissect animals”** is not supported.\n\n**Conclusion of my defeat:** ag1’s argument is defeated by undercutting the sourcing part of its weak exception (**W-Ex**) using my theory about ~99% wild-caught sourcing and biodiversity harm.",
+      "type": "defeat",
+      "proponent": "AG1",
+      "attack": "rebut",
+      "target_id": "h8"
+    },
+    {
+      "id": "h10",
+      "agent": "AG1",
+      "argument": "### Phase 2 — Defeat ag1’s support (undercut ag2’s attempt)\n\nAg2 tries to undercut ag1 by deriving ag1’s weak exception’s *sourcing disjunct*, i.e. that the program relies mainly on **not** already-deceased byproducts (they use **U-Wild** to infer the opposite of ag1’s byproduct claim).\n\nTo defeat this, I’ll instead support (from my own theory) the negation of ag2’s needed assumption—namely that dissection specimens are mainly **already-deceased byproducts**. That contradicts ag2’s **U-Wild**-based derivation of the sourcing disjunct, so ag2’s undercut fails.\n\n#### Target weak statement in ag2 (needed for their undercut)\nAg2’s undercut hinges on the derivation that the sourcing disjunct in ag1’s **W-Ex** holds:\n\n- **Sourcing disjunct (inside ag1’s W-Ex):**  \n  “the program relies mainly on sourcing that is not already-deceased byproducts.”\n\nSo I will derive the contrary of that statement.\n\n---\n\n## Undercut (via rebutting the assumption that sources are mainly not byproducts)\n\n### Rule (from my theory)\n**U-Byp-Again:**  \nIf **over 98%** of dissected animals are **already deceased byproduct specimens**,  \nthen it is the case that the dissection program uses specimens that are **mainly already-deceased byproducts** rather than sourcing that is not already-deceased byproducts.\n\n**Exception (absent unless the contrary is shown):**  \nUnless there is evidence that a given school/program’s sourcing significantly deviates from the “over 98% byproduct” pattern.\n\n### Why this defeats ag2\n- From **U-Byp-Again**, I directly derive the opposite of what ag2 needs for their undercut:\n  - ag2 needs: “mainly **not** already-deceased byproducts”\n  - I derive: “mainly **already-deceased** byproducts”\n- Therefore ag2 cannot successfully undercut ag1 by triggering ag1’s sourcing disjunct, because the sourcing disjunct is not supported by my theory.\n\n**Net effect:** ag2’s undercut attempt against ag1 fails, so ag1’s conclusion (“students should dissect animals”) is not defeated by ag2’s argument.",
+      "type": "counter",
+      "proponent": "AG1",
+      "attack": "rebut",
+      "target_id": "h9"
+    },
+    {
+      "id": "h11",
+      "agent": "AG2",
+      "argument": "### Phase 2 — Defeat ag1 (supporting animal dissection)\n\nI focus on **undercutting** ag1’s argument by deriving one of its **weak statements** (the “unless …” conditions) from my own theory.\n\n#### ag1’s weak statement to target\nAg1’s exception is:\n\n**W-Ex (weak exception in antecedent):**  \n“unless it is shown that dissection is ineffective/insufficient for the intended learning goals **or** that the program relies mainly on sourcing that is not already-deceased byproducts.”\n\nTo undercut ag1, I just need to derive **one disjunct** inside this weak statement—i.e., show that the “unless” condition holds via the sourcing part.\n\n---\n\n## Undercut: derive the “not mainly byproduct sourcing” disjunct\n\n### Rule (from my theory)\n**R-Wild:**  \nIf approximately **99%** of dissection animals are **caught in the wild**, and wild-catching **reduces local populations** and **reduces biodiversity**,  \nthen it is the case that the program relies mainly on sourcing that is **not** already-deceased byproducts.\n\n### Why this defeats ag1\n- From **R-Wild**, I derive exactly the sourcing disjunct in ag1’s weak statement:  \n  “the program relies mainly on sourcing that is not already-deceased byproducts.”\n- Therefore, ag1’s **W-Ex** (“unless … it is shown that … the program relies mainly on … not already-deceased byproducts”) is **not** treated as absent; the exception is effectively triggered.\n- When that happens, ag1’s justification for “students should dissect animals” via **R-Dissect** is undermined.\n\n✅ **Net result:** ag1’s argument is defeated by an undercut to its key weak exception (the sourcing condition).",
+      "type": "defeat",
+      "proponent": "AG1",
+      "attack": "rebut",
+      "target_id": "h8"
+    },
+    {
+      "id": "h12",
+      "agent": "AG2",
+      "argument": "## Phase 1 — Main argument (oppose animal dissection)\n\n**Claim:** Students **should not** dissect animals.\n\n### Rule (from my theory)\n**R-NonDissect:**  \nIf  \n1) approximately **99%** of dissection animals are **caught in the wild**, and wild-catching **reduces local populations** and **biodiversity** (environmental harm), and  \n2) medical research/education **does not require** animal dissection for the relevant instructional aims (e.g., it is not required by major biology education frameworks), and  \n3) the intended biology learning goals can be achieved **at least as well** with **non-animal alternatives** (synthetic models and computer simulations),  \nthen it is **not justified** to require students to dissect animals.\n\n### Exception (absent unless the contrary can be shown) — written as a weak statement in the antecedent\nI take the following exception to be absent unless contrary evidence is shown:\n\n**W-Ex:** “unless it is shown that (a) high-quality non-animal alternatives cannot meet the intended learning goals at comparable quality, **or** (b) the dissection program does not rely mainly on the harmful wild-capture sourcing pattern.”\n\n### Conclusion\nTherefore, given that comparable alternatives exist while typical dissection practice (as described in my theory) involves harmful wild capture and biodiversity loss, **students should not dissect animals**.",
+      "type": "main",
+      "proponent": "AG2",
+      "status": "defensible"
+    },
+    {
+      "id": "h14",
+      "agent": "AG1",
+      "argument": "### Main argument (supporting animal dissection via my concession rule)\n\n**Claim:** Students **should** dissect animals.\n\n**Argument using my strict rule C (concession):**\n\n1) **(i) Valuable learning & engagement:** Dissection provides effective hands-on biology learning—building fine motor skills, hand-eye coordination, and critical thinking through direct anatomical observation—and it can increase student engagement and science interest via “aha moments.”\n\n2) **(ii) Mainly already-deceased byproduct specimens:** In many standard dissection programs, the animals used are largely already-deceased byproduct specimens (e.g., from food/agriculture supply chains), meaning the activity is not primarily driven by harmful wild-capture.\n\n3) **Non-animal alternatives not shown comparable for the same goals:** It is *not shown* that high-quality non-animal alternatives achieve the relevant learning goals at **comparable quality** (especially for the hands-on skill/observation components and the engagement benefits).\n\n**Therefore (by Strict rule C):** Since (1) and (2) hold, and the “only when” condition (3) is met, **students should dissect animals**.",
+      "type": "main",
+      "proponent": "AG1",
+      "status": "defensible"
+    }
+  ],
+  "history": [
+    {
+      "role": "ag1",
+      "content": "**Main argument 1 (supporting animal dissection):**  \nIn school biology, hands-on study of real anatomical structures is more effective for learning than purely virtual alternatives, because it trains fine motor skills, hand-eye coordination, and critical thinking through direct observation.  \nTherefore, **students should dissect animals** (real specimens are an effective and educational part of biology instruction, unless it is shown that the learning goal can’t be met with comparable effectiveness by non-animal methods).",
+      "status": "overruled",
+      "kind": "main"
+    },
+    {
+      "role": "ag2",
+      "content": "### Attack (Undercut)\n\n**Target assumption in ag1:** the weak “unless” clause embedded in ag1’s conclusion:  \n> “real specimens are an effective and educational part of biology instruction, **unless it is shown that the learning goal can’t be met with comparable effectiveness by non-animal methods**.”\n\n**Undercut rule from my theory (explicitly stating the “weak statement” as the consequent):**  \n**Rule U1 (from my theory):**  \nIf non-animal alternatives (e.g., synthetic models and computer simulations) **teach equally well or better** than dissections for the intended learning goals,  \nthen it is the case that **the learning goal can be met with comparable effectiveness by non-animal methods**.\n\n**Why this undercuts ag1:**  \nMy theory directly supports the antecedent of U1: that alternatives teach equally well or better and students learn as well or better with alternatives versus dead animals. Therefore, the “unless … non-animal methods can’t meet the learning goal comparably” condition is not met, which removes the justification for ag1’s “unless” safeguard for animal dissection.\n\n**Net effect:** ag1’s conclusion (“therefore students should dissect animals…”) is undercut by demonstrating that the learning goals can be met with comparable effectiveness using non-animal methods.",
+      "kind": "attack"
+    },
+    {
+      "role": "ag2",
+      "content": "### Main argument (oppose animal dissection)\n\n**Claim:** Students should **not** dissect animals.\n\n**Argument from my theory:**\n- **Rule R1 (from my theory):** If the intended biology learning goals can be achieved **at least as well** using non-animal alternatives (synthetic models and computer simulations), then it is not justified to use animal dissection as the instructional method.\n  - **Exception (treated as absent unless shown otherwise):** *unless* non-animal methods cannot meet the learning goals at comparable quality.\n\n**Why R1 applies:**\n- Synthetic models and computer simulations can teach anatomy and biology learning objectives effectively (often with better opportunities for repetition and safer, controlled learning).\n- Therefore, the “unless” exception is not supported: non-animal methods can meet the learning goals comparably.\n\n**Conclusion:** Since dissection is unnecessary when comparable alternatives exist, and because the practice also relies on sourcing animals from the wild, students should **not** dissect animals.",
+      "status": "overruled",
+      "kind": "main"
+    },
+    {
+      "role": "ag1",
+      "content": "### Phase 2 — Defeat the other agent\n\nI will attack **a weak statement/assumption** in the other agent’s argument (undercut), by deriving that weak statement from my theory.\n\n#### Other agent’s weak statements\nIn R1, the weak statement is the *exception*:\n- **W1 (weak statement):** “*unless* non-animal methods cannot meet the learning goals at comparable quality.”\n\nTo defeat R1, I need a rule from my theory whose consequent is (word-for-word) essentially this weak statement holding.\n\n#### Undercut (attack the exception)\nFrom my theory, I can justify that non-animal methods are **not** necessary to reach the goals because dissection itself is a worthwhile, effective way to achieve them (fine motor skills, critical thinking, and “aha moments”), and that the animals used are largely already dead byproduct specimens. That supports the negation of the other agent’s weak exception (“non-animal methods cannot meet the goals”).\n\nSo I state an undercutting rule:\n\n**Rule D1 (from my theory):**  \nIf dissection provides valuable learning experiences aligned with biology learning goals (e.g., fine motor skills, hand-eye coordination, critical thinking, and strong student engagement/aha moments), and the specimens are mainly already-deceased byproducts, then **non-animal methods can meet the learning goals at comparable quality**.\n\nSince the other agent’s “unless” exception is exactly the claim that non-animal methods *cannot* meet the goals comparably, D1 undercuts that weak statement.\n\n### Result\nBecause I undercut the “unless non-animal methods cannot meet … comparable quality” exception, the other agent’s Rule R1 loses its support, and their conclusion “students should not dissect animals” is defeated.",
+      "kind": "attack"
+    },
+    {
+      "role": "ag1",
+      "content": "**Main argument (supporting animal dissection):**\n\n**Claim:** Students **should dissect animals**.\n\n**Rule (from my theory):**  \n**R2:** If animal dissection (1) provides effective hands-on learning for biology (supporting fine motor skills, hand-eye coordination, and critical thinking through real anatomical study) and (2) is likely to increase student engagement and science-career interest through “aha moments,” and (3) uses specimens that are already dead byproducts (so the practice is not primarily driving additional animal harm),  \nthen it is justified that **students should dissect animals**.  \n\n**Exception (treated as absent unless shown):**  \nThis rule is assumed not to apply only when the contrary is shown that dissection is **not** effective/justified for the intended learning goals *or* that it meaningfully increases harm beyond byproduct use.  \nSo the exception is captured as a weak statement:  \n- **W2:** “unless dissection is shown to be ineffective/insufficient for the learning goals *or* to rely on sourcing that is not mainly from already-deceased byproducts.”\n\n**Conclusion:** Since dissection is educationally valuable (real anatomical learning + skill building + engagement) and can be a productive use of animals that are largely already dead byproducts, **students should dissect animals** under R2, with W2 as the absent exception.",
+      "status": "overruled",
+      "kind": "main"
+    },
+    {
+      "role": "ag2",
+      "content": "### Phase 2 — Defeat ag1’s argument (oppose dissection)\n\n**Target (weak statement in ag1):**  \nag1’s W2 is (as written):  \n> **W2:** “unless dissection is shown to be ineffective/insufficient for the learning goals *or* to rely on sourcing that is not mainly from already-deceased byproducts.”\n\nTo **undercut**, I need to derive **W2 itself** from my theory (i.e., show the “unless” condition holds), by giving a rule whose **consequent is exactly W2** (or its stated disjunctive content: either ineffectiveness or sourcing not mainly byproduct).\n\n---\n\n## Undercut (attack the sourcing part of W2)\n\n### Rule U-S (from my theory)\nIf it is the case that **~99% of dissection animals are caught in the wild** and that **wild-catching reduces local populations and biodiversity**,  \nthen dissection **relies on sourcing that is not mainly from already-deceased byproducts**—and therefore **W2 holds**.\n\n### Why U-S defeats ag1\n- My theory explicitly says ~**99%** of dissection animals are **wild-caught**.  \n- That means the “already dead byproduct” condition is not met in practice.  \n- So ag1’s weak statement W2 (“unless … reliance on sourcing that is not mainly from already-deceased byproducts”) is triggered: the sourcing is **not mainly** byproducts.\n\n**Net effect:** ag1’s Rule R2 loses its support because W2 holds (the exception is not “absent unless shown”); hence students should not dissect animals.\n\n--- \n\nIf you want, I can also provide a second undercut that targets the *“ineffective/insufficient”* disjunct of W2 using my alternatives argument (models/simulations teach as well or better).",
+      "kind": "attack"
+    },
+    {
+      "role": "ag2",
+      "content": "### Main argument (oppose animal dissection)\n\n**Claim:** Students **should not** dissect animals.\n\n**Rule (from my theory):**  \n**R-Alt:** If (1) the intended biology learning goals can be achieved **at least as well** using non-animal alternatives (synthetic models and computer simulations), and (2) animal dissection is supported by a practice that is environmentally harmful and involves inhumane wild-capture of animals (≈99% caught in the wild, with resulting population declines and biodiversity loss),  \n**then** it is not justified to use animal dissection in instruction.\n\n**Exception (treated as absent unless the contrary is shown):**  \nThis rule’s exception is taken to be absent unless there is evidence that (a) alternatives are **not** comparable for the specific learning goals *or* (b) the dissection program does **not** rely on the harmful sourcing pattern described in my theory. I represent that exception as a weak statement:\n\n**W-Ex (exception):**  \n“**unless** it is shown that non-animal alternatives cannot meet the relevant learning goals at comparable quality, **or** that the dissection program uses specimens that are mainly already-deceased byproducts rather than ~99% wild-caught animals.”\n\n**Conclusion:** Since comparable alternatives exist and dissection (as typically practiced) depends on harmful wild capture and biodiversity loss, **students should not dissect animals**.",
+      "status": "overruled",
+      "kind": "main"
+    },
+    {
+      "role": "ag1",
+      "content": "### Phase 2 — Defeat ag2 (oppose “students should not dissect”)\n\nI will **undercut** ag2’s argument by showing that one of ag2’s **weak statements in the antecedent** actually holds, using my theory.  \n\n#### Target weak statement\nAg2’s exception weak statement is:\n\n**W-Ex:**  \n“**unless** it is shown that non-animal alternatives cannot meet the relevant learning goals at comparable quality, **or** that the dissection program uses specimens that are mainly already-deceased byproducts rather than ~99% wild-caught animals.”\n\nTo undercut, it suffices to support the corresponding **“unless” condition** in ag2’s weak statement.\n\n---\n\n## Undercut: show the sourcing part of W-Ex holds (by my byproduct claim)\n\n### Rule (from my theory)\n**U-Byp:**  \nIf (1) **over 98%** of dissected animals are **already deceased byproduct specimens**, and (2) therefore the dissection practice **does not mainly rely on ~99% wild-caught sourcing**,  \nthen **the dissection program uses specimens that are mainly already-deceased byproducts rather than ~99% wild-caught animals**.\n\n### Why this defeats ag2\n- Under **U-Byp**, we can derive exactly the disjunct inside ag2’s W-Ex:  \n  “the dissection program uses specimens that are mainly already-deceased byproducts rather than ~99% wild-caught animals.”\n- Therefore, ag2’s **exception does not hold as an “absent unless contrary shown” condition**—because the “mainly already-deceased byproducts” condition is already supported by my theory.\n- That undermines ag2’s Rule **R-Alt**, removing the support for “students should not dissect animals.”\n\n**Net effect:** ag2’s conclusion is defeated by undercutting its exception condition (W-Ex).",
+      "kind": "attack"
+    },
+    {
+      "role": "ag1",
+      "content": "### Main argument (supporting animal dissection)\n\n**Claim:** Students **should dissect animals**.\n\n**Rule (from my theory):**  \n**R-Dissect:** If  \n1) animal dissection provides **effective hands-on biology learning** (improves fine motor skills and hand-eye coordination while strengthening critical thinking through direct anatomical observation), and  \n2) it increases **student engagement** in science by creating “aha moments” that can spark **career interest** in STEM, and  \n3) the specimens used are **mainly already-deceased byproducts** (so dissection is not primarily creating new harm),  \nthen it is justified that **students should dissect animals**.\n\n**Exception (taken as absent unless the contrary can be shown):**  \nThis rule can be overridden only if there is evidence that dissection is **not** meeting its instructional purpose or is **not** mainly using byproduct specimens, captured by this weak statement in the antecedent as a disjunct to the rule’s justification:\n\n**W-Ex (weak exception in antecedent):**  \n“unless it is shown that dissection is ineffective/insufficient for the intended learning goals **or** that the program relies mainly on sourcing that is not already-deceased byproducts.”\n\n**Conclusion:** Given (1)–(3), and with W-Ex treated as absent unless contrary evidence exists, **students should dissect animals**.",
+      "status": "overruled",
+      "kind": "main"
+    },
+    {
+      "role": "ag2",
+      "content": "### Phase 2 — Defeat ag1 (supporting animal dissection)\n\nAg1’s argument depends on its weak exception **W-Ex** being *absent unless contrary evidence exists*, i.e., it assumes the “unless” disjuncts largely do **not** hold.\n\nAg1’s **weak statement** is:\n\n**W-Ex:**  \n“**unless** it is shown that dissection is ineffective/insufficient for the intended learning goals **or** that the program relies mainly on sourcing that is not already-deceased byproducts.”\n\nSo to **undercut**, I only need to derive (from my theory) that the sourcing disjunct holds—i.e., the program relies mainly on sourcing **not** already-deceased byproducts.\n\n---\n\n## Undercut: derive the sourcing disjunct of W-Ex\n\n### Rule (from my theory)\n**U-Wild:**  \nIf approximately **99%** of dissection animals are **caught in the wild** and wild-catching **reduces local populations** and **biodiversity**,  \nthen it is the case that the dissection program relies mainly on sourcing that is **not** already-deceased byproducts.\n\n### Why this undercuts ag1\n- Under **U-Wild**, we can infer exactly the disjunct inside **W-Ex**:  \n  “the program relies mainly on sourcing that is **not** already-deceased byproducts.”\n- Therefore, the **“unless …”** exception in ag1’s antecedent is *triggered* (its exception-absence assumption fails).\n- Net effect: ag1’s rule **R-Dissect** is no longer justified, so **“students should dissect animals”** is not supported.\n\n**Conclusion of my defeat:** ag1’s argument is defeated by undercutting the sourcing part of its weak exception (**W-Ex**) using my theory about ~99% wild-caught sourcing and biodiversity harm.",
+      "kind": "attack"
+    },
+    {
+      "role": "ag1",
+      "content": "### Phase 2 — Defeat ag1’s support (undercut ag2’s attempt)\n\nAg2 tries to undercut ag1 by deriving ag1’s weak exception’s *sourcing disjunct*, i.e. that the program relies mainly on **not** already-deceased byproducts (they use **U-Wild** to infer the opposite of ag1’s byproduct claim).\n\nTo defeat this, I’ll instead support (from my own theory) the negation of ag2’s needed assumption—namely that dissection specimens are mainly **already-deceased byproducts**. That contradicts ag2’s **U-Wild**-based derivation of the sourcing disjunct, so ag2’s undercut fails.\n\n#### Target weak statement in ag2 (needed for their undercut)\nAg2’s undercut hinges on the derivation that the sourcing disjunct in ag1’s **W-Ex** holds:\n\n- **Sourcing disjunct (inside ag1’s W-Ex):**  \n  “the program relies mainly on sourcing that is not already-deceased byproducts.”\n\nSo I will derive the contrary of that statement.\n\n---\n\n## Undercut (via rebutting the assumption that sources are mainly not byproducts)\n\n### Rule (from my theory)\n**U-Byp-Again:**  \nIf **over 98%** of dissected animals are **already deceased byproduct specimens**,  \nthen it is the case that the dissection program uses specimens that are **mainly already-deceased byproducts** rather than sourcing that is not already-deceased byproducts.\n\n**Exception (absent unless the contrary is shown):**  \nUnless there is evidence that a given school/program’s sourcing significantly deviates from the “over 98% byproduct” pattern.\n\n### Why this defeats ag2\n- From **U-Byp-Again**, I directly derive the opposite of what ag2 needs for their undercut:\n  - ag2 needs: “mainly **not** already-deceased byproducts”\n  - I derive: “mainly **already-deceased** byproducts”\n- Therefore ag2 cannot successfully undercut ag1 by triggering ag1’s sourcing disjunct, because the sourcing disjunct is not supported by my theory.\n\n**Net effect:** ag2’s undercut attempt against ag1 fails, so ag1’s conclusion (“students should dissect animals”) is not defeated by ag2’s argument.",
+      "kind": "attack"
+    },
+    {
+      "role": "ag2",
+      "content": "### Phase 2 — Defeat ag1 (supporting animal dissection)\n\nI focus on **undercutting** ag1’s argument by deriving one of its **weak statements** (the “unless …” conditions) from my own theory.\n\n#### ag1’s weak statement to target\nAg1’s exception is:\n\n**W-Ex (weak exception in antecedent):**  \n“unless it is shown that dissection is ineffective/insufficient for the intended learning goals **or** that the program relies mainly on sourcing that is not already-deceased byproducts.”\n\nTo undercut ag1, I just need to derive **one disjunct** inside this weak statement—i.e., show that the “unless” condition holds via the sourcing part.\n\n---\n\n## Undercut: derive the “not mainly byproduct sourcing” disjunct\n\n### Rule (from my theory)\n**R-Wild:**  \nIf approximately **99%** of dissection animals are **caught in the wild**, and wild-catching **reduces local populations** and **reduces biodiversity**,  \nthen it is the case that the program relies mainly on sourcing that is **not** already-deceased byproducts.\n\n### Why this defeats ag1\n- From **R-Wild**, I derive exactly the sourcing disjunct in ag1’s weak statement:  \n  “the program relies mainly on sourcing that is not already-deceased byproducts.”\n- Therefore, ag1’s **W-Ex** (“unless … it is shown that … the program relies mainly on … not already-deceased byproducts”) is **not** treated as absent; the exception is effectively triggered.\n- When that happens, ag1’s justification for “students should dissect animals” via **R-Dissect** is undermined.\n\n✅ **Net result:** ag1’s argument is defeated by an undercut to its key weak exception (the sourcing condition).",
+      "kind": "attack"
+    },
+    {
+      "role": "ag2",
+      "content": "## Phase 1 — Main argument (oppose animal dissection)\n\n**Claim:** Students **should not** dissect animals.\n\n### Rule (from my theory)\n**R-NonDissect:**  \nIf  \n1) approximately **99%** of dissection animals are **caught in the wild**, and wild-catching **reduces local populations** and **biodiversity** (environmental harm), and  \n2) medical research/education **does not require** animal dissection for the relevant instructional aims (e.g., it is not required by major biology education frameworks), and  \n3) the intended biology learning goals can be achieved **at least as well** with **non-animal alternatives** (synthetic models and computer simulations),  \nthen it is **not justified** to require students to dissect animals.\n\n### Exception (absent unless the contrary can be shown) — written as a weak statement in the antecedent\nI take the following exception to be absent unless contrary evidence is shown:\n\n**W-Ex:** “unless it is shown that (a) high-quality non-animal alternatives cannot meet the intended learning goals at comparable quality, **or** (b) the dissection program does not rely mainly on the harmful wild-capture sourcing pattern.”\n\n### Conclusion\nTherefore, given that comparable alternatives exist while typical dissection practice (as described in my theory) involves harmful wild capture and biodiversity loss, **students should not dissect animals**.",
+      "status": "defensible",
+      "kind": "main"
+    },
+    {
+      "role": "ag1",
+      "content": "**Strict rule C (concession):**  \nIf **(i)** dissection provides valuable hands-on biology learning and student engagement *and* (ii) dissection uses specimens that are **mainly already-deceased byproducts** (so it is not primarily supported by harmful wild-capture), **then** students **should dissect animals**—**but** only **when** high-quality non-animal alternatives are **not shown** to meet the relevant learning goals at **comparable quality**.\n\n**Kind achieved: concession.**  \n- From **C** (with my stance), my warrant follows: **students should dissect animals**.  \n- The other agent’s warrant does **not** follow from **C**, because C allows dissection when byproduct sourcing and comparable-quality alternatives-as-not-shown conditions are met.",
+      "kind": "integrate"
+    },
+    {
+      "role": "ag1",
+      "content": "### Main argument (supporting animal dissection via my concession rule)\n\n**Claim:** Students **should** dissect animals.\n\n**Argument using my strict rule C (concession):**\n\n1) **(i) Valuable learning & engagement:** Dissection provides effective hands-on biology learning—building fine motor skills, hand-eye coordination, and critical thinking through direct anatomical observation—and it can increase student engagement and science interest via “aha moments.”\n\n2) **(ii) Mainly already-deceased byproduct specimens:** In many standard dissection programs, the animals used are largely already-deceased byproduct specimens (e.g., from food/agriculture supply chains), meaning the activity is not primarily driven by harmful wild-capture.\n\n3) **Non-animal alternatives not shown comparable for the same goals:** It is *not shown* that high-quality non-animal alternatives achieve the relevant learning goals at **comparable quality** (especially for the hands-on skill/observation components and the engagement benefits).\n\n**Therefore (by Strict rule C):** Since (1) and (2) hold, and the “only when” condition (3) is met, **students should dissect animals**.",
+      "status": "defensible",
+      "kind": "main"
+    }
+  ],
+  "statuses": {
+    "0": "overruled",
+    "2": "overruled",
+    "4": "overruled",
+    "6": "overruled",
+    "8": "overruled",
+    "12": "defensible",
+    "14": "defensible"
+  },
+  "integrated_rules": [],
+  "consensus_reached": false,
+  "justification_status": "fallback_no_consensus",
+  "final_answer": "Flow of the argumentation (what each side claimed, what objections were raised, and how responses went)\n\n1) Initial support for dissection (ag1)\n- Opinion put forward: Students should dissect animals.  \n- Main reasons (ag1): Real dissection gives effective hands-on learning (fine motor skills, hand-eye coordination, critical thinking through direct observation) and can increase engagement/career interest (“aha moments”). Also, the animals are said to come largely from byproducts rather than being newly taken for dissection.\n- Objection raised (ag2, undercut/attack): The “unless” clause in ag1’s argument was attacked. If non-animal alternatives (models/simulations) teach just as well or better for the learning goals, then the justification for dissection collapses.\n- ag1’s reply: ag1 tried to undercut the exception by claiming that dissection itself is valuable enough (skills + engagement) and that specimens are largely already dead byproducts, implying non-animal methods can meet the learning goals at comparable quality anyway. This did not directly establish the needed “unless” condition in ag1’s own framework; it largely traded on asserted byproduct sourcing and asserted educational value rather than resolving the comparative-effectiveness issue in a clear way.\n\n2) Initial opposition to dissection (ag2)\n- Opinion put forward: Students should not dissect animals.\n- Main reasons (ag2): Learning goals can be achieved at least as well with non-animal alternatives, and typical dissection sourcing involves environmental and biodiversity harm due to wild capture (ag2’s claim: about ~99% wild-caught).\n- Objection raised (ag1): ag1 attempted to defeat the sourcing-based objection by arguing that most specimens are actually already deceased byproducts (ag1’s claim: over 98% are byproducts), so the “harmful wild-capture sourcing” premise is not met.\n- ag2’s reply: ag2 doubled down by presenting its own wild-sourcing rule (≈99% wild-caught), treating it as directly triggering the “not mainly byproducts” disjunct in ag1’s exception.\n\n3) Repeated undercutting attempts (the dispute becomes about premises, not conclusions)\n- ag2 undercut against ag1:\n  - Attack: ag2 claimed it could derive the “not mainly byproduct” sourcing disjunct (within ag1’s weak exception) from ag2’s wild-capture premise (~99% caught in the wild).\n  - ag1 reply: ag1 offered the opposite rule (over 98% byproduct specimens) to rebut the derivation needed by ag2’s undercut.\n- ag1’s later concession strategy:\n  - Opinion shift (ag1): ag1 introduced a stricter “concession” rule: students should dissect only when alternatives are not shown to meet learning goals at comparable quality, and only when sourcing is mainly byproducts.\n  - This was meant to address the earlier “unless comparable alternatives exist” objection more directly.\n- ag2’s final response:\n  - ag2 maintained that typical dissection sourcing is harmful wild capture and that non-animal alternatives achieve comparable learning goals, so dissection is not justified.\n  - No side produced decisive evidence that definitively settles the empirical premises (wild-caught vs byproduct sourcing; and comparative learning effectiveness).\n\nHow each side’s answers landed\n- The core objections were procedural/strategic: both sides focused on undercutting the other side’s “unless” conditions by disputing the relevant premises:\n  - ag2 attacked ag1’s “unless non-animal methods can’t do it comparably” by asserting alternatives can.\n  - ag1 attacked ag2’s “unless byproducts aren’t mainly used” by asserting byproducts are used.\n- However, neither side successfully closed the gap with a single, shared, well-supported set of premises that both (a) clearly derive the conclusion and (b) are not themselves contested. The argumentation largely ended in a stalemate between conflicting empirical claims:\n  - ag1: >98% are already-deceased byproduct specimens.\n  - ag2: ~99% are caught in the wild and harm biodiversity.\n\nWhat remains undecided\n1) Empirical sourcing reality\n- Is dissection animal sourcing mainly byproducts (ag1: “over 98%”) or mainly wild-caught (ag2: “approximately 99%”)?\n- The argumentation did not resolve this with any agreed-upon evidence or credible shared reference.\n\n2) Comparative effectiveness of alternatives\n- Do non-animal alternatives (synthetic models, simulations, etc.) teach the relevant biology goals at least as well as dissection for the specific learning objectives (including fine motor/observation/critical thinking/engagement)?\n- The argumentation assumed this in opposite directions:\n  - ag2 assumed alternatives are comparable or better.\n  - ag1 assumed either they are not comparable on the key components or at least that dissection provides unique valuable learning.\n\n3) How to balance learning benefits vs animal welfare/environmental costs\n- Even if learning benefits are partly granted to dissection, it remains undecided in the framework of this debate how large the welfare/environmental harms are and how they should weigh against educational gains.\n\nWhat is known (from the argumentation itself)\n- Both sides agree on the general structure that matters:\n  - The debate turns on “unless” conditions: whether alternatives are comparable, and whether sourcing is byproduct vs harmful wild capture.\n- Both sides presented conditional rules attempting to justify “students should dissect” or “should not dissect,” but the attempt to trigger/avoid the relevant exceptions relied on contested premises.\n- Therefore, at the end:\n  - No argument was conclusively justified, because the decisive premises (sourcing and comparative effectiveness) were not established and were actively contradicted within the dialogue.",
+  "trace": [
+    "ag1.main_argument → main_argument（履歴 0）",
+    "  ag2.attack(rebut) → 有効（履歴 1）",
+    "  ag1.attack(undercut) → 無効（strictly defeat でない）",
+    "  P は strictly defeat できなかった → これ以上の返答なし",
+    "  地位: 履歴 0 は overruled",
+    "ag2.main_argument → main_argument（履歴 2）",
+    "  ag1.attack(rebut) → 有効（履歴 3）",
+    "  ag2.attack → できない（鎖の長さ 2）",
+    "  地位: 履歴 2 は overruled",
+    "ag1.main_argument → main_argument（履歴 4）",
+    "  ag2.attack(undercut) → 無効（defeat でない）",
+    "  ag2.attack(rebut) → 有効（履歴 5）",
+    "  ag1.attack(rebut) → 無効（strictly defeat でない）",
+    "  P は strictly defeat できなかった → これ以上の返答なし",
+    "  地位: 履歴 4 は overruled",
+    "ag2.main_argument → main_argument（履歴 6）",
+    "  ag1.attack(rebut) → 有効（履歴 7）",
+    "  ag2.attack → できない（鎖の長さ 2）",
+    "  地位: 履歴 6 は overruled",
+    "ag1.main_argument → main_argument（履歴 8）",
+    "  ag2.attack(rebut) → 有効（履歴 9）",
+    "  ag1.attack(rebut) → 有効（履歴 10）",
+    "  ag2.attack → できない（鎖の長さ 3）",
+    "  → O は M への別の攻撃を探す",
+    "  ag2.attack(rebut) → 有効（履歴 11）",
+    "  ag1.attack(undercut) → 無効（strictly defeat でない）",
+    "  P は strictly defeat できなかった → これ以上の返答なし",
+    "  地位: 履歴 8 は overruled",
+    "ag2.main_argument → main_argument（履歴 12）",
+    "  上限到達 → defensible",
+    "  地位: 履歴 12 は defensible",
+    "上限到達・未統合 → ag1 が統合（評価しない）",
+    "ag1.integrate → rule",
+    "ag1.main_argument_from_rule → main_argument（履歴 14）",
+    "final_answer（上限・justified なし）"
+  ],
+  "invalid_attempts": [
+    {
+      "role": "ag1",
+      "declared": "undercut",
+      "reason": "strictly defeat でない",
+      "target_index": 1,
+      "main_index": 0,
+      "content": "### Defeat (Rebutting ag2’s undercut by blocking U1’s antecedent)\n\n**Claim to rebut:** ag2 assumes that **non-animal alternatives teach equally well or better** than dissections for the intended learning goals (and thus that the “unless non-animal methods can’t meet the learning goal comparably” condition fails).\n\n**Counter-rule from my theory (explicit exception):**  \n**Rule R1:**  \nIf non-animal alternatives **can’t be shown to provide the same hands-on learning outcomes** as real dissection (fine motor practice, hand-eye coordination, and critical/observational reasoning from actual tissue anatomy),  \nthen it remains the case that **the learning goal cannot be met with comparable effectiveness by non-animal methods**, and animal dissection is still justified.\n\n**Why this defeats ag2:**  \nMy theory supports that real dissection uniquely builds those practical skills through direct manipulation and close anatomical observation. So the key weak statement in ag2’s argument—*“non-animal alternatives teach equally well or better”*—is not warranted. Therefore, **U1’s antecedent is not satisfied**, and ag2’s undercut fails."
+    },
+    {
+      "role": "ag2",
+      "declared": "undercut",
+      "reason": "defeat でない",
+      "target_index": 4,
+      "main_index": 4,
+      "content": "### Phase 2 — Attack the other agent’s argument (defeat ag1)\n\nFirst, identify ag1’s weak statements in the antecedent(s) of its rule:\n\n- **W2 (weak statement inside the exception):**  \n  “**unless dissection is shown to be ineffective/insufficient for the learning goals or to rely on sourcing that is not mainly from already-deceased byproducts**.”\n\nTo **undercut**, I need my own theory to imply the *contrary*—i.e., a rule whose consequent establishes that (at least one part of) **W2’s condition actually does hold**: either  \n(1) dissection is **ineffective/insufficient** versus alternatives, **or**  \n(2) it **relies on sourcing** that is **not mainly already-deceased byproducts**.\n\nFrom my theory, I have exactly this support:\n\n- **My theory premise:** approximately **99% of dissection animals are caught in the wild**, and wild-catching **reduces local populations and biodiversity**.  \nSo dissection **does rely on non-byproduct sourcing**, which defeats ag1’s byproduct assumption.\n\n#### Undercut rule (from my theory)\n**Rule U-ByproductFailure:**  \nIf dissection programs use animals that are **not mainly already-deceased byproducts**—e.g., if **about 99% are caught in the wild**—then it is the case that **the exception’s “unless … rely on sourcing that is not mainly from already-deceased byproducts” condition holds**, i.e., **dissection is not justified under the byproduct premise**.\n\n### Resulting undercut\nTherefore, ag1’s rule **R2** is blocked because its “W2-as-absent” assumption fails: dissection **does rely on sourcing that is not mainly from already-deceased byproducts**.\n\n**So my side defeats ag1’s conclusion that students should dissect animals.**"
+    },
+    {
+      "role": "ag1",
+      "declared": "rebut",
+      "reason": "strictly defeat でない",
+      "target_index": 5,
+      "main_index": 4,
+      "content": "### Phase 2 — Defeat ag2’s argument (oppose dissection) via **undercut**\n\n**Target:** ag2’s Rule U-S, whose consequent effectively establishes ag1’s W2:\n\n> **W2:** “unless dissection … relies on sourcing that is not mainly from already-deceased byproducts.”\n\nag2 undercuts ag1 by deriving that the sourcing is *not mainly* from byproducts (using a “wild-caught ~99%” claim).\n\nSo I will attack ag2 by deriving the **opposite** sourcing weak statement from my theory—i.e., that the dissection specimens *are mainly already-deceased byproducts*—thereby blocking ag2’s attempt to make W2 hold.\n\n---\n\n## Undercut (attack ag2’s sourcing assumption)\n\n### Rule U-BY (from my theory)\nIf it is the case that **over 98% of dissected animals were already deceased** prior to dissection and that **fetal pigs are meat-industry byproducts destined for landfills**,  \nthen it is the case that dissection **primarily relies on already-deceased byproducts**—so the “sourcing … not mainly from already-deceased byproducts” condition does **not** hold, i.e. **W2 is not triggered by sourcing**.\n\n**Why this defeats ag2:**\n- ag2’s undercut depends on the assumption (in U-S) that ~**99% are wild-caught**, implying sourcing is not mainly byproduct.\n- My theory instead supports that **>98% are already deceased** and that common specimens (e.g., fetal pigs) are **meat-industry byproducts**.\n- Therefore, ag2 cannot use U-S to derive that the sourcing part of W2 holds; the antecedent needed to make “not mainly byproducts” true is contradicted by my theory.\n\n### Net effect\nSince ag2’s undercut hinges on sourcing facts that my theory directly denies, ag2 fails to establish W2. Thus ag2’s conclusion (“students should not dissect animals” based on the sourcing exception) is not supported by a successful undercut against ag1.\n\n--- \n\n*(I do not additionally attack ag2’s second suggested undercut about effectiveness, since that would be a new attack not required by your instruction to focus on weak statements/attacks deriving from my theory.)*"
+    },
+    {
+      "role": "ag1",
+      "declared": "undercut",
+      "reason": "strictly defeat でない",
+      "target_index": 11,
+      "main_index": 8,
+      "content": "### Phase 2 — Defeat ag1’s animal-dissection support (undercut W-Ex in ag1)\n\nI will undercut **ag1’s key weak statement** by showing that one of its *disjuncts* (the “unless … sourcing is not mainly byproducts” side) is **not** warranted on my theory.\n\n#### Target ag1 weak statement (from ag1’s Phase 1 rule)\nAg1’s exception (as stated) is essentially:\n\n**W-Ex-ag1:**  \n“unless it is shown that dissection is ineffective/insufficient for the intended learning goals **or** that the program relies mainly on sourcing that is **not** already-deceased byproducts.”\n\nTo undercut, I need a rule whose consequent supports the **negation** of the “not already-deceased byproducts” disjunct—i.e., I derive that the program relies mainly on **already-deceased byproducts**.\n\n---\n\n## Undercut (by deriving the contrary of ag2’s R-Wild-supported disjunct)\n\n### Rule (from my theory)\n**U-Byp-Over98:**  \nIf **over 98%** of dissected animals are **already deceased byproduct specimens**,  \nthen it is the case that the dissection program relies mainly on sourcing that is **already-deceased byproducts** (and therefore **does not mainly rely** on sourcing that is *not* already-deceased byproducts).\n\n### Why this defeats ag1’s reliance on W-Ex\n- Ag2 tries to undermine ag1 by deriving the sourcing disjunct: *“relies mainly on sourcing that is not already-deceased byproducts.”*\n- Under **U-Byp-Over98**, my theory instead supports the opposite sourcing condition: the program relies mainly on **already-deceased byproducts**.\n- Therefore, ag1’s “unless … relies mainly on sourcing that is not already-deceased byproducts” condition is **not** something the opponent can trigger from the facts of their theory.\n- So ag1’s justification (that the byproduct-sourcing condition does not open the exception) stands against the undercut attempt.\n\n✅ **Net effect:** ag1’s argument is not undermined by the opponent’s attempt to activate ag1’s sourcing-based weak exception; the opponent’s derivation conflicts with my byproduct-based sourcing premise."
+    }
+  ]
+}
