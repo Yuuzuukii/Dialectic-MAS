@@ -256,9 +256,12 @@ def undercuts(x: Argument, y: Argument) -> bool:
     tはaをdefeat = undercuts(t, a) or (宣言 == "rebut" and not undercuts(a, t))   # rebut は対称
     aはtをstrictly defeat = aはtをdefeat and not tはaをdefeat
 （no schema 版は宣言がないので、aはtをdefeat = undercuts(a, t) or (rebuts(a, t) and not undercuts(t, a))。どちらも判定用 LLM の答え）
-求められる関係は、O は defeat、P は strictly defeat（P&S 定義4.5）。満たさない攻撃も履歴に残り、履歴のメッセージの defeats に false が入る。
+求められる関係は、O は defeat、P は strictly defeat（P&S 定義4.5）。
+宣言（rebut / undercut）は、そのとおりに信じる。判定するのは、既出の argument 同士の関係（相手が undercut し返せるか）だけ。
+求められる関係を満たさない攻撃は、履歴に入れない（対話の move ではない）。ログの invalid_attempts にだけ残す
+（分析用。動く側にも最終回答にも見せない）。残すもの: 動いた側、宣言、理由、鎖の中の対象の履歴番号、主張の履歴番号、LLM の出力。
 - O の攻撃が defeat でない: 「攻撃できない」と同じ扱い。やり直しはない。
-- P の返答が strictly defeat でない: P は 1 回だけなので、やり直さず、その場で地位が決まる（P の strictly defeat する返答が 1 つもなければ overruled）。
+- P の返答が strictly defeat でない: P は 1 回だけなので、やり直さず、その場で overruled。
 
 run():
     履歴 = []; ターン数 = 0; 手番 = ag1; 出せなかった連続 = 0; justified = None
@@ -278,20 +281,20 @@ run():
         手番 = 相手(手番)
 
 地位を決める(M, P):      # M は P の main argument。O = 相手(P)
-    鎖 = [M]; Pの返答数 = 0; 使ったターン = 1      # M を出した main_argument() の1回（統合から出した M は 0）
+    鎖 = [M]; 使ったターン = 1      # M を出した main_argument() の1回（統合から出した M は 0）
     while true:
         動く側 = O if len(鎖) が奇数 else P
         if 上限到達 or 使ったターン >= 上限 // 2: return "defensible"
         X = attack(動く側, 鎖[-1]); 使ったターン += 1
-        if X != "できない": 履歴に記録(X); 有効 = X が求められる関係を満たす   # 判定は、記録のあとの計算。採否には使わない
-        if X == "できない" or not 有効:
+        if X != "できない" and X が求められる関係を満たさない:
+            invalid_attempts に残す（履歴には入れない）; X = "できない"相当
+        if X == "できない":
             if 動く側 == O:
                 if len(鎖) == 1: return "justified"       # M を defeat する argument がない
-                鎖 = [M]; Pの返答数 = 0; continue          # P の最後の動きは undefeated。O は M への別の攻撃を探す
+                鎖 = [M]; continue          # P の最後の動きは undefeated。O は M への別の攻撃を探す
             else:
-                return "overruled" if Pの返答数 == 0 else "defensible"
-        if 動く側 == P: Pの返答数 += 1                       # P の strictly defeat する返答の数
-        鎖.append(X)
+                return "overruled"       # P は strictly defeat できなかった
+        鎖.append(X); 履歴に記録(X)
 
 統合(統合者, 評価する):   # 上限に達したときは、評価する = false（ag1 が統合する）
     if どちらかに main argument がない: → 終了処理

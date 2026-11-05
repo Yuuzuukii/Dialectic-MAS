@@ -211,6 +211,8 @@ async def run_one(
         "justification_status": "justified" if protocol.justified_index is not None else "fallback_no_consensus",
         "final_answer": result.final_answer if result else None,
         "trace": protocol.trace,
+        # 無効だった攻撃（履歴には入れていない。分析用。schema / no_schema のみ）
+        "invalid_attempts": protocol.invalid_attempts,
     }
     if error is not None:
         log["error"] = error

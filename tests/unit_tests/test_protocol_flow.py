@@ -164,10 +164,14 @@ def test_S4_proposer_gets_one_attempt_and_non_strict_defeat_is_overruled():
     )
     assert r.statuses[0] == "overruled"
     assert any("P は strictly defeat できなかった" in t for t in r.trace)
-    # 攻撃のターンでは判定しない: P の返答も、そのまま履歴に入る（対象は ag2 の攻撃＝履歴 1）。関係は defeats に残る。
-    assert [m.role for m in r.history][:3] == [AG1, AG2, AG1]
-    assert r.history[1].defeats is True and r.history[2].defeats is False
-    assert r.history[2].attack == "rebut" and r.history[2].target_index == 1
+    # strictly defeat できなかった返答は、履歴に入らず、invalid_attempts に 1 回だけ残る（対象は ag2 の攻撃＝履歴 1、主張は履歴 0）
+    assert [m.role for m in r.history][:2] == [AG1, AG2]
+    assert len(r.history) == 2  # ag1 の返答は、履歴に入っていない
+    assert len(r.invalid_attempts) == 1
+    first = r.invalid_attempts[0]
+    assert first["role"] == AG1 and first["declared"] == "rebut" and first["reason"] == "strictly defeat でない"
+    assert first["target_index"] == 1 and first["main_index"] == 0
+    assert first["content"]["attack_type"] == "rebut" and first["content"]["argument"]["rules"]
 
 
 def test_overruled_main_lets_the_other_side_present_a_main_argument():
@@ -187,13 +191,13 @@ def test_thread_limit_is_floor_of_half_and_integrated_main_counts_only_attacks()
     assert [m.role for m in r.history][:2] == [AG1, AG2]  # ag1 の主張 + ag2 の攻撃 1回だけ
 
 
-def test_proposer_with_a_valid_reply_earlier_is_defensible_when_next_reply_fails():
-    # O の 2 回目の攻撃に、P が rebut だけ（strictly でない）で返す → 1 回目の有効な返答があるので defensible。
+def test_proposer_with_a_valid_reply_earlier_is_still_overruled_when_next_reply_fails():
+    # O の 2 回目の攻撃に、P が rebut だけ（strictly でない）で返す → 前に有効な返答があっても overruled。
     r = run(
         FakeAgent(main=[main(arg("m1"))], attack=[undercut(A(R([], "w1")), "w1"), rebut(arg("r2"))]),
         FakeAgent(attack=[rebut(arg("b1", weak=("w1",))), rebut(arg("b2"))]),
     )
-    assert r.statuses[0] == "defensible" and [m.defeats for m in r.history if m.kind == "attack"] == [True, True, True, False]
+    assert r.statuses[0] == "overruled" and len(r.invalid_attempts) == 1
     # P が、何も作らずにできないと言うなら、overruled
     r2 = run(FakeAgent(main=[main(arg("m1"))]), FakeAgent(attack=[rebut(arg("b1"))]))
     assert r2.statuses[0] == "overruled"
@@ -204,7 +208,7 @@ def test_proposer_reply_that_does_not_defeat_is_not_counted():
     o_attack = rebut(A(R([], "q")))
     p_reply = rebut(A(R([], "z", weak=["q"])))
     r = run(FakeAgent(main=[main(arg("m1"))], attack=[p_reply, CANNOT_ATTACK]), FakeAgent(attack=[o_attack]))
-    assert r.statuses[0] == "overruled" and r.history[-1].defeats is False
+    assert r.statuses[0] == "overruled" and len(r.invalid_attempts) == 1
 
 
 def test_S5_cannot_present_with_both_mains_then_integrate_and_justified():
@@ -383,15 +387,20 @@ def test_free_integrate_uses_extracted_warrants_and_passes_text_through():
     assert [m.kind for m in r.history][-2:] == ["integrate", "main"] and r.history[-2].content == "NEW RULE TEXT"
 
 
-def test_opponent_rebut_that_the_target_undercuts_is_recorded_and_treated_as_no_attack():
-    # O の rebut を、M が undercut し返せる（O の weak statement が M の結論）→ defeat でない。履歴に入り、やり直しはなく、justified。
+def test_opponent_rebut_that_the_target_undercuts_is_not_recorded_and_treated_as_no_attack():
+    # O の rebut を、M が undercut し返せる（O の weak statement が M の結論）→ defeat でない。履歴に入らず、やり直しもなく、justified。
     m = A(R([], "x holds"))
     r = run(FakeAgent(main=[main(m)]), FakeAgent(attack=[rebut(arg("w", weak=("x holds",)))]))
     assert r.statuses[0] == "justified"
-    assert [m.kind for m in r.history] == ["main", "attack"] and r.history[1].defeats is False
+    assert [m.kind for m in r.history] == ["main"] and len(r.invalid_attempts) == 1 and r.invalid_attempts[0]["role"] == AG2
 
 
 def test_opponent_undercut_declaration_is_trusted_even_if_conclusion_does_not_match():
     bad = undercut(A(R([], "something else")), "w1")
     r = run(FakeAgent(main=[main(arg("m1", weak=("w1",)))]), FakeAgent(attack=[bad]))
-    assert r.history[1].defeats is True and r.statuses[0] != "justified"
+    assert [m.kind for m in r.history][:2] == ["main", "attack"] and not r.invalid_attempts and r.statuses[0] != "justified"
+
+
+def test_cannot_attack_reason_is_kept_in_the_trace():
+    r = run(FakeAgent(main=[main(arg("m1"))]), FakeAgent())  # ag2 は CANNOT_ATTACK（reason="x"）
+    assert any(t.endswith("attack → できない（鎖の長さ 1）: x") for t in r.trace)

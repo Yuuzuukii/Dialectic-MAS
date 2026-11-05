@@ -226,15 +226,12 @@ class Message:
     attack: str | None = None  # "rebut" | "undercut"（攻撃の宣言。no schema は、判定用 LLM の判定）
     target_index: int | None = None  # 攻撃の対象の、履歴の番号
     target_statement: str | None = None  # 攻撃の対象の文（schema のみ）
-    defeats: bool | None = None  # 攻撃のあと、地位の計算で求めた関係（O: 対象を defeat するか / P: strictly defeat するか）。攻撃の採否には使わない
 
     def to_dict(self, status: str | None = None) -> dict[str, Any]:
         content = self.content.model_dump() if isinstance(self.content, BaseModel) else self.content
         d = {"role": self.role, "content": content}
         if status is not None:
             d["status"] = status
-        if self.defeats is not None:
-            d["defeats"] = self.defeats
         return d
 
 
@@ -247,6 +244,13 @@ class Result:
     turns: int
     closed_by: str  # "justified" | "turn_limit" | "no_more_arguments" | "no_new_point"（比較手法）
     trace: list[str] = field(default_factory=list)
+    invalid_attempts: list[dict[str, Any]] = field(default_factory=list)  # 無効だった攻撃（履歴には入れない。分析用）
+
+
+def _reason(content: Any) -> str:
+    """「できない」と答えたときの理由（スキーマ版の CannotArgue / CannotAttack の reason）。trace に残すための文字列。"""
+    reason = getattr(content, "reason", None)
+    return f": {reason}" if isinstance(reason, str) and reason else ""
 
 
 def norm(s: str) -> str:
@@ -304,6 +308,7 @@ class DialecticalProtocol:
         self.justified_index: int | None = None
         self.integrated = False
         self.trace: list[str] = []
+        self.invalid_attempts: list[dict[str, Any]] = []
 
     # ---- プロンプト ----
     def _history_json(self, with_status: bool = False) -> str:
@@ -394,7 +399,7 @@ class DialecticalProtocol:
             content, argument = await self._ask_main(turn)
             self.turns += 1
             if argument is None:
-                self._log(f"{turn}.main_argument → できない")
+                self._log(f"{turn}.main_argument → できない{_reason(content)}")
                 if all(self._last_main(role) is not None for role in (AG1, AG2)):
                     await self._integrate(turn, evaluate=True)  # 両者の main argument がある: 出せない側が、すぐ統合する
                     return await self._close()
@@ -419,7 +424,6 @@ class DialecticalProtocol:
         opponent = other(proposer)
         chain: list[Any] = [main]
         chain_index: list[int | None] = [main_index]  # chain の各 argument の、履歴の番号
-        proposer_replies = 0
         thread_limit = self.max_turns // 2  # 1つの主張が使えるターン（上限の半分）
         while True:
             mover = opponent if len(chain) % 2 == 1 else proposer
@@ -433,20 +437,42 @@ class DialecticalProtocol:
             self.turns += 1
             used += 1
             if argument is None:
-                self._log(f"  {mover}.attack → できない（鎖の長さ {len(chain)}）")
+                self._log(f"  {mover}.attack → できない（鎖の長さ {len(chain)}）{_reason(content)}")
                 if mover == opponent:
                     if len(chain) == 1:
                         return JUSTIFIED
-                    chain, chain_index, proposer_replies = [main], [main_index], 0  # O は M への別の攻撃を探す
+                    chain, chain_index = [main], [main_index]  # O は M への別の攻撃を探す
                     self._log("  → O は M への別の攻撃を探す")
                     continue
-                return OVERRULED if proposer_replies == 0 else DEFENSIBLE
+                return OVERRULED  # P は strictly defeat できなかった
             target = chain[-1]
             rebut = await self._rebuts(content, argument, target)
             kind = "rebut" if rebut else "undercut"
             defeat = await self._defeats(argument, target, rebut)
             ok = defeat if mover == opponent else (defeat and not await self._defeated_back(argument, target, rebut))
-            # 攻撃は、そのまま履歴に入れる（攻撃のターンでは、成立を判定しない）。関係は、出そろった argument 同士で、あとから見る。
+            if not ok:
+                # 求められる関係（O は defeat、P は strictly defeat）を満たさない攻撃は、履歴に入れない。ログの invalid_attempts にだけ残す（分析用）。
+                reason = "strictly defeat でない" if mover == proposer else "defeat でない"
+                self._log(f"  {mover}.attack({kind}) → 履歴に入れない（{reason}）")
+                self.invalid_attempts.append(
+                    {
+                        "role": mover,
+                        "declared": kind,
+                        "reason": reason,
+                        "target_index": chain_index[-1],
+                        "main_index": main_index,
+                        "content": content.model_dump() if isinstance(content, BaseModel) else content,
+                    }
+                )
+                if mover == proposer:
+                    self._log("  P は strictly defeat できなかった → これ以上の返答なし")
+                    return OVERRULED
+                # O の攻撃が defeat でない: 対象を defeat する argument がない（「攻撃できない」と同じ。やり直しはない）
+                if len(chain) == 1:
+                    return JUSTIFIED
+                chain, chain_index = [main], [main_index]  # O は M への別の攻撃を探す
+                self._log("  → O は M への別の攻撃を探す")
+                continue
             index = self._record(
                 mover,
                 content,
@@ -457,22 +483,8 @@ class DialecticalProtocol:
                 attack=kind,
                 target_index=chain_index[-1],
                 target_statement=_target_statement(content),
-                defeats=ok,
             )
-            self._log(f"  {mover}.attack({kind}) → 履歴 {index}" + ("" if ok else "（" + ("strictly defeat でない" if mover == proposer else "defeat でない") + "）"))
-            if not ok:
-                if mover == proposer:
-                    # P は 1 回で strictly defeat できなければ、それ以上の手はない
-                    self._log("  P は strictly defeat できなかった → これ以上の返答なし")
-                    return OVERRULED if proposer_replies == 0 else DEFENSIBLE
-                # O の攻撃が defeat でない: 対象を defeat する argument がない（「攻撃できない」と同じ）
-                if len(chain) == 1:
-                    return JUSTIFIED
-                chain, chain_index, proposer_replies = [main], [main_index], 0  # O は M への別の攻撃を探す
-                self._log("  → O は M への別の攻撃を探す")
-                continue
-            if mover == proposer:
-                proposer_replies += 1  # P の strictly defeat する返答の数
+            self._log(f"  {mover}.attack({kind}) → 有効（履歴 {index}）")
             chain.append(argument)
             chain_index.append(index)
 
@@ -488,7 +500,7 @@ class DialecticalProtocol:
         self._log(f"{integrator}.integrate → rule")
         content, argument = await self._ask_main_from_rule(integrator, rule)
         if argument is None:
-            self._log(f"{integrator}.main_argument_from_rule → できない")
+            self._log(f"{integrator}.main_argument_from_rule → できない{_reason(content)}")
             return
         index = self._record(integrator, content, "main", argument, phase="main", proponent=integrator)
         self._log(f"{integrator}.main_argument_from_rule → main_argument（履歴 {index}）")
@@ -520,5 +532,5 @@ class DialecticalProtocol:
         if closed_by is None:
             closed_by = "justified" if justified else ("turn_limit" if not self.budget_left else "no_more_arguments")
         return Result(
-            answer, self.history, self.statuses, self.justified_index, self.turns, closed_by, self.trace
+            answer, self.history, self.statuses, self.justified_index, self.turns, closed_by, self.trace, self.invalid_attempts
         )
