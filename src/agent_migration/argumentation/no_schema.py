@@ -34,14 +34,14 @@ Argument Y:
 
 Does X undercut Y? X undercuts Y if one of the conclusions of X contradicts an assumption of Y, that is, a statement that Y takes to hold only because there is no evidence to the contrary. Answer yes or no."""
 
-REBUTS_JUDGE = """\
+CLASSIFY_ATTACK = """\
 Argument X:
 {x}
 
 Argument Y:
 {y}
 
-Does X rebut Y? X rebuts Y if one of the conclusions of X is the negation of one of the conclusions of Y. Answer yes or no."""
+The agent stated X to attack Y. Does X attack Y by rebutting it or by undercutting it? X rebuts Y if one of the conclusions of X is the negation of one of the conclusions of Y. X undercuts Y if one of the conclusions of X contradicts an assumption of Y, that is, a statement that Y takes to hold only because there is no evidence to the contrary. Answer rebut or undercut."""
 
 WARRANT_EXTRACT = """\
 Argument:
@@ -84,11 +84,10 @@ class NoSchemaProtocol(DialecticalProtocol):
         return await self._judge_yes(UNDERCUTS_JUDGE.replace("{x}", x).replace("{y}", y))
 
     async def _rebuts(self, move: Any, a: Any, t: Any) -> bool:
-        return await self._judge_yes(REBUTS_JUDGE.replace("{x}", a).replace("{y}", t))
-
-    async def _defeats(self, a: Any, t: Any, rebut: bool) -> bool:
-        # 宣言がないので、判定用 LLM の undercuts / rebuts の答えから決める（P&S 定義2.8）
-        return await self._undercuts(a, t) or (rebut and not await self._undercuts(t, a))
+        """宣言の代わりに、判定用 LLM が、攻撃の種類（rebut / undercut）だけを読み取る。成立の判定はしない。
+        あとの defeat の決め方は、スキーマ版と同じ（undercut なら defeat、rebut なら、既出の相手が undercut し返せるかだけを見る）。"""
+        words = _text(await self.judge.chat(CLASSIFY_ATTACK.replace("{x}", a).replace("{y}", t))).strip().lower().split()
+        return not (words and words[0].strip(".,!:;\"'") == "undercut")
 
     async def _warrant(self, argument: Any) -> Any:
         return _text(await self.judge.chat(WARRANT_EXTRACT.replace("{argument}", argument)))

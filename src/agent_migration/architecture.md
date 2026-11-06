@@ -333,7 +333,7 @@ run():
 ## no schema 版（実装: argumentation/no_schema.py。流れは DialecticalProtocol を継承し、LLM を呼ぶ部分と判定だけを差し替える）
 
 流れと、各行動のユーザープロンプトは、スキーマ版と同じ。スキーマ（structured output）と、argument の書き方指示だけを抜く。
-エージェントの出力は、文章（agent.chat()）。履歴の content も、その文章。攻撃の種類（rebut / undercut）は、宣言させない。
+エージェントの出力は、文章（agent.chat()）。履歴の content も、その文章。攻撃の種類（rebut / undercut）は、宣言させない（判定用の LLM が、文章から読み取る）。
 流れが必要とする判定は、判定用の LLM（JUDGE_MODEL）にさせる。システムプロンプトは付けない。答えは、yes / no の文字（先頭の単語で読む）。
 これらの呼び出しは、ターンに数えない。品質は判定しない（条件分岐のためだけ）。
 
@@ -354,16 +354,17 @@ Argument Y:
 Does X undercut Y? X undercuts Y if one of the conclusions of X contradicts an assumption of Y, that is, a statement that Y takes to hold only because there is no evidence to the contrary. Answer yes or no.
 '''
 
-- rebuts(x, y)    # スキーマ版では「宣言が rebut か」。defeat の式の「宣言 == rebut」を置き換える
+- 攻撃の種類の読み取り（宣言の代わり。rebut か undercut かだけ。攻撃が成立するかは判定しない）
   '''
-  Argument X:
-  {x}
+Argument X:
+{x}
 
 Argument Y:
 {y}
 
-Does X rebut Y? X rebuts Y if one of the conclusions of X is the negation of one of the conclusions of Y. Answer yes or no.
-'''
+The agent stated X to attack Y. Does X attack Y by rebutting it or by undercutting it? X rebuts Y if one of the conclusions of X is the negation of one of the conclusions of Y. X undercuts Y if one of the conclusions of X contradicts an assumption of Y, that is, a statement that Y takes to hold only because there is no evidence to the contrary. Answer rebut or undercut.
+  '''
+  読み取った種類を、スキーマ版の宣言と同じに扱う: undercut なら defeat、rebut なら、既出の相手が undercut し返せるか（undercuts(x, y)）だけを見る。
 
 - warrant の取り出し（integrate() の入力にする）
   '''

@@ -320,9 +320,10 @@ class FreeAgent:
 class FakeJudge:
     """判定用 Agent。プロンプトの文面で、判定の種類を見分けて、あらかじめ決めた規則で答える。"""
 
-    def __init__(self, undercut_pairs=(), rebut_default=True):
+    def __init__(self, undercut_pairs=(), rebut_default=True, undercut_attacks=()):
         self.undercut_pairs = set(undercut_pairs)  # (x の中の語, y の中の語)
         self.rebut_default = rebut_default
+        self.undercut_attacks = tuple(undercut_attacks)  # この語を含む攻撃は、undercut と読み取る
         self.calls: list[str] = []
 
     async def chat(self, prompt, system=None):
@@ -333,10 +334,11 @@ class FakeJudge:
             return SimpleNamespace(content="Yes." if "cannot" in reply else "No.")
         if prompt.startswith("Argument X:"):
             x, y = prompt.split("Argument X:\n", 1)[1].split("\n\nArgument Y:\n", 1)
+            if prompt.endswith("Answer rebut or undercut."):
+                # 攻撃の種類の読み取り（宣言の代わり）
+                return SimpleNamespace(content="undercut" if any(w in x for w in self.undercut_attacks) else "rebut")
             y = y.split("\n\nDoes X")[0]
-            if "undercut" in prompt.split("\n\n")[-1]:
-                return SimpleNamespace(content="yes" if any(a in x and b in y for a, b in self.undercut_pairs) else "no")
-            return SimpleNamespace(content="yes" if self.rebut_default else "no")
+            return SimpleNamespace(content="yes" if any(a in x and b in y for a, b in self.undercut_pairs) else "no")
         if prompt.startswith("Argument:\n"):
             return SimpleNamespace(content="WARRANT OF: " + prompt.split("Argument:\n", 1)[1].split("\n\nWrite the warrant")[0])
         raise AssertionError(prompt)
@@ -381,11 +383,23 @@ def test_free_rebut_only_is_symmetric_and_never_strict():
 
 def test_free_undercut_reinstates_and_status_is_justified():
     # ag2 の反論に、ag1 が undercut（judge が yes）で返し、ag2 は返せない → 別の攻撃も探せない → justified
-    judge = FakeJudge(undercut_pairs=[("out of stock", "price")])
+    judge = FakeJudge(undercut_pairs=[("out of stock", "price")], undercut_attacks=["out of stock"])
     ag1 = FreeAgent(main=["claim 1"], attack=["camera a is out of stock"])
     ag2 = FreeAgent(attack=["price is too high"])
     r = run_free(ag1, ag2, judge)
     assert r.statuses[0] == "justified" and [m.role for m in r.history] == [AG1, AG2, AG1]
+
+
+def test_free_attack_is_defeat_without_judging_validity_only_the_kind_is_read():
+    # ag2 の返答は、ag1 の main と無関係に見えても、種類（rebut）を読み取るだけ。ag1 に undercut し返す語がなければ、defeat として履歴に入る。
+    ag1 = FreeAgent(main=["claim 1"], attack=["reply"])
+    ag2 = FreeAgent(attack=["something loosely related"])
+    judge = FakeJudge()
+    r = run_free(ag1, ag2, judge, max_turns=6)
+    assert [m.kind for m in r.history][:2] == ["main", "attack"] and r.history[1].role == AG2
+    assert not any(a["role"] == AG2 for a in r.invalid_attempts)  # O の攻撃は、成立を判定されない
+    assert sum(1 for c in judge.calls if c.endswith("Answer rebut or undercut.")) >= 1
+    assert not any("Does X rebut Y?" in c for c in judge.calls)
 
 
 def test_free_integrate_uses_extracted_warrants_and_passes_text_through():
