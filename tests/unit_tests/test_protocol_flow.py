@@ -249,14 +249,23 @@ def test_prompts_are_assembled_from_the_design_doc():
     assert first["system"].startswith("You are agent 1. You are arguing with agent 2.")
     assert "The issue of this argumentation is:\nISSUE" in first["system"]
     assert "You have these theory on the issue:\nTHEORY1" in first["system"]
-    assert "An argument is a finite sequence of rules such that:" in first["system"]
+    assert "An argument is a finite sequence of rules." in first["system"]
     assert "The argumentation so far:\n[]" in first["system"]
     assert "make new main arguments based on it." in first["system"]
-    # defeat / strictly defeat（Kido 定義4）と、justified / overruled / defensible（定義5）の定義は、フェーズの説明の直後に入る
-    assert "A1 strictly defeats A2 iff A1 defeats A2 and A2 does not defeat A1." in first["system"]
-    assert first["system"].rstrip().endswith("A is defensible if A is neither justified nor overruled.")
-    assert "is justified if no argument defeats A or if every argument which defeats A is also strictly defeated" in first["system"]
-    assert first["prompt"].startswith("Now it is phase 1.\nMake your main argument")
+    # 順序: 目的（Dung）→ argument の形式 → フェーズ → defeat（Kido 定義4）→ 地位（定義5）→ 履歴（最後）
+    system = first["system"]
+    order = [
+        "Roughly, the idea of argumentational reasoning",
+        "An argument is a finite sequence of rules.",
+        "Argumentation consists of two phases.",
+        "A1 strictly defeats A2 when A1 defeats A2 and A2 does not defeat A1.",
+        "An argument is defensible if it is neither justified nor overruled.",
+        "The argumentation so far:\n[]",
+    ]
+    assert [system.index(x) for x in order] == sorted(system.index(x) for x in order)
+    assert system.rstrip().endswith("The argumentation so far:\n[]")
+    assert "An argument is justified if no argument defeats it, or if every argument that defeats it is also strictly defeated." in first["system"]
+    assert first["prompt"].startswith("Now it is phase 1.\n\nMake your main argument")
     # ag2 の攻撃: 対象の argument が、ユーザープロンプトに入る。システムプロンプトの履歴に、main が入る。
     attack_call = ag2.calls[0]
     assert attack_call["schema"] is Attack and attack_call["system"].startswith("You are agent 2. You are arguing with agent 1.")

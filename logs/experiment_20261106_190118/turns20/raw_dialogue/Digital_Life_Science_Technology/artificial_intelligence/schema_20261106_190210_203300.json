@@ -1,0 +1,1847 @@
+{
+  "method": "schema",
+  "question": "Is Artificial Intelligence Good for Society?",
+  "agent1_stance": "Your stance:\nYou support artificial intelligence.\nYou believe AI can make everyday life more enjoyable and convenient, while improving our health and standard of living.\nYou believe AI makes work easier for students and professionals alike.\nYou believe AI helps marginalized groups by offering accessibility for people with disabilities.\nYou believe AI can improve workplace safety.",
+  "agent2_stance": "Your stance:\nYou oppose artificial intelligence.\nYou believe AI is harming the economic well-being of many people and businesses.\nYou believe AI undermines critical thinking skills for students and adults alike.\nYou believe AI hurts racial minorities by repeating and exacerbating racism.\nYou believe AI poses dangerous privacy risks.",
+  "metrics": {
+    "elapsed_seconds": 51.532,
+    "max_dialogue_turns": 20,
+    "turns": 20,
+    "closed_by": "turn_limit",
+    "justified_index": null,
+    "total_dialogue_turns": 20,
+    "main_argument_count": 8,
+    "attack_turn_count": 7,
+    "overruled_count": 6,
+    "defensible_count": 2,
+    "justified_proven_count": 0,
+    "usage": {
+      "agents": {
+        "model": "gpt-5.4-nano",
+        "prompt_tokens": 86864,
+        "cached_tokens": 27648,
+        "completion_tokens": 4880,
+        "total_tokens": 91744,
+        "total_cost_usd": 0.018496
+      },
+      "judge": {
+        "model": "gpt-5.4-mini",
+        "prompt_tokens": 0,
+        "cached_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0,
+        "total_cost_usd": 0.0
+      },
+      "total_cost_usd": 0.018496
+    },
+    "cost_usd_this_run": 0.018496
+  },
+  "dialogue_history": [
+    {
+      "id": "h0",
+      "agent": "AG1",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [],
+                "weak_negation": []
+              },
+              "consequent": "AI can make everyday life more enjoyable and convenient"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI can make everyday life more enjoyable and convenient"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AI can improve our health and standard of living"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI can make everyday life more enjoyable and convenient"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AI makes work easier for students and professionals"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI makes work easier for students and professionals"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AI improves educational and professional outcomes"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI can improve our health and standard of living",
+                  "AI improves educational and professional outcomes"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AI is good for society"
+            }
+          ],
+          "Conc": [
+            "AI can make everyday life more enjoyable and convenient",
+            "AI can improve our health and standard of living",
+            "AI makes work easier for students and professionals",
+            "AI improves educational and professional outcomes",
+            "AI is good for society"
+          ],
+          "Ass": []
+        }
+      },
+      "type": "main",
+      "proponent": "AG1",
+      "status": "overruled"
+    },
+    {
+      "id": "h1",
+      "agent": "AG2",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [],
+                "weak_negation": []
+              },
+              "consequent": "AI is harming the economic well-being of many people and businesses"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI is harming the economic well-being of many people and businesses"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AI is not good for society"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI is not good for society"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AI is harming the economic well-being of many people and businesses is sufficient to undermine the claim that AI is good for society"
+            }
+          ],
+          "Conc": [
+            "AI is harming the economic well-being of many people and businesses",
+            "AI is not good for society",
+            "AI is harming the economic well-being of many people and businesses is sufficient to undermine the claim that AI is good for society"
+          ],
+          "Ass": []
+        }
+      },
+      "type": "defeat",
+      "proponent": "AG1",
+      "attack": "rebut",
+      "target_id": "h0",
+      "target_statement": "AI is good for society"
+    },
+    {
+      "id": "h2",
+      "agent": "AG2",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [],
+                "weak_negation": []
+              },
+              "consequent": "AI automates or enables surveillance in ways that displace workers and concentrate market power"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI automates or enables surveillance in ways that displace workers and concentrate market power"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AI harms the economic well-being of many people and businesses"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI harms the economic well-being of many people and businesses"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AI is not good for society"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI is not good for society"
+                ],
+                "weak_negation": [
+                  "AI is largely deployed in highly regulated, equitable ways (explicit exception)"
+                ]
+              },
+              "consequent": "AI is harming society"
+            }
+          ],
+          "Conc": [
+            "AI automates or enables surveillance in ways that displace workers and concentrate market power",
+            "AI harms the economic well-being of many people and businesses",
+            "AI is not good for society",
+            "AI is harming society"
+          ],
+          "Ass": [
+            "AI is largely deployed in highly regulated, equitable ways (explicit exception)"
+          ]
+        }
+      },
+      "type": "main",
+      "proponent": "AG2",
+      "status": "overruled"
+    },
+    {
+      "id": "h3",
+      "agent": "AG1",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [],
+                "weak_negation": []
+              },
+              "consequent": "AI makes work easier for students and professionals"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI makes work easier for students and professionals"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AI improves educational and professional outcomes"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI improves educational and professional outcomes"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AI is good for society"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI is good for society"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AI is not harming society is sufficient to undermine the claim that AI is not good for society"
+            }
+          ],
+          "Conc": [
+            "AI makes work easier for students and professionals",
+            "AI improves educational and professional outcomes",
+            "AI is good for society",
+            "AI is not harming society is sufficient to undermine the claim that AI is not good for society"
+          ],
+          "Ass": []
+        }
+      },
+      "type": "defeat",
+      "proponent": "AG2",
+      "attack": "rebut",
+      "target_id": "h2",
+      "target_statement": "AI is not good for society"
+    },
+    {
+      "id": "h4",
+      "agent": "AG1",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [],
+                "weak_negation": []
+              },
+              "consequent": "AI improves workplace safety"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI improves workplace safety"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AI helps protect workers’ well-being"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI helps protect workers’ well-being"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AI improves our health and standard of living"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI improves our health and standard of living"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AI is good for society"
+            }
+          ],
+          "Conc": [
+            "AI improves workplace safety",
+            "AI helps protect workers’ well-being",
+            "AI improves our health and standard of living",
+            "AI is good for society"
+          ],
+          "Ass": []
+        }
+      },
+      "type": "main",
+      "proponent": "AG1",
+      "status": "overruled"
+    },
+    {
+      "id": "h5",
+      "agent": "AG2",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [],
+                "weak_negation": []
+              },
+              "consequent": "AI is harming the economic well-being of many people and businesses"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI is harming the economic well-being of many people and businesses"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AI undermines workers’ well-being and stability (e.g., via displacement and unsafe labor conditions)"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI undermines workers’ well-being and stability (e.g., via displacement and unsafe labor conditions)"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AI does not improve workplace safety"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI does not improve workplace safety"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AI improves workplace safety is false (sufficient to defeat the claim)."
+            }
+          ],
+          "Conc": [
+            "AI is harming the economic well-being of many people and businesses",
+            "AI undermines workers’ well-being and stability (e.g., via displacement and unsafe labor conditions)",
+            "AI does not improve workplace safety",
+            "AI improves workplace safety is false (sufficient to defeat the claim)."
+          ],
+          "Ass": []
+        }
+      },
+      "type": "defeat",
+      "proponent": "AG1",
+      "attack": "rebut",
+      "target_id": "h4",
+      "target_statement": "AI improves workplace safety"
+    },
+    {
+      "id": "h6",
+      "agent": "AG2",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [],
+                "weak_negation": []
+              },
+              "consequent": "AI poses dangerous privacy risks"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI poses dangerous privacy risks"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AI undermines citizens’ ability to control personal information and prevents meaningful consent"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI undermines citizens’ ability to control personal information and prevents meaningful consent"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AI harms social trust and democratic decision-making"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI harms social trust and democratic decision-making"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AI is not good for society"
+            }
+          ],
+          "Conc": [
+            "AI poses dangerous privacy risks",
+            "AI undermines citizens’ ability to control personal information and prevents meaningful consent",
+            "AI harms social trust and democratic decision-making",
+            "AI is not good for society"
+          ],
+          "Ass": []
+        }
+      },
+      "type": "main",
+      "proponent": "AG2",
+      "status": "overruled"
+    },
+    {
+      "id": "h7",
+      "agent": "AG1",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [],
+                "weak_negation": []
+              },
+              "consequent": "AI improves our health and standard of living"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI improves our health and standard of living"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AI is good for society"
+            }
+          ],
+          "Conc": [
+            "AI improves our health and standard of living",
+            "AI is good for society"
+          ],
+          "Ass": []
+        }
+      },
+      "type": "defeat",
+      "proponent": "AG2",
+      "attack": "rebut",
+      "target_id": "h6",
+      "target_statement": "AI is not good for society"
+    },
+    {
+      "id": "h8",
+      "agent": "AG1",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [],
+                "weak_negation": []
+              },
+              "consequent": "AI can help marginalized groups by offering accessibility for people with disabilities"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI can help marginalized groups by offering accessibility for people with disabilities"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AI can improve equal opportunity"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI can improve equal opportunity"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AI is good for society"
+            }
+          ],
+          "Conc": [
+            "AI can help marginalized groups by offering accessibility for people with disabilities",
+            "AI can improve equal opportunity",
+            "AI is good for society"
+          ],
+          "Ass": []
+        }
+      },
+      "type": "main",
+      "proponent": "AG1",
+      "status": "overruled"
+    },
+    {
+      "id": "h9",
+      "agent": "AG2",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [],
+                "weak_negation": []
+              },
+              "consequent": "AI undermines critical thinking skills for students and adults alike"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI undermines critical thinking skills for students and adults alike"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AI harms society"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI harms society"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AI is not good for society"
+            }
+          ],
+          "Conc": [
+            "AI undermines critical thinking skills for students and adults alike",
+            "AI harms society",
+            "AI is not good for society"
+          ],
+          "Ass": []
+        }
+      },
+      "type": "defeat",
+      "proponent": "AG1",
+      "attack": "rebut",
+      "target_id": "h8",
+      "target_statement": "AI is good for society"
+    },
+    {
+      "id": "h10",
+      "agent": "AG2",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [],
+                "weak_negation": []
+              },
+              "consequent": "AI undermines critical thinking skills for students and adults alike"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI undermines critical thinking skills for students and adults alike"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "When critical thinking skills decline, people are less able to evaluate claims and resist manipulation"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "When critical thinking skills decline, people are less able to evaluate claims and resist manipulation"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AI enables manipulation at scale by making persuasive content easier to generate and harder to scrutinize"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI enables manipulation at scale by making persuasive content easier to generate and harder to scrutinize"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AI harms society by weakening informed, autonomous decision-making"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI harms society by weakening informed, autonomous decision-making"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AI is not good for society"
+            }
+          ],
+          "Conc": [
+            "AI undermines critical thinking skills for students and adults alike",
+            "When critical thinking skills decline, people are less able to evaluate claims and resist manipulation",
+            "AI enables manipulation at scale by making persuasive content easier to generate and harder to scrutinize",
+            "AI harms society by weakening informed, autonomous decision-making",
+            "AI is not good for society"
+          ],
+          "Ass": []
+        }
+      },
+      "type": "main",
+      "proponent": "AG2",
+      "status": "overruled"
+    },
+    {
+      "id": "h11",
+      "agent": "AG1",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [],
+                "weak_negation": []
+              },
+              "consequent": "AI makes work easier for students and professionals"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI makes work easier for students and professionals"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AI improves educational and professional outcomes"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI improves educational and professional outcomes"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AI is good for society"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI is good for society"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AI is not harming society is sufficient to undermine the claim that AI is not good for society"
+            }
+          ],
+          "Conc": [
+            "AI makes work easier for students and professionals",
+            "AI improves educational and professional outcomes",
+            "AI is good for society",
+            "AI is not harming society is sufficient to undermine the claim that AI is not good for society"
+          ],
+          "Ass": []
+        }
+      },
+      "type": "defeat",
+      "proponent": "AG2",
+      "attack": "rebut",
+      "target_id": "h10",
+      "target_statement": "AI is not good for society"
+    },
+    {
+      "id": "h12",
+      "agent": "AG1",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [],
+                "weak_negation": []
+              },
+              "consequent": "AI can improve everyday decision-making by providing personalized assistance and recommendations"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI can improve everyday decision-making by providing personalized assistance and recommendations"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "When everyday decision-making improves, people experience greater convenience and better outcomes in daily life"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "When everyday decision-making improves, people experience greater convenience and better outcomes in daily life"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Greater convenience and better daily outcomes improve the standard of living"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Greater convenience and better daily outcomes improve the standard of living"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Improving the standard of living means AI is good for society"
+            }
+          ],
+          "Conc": [
+            "AI can improve everyday decision-making by providing personalized assistance and recommendations",
+            "When everyday decision-making improves, people experience greater convenience and better outcomes in daily life",
+            "Greater convenience and better daily outcomes improve the standard of living",
+            "Improving the standard of living means AI is good for society"
+          ],
+          "Ass": []
+        }
+      },
+      "type": "main",
+      "proponent": "AG1",
+      "status": "defensible"
+    },
+    {
+      "id": "h13",
+      "agent": "AG2",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [],
+                "weak_negation": []
+              },
+              "consequent": "AI poses dangerous privacy risks"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI poses dangerous privacy risks"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AI undermines citizens’ ability to control personal information and prevents meaningful consent"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI undermines citizens’ ability to control personal information and prevents meaningful consent"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AI harms social trust and democratic decision-making"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI harms social trust and democratic decision-making"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AI can harm everyday decision-making rather than reliably improve it"
+            }
+          ],
+          "Conc": [
+            "AI poses dangerous privacy risks",
+            "AI undermines citizens’ ability to control personal information and prevents meaningful consent",
+            "AI harms social trust and democratic decision-making",
+            "AI can harm everyday decision-making rather than reliably improve it"
+          ],
+          "Ass": []
+        }
+      },
+      "type": "defeat",
+      "proponent": "AG1",
+      "attack": "rebut",
+      "target_id": "h12",
+      "target_statement": "AI can improve everyday decision-making by providing personalized assistance and recommendations"
+    },
+    {
+      "id": "h15",
+      "agent": "AG1",
+      "argument": {
+        "Argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong": [],
+                "weak_negation": []
+              },
+              "consequent": "AI can improve everyday decision-making by providing personalized assistance and recommendations"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "AI can improve everyday decision-making by providing personalized assistance and recommendations"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "When everyday decision-making improves, people experience greater convenience and better outcomes in daily life"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "When everyday decision-making improves, people experience greater convenience and better outcomes in daily life"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "Greater convenience and better daily outcomes improve the standard of living"
+            },
+            {
+              "antecedent": {
+                "strong": [
+                  "Greater convenience and better daily outcomes improve the standard of living",
+                  "AI harms society by weakening informed, autonomous decision-making"
+                ],
+                "weak_negation": []
+              },
+              "consequent": "AI can be good for society overall when it improves daily outcomes without undermining informed, autonomous decision-making"
+            }
+          ],
+          "Conc": [
+            "AI can improve everyday decision-making by providing personalized assistance and recommendations",
+            "When everyday decision-making improves, people experience greater convenience and better outcomes in daily life",
+            "Greater convenience and better daily outcomes improve the standard of living",
+            "AI can be good for society overall when it improves daily outcomes without undermining informed, autonomous decision-making"
+          ],
+          "Ass": []
+        }
+      },
+      "type": "main",
+      "proponent": "AG1",
+      "status": "defensible"
+    }
+  ],
+  "history": [
+    {
+      "role": "ag1",
+      "content": {
+        "argument_type": "main_argument",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "AI can make everyday life more enjoyable and convenient"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI can make everyday life more enjoyable and convenient"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI can improve our health and standard of living"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI can make everyday life more enjoyable and convenient"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI makes work easier for students and professionals"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI makes work easier for students and professionals"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI improves educational and professional outcomes"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI can improve our health and standard of living",
+                  "AI improves educational and professional outcomes"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI is good for society"
+            }
+          ]
+        },
+        "reason_no_weak_statements": ""
+      },
+      "status": "overruled",
+      "kind": "main"
+    },
+    {
+      "role": "ag2",
+      "content": {
+        "attack_type": "rebut",
+        "target": "AI is good for society",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "AI is harming the economic well-being of many people and businesses"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI is harming the economic well-being of many people and businesses"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI is not good for society"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI is not good for society"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI is harming the economic well-being of many people and businesses is sufficient to undermine the claim that AI is good for society"
+            }
+          ]
+        }
+      },
+      "kind": "attack"
+    },
+    {
+      "role": "ag2",
+      "content": {
+        "argument_type": "main_argument",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "AI automates or enables surveillance in ways that displace workers and concentrate market power"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI automates or enables surveillance in ways that displace workers and concentrate market power"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI harms the economic well-being of many people and businesses"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI harms the economic well-being of many people and businesses"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI is not good for society"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI is not good for society"
+                ],
+                "weak_statements": [
+                  "AI is largely deployed in highly regulated, equitable ways (explicit exception)"
+                ]
+              },
+              "consequent": "AI is harming society"
+            }
+          ]
+        },
+        "reason_no_weak_statements": ""
+      },
+      "status": "overruled",
+      "kind": "main"
+    },
+    {
+      "role": "ag1",
+      "content": {
+        "attack_type": "rebut",
+        "target": "AI is not good for society",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "AI makes work easier for students and professionals"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI makes work easier for students and professionals"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI improves educational and professional outcomes"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI improves educational and professional outcomes"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI is good for society"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI is good for society"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI is not harming society is sufficient to undermine the claim that AI is not good for society"
+            }
+          ]
+        }
+      },
+      "kind": "attack"
+    },
+    {
+      "role": "ag1",
+      "content": {
+        "argument_type": "main_argument",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "AI improves workplace safety"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI improves workplace safety"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI helps protect workers’ well-being"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI helps protect workers’ well-being"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI improves our health and standard of living"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI improves our health and standard of living"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI is good for society"
+            }
+          ]
+        },
+        "reason_no_weak_statements": ""
+      },
+      "status": "overruled",
+      "kind": "main"
+    },
+    {
+      "role": "ag2",
+      "content": {
+        "attack_type": "rebut",
+        "target": "AI improves workplace safety",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "AI is harming the economic well-being of many people and businesses"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI is harming the economic well-being of many people and businesses"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI undermines workers’ well-being and stability (e.g., via displacement and unsafe labor conditions)"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI undermines workers’ well-being and stability (e.g., via displacement and unsafe labor conditions)"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI does not improve workplace safety"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI does not improve workplace safety"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI improves workplace safety is false (sufficient to defeat the claim)."
+            }
+          ]
+        }
+      },
+      "kind": "attack"
+    },
+    {
+      "role": "ag2",
+      "content": {
+        "argument_type": "main_argument",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "AI poses dangerous privacy risks"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI poses dangerous privacy risks"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI undermines citizens’ ability to control personal information and prevents meaningful consent"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI undermines citizens’ ability to control personal information and prevents meaningful consent"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI harms social trust and democratic decision-making"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI harms social trust and democratic decision-making"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI is not good for society"
+            }
+          ]
+        },
+        "reason_no_weak_statements": ""
+      },
+      "status": "overruled",
+      "kind": "main"
+    },
+    {
+      "role": "ag1",
+      "content": {
+        "attack_type": "rebut",
+        "target": "AI is not good for society",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "AI improves our health and standard of living"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI improves our health and standard of living"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI is good for society"
+            }
+          ]
+        }
+      },
+      "kind": "attack"
+    },
+    {
+      "role": "ag1",
+      "content": {
+        "argument_type": "main_argument",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "AI can help marginalized groups by offering accessibility for people with disabilities"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI can help marginalized groups by offering accessibility for people with disabilities"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI can improve equal opportunity"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI can improve equal opportunity"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI is good for society"
+            }
+          ]
+        },
+        "reason_no_weak_statements": ""
+      },
+      "status": "overruled",
+      "kind": "main"
+    },
+    {
+      "role": "ag2",
+      "content": {
+        "attack_type": "rebut",
+        "target": "AI is good for society",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "AI undermines critical thinking skills for students and adults alike"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI undermines critical thinking skills for students and adults alike"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI harms society"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI harms society"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI is not good for society"
+            }
+          ]
+        }
+      },
+      "kind": "attack"
+    },
+    {
+      "role": "ag2",
+      "content": {
+        "argument_type": "main_argument",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "AI undermines critical thinking skills for students and adults alike"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI undermines critical thinking skills for students and adults alike"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "When critical thinking skills decline, people are less able to evaluate claims and resist manipulation"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "When critical thinking skills decline, people are less able to evaluate claims and resist manipulation"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI enables manipulation at scale by making persuasive content easier to generate and harder to scrutinize"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI enables manipulation at scale by making persuasive content easier to generate and harder to scrutinize"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI harms society by weakening informed, autonomous decision-making"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI harms society by weakening informed, autonomous decision-making"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI is not good for society"
+            }
+          ]
+        },
+        "reason_no_weak_statements": ""
+      },
+      "status": "overruled",
+      "kind": "main"
+    },
+    {
+      "role": "ag1",
+      "content": {
+        "attack_type": "rebut",
+        "target": "AI is not good for society",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "AI makes work easier for students and professionals"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI makes work easier for students and professionals"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI improves educational and professional outcomes"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI improves educational and professional outcomes"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI is good for society"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI is good for society"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI is not harming society is sufficient to undermine the claim that AI is not good for society"
+            }
+          ]
+        }
+      },
+      "kind": "attack"
+    },
+    {
+      "role": "ag1",
+      "content": {
+        "argument_type": "main_argument",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "AI can improve everyday decision-making by providing personalized assistance and recommendations"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI can improve everyday decision-making by providing personalized assistance and recommendations"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "When everyday decision-making improves, people experience greater convenience and better outcomes in daily life"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "When everyday decision-making improves, people experience greater convenience and better outcomes in daily life"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Greater convenience and better daily outcomes improve the standard of living"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Greater convenience and better daily outcomes improve the standard of living"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Improving the standard of living means AI is good for society"
+            }
+          ]
+        },
+        "reason_no_weak_statements": ""
+      },
+      "status": "defensible",
+      "kind": "main"
+    },
+    {
+      "role": "ag2",
+      "content": {
+        "attack_type": "rebut",
+        "target": "AI can improve everyday decision-making by providing personalized assistance and recommendations",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "AI poses dangerous privacy risks"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI poses dangerous privacy risks"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI undermines citizens’ ability to control personal information and prevents meaningful consent"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI undermines citizens’ ability to control personal information and prevents meaningful consent"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI harms social trust and democratic decision-making"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI harms social trust and democratic decision-making"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI can harm everyday decision-making rather than reliably improve it"
+            }
+          ]
+        }
+      },
+      "kind": "attack"
+    },
+    {
+      "role": "ag1",
+      "content": {
+        "antecedent": {
+          "strong_statements": [
+            "Greater convenience and better daily outcomes improve the standard of living",
+            "AI harms society by weakening informed, autonomous decision-making"
+          ],
+          "weak_statements": []
+        },
+        "consequent": "AI can be good for society overall when it improves daily outcomes without undermining informed, autonomous decision-making"
+      },
+      "kind": "integrate"
+    },
+    {
+      "role": "ag1",
+      "content": {
+        "argument_type": "main_argument",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "AI can improve everyday decision-making by providing personalized assistance and recommendations"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI can improve everyday decision-making by providing personalized assistance and recommendations"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "When everyday decision-making improves, people experience greater convenience and better outcomes in daily life"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "When everyday decision-making improves, people experience greater convenience and better outcomes in daily life"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "Greater convenience and better daily outcomes improve the standard of living"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "Greater convenience and better daily outcomes improve the standard of living",
+                  "AI harms society by weakening informed, autonomous decision-making"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI can be good for society overall when it improves daily outcomes without undermining informed, autonomous decision-making"
+            }
+          ]
+        },
+        "reason_no_weak_statements": ""
+      },
+      "status": "defensible",
+      "kind": "main"
+    }
+  ],
+  "statuses": {
+    "0": "overruled",
+    "2": "overruled",
+    "4": "overruled",
+    "6": "overruled",
+    "8": "overruled",
+    "10": "overruled",
+    "12": "defensible",
+    "15": "defensible"
+  },
+  "integrated_rules": [],
+  "consensus_reached": false,
+  "justification_status": "fallback_no_consensus",
+  "final_answer": "AG1’s position (pro-AI) was that AI is good for society because it:\n\n1) Makes everyday life more enjoyable and convenient, and can improve health and the standard of living.  \n- **Objection by AG2:** AI harms society by displacing workers and concentrating market power, which undermines economic well-being.  \n- **AG1’s response:** AG1 argued separately that AI also makes work easier for students and professionals, improves educational/professional outcomes, and therefore supports the “AI is good for society” conclusion. (In the recorded steps, this rebuttal did not directly engage AG2’s specific economic-displacement claim; it largely countered with other benefits.)\n\n2) Improves education and work outcomes (students and professionals).  \n- **Objection by AG2:** AI undermines critical thinking, making manipulation easier and informed/autonomous decision-making harder.  \n- **AG1’s response:** AG1 reused the “AI makes work easier → improves outcomes → therefore good for society” line and later added a conditional qualification: AI can be good overall when it improves daily outcomes **without** undermining informed, autonomous decision-making.\n\n3) Helps marginalized groups via accessibility for people with disabilities and can improve equal opportunity.  \n- **Objection by AG2:** (Notably, in the log, the “critical thinking/manipulation” rebuttal was directed at AG1’s pro-AI claim broadly rather than specifically rebutting the accessibility argument.)  \n- **AG1’s response:** Continued asserting equal-opportunity benefits, but the accessibility line was not specifically addressed against AG2’s objections in the provided record.\n\n4) Improves workplace safety and protects workers’ well-being.  \n- **Objection by AG2:** AI does not improve workplace safety because it can displace workers and enable unsafe labor conditions; thus it may undermine workers’ stability and well-being.  \n- **AG1’s response:** AG1 countered with workplace-safety → better worker well-being → better health/standard of living → good for society. This again did not directly refute AG2’s specific “unsafe/unstable labor conditions” mechanism.\n\n5) Improves everyday decision-making via personalized assistance and recommendations.  \n- **Objection by AG2:** Personalized systems entail dangerous privacy risks; they undermine consent, social trust, and democratic decision-making—so AI may harm everyday decision-making rather than reliably improve it.  \n- **AG1’s response:** AG1 added a conditional “overall good” framing: AI can be good for society when it improves daily outcomes **without** undermining informed/autonomous decision-making.\n\nAG2’s position (anti-AI) was that AI is not good for society because it:\n\n1) Harms economic well-being: worker displacement and market power concentration.  \n- **AG1’s counter:** pro-AI benefits to work/education outcomes.\n\n2) Reduces workplace safety by undermining workers’ stability and well-being.  \n- **AG1’s counter:** pro-safety/worker well-being benefits.\n\n3) Poses privacy risks and can undermine democratic processes and social trust.  \n- **AG1’s counter:** conditional acceptance—AI could still be good overall if it does not undermine autonomy/decision-making.\n\n4) Undermines critical thinking, enabling manipulation at scale and weakening informed, autonomous decisions.  \n- **AG1’s counter:** again relied on pro-outcome benefits and later used the conditional “good if it avoids autonomy harm” strategy.\n\nHow each was “answered” overall  \n- AG1 repeatedly answered objections by pointing to **other positive effects** (education/work improvement, convenience, health, accessibility, safety) rather than directly disproving AG2’s claimed harms (displacement, unsafe labor, privacy/consent problems, manipulation/critical thinking decline).  \n- Where AG1 did engage the objection more directly (critical thinking and privacy/democracy concerns), the response became **conditional**: AI is “good for society overall” only if it improves outcomes **without** undermining informed/autonomous decision-making.\n\nWhat remains undecided  \n- **Net effect / balance of harms vs benefits:** The record does not settle whether AI’s negative mechanisms (labor displacement, unsafe conditions, privacy/consent erosion, manipulation/critical-thinking decline) outweigh its promised benefits at a societal scale.  \n- **Reliability and causality:** It is not decided whether the positive outcomes are robust and widespread, or whether harms are common and significant enough to negate them.  \n- **Conditions and safeguards:** Although AG1 introduced “only if” conditions (e.g., not undermining autonomy/critical thinking), the argumentation does not establish what concrete governance, deployment practices, or technical safeguards would be sufficient to guarantee those conditions in practice.\n\nWhat is known from the argumentation (i.e., accepted within the debate structure)  \n- Both sides presented multiple claims about AI’s pros and cons, but the debate record shows **no decisive resolution** that conclusively validates one side across all objections.  \n- AG1’s best synthesis in the log is a qualified claim: AI can be good for society **overall** under constraints that prevent harms to autonomy/informed decision-making.  \n- AG2’s central objections remain standing as plausible mechanisms of societal harm: economic displacement/market power, privacy/consent problems, democratic-trust erosion, and manipulation/critical-thinking decline.",
+  "trace": [
+    "ag1.main_argument → main_argument（履歴 0）",
+    "  ag2.attack(rebut) → 有効（履歴 1）",
+    "  ag1.attack(rebut) → 履歴に入れない（strictly defeat でない）",
+    "  P は strictly defeat できなかった → これ以上の返答なし",
+    "  地位: 履歴 0 は overruled",
+    "ag2.main_argument → main_argument（履歴 2）",
+    "  ag1.attack(rebut) → 有効（履歴 3）",
+    "  ag2.attack(rebut) → 履歴に入れない（strictly defeat でない）",
+    "  P は strictly defeat できなかった → これ以上の返答なし",
+    "  地位: 履歴 2 は overruled",
+    "ag1.main_argument → main_argument（履歴 4）",
+    "  ag2.attack(rebut) → 有効（履歴 5）",
+    "  ag1.attack(rebut) → 履歴に入れない（strictly defeat でない）",
+    "  P は strictly defeat できなかった → これ以上の返答なし",
+    "  地位: 履歴 4 は overruled",
+    "ag2.main_argument → main_argument（履歴 6）",
+    "  ag1.attack(rebut) → 有効（履歴 7）",
+    "  ag2.attack(rebut) → 履歴に入れない（strictly defeat でない）",
+    "  P は strictly defeat できなかった → これ以上の返答なし",
+    "  地位: 履歴 6 は overruled",
+    "ag1.main_argument → main_argument（履歴 8）",
+    "  ag2.attack(rebut) → 有効（履歴 9）",
+    "  ag1.attack(rebut) → 履歴に入れない（strictly defeat でない）",
+    "  P は strictly defeat できなかった → これ以上の返答なし",
+    "  地位: 履歴 8 は overruled",
+    "ag2.main_argument → main_argument（履歴 10）",
+    "  ag1.attack(rebut) → 有効（履歴 11）",
+    "  ag2.attack(rebut) → 履歴に入れない（strictly defeat でない）",
+    "  P は strictly defeat できなかった → これ以上の返答なし",
+    "  地位: 履歴 10 は overruled",
+    "ag1.main_argument → main_argument（履歴 12）",
+    "  ag2.attack(rebut) → 有効（履歴 13）",
+    "  上限到達 → defensible",
+    "  地位: 履歴 12 は defensible",
+    "上限到達・未統合 → ag1 が統合（評価しない）",
+    "ag1.integrate → rule",
+    "ag1.main_argument_from_rule → main_argument（履歴 15）",
+    "final_answer（上限・justified なし）"
+  ],
+  "invalid_attempts": [
+    {
+      "role": "ag1",
+      "declared": "rebut",
+      "reason": "strictly defeat でない",
+      "target_index": 1,
+      "main_index": 0,
+      "content": {
+        "attack_type": "rebut",
+        "target": "AI is harming the economic well-being of many people and businesses",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "AI can improve our health and standard of living"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI can improve our health and standard of living"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI improves economic well-being"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI improves economic well-being"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI is not harming the economic well-being of many people and businesses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "role": "ag2",
+      "declared": "rebut",
+      "reason": "strictly defeat でない",
+      "target_index": 3,
+      "main_index": 2,
+      "content": {
+        "attack_type": "rebut",
+        "target": "AI is good for society",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "AI poses dangerous privacy risks"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI poses dangerous privacy risks"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI hurts racial minorities by repeating and exacerbating racism"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI hurts racial minorities by repeating and exacerbating racism",
+                  "AI poses dangerous privacy risks"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI is not good for society"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI is not good for society"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI is harming society is sufficient to undermine the claim that AI is good for society"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "role": "ag1",
+      "declared": "rebut",
+      "reason": "strictly defeat でない",
+      "target_index": 5,
+      "main_index": 4,
+      "content": {
+        "attack_type": "rebut",
+        "target": "AI does not improve workplace safety",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "AI improves workplace safety"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI improves workplace safety"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI helps protect workers’ well-being"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI helps protect workers’ well-being"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI improves our health and standard of living"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "role": "ag2",
+      "declared": "rebut",
+      "reason": "strictly defeat でない",
+      "target_index": 7,
+      "main_index": 6,
+      "content": {
+        "attack_type": "rebut",
+        "target": "AI improves our health and standard of living",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "AI poses dangerous privacy risks"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI poses dangerous privacy risks"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI undermines citizens’ ability to control personal information and prevents meaningful consent"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI undermines citizens’ ability to control personal information and prevents meaningful consent"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI harms social trust and democratic decision-making"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI harms social trust and democratic decision-making"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI does not improve our health and standard of living"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "role": "ag1",
+      "declared": "rebut",
+      "reason": "strictly defeat でない",
+      "target_index": 9,
+      "main_index": 8,
+      "content": {
+        "attack_type": "rebut",
+        "target": "AI undermines critical thinking skills for students and adults alike",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "AI makes work easier for students and professionals"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI makes work easier for students and professionals"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI improves educational and professional outcomes"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI improves educational and professional outcomes"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI does not undermine critical thinking skills for students and adults alike"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "role": "ag2",
+      "declared": "rebut",
+      "reason": "strictly defeat でない",
+      "target_index": 11,
+      "main_index": 10,
+      "content": {
+        "attack_type": "rebut",
+        "target": "AI is good for society",
+        "argument": {
+          "rules": [
+            {
+              "antecedent": {
+                "strong_statements": [],
+                "weak_statements": []
+              },
+              "consequent": "AI undermines critical thinking skills for students and adults alike"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI undermines critical thinking skills for students and adults alike"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI harms society by weakening informed, autonomous decision-making"
+            },
+            {
+              "antecedent": {
+                "strong_statements": [
+                  "AI harms society by weakening informed, autonomous decision-making"
+                ],
+                "weak_statements": []
+              },
+              "consequent": "AI is not good for society"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
